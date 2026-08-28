@@ -746,4 +746,8 @@ app.listen(
       `Command Center live at http://0.0.0.0:${PORT}`
     );
   }
-);Replace demo metrics with real container metrics
+);
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Command Center live at http://0.0.0.0:${PORT}`);
+});
