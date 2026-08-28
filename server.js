@@ -716,9 +716,6 @@ app.get(
         demo.deployment
       )
     );
-  }
-);
-
 app.get(
   "/api/health",
   (_req, res) => {
@@ -730,21 +727,6 @@ app.get(
       time:
         new Date().toISOString()
     });
-  }
-);
-
-/*
- * Railway supplies PORT.
- * Bind to 0.0.0.0 so external traffic can reach
- * the application inside the container.
- */
-app.listen(
-  PORT,
-  "0.0.0.0",
-  () => {
-    console.log(
-      `Command Center live at http://0.0.0.0:${PORT}`
-    );
   }
 );
 
