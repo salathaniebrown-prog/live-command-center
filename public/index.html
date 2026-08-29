@@ -195,23 +195,35 @@
       } catch (e) {
         document.getElementById('status-error').textContent = '✗ Failed to fetch status';
       }
-
       // Metrics
       try {
         const res = await fetch('/api/metrics');
         const data = await res.json();
+
         const update = (id, value) => {
-          document.getElementById(id).textContent = value + '%';
-          document.getElementById(id.replace('-value', '-bar')).style.width = value + '%';
+          const available = Number.isFinite(value);
+          document.getElementById(id).textContent =
+            available ? `${value}%` : 'N/A';
+          document.getElementById(
+            id.replace('-value', '-bar')
+          ).style.width = available ? `${value}%` : '0%';
         };
+
         update('cpu-value', data.cpu);
         update('gpu-value', data.gpu);
         update('mem-value', data.memory);
         update('storage-value', data.storage);
-        document.getElementById('temp-value').textContent = data.temperatureC + '°C';
-        document.getElementById('metrics-error').textContent = data.upstreamError ? `⚠ ${data.upstreamError}` : '';
+
+        document.getElementById('temp-value').textContent =
+          Number.isFinite(data.temperatureC)
+            ? `${data.temperatureC}°C`
+            : 'N/A';
+
+        document.getElementById('metrics-error').textContent =
+          data.upstreamError ? `⚠ ${data.upstreamError}` : '';
       } catch (e) {
-        document.getElementById('metrics-error').textContent = '✗ Failed to fetch metrics';
+        document.getElementById('metrics-error').textContent =
+          '✗ Failed to fetch metrics';
       }
 
       // Workloads
@@ -219,26 +231,42 @@
         const res = await fetch('/api/workloads');
         const data = await res.json();
         const list = document.getElementById('workload-list');
-        list.innerHTML = data.map(w => `<li class="workload-item">▶ ${w}</li>`).join('');
-        document.getElementById('workload-error').textContent = data.upstreamError ? `⚠ ${data.upstreamError}` : '';
+        list.innerHTML = data
+          .map(w => `<li class="workload-item">▶ ${w}</li>`)
+          .join('');
+        document.getElementById('workload-error').textContent =
+          data.upstreamError ? `⚠ ${data.upstreamError}` : '';
       } catch (e) {
-        document.getElementById('workload-error').textContent = '✗ Failed to fetch workloads';
+        document.getElementById('workload-error').textContent =
+          '✗ Failed to fetch workloads';
       }
 
       // Deployment
       try {
         const res = await fetch('/api/deployment');
         const data = await res.json();
-        document.getElementById('deploy-progress').textContent = data.progress + '%';
-        document.getElementById('deploy-bar').style.width = data.progress + '%';
-        document.getElementById('deploy-stage').textContent = data.stage || '—';
-        document.getElementById('deploy-success').textContent = data.success ? '✓ SUCCESS' : '✗ FAILED';
-        document.getElementById('deploy-success').style.color = data.success ? '#00ff88' : '#ff0055';
-        document.getElementById('deploy-error').textContent = data.upstreamError ? `⚠ ${data.upstreamError}` : '';
-      } catch (e) {
-        document.getElementById('deploy-error').textContent = '✗ Failed to fetch deployment';
-      }
 
+        const hasProgress = Number.isFinite(data.progress);
+        const running = data.stage === 'RUNNING';
+        const successful = data.success === true || running;
+
+        document.getElementById('deploy-progress').textContent =
+          hasProgress ? `${data.progress}%` : 'N/A';
+        document.getElementById('deploy-bar').style.width =
+          hasProgress ? `${data.progress}%` : '0%';
+        document.getElementById('deploy-stage').textContent =
+          data.stage || '—';
+        document.getElementById('deploy-success').textContent =
+          successful ? '✓ RUNNING' :
+          data.success === false ? '✗ FAILED' : '—';
+        document.getElementById('deploy-success').style.color =
+          successful ? '#00ff88' : '#ff0055';
+        document.getElementById('deploy-error').textContent =
+          data.upstreamError ? `⚠ ${data.upstreamError}` : '';
+      } catch (e) {
+        document.getElementById('deploy-error').textContent =
+          '✗ Failed to fetch deployment';
+    }
       // Health
       try {
         const res = await fetch('/api/health');
