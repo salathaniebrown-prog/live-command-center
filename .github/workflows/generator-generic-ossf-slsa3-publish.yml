@@ -1,4 +1,4 @@
- Live Command Center CI
+name: Live Command Center CI
 
 on:
   push:
@@ -29,33 +29,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          elif [ -f package.json ]; then
-            npm install
-          else
-            echo "ERROR: package.json was not found."
-            exit 1
-          fi
+        run: npm install
 
-      - name: Check server.js syntax
-        run: |
-          if [ -f server.js ]; then
-            node --check server.js
-          else
-            echo "ERROR: server.js was not found."
-            exit 1
-          fi
+      - name: Check server syntax
+        run: node --check server.js
 
       - name: Run tests
         run: npm test --if-present
 
-      - name: Verify application
+      - name: Verify required files
         run: |
           test -f package.json
           test -f server.js
+          test -f public/index.html
           echo "Live Command Center validation passed."
