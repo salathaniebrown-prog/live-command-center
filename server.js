@@ -144,7 +144,47 @@ app.get("/api/health", (_req, res) => {
     time: new Date().toISOString()
   });
 });
+app.get("/api/dedalus/health", async (_req, res) => {
+  const apiKey = process.env.DEDALUS_API_KEY;
 
+  if (!apiKey) {
+    return res.status(503).json({
+      ok: false,
+      service: "dedalus",
+      error: "DEDALUS_API_KEY is not configured"
+    });
+  }
+
+  try {
+    const response = await fetch("https://api.dedaluslabs.ai/v1/models", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+
+    if (!response.ok) {
+      return res.status(502).json({
+        ok: false,
+        service: "dedalus",
+        error: `Dedalus returned HTTP ${response.status}`
+      });
+    }
+
+    return res.json({
+      ok: true,
+      service: "dedalus",
+      connected: true,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return res.status(502).json({
+      ok: false,
+      service: "dedalus",
+      error: "Dedalus connection failed"
+    });
+  }
+});
 app.use((error, _req, res, _next) => {
   console.error(error);
 
