@@ -663,14 +663,50 @@ async function streamedResponse(
       }
 
       if (
-        event.type ===
-        "response.completed"
-      ) {
-        completed =
-          event.response;
-      }
+  event.type ===
+  "response.failed"
+) {
+  throw new Error(
+    event.response?.error?.message ||
+      event.response?.error?.code ||
+      "OpenAI response failed"
+  );
+}
 
-      await onEvent(event);
+if (
+  event.type ===
+  "response.incomplete"
+) {
+  const reason =
+    event.response?.incomplete_details?.reason ||
+    "unknown reason";
+
+  throw new Error(
+    `OpenAI response incomplete: ${reason}`
+  );
+}
+
+if (
+  event.type ===
+  "error"
+) {
+  throw new Error(
+    event.message ||
+      event.error?.message ||
+      event.error?.code ||
+      "OpenAI streaming error"
+  );
+}
+
+if (
+  event.type ===
+  "response.completed"
+) {
+  completed =
+    event.response;
+}
+
+await onEvent(event);
     }
   }
 
