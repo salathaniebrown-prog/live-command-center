@@ -3,48 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Command Center</title>
+
+  <title>Eagle Eyes Live Command Center</title>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Courier New', monospace;
+      font-family: "Courier New", monospace;
       background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
       color: #00ff88;
-      overflow: hidden;
+      min-height: 100vh;
+      overflow: auto;
     }
+
     .container {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: auto auto auto;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 20px;
       padding: 20px;
-      height: 100vh;
+      min-height: 100vh;
     }
+
+    .header {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 20px;
+      border-bottom: 2px solid #00ff88;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 5px;
+    }
+
+    .timestamp {
+      font-size: 11px;
+      color: #00aa66;
+    }
+
     .card {
-      background: rgba(10, 14, 39, 0.8);
+      background: rgba(10, 14, 39, 0.88);
       border: 2px solid #00ff88;
       border-radius: 8px;
       padding: 20px;
       box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
     }
+
     h2 {
       margin-bottom: 15px;
       text-transform: uppercase;
       font-size: 14px;
       letter-spacing: 2px;
     }
+
     .metric-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       margin: 10px 0;
     }
-    .metric-label { font-size: 12px; text-transform: uppercase; }
+
+    .metric-label {
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
     .metric-value {
       font-size: 24px;
       font-weight: bold;
       color: #00ff88;
+      text-align: right;
     }
+
     .progress-bar {
       width: 100%;
       height: 20px;
@@ -54,135 +92,302 @@
       margin: 8px 0;
       overflow: hidden;
     }
+
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, #00ff88, #00cc6a);
       width: 0%;
       transition: width 0.3s ease;
     }
-    .status-online { color: #00ff88; }
-    .status-offline { color: #ff0055; }
+
+    .status-online {
+      color: #00ff88;
+    }
+
+    .status-offline {
+      color: #ff0055;
+    }
+
+    .error {
+      color: #ff0055;
+      font-size: 11px;
+      margin-top: 5px;
+      white-space: pre-wrap;
+    }
+
     .workload-list {
       list-style: none;
       font-size: 12px;
     }
+
     .workload-item {
-      padding: 5px 0;
-      padding-left: 10px;
+      padding: 5px 0 5px 10px;
       border-left: 2px solid #00ff88;
       margin: 5px 0;
     }
-    .header {
+
+    .assistant-card {
       grid-column: 1 / -1;
-      text-align: center;
-      padding: 20px;
-      border-bottom: 2px solid #00ff88;
     }
-    .header h1 {
-      font-size: 32px;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      margin-bottom: 5px;
+
+    .assistant-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
     }
-    .timestamp {
+
+    .assistant-badge {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .assistant-model {
       font-size: 11px;
       color: #00aa66;
+      margin-bottom: 12px;
     }
-    .error { color: #ff0055; font-size: 11px; margin-top: 5px; }
 
-@media (max-width: 900px) {
-  body { overflow: auto; }
+    .assistant-log {
+      width: 100%;
+      min-height: 190px;
+      max-height: 420px;
+      overflow-y: auto;
+      background: #050916;
+      border: 1px solid #00aa66;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+      color: #e8fff4;
+    }
 
-  .container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-    height: auto;
-    min-height: 100vh;
-    gap: 12px;
-    padding: 12px;
-  }
+    .message {
+      padding: 9px 10px;
+      margin-bottom: 9px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.45;
+      font-size: 13px;
+    }
 
-  .header { padding: 14px 8px; }
+    .message-user {
+      border-left: 3px solid #00aaff;
+      background: rgba(0, 170, 255, 0.08);
+    }
 
-  .header h1 {
-    font-size: 22px;
-    letter-spacing: 2px;
-  }
+    .message-assistant {
+      border-left: 3px solid #00ff88;
+      background: rgba(0, 255, 136, 0.08);
+    }
 
-  .card { padding: 14px; }
+    .message-system {
+      color: #00aa66;
+      font-size: 11px;
+    }
 
-  .metric-value { font-size: 20px; }
-}
-</style>
+    .quick-commands {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .quick-command,
+    .assistant-send {
+      font-family: inherit;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .quick-command {
+      background: transparent;
+      color: #00ff88;
+      border: 1px solid #00aa66;
+      padding: 8px 10px;
+      font-size: 11px;
+    }
+
+    .quick-command:hover {
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .assistant-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .assistant-input {
+      width: 100%;
+      min-height: 70px;
+      resize: vertical;
+      background: #050916;
+      color: #e8fff4;
+      border: 1px solid #00ff88;
+      border-radius: 5px;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .assistant-input:focus {
+      box-shadow: 0 0 12px rgba(0, 255, 136, 0.25);
+    }
+
+    .assistant-send {
+      min-width: 130px;
+      padding: 10px 16px;
+      background: #00ff88;
+      color: #04110b;
+      border: 0;
+      font-weight: bold;
+    }
+
+    .assistant-send:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .header,
+      .assistant-card {
+        grid-column: 1;
+      }
+
+      .header {
+        padding: 14px 8px;
+      }
+
+      .header h1 {
+        font-size: 22px;
+        letter-spacing: 2px;
+      }
+
+      .card {
+        padding: 14px;
+      }
+
+      .metric-value {
+        font-size: 20px;
+      }
+
+      .assistant-form {
+        grid-template-columns: 1fr;
+      }
+
+      .assistant-send {
+        width: 100%;
+        min-height: 48px;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="container">
+
     <div class="header">
-      <h1>⚡ COMMAND CENTER</h1>
+      <h1>⚡ EAGLE EYES COMMAND CENTER</h1>
       <p class="timestamp" id="time"></p>
     </div>
 
     <div class="card">
       <h2>System Status</h2>
+
       <div class="metric-row">
         <span class="metric-label">System Online</span>
         <span class="metric-value" id="status-online">—</span>
       </div>
+
       <div class="metric-row">
         <span class="metric-label">System Status</span>
         <span class="metric-value" id="status-value">—</span>
       </div>
+
       <div class="metric-row">
         <span class="metric-label">Mode</span>
-        <span style="font-size: 12px;" id="status-mode">—</span>
+        <span id="status-mode">—</span>
       </div>
+
       <div class="error" id="status-error"></div>
     </div>
 
     <div class="card">
       <h2>System Metrics</h2>
+
       <div class="metric-row">
         <span class="metric-label">CPU</span>
         <span class="metric-value" id="cpu-value">—</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="cpu-bar"></div></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="cpu-bar"></div>
+      </div>
+
       <div class="metric-row">
         <span class="metric-label">GPU</span>
         <span class="metric-value" id="gpu-value">—</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="gpu-bar"></div></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="gpu-bar"></div>
+      </div>
+
       <div class="metric-row">
         <span class="metric-label">Memory</span>
         <span class="metric-value" id="mem-value">—</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="mem-bar"></div></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="mem-bar"></div>
+      </div>
+
       <div class="metric-row">
         <span class="metric-label">Storage</span>
         <span class="metric-value" id="storage-value">—</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="storage-bar"></div></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="storage-bar"></div>
+      </div>
+
       <div class="metric-row">
         <span class="metric-label">Temperature</span>
         <span class="metric-value" id="temp-value">—</span>
       </div>
+
       <div class="error" id="metrics-error"></div>
     </div>
 
     <div class="card">
       <h2>Deployment Status</h2>
+
       <div class="metric-row">
         <span class="metric-label">Progress</span>
         <span class="metric-value" id="deploy-progress">—</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="deploy-bar"></div></div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="deploy-bar"></div>
+      </div>
+
       <div class="metric-row">
         <span class="metric-label">Stage</span>
         <span class="metric-value" id="deploy-stage">—</span>
       </div>
+
       <div class="metric-row">
         <span class="metric-label">Success</span>
         <span class="metric-value" id="deploy-success">—</span>
       </div>
+
       <div class="error" id="deploy-error"></div>
     </div>
 
@@ -194,121 +399,601 @@
 
     <div class="card">
       <h2>System Health</h2>
+
       <div class="metric-row">
         <span class="metric-label">API Health</span>
         <span class="metric-value" id="health-status">—</span>
       </div>
-      <div class="metric-row" style="font-size: 11px;">
+
+      <div class="metric-row">
+        <span class="metric-label">Updated</span>
         <span id="health-time">—</span>
       </div>
+
       <div class="error" id="health-error"></div>
     </div>
+
+    <div class="card">
+      <h2>World Data</h2>
+
+      <div class="metric-row">
+        <span class="metric-label">USGS</span>
+        <span>Earthquakes</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-label">NASA EONET</span>
+        <span>Natural Events</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-label">NOAA / NWS</span>
+        <span>Weather Alerts</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-label">Simulation</span>
+        <span class="status-online">OFF</span>
+      </div>
+    </div>
+
+    <div class="card assistant-card">
+      <div class="assistant-heading">
+        <h2>🦅 Eagle Eyes GPT-5.6 Command Rail</h2>
+        <span class="assistant-badge" id="assistant-badge">
+          CHECKING...
+        </span>
+      </div>
+
+      <div class="assistant-model" id="assistant-model">
+        Checking assistant connection...
+      </div>
+
+      <div class="quick-commands">
+        <button
+          class="quick-command"
+          type="button"
+          data-prompt="Check the current Command Center health and tell me if anything needs attention."
+        >
+          Check Health
+        </button>
+
+        <button
+          class="quick-command"
+          type="button"
+          data-prompt="Show me the current live container metrics and explain what they mean."
+        >
+          Live Metrics
+        </button>
+
+        <button
+          class="quick-command"
+          type="button"
+          data-prompt="Check the current Railway deployment status."
+        >
+          Deployment
+        </button>
+
+        <button
+          class="quick-command"
+          type="button"
+          data-prompt="Check current NOAA NWS alerts and summarize the most important ones."
+        >
+          NWS Alerts
+        </button>
+
+        <button
+          class="quick-command"
+          type="button"
+          data-prompt="Check current USGS earthquake events and summarize the most important ones."
+        >
+          USGS
+        </button>
+
+        <button
+          class="quick-command"
+          type="button"
+          data-prompt="Check current NASA EONET events and summarize the most important ones."
+        >
+          NASA EONET
+        </button>
+      </div>
+
+      <div class="assistant-log" id="assistant-log">
+        <div class="message message-system">
+          Eagle Eyes command interface ready. Commands use read-only tools.
+        </div>
+      </div>
+
+      <form class="assistant-form" id="assistant-form">
+        <textarea
+          class="assistant-input"
+          id="assistant-input"
+          placeholder="Type a command for Eagle Eyes..."
+          required
+        ></textarea>
+
+        <button
+          class="assistant-send"
+          id="assistant-send"
+          type="submit"
+        >
+          SEND COMMAND
+        </button>
+      </form>
+
+      <div class="error" id="assistant-error"></div>
+    </div>
+
   </div>
 
   <script>
+    function setPercent(id, value) {
+      const available = Number.isFinite(value);
+
+      document.getElementById(id + "-value").textContent =
+        available ? `${value}%` : "N/A";
+
+      document.getElementById(id + "-bar").style.width =
+        available ? `${Math.max(0, Math.min(100, value))}%` : "0%";
+    }
+
     async function fetchData() {
-      // Status
       try {
-        const res = await fetch('/api/status');
+        const res = await fetch("/api/status");
         const data = await res.json();
-        document.getElementById('status-online').textContent = data.online ? '✓ ONLINE' : '✗ OFFLINE';
-        document.getElementById('status-online').className = data.online ? 'metric-value status-online' : 'metric-value status-offline';
-        document.getElementById('status-value').textContent = data.systemStatus || '—';
-        document.getElementById('status-mode').textContent = data.mode || '—';
-        document.getElementById('status-error').textContent = data.upstreamError ? `⚠ ${data.upstreamError}` : '';
-      } catch (e) {
-        document.getElementById('status-error').textContent = '✗ Failed to fetch status';
+
+        const online = document.getElementById("status-online");
+
+        online.textContent =
+          data.online ? "✓ ONLINE" : "✗ OFFLINE";
+
+        online.className =
+          data.online
+            ? "metric-value status-online"
+            : "metric-value status-offline";
+
+        document.getElementById("status-value").textContent =
+          data.systemStatus || "—";
+
+        document.getElementById("status-mode").textContent =
+          data.mode || "—";
+
+        document.getElementById("status-error").textContent = "";
+      } catch {
+        document.getElementById("status-error").textContent =
+          "✗ Failed to fetch status";
       }
-      // Metrics
+
       try {
-        const res = await fetch('/api/metrics');
+        const res = await fetch("/api/metrics");
         const data = await res.json();
 
-        const update = (id, value) => {
-          const available = Number.isFinite(value);
-          document.getElementById(id).textContent =
-            available ? `${value}%` : 'N/A';
-          document.getElementById(
-            id.replace('-value', '-bar')
-          ).style.width = available ? `${value}%` : '0%';
-        };
+        setPercent("cpu", data.cpu);
+        setPercent("gpu", data.gpu);
+        setPercent("mem", data.memory);
+        setPercent("storage", data.storage);
 
-        update('cpu-value', data.cpu);
-        update('gpu-value', data.gpu);
-        update('mem-value', data.memory);
-        update('storage-value', data.storage);
-
-        document.getElementById('temp-value').textContent =
+        document.getElementById("temp-value").textContent =
           Number.isFinite(data.temperatureC)
             ? `${data.temperatureC}°C`
-            : 'N/A';
+            : "N/A";
 
-        document.getElementById('metrics-error').textContent =
-          data.upstreamError ? `⚠ ${data.upstreamError}` : '';
-      } catch (e) {
-        document.getElementById('metrics-error').textContent =
-          '✗ Failed to fetch metrics';
+        document.getElementById("metrics-error").textContent = "";
+      } catch {
+        document.getElementById("metrics-error").textContent =
+          "✗ Failed to fetch metrics";
       }
 
-      // Workloads
       try {
-        const res = await fetch('/api/workloads');
+        const res = await fetch("/api/workloads");
         const data = await res.json();
-        const list = document.getElementById('workload-list');
-        list.innerHTML = data
-          .map(w => `<li class="workload-item">▶ ${w}</li>`)
-          .join('');
-        document.getElementById('workload-error').textContent =
-          data.upstreamError ? `⚠ ${data.upstreamError}` : '';
-      } catch (e) {
-        document.getElementById('workload-error').textContent =
-          '✗ Failed to fetch workloads';
+
+        const list = document.getElementById("workload-list");
+        list.innerHTML = "";
+
+        if (Array.isArray(data) && data.length) {
+          for (const workload of data) {
+            const li = document.createElement("li");
+            li.className = "workload-item";
+            li.textContent = `▶ ${workload}`;
+            list.appendChild(li);
+          }
+        } else {
+          const li = document.createElement("li");
+          li.className = "workload-item";
+          li.textContent = "No active workloads reported";
+          list.appendChild(li);
+        }
+
+        document.getElementById("workload-error").textContent = "";
+      } catch {
+        document.getElementById("workload-error").textContent =
+          "✗ Failed to fetch workloads";
       }
 
-      // Deployment
       try {
-        const res = await fetch('/api/deployment');
+        const res = await fetch("/api/deployment");
         const data = await res.json();
 
-        const hasProgress = Number.isFinite(data.progress);
-        const running = data.stage === 'RUNNING';
-        const successful = data.success === true || running;
+        const running = data.stage === "RUNNING";
 
-        document.getElementById('deploy-progress').textContent =
-          hasProgress ? `${data.progress}%` : 'N/A';
-        document.getElementById('deploy-bar').style.width =
-          hasProgress ? `${data.progress}%` : '0%';
-        document.getElementById('deploy-stage').textContent =
-          data.stage || '—';
-        document.getElementById('deploy-success').textContent =
-          successful ? '✓ RUNNING' :
-          data.success === false ? '✗ FAILED' : '—';
-        document.getElementById('deploy-success').style.color =
-          successful ? '#00ff88' : '#ff0055';
-        document.getElementById('deploy-error').textContent =
-          data.upstreamError ? `⚠ ${data.upstreamError}` : '';
-      } catch (e) {
-        document.getElementById('deploy-error').textContent =
-          '✗ Failed to fetch deployment';
+        document.getElementById("deploy-progress").textContent =
+          running ? "100%" : "N/A";
+
+        document.getElementById("deploy-bar").style.width =
+          running ? "100%" : "0%";
+
+        document.getElementById("deploy-stage").textContent =
+          data.stage || "—";
+
+        const success = document.getElementById("deploy-success");
+
+        success.textContent =
+          running ? "✓ RUNNING" : "—";
+
+        success.className =
+          running
+            ? "metric-value status-online"
+            : "metric-value";
+
+        document.getElementById("deploy-error").textContent = "";
+      } catch {
+        document.getElementById("deploy-error").textContent =
+          "✗ Failed to fetch deployment";
+      }
+
+      try {
+        const res = await fetch("/api/health");
+        const data = await res.json();
+
+        const healthStatus =
+          document.getElementById("health-status");
+
+        healthStatus.textContent =
+          data.ok ? "✓ HEALTHY" : "✗ UNHEALTHY";
+
+        healthStatus.className =
+          data.ok
+            ? "metric-value status-online"
+            : "metric-value status-offline";
+
+        document.getElementById("health-time").textContent =
+          data.time
+            ? new Date(data.time).toLocaleString()
+            : "—";
+
+        document.getElementById("health-error").textContent = "";
+      } catch {
+        document.getElementById("health-error").textContent =
+          "✗ Failed to fetch health";
+      }
+
+      document.getElementById("time").textContent =
+        new Date().toLocaleString();
     }
-      // Health
-      try {
-        const res = await fetch('/api/health');
-        const data = await res.json();
-        document.getElementById('health-status').textContent = data.ok ? '✓ HEALTHY' : '✗ UNHEALTHY';
-        document.getElementById('health-time').textContent = new Date(data.time).toLocaleString();
-        document.getElementById('health-error').textContent = '';
-      } catch (e) {
-        document.getElementById('health-error').textContent = '✗ Failed to fetch health';
-      }
 
-      // Time
-      document.getElementById('time').textContent = new Date().toLocaleString();
+    async function fetchAssistantStatus() {
+      const badge =
+        document.getElementById("assistant-badge");
+
+      const detail =
+        document.getElementById("assistant-model");
+
+      try {
+        const res =
+          await fetch("/api/assistant/status");
+
+        const data =
+          await res.json();
+
+        if (data.configured) {
+          badge.textContent =
+            "✓ CONNECTED";
+
+          badge.className =
+            "assistant-badge status-online";
+        } else {
+          badge.textContent =
+            "✗ NOT CONFIGURED";
+
+          badge.className =
+            "assistant-badge status-offline";
+        }
+
+        detail.textContent =
+          `${data.model || "Unknown model"} • ` +
+          `${data.transport || "Unknown transport"} • ` +
+          `${Array.isArray(data.readOnlyTools)
+            ? data.readOnlyTools.length
+            : 0} read-only tools`;
+      } catch {
+        badge.textContent =
+          "✗ UNAVAILABLE";
+
+        badge.className =
+          "assistant-badge status-offline";
+
+        detail.textContent =
+          "Assistant status endpoint unavailable";
+      }
     }
 
-    // Initial fetch and then every 2 seconds
+    function addMessage(type, text) {
+      const log =
+        document.getElementById("assistant-log");
+
+      const message =
+        document.createElement("div");
+
+      message.className =
+        `message message-${type}`;
+
+      message.textContent =
+        text;
+
+      log.appendChild(message);
+
+      log.scrollTop =
+        log.scrollHeight;
+
+      return message;
+    }
+
+    function parseSSEBlock(block) {
+      let eventName = "message";
+      const dataLines = [];
+
+      for (const line of block.split("\n")) {
+        if (line.startsWith("event:")) {
+          eventName =
+            line.slice(6).trim();
+        }
+
+        if (line.startsWith("data:")) {
+          dataLines.push(
+            line.slice(5).trimStart()
+          );
+        }
+      }
+
+      if (!dataLines.length) {
+        return null;
+      }
+
+      const raw =
+        dataLines.join("\n");
+
+      try {
+        return {
+          eventName,
+          data: JSON.parse(raw)
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    async function sendCommand(message) {
+      const sendButton =
+        document.getElementById("assistant-send");
+
+      const errorBox =
+        document.getElementById("assistant-error");
+
+      errorBox.textContent = "";
+      sendButton.disabled = true;
+      sendButton.textContent = "RUNNING...";
+
+      addMessage("user", `YOU:\n${message}`);
+
+      const reply =
+        addMessage("assistant", "EAGLE EYES:\n");
+
+      try {
+        const response =
+          await fetch("/api/assistant/stream", {
+            method: "POST",
+
+            headers: {
+              "content-type": "application/json"
+            },
+
+            body: JSON.stringify({
+              message
+            })
+          });
+
+        if (!response.ok) {
+          const raw =
+            await response.text();
+
+          let reason = raw;
+
+          try {
+            reason =
+              JSON.parse(raw).error || raw;
+          } catch {}
+
+          throw new Error(
+            reason ||
+            `HTTP ${response.status}`
+          );
+        }
+
+        if (!response.body) {
+          throw new Error(
+            "Streaming response body unavailable"
+          );
+        }
+
+        const reader =
+          response.body.getReader();
+
+        const decoder =
+          new TextDecoder();
+
+        let buffer = "";
+
+        while (true) {
+          const result =
+            await reader.read();
+
+          if (result.done) {
+            break;
+          }
+
+          buffer += decoder
+            .decode(result.value, {
+              stream: true
+            })
+            .replace(/\r\n/g, "\n");
+
+          let boundary;
+
+          while (
+            (boundary =
+              buffer.indexOf("\n\n")) !== -1
+          ) {
+            const block =
+              buffer.slice(0, boundary);
+
+            buffer =
+              buffer.slice(boundary + 2);
+
+            const parsed =
+              parseSSEBlock(block);
+
+            if (!parsed) {
+              continue;
+            }
+
+            const {
+              eventName,
+              data
+            } = parsed;
+
+            if (
+              eventName === "delta" &&
+              typeof data.text === "string"
+            ) {
+              reply.textContent +=
+                data.text;
+
+              document
+                .getElementById("assistant-log")
+                .scrollTop =
+                document
+                  .getElementById("assistant-log")
+                  .scrollHeight;
+            }
+
+            if (eventName === "tool_call") {
+              document.getElementById(
+                "assistant-model"
+              ).textContent =
+                `Using tool: ${data.name || "unknown"}...`;
+            }
+
+            if (eventName === "tool_result") {
+              document.getElementById(
+                "assistant-model"
+              ).textContent =
+                `${data.name || "Tool"}: ` +
+                `${data.ok ? "complete" : "failed"}`;
+            }
+
+            if (eventName === "done") {
+              document.getElementById(
+                "assistant-model"
+              ).textContent =
+                `${data.model || "gpt-5.6"} • command complete`;
+            }
+
+            if (eventName === "error") {
+              throw new Error(
+                data.message ||
+                "Assistant stream error"
+              );
+            }
+          }
+        }
+
+        if (
+          reply.textContent.trim() ===
+          "EAGLE EYES:"
+        ) {
+          reply.textContent +=
+            "\nCommand completed with no text response.";
+        }
+      } catch (error) {
+        reply.textContent +=
+          `\nERROR: ${error.message}`;
+
+        errorBox.textContent =
+          `✗ ${error.message}`;
+      } finally {
+        sendButton.disabled = false;
+        sendButton.textContent =
+          "SEND COMMAND";
+
+        fetchAssistantStatus();
+      }
+    }
+
+    document
+      .getElementById("assistant-form")
+      .addEventListener(
+        "submit",
+        async (event) => {
+          event.preventDefault();
+
+          const input =
+            document.getElementById(
+              "assistant-input"
+            );
+
+          const message =
+            input.value.trim();
+
+          if (!message) {
+            return;
+          }
+
+          input.value = "";
+
+          await sendCommand(message);
+        }
+      );
+
+    document
+      .querySelectorAll(".quick-command")
+      .forEach((button) => {
+        button.addEventListener(
+          "click",
+          async () => {
+            const prompt =
+              button.dataset.prompt;
+
+            if (prompt) {
+              await sendCommand(prompt);
+            }
+          }
+        );
+      });
+
     fetchData();
-    setInterval(fetchData, 2000);
+    fetchAssistantStatus();
+
+    setInterval(
+      fetchData,
+      2000
+    );
+
+    setInterval(
+      fetchAssistantStatus,
+      30000
+    );
   </script>
 </body>
-</html>
+          </html>
