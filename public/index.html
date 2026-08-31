@@ -89,7 +89,31 @@
       color: #00aa66;
     }
     .error { color: #ff0055; font-size: 11px; margin-top: 5px; }
-  </style>
+
+@media (max-width: 900px) {
+  body { overflow: auto; }
+
+  .container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    height: auto;
+    min-height: 100vh;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .header { padding: 14px 8px; }
+
+  .header h1 {
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+
+  .card { padding: 14px; }
+
+  .metric-value { font-size: 20px; }
+}
+</style>
 </head>
 <body>
   <div class="container">
