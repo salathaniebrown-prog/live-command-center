@@ -241,6 +241,20 @@ function formatWeather(data) {
   ].join("\n");
 }
 
+function shouldUseFreeKnowledge(message, openAIConfigured) {
+  const q = cleanText(message).toLowerCase();
+
+  if (!q) {
+    return false;
+  }
+
+  if (!openAIConfigured) {
+    return true;
+  }
+
+  return /\b(?:who (?:is|was|are|were)|what (?:is|was|are|were)|where (?:is|was|are|were)|when (?:is|was|did)|tell me about|world knowledge|wikipedia|encyclopedia)\b/.test(q);
+}
+
 function worldOSStatus() {
   return {
     ok: true,
@@ -280,5 +294,6 @@ module.exports = {
   globalWeather,
   formatKnowledge,
   formatWeather,
-  worldOSStatus
+  worldOSStatus,
+  shouldUseFreeKnowledge
 };
