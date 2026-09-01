@@ -99,7 +99,6 @@ function normalizeUsgs(data, sourceUrl, limit = 10, retrievedAt = new Date().toI
               depthKm: position.depth
             }
           : null,
-        geometry,
         spine: spineRecord({
           source: "usgs",
           sourceId,
@@ -124,7 +123,6 @@ function normalizeUsgs(data, sourceUrl, limit = 10, retrievedAt = new Date().toI
         sourceRecord: {
           id: sourceId,
           type: feature?.type || null,
-          geometry,
           properties: {
             mag: magnitude,
             place: p.place || null,
@@ -212,7 +210,6 @@ function normalizeEonet(data, sourceUrl, limit = 10, retrievedAt = new Date().to
               longitude: position.longitude
             }
           : null,
-        geometry,
         geometryHistory: history,
         spine: spineRecord({
           source: "eonet",
@@ -240,8 +237,7 @@ function normalizeEonet(data, sourceUrl, limit = 10, retrievedAt = new Date().to
           link: event?.link || null,
           closed: event?.closed || null,
           categories: event?.categories || [],
-          sources: event?.sources || [],
-          geometry: history
+          sources: event?.sources || []
         }
       };
     });
@@ -294,7 +290,6 @@ function normalizeNws(data, sourceUrl, limit = 10, retrievedAt = new Date().toIS
         certainty: p.certainty || null,
         status: p.status || null,
         messageType: p.messageType || null,
-        geometry,
         coordinates: position
           ? {
               latitude: position.latitude,
@@ -327,7 +322,6 @@ function normalizeNws(data, sourceUrl, limit = 10, retrievedAt = new Date().toIS
         sourceRecord: {
           id: p.id || null,
           type: feature?.type || null,
-          geometry,
           properties: {
             areaDesc: p.areaDesc || null,
             geocode: p.geocode || null,
