@@ -1308,6 +1308,39 @@ app.post(
     }
 
     try {
+      const local =
+        await freeCommand(
+          message
+        );
+
+      if (local) {
+        return res.json({
+          ok: true,
+          mode:
+            "free",
+          model:
+            "free-command-mode",
+          tool:
+            local.tool,
+          text:
+            local.text
+        });
+      }
+
+      if (
+        !OPENAI_API_KEY
+      ) {
+        return res
+          .status(503)
+          .json({
+            ok: false,
+            mode:
+              "free",
+            error:
+              "GPT-5.6 is temporarily unavailable. Free commands remain available: health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, or help."
+          });
+      }
+
       return res.json({
         ok: true,
 
