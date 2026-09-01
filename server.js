@@ -3,6 +3,7 @@
 const express = require("express");
 const os = require("os");
 const path = require("path");
+const crypto = require("crypto");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
 
@@ -12,6 +13,7 @@ const PORT = Number(process.env.PORT) || 3000;
 const startedAt = new Date();
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6";
+const COMMAND_CENTER_ACCESS_TOKEN = process.env.COMMAND_CENTER_ACCESS_TOKEN || "";
 const OPENAI_URL = "https://api.openai.com/v1/responses";
 
 const SOURCES = {
@@ -94,6 +96,53 @@ const INSTRUCTIONS = [
 app.disable("x-powered-by");
 app.use(express.json({ limit: "256kb" }));
 app.use(express.static(path.join(__dirname, "public")));
+
+function secretsMatch(received, expected) {
+  if (!received || !expected) {
+    return false;
+  }
+
+  const a = Buffer.from(received);
+  const b = Buffer.from(expected);
+
+  return (
+    a.length === b.length &&
+    crypto.timingSafeEqual(a, b)
+  );
+}
+
+function requireAssistantAccess(req, res, next) {
+  if (!COMMAND_CENTER_ACCESS_TOKEN) {
+    return res.status(503).json({
+      ok: false,
+      error:
+        "Assistant access is locked until COMMAND_CENTER_ACCESS_TOKEN is configured"
+    });
+  }
+
+  const authorization =
+    req.get("authorization") || "";
+
+  const match =
+    authorization.match(
+      /^Bearer\s+(.+)$/i
+    );
+
+  if (
+    !match ||
+    !secretsMatch(
+      match[1],
+      COMMAND_CENTER_ACCESS_TOKEN
+    )
+  ) {
+    return res.status(401).json({
+      ok: false,
+      error: "Unauthorized"
+    });
+  }
+
+  return next();
+}
 
 function cpuTimes() {
   return os.cpus().reduce(
@@ -987,6 +1036,14 @@ app.get(
           OPENAI_API_KEY
         ),
 
+      accessProtected:
+        true,
+
+      accessConfigured:
+        Boolean(
+          COMMAND_CENTER_ACCESS_TOKEN
+        ),
+
       model:
         OPENAI_MODEL,
 
@@ -1004,8 +1061,21 @@ app.get(
     })
 );
 
+app.get(
+  "/api/assistant/auth-check",
+  requireAssistantAccess,
+  (_req, res) =>
+    res.json({
+      ok: true,
+      authorized: true,
+      timestamp:
+        new Date().toISOString()
+    })
+);
+
 app.post(
   "/api/assistant",
+  requireAssistantAccess,
   async (req, res) => {
     const message =
       typeof req.body?.message ===
@@ -1061,6 +1131,7 @@ app.post(
 
 app.post(
   "/api/assistant/stream",
+  requireAssistantAccess,
   async (req, res) => {
     const message =
       typeof req.body?.message ===
