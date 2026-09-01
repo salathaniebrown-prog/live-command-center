@@ -472,7 +472,7 @@
 
     <div class="card assistant-card">
       <div class="assistant-heading">
-        <h2>🦅 Eagle Eyes GPT-5.6 Command Rail</h2>
+        <h2>🦅 Eagle Eyes Command Rail • Free + GPT-5.6</h2>
         <span class="assistant-badge" id="assistant-badge">
           CHECKING...
         </span>
@@ -552,7 +552,7 @@
 
       <div class="assistant-log" id="assistant-log">
         <div class="message message-system">
-          Eagle Eyes command interface ready. Commands use read-only tools.
+          Eagle Eyes ready. Free command mode works without GPT credits; all command tools are read-only.
         </div>
       </div>
 
@@ -791,12 +791,12 @@
             : false;
 
         if (
-          data.configured &&
           data.accessConfigured &&
-          authorized
+          authorized &&
+          data.configured
         ) {
           badge.textContent =
-            "✓ CONNECTED + PRIVATE";
+            "✓ AI + FREE MODE • PRIVATE";
 
           badge.className =
             "assistant-badge status-online";
@@ -806,9 +806,21 @@
             `${data.transport || "Unknown transport"} • ` +
             `${Array.isArray(data.readOnlyTools)
               ? data.readOnlyTools.length
-              : 0} read-only tools`;
+              : 0} read-only tools • free fallback ready`;
         } else if (
-          data.configured &&
+          data.accessConfigured &&
+          authorized &&
+          data.freeMode
+        ) {
+          badge.textContent =
+            "✓ FREE MODE • PRIVATE";
+
+          badge.className =
+            "assistant-badge status-online";
+
+          detail.textContent =
+            "Live health, metrics, Railway status, NWS, USGS and NASA EONET commands are ready without OpenAI credits.";
+        } else if (
           data.accessConfigured
         ) {
           badge.textContent =
@@ -818,10 +830,10 @@
             "assistant-badge";
 
           detail.textContent =
-            "Private access is enabled. Enter the Railway access token to unlock.";
-        } else if (
-          data.configured
-        ) {
+            data.configured
+              ? "Private access is enabled. Enter the Railway access token to unlock AI + free commands."
+              : "Private access is enabled. Enter the Railway access token to unlock free command mode.";
+        } else {
           badge.textContent =
             "🔒 SERVER LOCKED";
 
@@ -830,15 +842,6 @@
 
           detail.textContent =
             "Set COMMAND_CENTER_ACCESS_TOKEN in Railway before using commands.";
-        } else {
-          badge.textContent =
-            "✗ OPENAI NOT READY";
-
-          badge.className =
-            "assistant-badge status-offline";
-
-          detail.textContent =
-            "OPENAI_API_KEY is not configured.";
         }
       } catch {
         badge.textContent =
