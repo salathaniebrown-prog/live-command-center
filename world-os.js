@@ -133,7 +133,7 @@ async function globalWeather(location) {
     `${OPEN_METEO_FORECAST}?latitude=${encodeURIComponent(hit.latitude)}` +
     `&longitude=${encodeURIComponent(hit.longitude)}` +
     "&current=temperature_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m,wind_direction_10m" +
-    "&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto";
+    "&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto";
 
   const forecast = await fetchJson(forecastUrl);
   const current = forecast?.current || {};
