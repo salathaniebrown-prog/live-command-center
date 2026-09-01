@@ -504,6 +504,14 @@
         <button
           class="quick-command"
           type="button"
+          data-prompt="Mission brief: build a live operational snapshot and prioritize what matters now."
+        >
+          Mission Brief
+        </button>
+
+        <button
+          class="quick-command"
+          type="button"
           data-prompt="Check the current Command Center health and tell me if anything needs attention."
         >
           Check Health
@@ -552,7 +560,7 @@
 
       <div class="assistant-log" id="assistant-log">
         <div class="message message-system">
-          Eagle Eyes ready. Free command mode works without GPT credits; all command tools are read-only.
+          Eagle Eyes ready. Mission Brief and free command mode work without GPT credits; all command tools are read-only.
         </div>
       </div>
 
@@ -819,7 +827,7 @@
             "assistant-badge status-online";
 
           detail.textContent =
-            "Live health, metrics, Railway status, NWS, USGS and NASA EONET commands are ready without OpenAI credits.";
+            "Mission Brief, live health, metrics, Railway status, NWS, USGS and NASA EONET commands are ready without OpenAI credits.";
         } else if (
           data.accessConfigured
         ) {
