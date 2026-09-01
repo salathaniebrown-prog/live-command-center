@@ -4,6 +4,13 @@ const express = require("express");
 const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
+const {
+  knowledgeSearch,
+  globalWeather,
+  formatKnowledge,
+  formatWeather,
+  worldOSStatus
+} = require("./world-os");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
 
@@ -90,12 +97,60 @@ const TOOLS = [
       required: ["source", "limit"],
       additionalProperties: false
     }
+  },
+  {
+    type: "function",
+    name: "search_world_knowledge",
+    description:
+      "Search free encyclopedic world knowledge for people, places, organizations, history, science, technology, and general factual topics.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string"
+        },
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: 5
+        }
+      },
+      required: ["query", "limit"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
+    name: "get_global_weather",
+    description:
+      "Get current global weather for a named city or location using live Open-Meteo data.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        location: {
+          type: "string"
+        }
+      },
+      required: ["location"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
+    name: "get_world_os_status",
+    description:
+      "Get Eagle Eyes World Command Operating System capability and module status.",
+    strict: true,
+    parameters: EMPTY
   }
 ];
 
 const INSTRUCTIONS = [
-  "You are Eagle Eyes inside the Live Command Center.",
-  "Use tools for current system state, metrics, deployment state, health, or world-event feeds.",
+  "You are Eagle Eyes, the intelligence core of the EAGLE EYES WORLD COMMAND OPERATING SYSTEM.",
+  "Use tools for current system state, metrics, deployment state, health, world-event feeds, global weather, and encyclopedic world knowledge.",
+  "For general factual questions that benefit from reference knowledge, call search_world_knowledge. For current weather by place, call get_global_weather.",
   "For a mission brief, situation report, broad incident-priority request, or question about what matters now, call get_operational_snapshot before answering.",
   "When prioritizing, distinguish source facts from interpretation and use explicit NWS severity, earthquake magnitude, recency, deployment health, and container pressure as evidence.",
   "Keep mission briefs executive and mobile-friendly: group related alerts, show no more than five top incidents, shorten long area lists, separate system pressure from external incidents, explain why each priority matters, and finish with a short WATCH NEXT section.",
@@ -965,6 +1020,9 @@ async function freeCommand(message) {
         "• USGS earthquakes",
         "• NASA EONET events",
         "• world data sources",
+        "• world knowledge lookup (people, places, history, science, technology)",
+        "• global current weather by city or place",
+        "• World OS capability status",
         "",
         "These commands use live read-only data. GPT-5.6 commands will automatically become available when API billing is active."
       ].join("\n")
@@ -983,6 +1041,37 @@ async function freeCommand(message) {
       text:
         formatMissionBrief(snapshot)
     };
+  }
+
+  const weatherMatch =
+    String(message || "").match(
+      /\b(?:weather|temperature|forecast)\s+(?:in|for|at)\s+(.+?)\s*$/i
+    );
+
+  if (weatherMatch?.[1]) {
+    try {
+      const data =
+        await globalWeather(
+          weatherMatch[1]
+        );
+
+      return {
+        handled: true,
+        tool: "get_global_weather",
+        text:
+          formatWeather(data)
+      };
+    } catch (error) {
+      return {
+        handled: true,
+        tool: "get_global_weather",
+        text: [
+          "GLOBAL WEATHER TEMPORARILY UNAVAILABLE",
+          `Reason: ${error.message}`,
+          "No simulated data was substituted."
+        ].join("\n")
+      };
+    }
   }
 
   if (/\b(deployment|deploy|railway)\b/.test(q)) {
@@ -1108,6 +1197,34 @@ async function freeCommand(message) {
     };
   }
 
+  if (!OPENAI_API_KEY) {
+    try {
+      const data =
+        await knowledgeSearch(
+          message,
+          3
+        );
+
+      return {
+        handled: true,
+        tool: "search_world_knowledge",
+        text:
+          formatKnowledge(data)
+      };
+    } catch (error) {
+      return {
+        handled: true,
+        tool: "search_world_knowledge",
+        text: [
+          "EAGLE EYES FREE KNOWLEDGE MODE",
+          "I could not resolve that request from the current free knowledge source.",
+          `Reason: ${error.message}`,
+          "Try a more specific person, place, organization, event, science, history, or technology question."
+        ].join("\n")
+      };
+    }
+  }
+
   return null;
 }
 
@@ -1137,6 +1254,20 @@ async function runTool(call) {
         args.source,
         args.limit
       );
+
+    case "search_world_knowledge":
+      return knowledgeSearch(
+        args.query,
+        args.limit
+      );
+
+    case "get_global_weather":
+      return globalWeather(
+        args.location
+      );
+
+    case "get_world_os_status":
+      return worldOSStatus();
 
     default:
       throw new Error(
@@ -1785,6 +1916,95 @@ app.get(
 );
 
 app.get(
+  "/api/eagle-eyes/world-os",
+  requireAssistantAccess,
+  (_req, res) =>
+    res.json(
+      worldOSStatus()
+    )
+);
+
+app.get(
+  "/api/eagle-eyes/knowledge",
+  requireAssistantAccess,
+  async (req, res) => {
+    try {
+      const query =
+        String(
+          req.query.q || ""
+        ).trim();
+
+      if (!query) {
+        return res
+          .status(400)
+          .json({
+            ok: false,
+            error: "q is required"
+          });
+      }
+
+      return res.json(
+        await knowledgeSearch(
+          query,
+          Number(
+            req.query.limit || 3
+          )
+        )
+      );
+    } catch (e) {
+      return res
+        .status(502)
+        .json({
+          ok: false,
+          error: e.message,
+          simulated: false,
+          timestamp:
+            new Date().toISOString()
+        });
+    }
+  }
+);
+
+app.get(
+  "/api/eagle-eyes/weather",
+  requireAssistantAccess,
+  async (req, res) => {
+    try {
+      const location =
+        String(
+          req.query.location || ""
+        ).trim();
+
+      if (!location) {
+        return res
+          .status(400)
+          .json({
+            ok: false,
+            error:
+              "location is required"
+          });
+      }
+
+      return res.json(
+        await globalWeather(
+          location
+        )
+      );
+    } catch (e) {
+      return res
+        .status(502)
+        .json({
+          ok: false,
+          error: e.message,
+          simulated: false,
+          timestamp:
+            new Date().toISOString()
+        });
+    }
+  }
+);
+
+app.get(
   "/api/assistant/status",
   (_req, res) =>
     res.json({
@@ -1797,6 +2017,15 @@ app.get(
 
       freeMode:
         true,
+
+      worldOS:
+        true,
+
+      freeKnowledge:
+        "Wikipedia",
+
+      globalWeather:
+        "Open-Meteo",
 
       commandMode:
         OPENAI_API_KEY
@@ -1903,7 +2132,7 @@ app.post(
             mode:
               "free",
             error:
-              "GPT-5.6 is temporarily unavailable. Free commands remain available: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, or help."
+              "GPT-5.6 is temporarily unavailable. Free commands remain available: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, global weather, world knowledge, World OS status, or help."
           });
       }
 
@@ -2079,7 +2308,7 @@ app.post(
           text: [
             "GPT-5.6 is temporarily unavailable because API billing is not active.",
             "",
-            "FREE COMMAND MODE is still online. Try: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, or help."
+            "FREE COMMAND MODE is still online. Try: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, weather in a city, a factual world-knowledge question, World OS status, or help."
           ].join("\n")
         }
       );
