@@ -43,7 +43,7 @@ test("USGS spine preserves coordinates, depth, source IDs, source time, and lega
   assert.equal(event.spine.sourceId, "us123");
   assert.equal(event.spine.position.depth, 12.4);
   assert.equal(event.spine.position.depthUnit, "km");
-  assert.equal(event.sourceRecord.geometry.type, "Point");
+  assert.equal(event.spine.geometry.type, "Point");
 });
 
 test("EONET spine preserves latest geometry and the complete geometry history", () => {
@@ -65,7 +65,7 @@ test("EONET spine preserves latest geometry and the complete geometry history", 
   assert.equal(event.coordinates.latitude, 35.5);
   assert.equal(event.coordinates.longitude, -119.5);
   assert.equal(event.geometryHistory.length, 2);
-  assert.equal(event.sourceRecord.geometry.length, 2);
+  assert.equal(event.sourceRecord.sources.length, 1);
   assert.equal(event.spine.eventType, "Wildfires");
   assert.equal(event.spine.occurredAt, "2026-09-01T12:00:00Z");
 });
@@ -103,7 +103,7 @@ test("NWS spine preserves alert geometry and operational alert metadata", () => 
   const event = result.events[0];
   assert.equal(event.event, "Severe Thunderstorm Warning");
   assert.equal(event.severity, "Severe");
-  assert.equal(event.geometry.type, "Polygon");
+  assert.equal(event.spine.geometry.type, "Polygon");
   assert.equal(event.spine.sourceId, "urn:oid:abc");
   assert.equal(event.spine.occurredAt, "2026-09-01T23:12:00Z");
   assert.equal(event.spine.expiresAt, "2026-09-02T00:00:00Z");
