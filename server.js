@@ -12,6 +12,7 @@ const {
   worldOSStatus,
   shouldUseFreeKnowledge
 } = require("./world-os");
+const { normalizeWorldData } = require("./data-spine");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
 
@@ -370,77 +371,14 @@ async function world(source, limit = 10) {
     headers
   );
 
-  let events;
-
-  if (source === "usgs") {
-    events = (data.features || [])
-      .slice(0, n)
-      .map((f) => ({
-        id: f.id || null,
-        title: f.properties?.title || null,
-        magnitude: Number.isFinite(
-          f.properties?.mag
-        )
-          ? f.properties.mag
-          : null,
-        place: f.properties?.place || null,
-        time: Number.isFinite(
-          f.properties?.time
-        )
-          ? new Date(
-              f.properties.time
-            ).toISOString()
-          : null,
-        url: f.properties?.url || null
-      }));
-  } else if (source === "eonet") {
-    events = (data.events || [])
-      .slice(0, n)
-      .map((e) => ({
-        id: e.id || null,
-        title: e.title || null,
-        categories: (e.categories || [])
-          .map((x) => x.title)
-          .filter(Boolean),
-        time:
-          e.geometry?.at(-1)?.date || null,
-        link: e.link || null
-      }));
-  } else {
-    events = (data.features || [])
-      .slice(0, n)
-      .map((f) => ({
-        id: f.id || null,
-        event:
-          f.properties?.event || null,
-        headline:
-          f.properties?.headline || null,
-        severity:
-          f.properties?.severity || null,
-        area:
-          f.properties?.areaDesc || null,
-        effective:
-          f.properties?.effective || null,
-        expires:
-          f.properties?.expires || null,
-        url:
-          f.properties?.web ||
-          f.properties?.uri ||
-          null
-      }));
-  }
-
-  return {
-    ok: true,
+  return normalizeWorldData(
     source,
-    sourceUrl: SOURCES[source],
-    simulated: false,
-    count: events.length,
-    events,
-    timestamp: new Date().toISOString()
-  };
+    data,
+    SOURCES[source],
+    n,
+    new Date().toISOString()
+  );
 }
-
 
 function severityScore(severity) {
   const scores = {
