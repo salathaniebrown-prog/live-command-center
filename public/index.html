@@ -3,811 +3,1087 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>EAGLE EYES WORLD COMMAND OPERATING SYSTEM</title>
-
+  <meta name="theme-color" content="#080807">
+  <title>EAGLE EYES • COMMAND CENTER V2</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      color-scheme: dark;
+      --bg: #070706;
+      --panel: rgba(14, 13, 11, 0.92);
+      --panel-2: rgba(20, 18, 14, 0.88);
+      --line: rgba(216, 170, 87, 0.28);
+      --line-strong: rgba(246, 196, 105, 0.7);
+      --gold: #f2c66d;
+      --gold-2: #c98b32;
+      --text: #f7f1e7;
+      --muted: #9f9789;
+      --green: #73e58c;
+      --red: #ff6f71;
+      --blue: #70b7ff;
+      --shadow: 0 26px 80px rgba(0,0,0,.55);
     }
 
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
     body {
-      font-family: "Courier New", monospace;
-      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-      color: #00ff88;
+      margin: 0;
       min-height: 100vh;
-      overflow: auto;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% -10%, rgba(211,151,56,.17), transparent 34rem),
+        radial-gradient(circle at 100% 0%, rgba(111,78,26,.10), transparent 28rem),
+        linear-gradient(180deg, #0c0b09 0%, #070706 54%, #050505 100%);
     }
 
-    .container {
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image:
+        linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
+    }
+
+    button, input, textarea { font: inherit; }
+
+    .shell {
+      min-height: 100vh;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 20px;
-      padding: 20px;
-      min-height: 100vh;
+      grid-template-columns: 214px minmax(0,1fr);
     }
 
-    .header {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 20px;
-      border-bottom: 2px solid #00ff88;
-    }
-
-    .header h1 {
-      font-size: 32px;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      margin-bottom: 5px;
-    }
-
-    .timestamp {
-      font-size: 11px;
-      color: #00aa66;
-    }
-
-    .card {
-      background: rgba(10, 14, 39, 0.88);
-      border: 2px solid #00ff88;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-    }
-
-    h2 {
-      margin-bottom: 15px;
-      text-transform: uppercase;
-      font-size: 14px;
-      letter-spacing: 2px;
-    }
-
-    .metric-row {
+    .rail {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 16px;
+      border-right: 1px solid var(--line);
+      background: rgba(6,6,5,.93);
+      backdrop-filter: blur(20px);
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin: 10px 0;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 20;
     }
 
-    .metric-label {
-      font-size: 12px;
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border: 1px solid var(--line-strong);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+      box-shadow: inset 0 0 28px rgba(237,185,83,.07), 0 0 30px rgba(237,185,83,.08);
+      font-size: 22px;
+    }
+
+    .brand h1 {
+      margin: 12px 0 4px;
+      font-size: 14px;
+      letter-spacing: .15em;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: .22em;
       text-transform: uppercase;
     }
 
-    .metric-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: #00ff88;
+    .rail nav { display: grid; gap: 6px; }
+    .nav-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: var(--muted);
+      border: 1px solid transparent;
+      font-size: 12px;
+      letter-spacing: .05em;
+      text-decoration: none;
+    }
+    .nav-item.active {
+      color: var(--gold);
+      border-color: var(--line);
+      background: linear-gradient(90deg, rgba(225,170,71,.12), transparent);
+    }
+
+    .rail-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .tiny-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      box-shadow: 0 0 12px currentColor;
+    }
+    .dot.ok { background: var(--green); color: var(--green); }
+    .dot.bad { background: var(--red); color: var(--red); }
+
+    main {
+      min-width: 0;
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 4px 2px 20px;
+    }
+
+    .identity h2 {
+      margin: 2px 0;
+      font-size: clamp(18px, 2vw, 28px);
+      letter-spacing: .14em;
+      font-weight: 650;
+    }
+
+    .identity p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .11em;
+    }
+
+    .top-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 11px;
       text-align: right;
     }
 
-    .progress-bar {
-      width: 100%;
-      height: 20px;
-      background: rgba(0, 255, 136, 0.1);
-      border: 1px solid #00ff88;
-      border-radius: 4px;
-      margin: 8px 0;
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: clamp(22px, 4vw, 44px);
+      min-height: 260px;
+      background:
+        linear-gradient(110deg, rgba(19,17,13,.98) 0%, rgba(11,10,8,.94) 50%, rgba(34,25,12,.78) 100%);
+      box-shadow: var(--shadow);
+      isolation: isolate;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 0 48%;
+      z-index: -1;
+      opacity: .55;
+      background:
+        radial-gradient(circle at 58% 46%, transparent 0 7%, rgba(236,187,95,.12) 7.4% 7.7%, transparent 8.2% 15%, rgba(236,187,95,.08) 15.3% 15.5%, transparent 16%),
+        repeating-radial-gradient(circle at 58% 46%, rgba(226,170,75,.06) 0 1px, transparent 1px 29px),
+        linear-gradient(90deg, transparent, rgba(234,184,87,.04));
+      transform: skewX(-8deg) scale(1.2);
+    }
+
+    .hero::after {
+      content: "EAGLE EYES";
+      position: absolute;
+      right: -10px;
+      bottom: -24px;
+      font-weight: 800;
+      font-size: clamp(72px, 11vw, 180px);
+      letter-spacing: -.06em;
+      color: rgba(242,198,109,.025);
+      z-index: -1;
+      white-space: nowrap;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0,1.5fr) minmax(250px,.75fr);
+      gap: 30px;
+      align-items: end;
+    }
+
+    .hero h3 {
+      margin: 10px 0 12px;
+      max-width: 820px;
+      font-size: clamp(28px, 4.2vw, 62px);
+      line-height: .98;
+      letter-spacing: -.045em;
+      font-weight: 650;
+    }
+
+    .hero-copy {
+      color: #c6bfb3;
+      line-height: 1.6;
+      font-size: 13px;
+      max-width: 700px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text);
+      background: rgba(255,255,255,.025);
+      cursor: pointer;
+      transition: .18s ease;
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    .btn:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+    .btn.primary {
+      color: #15110a;
+      border-color: var(--gold);
+      background: linear-gradient(135deg, #f5d58e, #c98b32);
+      font-weight: 750;
+    }
+
+    .hero-state {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hero-state .mini {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(4,4,4,.32);
+    }
+
+    .mini-label {
+      color: var(--muted);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+    }
+
+    .mini-value {
+      margin-top: 8px;
+      font-size: 19px;
+      font-weight: 650;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0,1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .panel {
+      position: relative;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--panel), rgba(8,8,7,.94));
+      box-shadow: 0 20px 60px rgba(0,0,0,.28);
       overflow: hidden;
     }
 
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #00ff88, #00cc6a);
-      width: 0%;
-      transition: width 0.3s ease;
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(246,196,105,.5), transparent);
+      opacity: .5;
     }
 
-    .status-online {
-      color: #00ff88;
+    .panel-head {
+      padding: 16px 16px 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid rgba(216,170,87,.12);
     }
 
-    .status-offline {
-      color: #ff0055;
-    }
-
-    .error {
-      color: #ff0055;
+    .panel-title {
       font-size: 11px;
-      margin-top: 5px;
-      white-space: pre-wrap;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--gold);
     }
 
-    .workload-list {
-      list-style: none;
+    .panel-sub {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .panel-body { padding: 16px; }
+
+    .runtime { grid-column: span 5; }
+    .deployment { grid-column: span 3; }
+    .feeds { grid-column: span 4; }
+    .mission { grid-column: span 7; }
+    .intel { grid-column: span 5; }
+    .command { grid-column: 1 / -1; }
+
+    .metric {
+      display: grid;
+      grid-template-columns: 86px 1fr 48px;
+      gap: 10px;
+      align-items: center;
+      margin: 13px 0;
+    }
+
+    .metric-name {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+    }
+
+    .bar {
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.07);
+      overflow: hidden;
+    }
+
+    .bar > div {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #8f672d, var(--gold));
+      box-shadow: 0 0 15px rgba(242,198,109,.24);
+      transition: width .35s ease;
+    }
+
+    .metric-num {
+      text-align: right;
       font-size: 12px;
+      font-variant-numeric: tabular-nums;
     }
 
-    .workload-item {
-      padding: 5px 0 5px 10px;
-      border-left: 2px solid #00ff88;
-      margin: 5px 0;
+    .deploy-orb {
+      width: 124px;
+      height: 124px;
+      margin: 6px auto 16px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle, #11100e 52%, transparent 53%),
+        conic-gradient(var(--green) 0deg 360deg);
+      box-shadow: inset 0 0 35px rgba(0,0,0,.8), 0 0 45px rgba(115,229,140,.08);
+      position: relative;
+    }
+
+    .deploy-orb::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .deploy-center { text-align: center; }
+    .deploy-center strong { display: block; font-size: 16px; }
+    .deploy-center span { color: var(--muted); font-size: 9px; letter-spacing: .1em; }
+
+    .facts {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+
+    .fact {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .fact b { color: var(--text); font-weight: 600; text-align: right; }
+
+    .feed-list { display: grid; gap: 9px; }
+    .feed-row {
+      display: grid;
+      grid-template-columns: 78px 1fr auto;
+      gap: 9px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(255,255,255,.04);
+    }
+    .feed-row strong { color: var(--gold); font-size: 10px; }
+    .feed-row span { color: var(--muted); font-size: 10px; }
+    .feed-count { color: var(--text) !important; font-variant-numeric: tabular-nums; }
+
+    .mission-stage {
+      min-height: 250px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      border: 1px solid rgba(216,170,87,.11);
+      background:
+        radial-gradient(circle at center, rgba(214,159,60,.12), transparent 32%),
+        radial-gradient(circle at center, transparent 0 28%, rgba(214,159,60,.11) 28.5% 29%, transparent 29.5% 46%, rgba(214,159,60,.07) 46.5% 47%, transparent 47.5%),
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: auto, auto, 24px 24px, 24px 24px;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .mission-stage strong {
+      display: block;
+      font-size: clamp(24px, 3vw, 40px);
+      letter-spacing: -.03em;
+    }
+
+    .mission-stage p {
+      margin: 8px auto 0;
+      color: var(--muted);
+      max-width: 520px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .intel-list {
+      display: grid;
+      gap: 9px;
+      max-height: 260px;
+      overflow: auto;
+      scrollbar-width: thin;
+    }
+
+    .intel-item {
+      padding: 11px 12px;
+      border-left: 2px solid rgba(242,198,109,.5);
+      background: rgba(255,255,255,.02);
+      font-size: 11px;
+      line-height: 1.45;
+      color: #cfc7bb;
+    }
+
+    .intel-item b {
+      color: var(--text);
+      font-weight: 650;
     }
 
     .assistant-card {
-      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(0,1fr) 300px;
+      min-height: 430px;
+    }
+
+    .assistant-main {
+      padding: 18px;
+      min-width: 0;
+    }
+
+    .assistant-side {
+      border-left: 1px solid rgba(216,170,87,.14);
+      padding: 18px;
+      background: rgba(255,255,255,.012);
     }
 
     .assistant-heading {
       display: flex;
       justify-content: space-between;
+      gap: 12px;
       align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
       margin-bottom: 12px;
     }
 
     .assistant-badge {
-      font-size: 12px;
-      font-weight: bold;
+      font-size: 10px;
+      color: var(--gold);
+      border: 1px solid var(--line);
+      padding: 7px 9px;
+      border-radius: 999px;
     }
 
     .assistant-model {
-      font-size: 11px;
-      color: #00aa66;
+      min-height: 16px;
+      color: var(--muted);
+      font-size: 10px;
       margin-bottom: 12px;
-    }
-
-    .assistant-access {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .assistant-token {
-      width: 100%;
-      min-height: 44px;
-      background: #050916;
-      color: #e8fff4;
-      border: 1px solid #00aa66;
-      border-radius: 5px;
-      padding: 10px;
-      font-family: inherit;
-      outline: none;
-    }
-
-    .assistant-unlock {
-      min-width: 160px;
-      border: 0;
-      border-radius: 5px;
-      padding: 10px 14px;
-      background: #00ff88;
-      color: #04110b;
-      font-family: inherit;
-      font-weight: bold;
-      cursor: pointer;
     }
 
     .assistant-log {
-      width: 100%;
-      min-height: 190px;
-      max-height: 420px;
-      overflow-y: auto;
-      background: #050916;
-      border: 1px solid #00aa66;
-      border-radius: 6px;
+      height: 250px;
+      overflow: auto;
       padding: 12px;
-      margin-bottom: 12px;
-      color: #e8fff4;
+      border-radius: 14px;
+      border: 1px solid rgba(216,170,87,.12);
+      background: rgba(2,2,2,.36);
+      scrollbar-width: thin;
     }
 
     .message {
       padding: 9px 10px;
-      margin-bottom: 9px;
-      border-radius: 5px;
+      margin-bottom: 8px;
+      border-radius: 10px;
       white-space: pre-wrap;
       word-break: break-word;
-      line-height: 1.45;
-      font-size: 13px;
+      line-height: 1.5;
+      font-size: 11px;
+      color: #ddd5ca;
     }
 
     .message-user {
-      border-left: 3px solid #00aaff;
-      background: rgba(0, 170, 255, 0.08);
+      border: 1px solid rgba(112,183,255,.12);
+      background: rgba(112,183,255,.045);
     }
 
     .message-assistant {
-      border-left: 3px solid #00ff88;
-      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(242,198,109,.12);
+      background: rgba(242,198,109,.045);
     }
 
-    .message-system {
-      color: #00aa66;
-      font-size: 11px;
-    }
-
-    .quick-commands {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .quick-command,
-    .assistant-send {
-      font-family: inherit;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .quick-command {
-      background: transparent;
-      color: #00ff88;
-      border: 1px solid #00aa66;
-      padding: 8px 10px;
-      font-size: 11px;
-    }
-
-    .quick-command:hover {
-      background: rgba(0, 255, 136, 0.1);
-    }
+    .message-system { color: var(--muted); }
 
     .assistant-form {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
-      align-items: stretch;
+      margin-top: 10px;
     }
 
-    .assistant-input {
+    .assistant-input,
+    .assistant-token {
       width: 100%;
-      min-height: 70px;
-      resize: vertical;
-      background: #050916;
-      color: #e8fff4;
-      border: 1px solid #00ff88;
-      border-radius: 5px;
-      padding: 10px;
-      font-family: inherit;
-      font-size: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.025);
+      color: var(--text);
       outline: none;
     }
 
-    .assistant-input:focus {
-      box-shadow: 0 0 12px rgba(0, 255, 136, 0.25);
+    .assistant-input {
+      min-height: 58px;
+      resize: vertical;
+      padding: 12px;
     }
 
-    .assistant-send {
-      min-width: 130px;
-      padding: 10px 16px;
-      background: #00ff88;
-      color: #04110b;
-      border: 0;
-      font-weight: bold;
+    .assistant-token { padding: 10px 11px; }
+
+    .assistant-input:focus,
+    .assistant-token:focus {
+      border-color: var(--line-strong);
+      box-shadow: 0 0 0 3px rgba(242,198,109,.05);
     }
 
-    .assistant-send:disabled {
-      opacity: 0.5;
-      cursor: wait;
+    .quick-commands {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    @media (max-width: 900px) {
-      .container {
-        grid-template-columns: 1fr;
-        gap: 12px;
+    .quick-command {
+      min-height: 38px;
+      border: 1px solid rgba(216,170,87,.17);
+      border-radius: 10px;
+      color: #cfc7bb;
+      background: rgba(255,255,255,.018);
+      cursor: pointer;
+      font-size: 10px;
+    }
+
+    .quick-command:hover {
+      border-color: var(--line-strong);
+      color: var(--gold);
+    }
+
+    .assistant-access { display: grid; gap: 8px; }
+    .assistant-unlock, .assistant-send {
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 750;
+      background: linear-gradient(135deg, #f2ce7d, #bd7d28);
+      color: #171108;
+      padding: 10px 12px;
+    }
+    .assistant-send { min-width: 120px; }
+    .assistant-send:disabled { opacity: .5; cursor: wait; }
+
+    .error {
+      color: var(--red);
+      font-size: 10px;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+
+    .source-legend {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1150px) {
+      .runtime, .deployment, .feeds, .mission, .intel { grid-column: span 6; }
+      .feeds { grid-column: span 12; }
+      .assistant-card { grid-template-columns: 1fr; }
+      .assistant-side { border-left: 0; border-top: 1px solid rgba(216,170,87,.14); }
+    }
+
+    @media (max-width: 820px) {
+      .shell { grid-template-columns: 1fr; }
+      .rail {
+        position: static;
+        height: auto;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
         padding: 12px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
       }
+      .brand { display: flex; gap: 10px; align-items: center; }
+      .brand h1 { margin: 0; }
+      .rail nav, .rail-footer { display: none; }
+      main { padding: 12px; }
+      .topbar { padding: 6px 2px 12px; }
+      .top-status .timestamp-label { display: none; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-state { grid-template-columns: repeat(4, minmax(0,1fr)); }
+      .runtime, .deployment, .feeds, .mission, .intel { grid-column: 1 / -1; }
+    }
 
-      .header,
-      .assistant-card {
-        grid-column: 1;
-      }
-
-      .header {
-        padding: 14px 8px;
-      }
-
-      .header h1 {
-        font-size: 22px;
-        letter-spacing: 2px;
-      }
-
-      .card {
-        padding: 14px;
-      }
-
-      .metric-value {
-        font-size: 20px;
-      }
-
-      .assistant-form,
-      .assistant-access {
-        grid-template-columns: 1fr;
-      }
-
-      .assistant-send,
-      .assistant-unlock {
-        width: 100%;
-        min-height: 48px;
-      }
+    @media (max-width: 560px) {
+      .identity p { letter-spacing: .04em; }
+      .hero { border-radius: 16px; }
+      .hero-state { grid-template-columns: 1fr 1fr; }
+      .grid { gap: 10px; }
+      .panel { border-radius: 15px; }
+      .metric { grid-template-columns: 74px 1fr 44px; }
+      .assistant-form { grid-template-columns: 1fr; }
+      .assistant-send { width: 100%; min-height: 44px; }
+      .quick-commands { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
-
-    <div class="header">
-      <h1>⚡ EAGLE EYES WORLD COMMAND OPERATING SYSTEM</h1>
-      <p class="timestamp">LIVE • READ-ONLY • WORLD INTELLIGENCE</p>
-      <p class="timestamp" id="time"></p>
-    </div>
-
-    <div class="card">
-      <h2>System Status</h2>
-
-      <div class="metric-row">
-        <span class="metric-label">System Online</span>
-        <span class="metric-value" id="status-online">—</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">System Status</span>
-        <span class="metric-value" id="status-value">—</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Mode</span>
-        <span id="status-mode">—</span>
-      </div>
-
-      <div class="error" id="status-error"></div>
-    </div>
-
-    <div class="card">
-      <h2>System Metrics</h2>
-
-      <div class="metric-row">
-        <span class="metric-label">CPU</span>
-        <span class="metric-value" id="cpu-value">—</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="cpu-bar"></div>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">GPU</span>
-        <span class="metric-value" id="gpu-value">—</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="gpu-bar"></div>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Memory</span>
-        <span class="metric-value" id="mem-value">—</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="mem-bar"></div>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Storage</span>
-        <span class="metric-value" id="storage-value">—</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="storage-bar"></div>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Temperature</span>
-        <span class="metric-value" id="temp-value">—</span>
-      </div>
-
-      <div class="error" id="metrics-error"></div>
-    </div>
-
-    <div class="card">
-      <h2>Deployment Status</h2>
-
-      <div class="metric-row">
-        <span class="metric-label">Progress</span>
-        <span class="metric-value" id="deploy-progress">—</span>
-      </div>
-
-      <div class="progress-bar">
-        <div class="progress-fill" id="deploy-bar"></div>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Stage</span>
-        <span class="metric-value" id="deploy-stage">—</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Success</span>
-        <span class="metric-value" id="deploy-success">—</span>
-      </div>
-
-      <div class="error" id="deploy-error"></div>
-    </div>
-
-    <div class="card">
-      <h2>Active Workloads</h2>
-      <ul class="workload-list" id="workload-list"></ul>
-      <div class="error" id="workload-error"></div>
-    </div>
-
-    <div class="card">
-      <h2>System Health</h2>
-
-      <div class="metric-row">
-        <span class="metric-label">API Health</span>
-        <span class="metric-value" id="health-status">—</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Updated</span>
-        <span id="health-time">—</span>
-      </div>
-
-      <div class="error" id="health-error"></div>
-    </div>
-
-    <div class="card">
-      <h2>World Intelligence Grid</h2>
-
-      <div class="metric-row">
-        <span class="metric-label">USGS</span>
-        <span>Earthquakes</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">NASA EONET</span>
-        <span>Natural Events</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">NOAA / NWS</span>
-        <span>Weather Alerts</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Wikipedia</span>
-        <span>World Knowledge</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Open-Meteo</span>
-        <span>Global Weather</span>
-      </div>
-
-      <div class="metric-row">
-        <span class="metric-label">Simulation</span>
-        <span class="status-online">OFF</span>
-      </div>
-    </div>
-
-    <div class="card assistant-card">
-      <div class="assistant-heading">
-        <h2>🦅 EAGLE EYES WORLD OS • Free Intelligence + GPT-5.6</h2>
-        <span class="assistant-badge" id="assistant-badge">
-          CHECKING...
-        </span>
-      </div>
-
-      <div class="assistant-model" id="assistant-model">
-        Checking World OS intelligence connection...
-      </div>
-
-      <div class="assistant-access">
-        <input
-          class="assistant-token"
-          id="assistant-token"
-          type="password"
-          autocomplete="current-password"
-          placeholder="Private assistant access token"
-        >
-
-        <button
-          class="assistant-unlock"
-          id="assistant-unlock"
-          type="button"
-        >
-          UNLOCK ASSISTANT
-        </button>
-      </div>
-
-      <div class="quick-commands">
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Mission brief: build a live operational snapshot and prioritize what matters now."
-        >
-          Mission Brief
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Check the current Command Center health and tell me if anything needs attention."
-        >
-          Check Health
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Show me the current live container metrics and explain what they mean."
-        >
-          Live Metrics
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Check the current Railway deployment status."
-        >
-          Deployment
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Check current NOAA NWS alerts and summarize the most important ones."
-        >
-          NWS Alerts
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Check current USGS earthquake events and summarize the most important ones."
-        >
-          USGS
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Check current NASA EONET events and summarize the most important ones."
-        >
-          NASA EONET
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="World OS status: show me every active capability and intelligence module."
-        >
-          World OS
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Weather in New York City"
-        >
-          Global Weather
-        </button>
-
-        <button
-          class="quick-command"
-          type="button"
-          data-prompt="Who is Katherine Johnson?"
-        >
-          World Knowledge
-        </button>
-      </div>
-
-      <div class="assistant-log" id="assistant-log">
-        <div class="message message-system">
-          EAGLE EYES WORLD OS ready. Free mode includes mission intelligence, world knowledge, global weather, system telemetry, and live public feeds without GPT credits; all command tools are read-only.
+  <div class="shell">
+    <aside class="rail">
+      <div class="brand">
+        <div class="brand-mark">◉</div>
+        <div>
+          <div class="eyebrow">World Command OS</div>
+          <h1>EAGLE EYES</h1>
         </div>
       </div>
 
-      <form class="assistant-form" id="assistant-form">
-        <textarea
-          class="assistant-input"
-          id="assistant-input"
-          placeholder="Ask Eagle Eyes about the world, weather, live events, system status, or mission priorities..."
-          required
-        ></textarea>
+      <nav>
+        <a class="nav-item active" href="#overview">Overview</a>
+        <a class="nav-item" href="#runtime">Runtime</a>
+        <a class="nav-item" href="#intelligence">Intelligence</a>
+        <a class="nav-item" href="#command">Command Rail</a>
+      </nav>
 
-        <button
-          class="assistant-send"
-          id="assistant-send"
-          type="submit"
-        >
-          SEND COMMAND
-        </button>
-      </form>
+      <div class="rail-footer">
+        <div class="tiny-status"><span class="dot" id="rail-health-dot"></span><span id="rail-health">Checking runtime</span></div>
+        <div class="tiny-status"><span class="dot ok"></span><span>Simulation OFF</span></div>
+        <div class="eyebrow">Salathaniel Command Center</div>
+      </div>
+    </aside>
 
-      <div class="error" id="assistant-error"></div>
-    </div>
+    <main>
+      <header class="topbar">
+        <div class="identity">
+          <div class="eyebrow">Salathaniel Brown Sr • Command Center</div>
+          <h2>EAGLE EYES COMMAND CENTER V2</h2>
+          <p>REAL-TIME • READ-ONLY • WORLD INTELLIGENCE • PRODUCTION RUNTIME</p>
+        </div>
+        <div class="top-status">
+          <span class="dot" id="top-dot"></span>
+          <div>
+            <div id="top-system">CHECKING SYSTEM</div>
+            <div class="timestamp-label" id="time">—</div>
+          </div>
+        </div>
+      </header>
 
+      <section class="hero" id="overview">
+        <div class="hero-grid">
+          <div>
+            <div class="eyebrow">Live Operations Layer</div>
+            <h3>SEE THE SYSTEM.<br>SEE THE WORLD.<br>COMMAND WITH CONTEXT.</h3>
+            <p class="hero-copy">
+              Eagle Eyes unifies the live Railway runtime, container telemetry, NOAA/NWS alerts,
+              USGS earthquakes, NASA EONET events, global weather, world knowledge, and a protected
+              command interface. Values shown below come from the running service or named public sources;
+              unavailable data stays unavailable.
+            </p>
+            <div class="hero-actions">
+              <button class="btn primary quick-command" data-prompt="Mission brief: build a live operational snapshot and prioritize what matters now.">RUN MISSION BRIEF</button>
+              <button class="btn quick-command" data-prompt="Check current NOAA NWS alerts and summarize the most important ones.">NWS INTELLIGENCE</button>
+              <button class="btn quick-command" data-prompt="Check current USGS earthquake events and summarize the most important ones.">USGS WATCH</button>
+            </div>
+          </div>
+          <div class="hero-state">
+            <div class="mini"><div class="mini-label">System</div><div class="mini-value" id="hero-system">—</div></div>
+            <div class="mini"><div class="mini-label">Railway</div><div class="mini-value" id="hero-deploy">—</div></div>
+            <div class="mini"><div class="mini-label">Assistant</div><div class="mini-value" id="hero-assistant">—</div></div>
+            <div class="mini"><div class="mini-label">Feeds</div><div class="mini-value" id="hero-feeds">—</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid" id="runtime">
+        <article class="panel runtime">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Live Runtime Utilization</div>
+              <div class="panel-sub">Running container • no simulated substitutions</div>
+            </div>
+            <span class="dot" id="metrics-dot"></span>
+          </div>
+          <div class="panel-body">
+            <div class="metric"><span class="metric-name">CPU</span><div class="bar"><div id="cpu-bar"></div></div><span class="metric-num" id="cpu-value">—</span></div>
+            <div class="metric"><span class="metric-name">Memory</span><div class="bar"><div id="mem-bar"></div></div><span class="metric-num" id="mem-value">—</span></div>
+            <div class="metric"><span class="metric-name">Storage</span><div class="bar"><div id="storage-bar"></div></div><span class="metric-num" id="storage-value">—</span></div>
+            <div class="metric"><span class="metric-name">GPU</span><div class="bar"><div id="gpu-bar"></div></div><span class="metric-num" id="gpu-value">—</span></div>
+            <div class="facts" style="margin-top:18px">
+              <div class="fact"><span>Temperature</span><b id="temp-value">N/A</b></div>
+              <div class="fact"><span>Metrics source</span><b id="metrics-source">container</b></div>
+            </div>
+            <div class="error" id="metrics-error"></div>
+          </div>
+        </article>
+
+        <article class="panel deployment">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Railway Runtime</div>
+              <div class="panel-sub">Serving process environment</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="deploy-orb">
+              <div class="deploy-center"><strong id="deploy-stage">—</strong><span>RUNTIME</span></div>
+            </div>
+            <div class="facts">
+              <div class="fact"><span>Environment</span><b id="deploy-environment">N/A</b></div>
+              <div class="fact"><span>Service ID</span><b id="deploy-service">N/A</b></div>
+              <div class="fact"><span>Deployment ID</span><b id="deploy-id">N/A</b></div>
+            </div>
+            <div class="error" id="deploy-error"></div>
+          </div>
+        </article>
+
+        <article class="panel feeds" id="intelligence">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">World Intelligence Grid</div>
+              <div class="panel-sub">Current public-source samples</div>
+            </div>
+            <span class="dot" id="feeds-dot"></span>
+          </div>
+          <div class="panel-body">
+            <div class="feed-list">
+              <div class="feed-row"><strong>NWS</strong><span>Active alerts sample</span><span class="feed-count" id="nws-count">—</span></div>
+              <div class="feed-row"><strong>USGS</strong><span>Earthquake feed sample</span><span class="feed-count" id="usgs-count">—</span></div>
+              <div class="feed-row"><strong>NASA EONET</strong><span>Active natural events sample</span><span class="feed-count" id="eonet-count">—</span></div>
+              <div class="feed-row"><strong>WIKIPEDIA</strong><span>World knowledge</span><span class="feed-count">READY</span></div>
+              <div class="feed-row"><strong>OPEN-METEO</strong><span>Global current weather</span><span class="feed-count">READY</span></div>
+            </div>
+            <div class="source-legend">Feed counts are the returned live sample size requested by this dashboard, not a claim of total worldwide events.</div>
+            <div class="error" id="feeds-error"></div>
+          </div>
+        </article>
+
+        <article class="panel mission">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Mission Intelligence</div>
+              <div class="panel-sub">Protected cross-feed operational brief</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="mission-stage">
+              <div>
+                <div class="eyebrow">Executive Decision Surface</div>
+                <strong>WHAT MATTERS NOW?</strong>
+                <p>Run the protected Mission Brief to combine system pressure, Railway runtime state, NWS severity, USGS magnitude, and NASA EONET activity into a prioritized operational snapshot.</p>
+                <button class="btn primary quick-command" style="margin-top:18px" data-prompt="Mission brief: build a live operational snapshot and prioritize what matters now.">GENERATE LIVE BRIEF</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel intel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Live Intel Strip</div>
+              <div class="panel-sub">Top returned items from public feeds</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="intel-list" id="intel-list">
+              <div class="intel-item">Loading live public intelligence…</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel command" id="command">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Eagle Eyes Command Rail</div>
+              <div class="panel-sub">Protected • read-only tools • free fallback + GPT routing when configured</div>
+            </div>
+          </div>
+          <div class="assistant-card">
+            <div class="assistant-main">
+              <div class="assistant-heading">
+                <div>
+                  <div class="eyebrow">Command Interface</div>
+                  <strong>EAGLE EYES WORLD OS</strong>
+                </div>
+                <span class="assistant-badge" id="assistant-badge">CHECKING…</span>
+              </div>
+              <div class="assistant-model" id="assistant-model">Checking command layer…</div>
+              <div class="assistant-log" id="assistant-log">
+                <div class="message message-system">EAGLE EYES V2 ready. Unlock the protected command rail to use Mission Brief, telemetry, live public feeds, world knowledge, global weather, and GPT-5.6 routing when API access is active.</div>
+              </div>
+              <form class="assistant-form" id="assistant-form">
+                <textarea class="assistant-input" id="assistant-input" placeholder="Command Eagle Eyes: mission brief, weather in Raleigh, USGS earthquakes, NWS alerts, World OS status…" required></textarea>
+                <button class="assistant-send" id="assistant-send" type="submit">EXECUTE</button>
+              </form>
+              <div class="error" id="assistant-error"></div>
+            </div>
+
+            <aside class="assistant-side">
+              <div class="eyebrow">Private Access</div>
+              <div class="assistant-access" style="margin-top:10px">
+                <input class="assistant-token" id="assistant-token" type="password" autocomplete="current-password" placeholder="Command center access token">
+                <button class="assistant-unlock" id="assistant-unlock" type="button">UNLOCK COMMAND RAIL</button>
+              </div>
+
+              <div class="eyebrow" style="margin-top:20px">Quick Commands</div>
+              <div class="quick-commands">
+                <button class="quick-command" data-prompt="Mission brief: build a live operational snapshot and prioritize what matters now.">Mission Brief</button>
+                <button class="quick-command" data-prompt="Show me the current live container metrics and explain what they mean.">Live Metrics</button>
+                <button class="quick-command" data-prompt="Check the current Railway deployment status.">Railway</button>
+                <button class="quick-command" data-prompt="Check current NOAA NWS alerts and summarize the most important ones.">NWS Alerts</button>
+                <button class="quick-command" data-prompt="Check current USGS earthquake events and summarize the most important ones.">USGS</button>
+                <button class="quick-command" data-prompt="Check current NASA EONET events and summarize the most important ones.">NASA EONET</button>
+                <button class="quick-command" data-prompt="World OS status: show me every active capability and intelligence module.">World OS</button>
+                <button class="quick-command" data-prompt="Weather in Raleigh North Carolina">Global Weather</button>
+                <button class="quick-command" data-prompt="Who is Katherine Johnson?">World Knowledge</button>
+                <button class="quick-command" data-prompt="Check the current Command Center health and tell me if anything needs attention.">Health</button>
+              </div>
+            </aside>
+          </div>
+        </article>
+      </section>
+    </main>
   </div>
 
   <script>
-    function setPercent(id, value) {
-      const available = Number.isFinite(value);
+    const assistantTokenKey = "eagleEyesAssistantToken";
 
-      document.getElementById(id + "-value").textContent =
-        available ? `${value}%` : "N/A";
-
-      document.getElementById(id + "-bar").style.width =
-        available ? `${Math.max(0, Math.min(100, value))}%` : "0%";
+    function valueOrNA(value) {
+      return value === null || value === undefined || value === "" ? "N/A" : String(value);
     }
 
-    async function fetchData() {
-      try {
-        const res = await fetch("/api/status");
-        const data = await res.json();
+    function shortId(value) {
+      if (!value) return "N/A";
+      const s = String(value);
+      return s.length > 14 ? s.slice(0, 6) + "…" + s.slice(-5) : s;
+    }
 
-        const online = document.getElementById("status-online");
+    function setDot(id, ok) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = "dot " + (ok ? "ok" : "bad");
+    }
 
-        online.textContent =
-          data.online ? "✓ ONLINE" : "✗ OFFLINE";
+    function setPercent(id, value) {
+      const number = Number(value);
+      const available = Number.isFinite(number);
+      const bar = document.getElementById(id + "-bar");
+      const label = document.getElementById(id + "-value");
+      if (bar) bar.style.width = available ? Math.max(0, Math.min(100, number)) + "%" : "0%";
+      if (label) label.textContent = available ? number.toFixed(1).replace(".0", "") + "%" : "N/A";
+    }
 
-        online.className =
-          data.online
-            ? "metric-value status-online"
-            : "metric-value status-offline";
+    async function getJson(url, options) {
+      const res = await fetch(url, options);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "HTTP " + res.status);
+      return data;
+    }
 
-        document.getElementById("status-value").textContent =
-          data.systemStatus || "—";
+    async function fetchRuntime() {
+      const [statusResult, metricsResult, deployResult, healthResult] = await Promise.allSettled([
+        getJson("/api/status"),
+        getJson("/api/metrics"),
+        getJson("/api/deployment"),
+        getJson("/api/health")
+      ]);
 
-        document.getElementById("status-mode").textContent =
-          data.mode || "—";
-
-        document.getElementById("status-error").textContent = "";
-      } catch {
-        document.getElementById("status-error").textContent =
-          "✗ Failed to fetch status";
+      if (statusResult.status === "fulfilled") {
+        const data = statusResult.value;
+        const online = Boolean(data.online);
+        document.getElementById("top-system").textContent = online ? "SYSTEM ONLINE" : "SYSTEM OFFLINE";
+        document.getElementById("hero-system").textContent = data.systemStatus || (online ? "ONLINE" : "OFFLINE");
+        document.getElementById("rail-health").textContent = online ? "Runtime online" : "Runtime offline";
+        setDot("top-dot", online);
+        setDot("rail-health-dot", online);
+      } else {
+        document.getElementById("top-system").textContent = "STATUS UNAVAILABLE";
+        document.getElementById("hero-system").textContent = "N/A";
+        setDot("top-dot", false);
+        setDot("rail-health-dot", false);
       }
 
-      try {
-        const res = await fetch("/api/metrics");
-        const data = await res.json();
-
+      if (metricsResult.status === "fulfilled") {
+        const data = metricsResult.value;
         setPercent("cpu", data.cpu);
-        setPercent("gpu", data.gpu);
         setPercent("mem", data.memory);
         setPercent("storage", data.storage);
-
-        document.getElementById("temp-value").textContent =
-          Number.isFinite(data.temperatureC)
-            ? `${data.temperatureC}°C`
-            : "N/A";
-
+        setPercent("gpu", data.gpu);
+        document.getElementById("temp-value").textContent = Number.isFinite(data.temperatureC) ? data.temperatureC + "°C" : "N/A";
+        document.getElementById("metrics-source").textContent = valueOrNA(data.source);
         document.getElementById("metrics-error").textContent = "";
-      } catch {
-        document.getElementById("metrics-error").textContent =
-          "✗ Failed to fetch metrics";
+        setDot("metrics-dot", true);
+      } else {
+        document.getElementById("metrics-error").textContent = "Metrics unavailable";
+        setDot("metrics-dot", false);
       }
 
-      try {
-        const res = await fetch("/api/workloads");
-        const data = await res.json();
-
-        const list = document.getElementById("workload-list");
-        list.innerHTML = "";
-
-        if (Array.isArray(data) && data.length) {
-          for (const workload of data) {
-            const li = document.createElement("li");
-            li.className = "workload-item";
-            li.textContent = `▶ ${workload}`;
-            list.appendChild(li);
-          }
-        } else {
-          const li = document.createElement("li");
-          li.className = "workload-item";
-          li.textContent = "No active workloads reported";
-          list.appendChild(li);
-        }
-
-        document.getElementById("workload-error").textContent = "";
-      } catch {
-        document.getElementById("workload-error").textContent =
-          "✗ Failed to fetch workloads";
-      }
-
-      try {
-        const res = await fetch("/api/deployment");
-        const data = await res.json();
-
-        const running = data.stage === "RUNNING";
-
-        document.getElementById("deploy-progress").textContent =
-          running ? "100%" : "N/A";
-
-        document.getElementById("deploy-bar").style.width =
-          running ? "100%" : "0%";
-
-        document.getElementById("deploy-stage").textContent =
-          data.stage || "—";
-
-        const success = document.getElementById("deploy-success");
-
-        success.textContent =
-          running ? "✓ RUNNING" : "—";
-
-        success.className =
-          running
-            ? "metric-value status-online"
-            : "metric-value";
-
+      if (deployResult.status === "fulfilled") {
+        const data = deployResult.value;
+        document.getElementById("deploy-stage").textContent = valueOrNA(data.stage);
+        document.getElementById("hero-deploy").textContent = valueOrNA(data.stage);
+        document.getElementById("deploy-environment").textContent = valueOrNA(data.environment);
+        document.getElementById("deploy-service").textContent = shortId(data.serviceId);
+        document.getElementById("deploy-id").textContent = shortId(data.deploymentId);
         document.getElementById("deploy-error").textContent = "";
-      } catch {
-        document.getElementById("deploy-error").textContent =
-          "✗ Failed to fetch deployment";
+      } else {
+        document.getElementById("deploy-stage").textContent = "N/A";
+        document.getElementById("hero-deploy").textContent = "N/A";
+        document.getElementById("deploy-error").textContent = "Railway runtime data unavailable";
       }
 
-      try {
-        const res = await fetch("/api/health");
-        const data = await res.json();
-
-        const healthStatus =
-          document.getElementById("health-status");
-
-        healthStatus.textContent =
-          data.ok ? "✓ HEALTHY" : "✗ UNHEALTHY";
-
-        healthStatus.className =
-          data.ok
-            ? "metric-value status-online"
-            : "metric-value status-offline";
-
-        document.getElementById("health-time").textContent =
-          data.time
-            ? new Date(data.time).toLocaleString()
-            : "—";
-
-        document.getElementById("health-error").textContent = "";
-      } catch {
-        document.getElementById("health-error").textContent =
-          "✗ Failed to fetch health";
+      if (healthResult.status !== "fulfilled" || !healthResult.value.ok) {
+        setDot("rail-health-dot", false);
       }
 
-      document.getElementById("time").textContent =
-        new Date().toLocaleString();
+      document.getElementById("time").textContent = new Date().toLocaleString();
     }
 
-    const assistantTokenKey =
-      "eagleEyesAssistantToken";
+    function formatIntel(source, event) {
+      if (source === "nws") {
+        return "<b>NWS • " + escapeHtml(event.event || "Weather alert") + "</b><br>" +
+          escapeHtml([event.severity, event.area].filter(Boolean).join(" • ") || "Details unavailable");
+      }
+      if (source === "usgs") {
+        const mag = Number.isFinite(event.magnitude) ? "M" + event.magnitude : "Magnitude N/A";
+        return "<b>USGS • " + escapeHtml(mag) + "</b><br>" +
+          escapeHtml(event.place || event.title || "Location unavailable");
+      }
+      return "<b>NASA EONET • " + escapeHtml(event.title || "Active event") + "</b><br>" +
+        escapeHtml(Array.isArray(event.categories) ? event.categories.join(", ") : "Natural event");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function fetchFeeds() {
+      try {
+        const results = await Promise.allSettled([
+          getJson("/api/eagle-eyes/events?source=nws&limit=5"),
+          getJson("/api/eagle-eyes/events?source=usgs&limit=5"),
+          getJson("/api/eagle-eyes/events?source=eonet&limit=5")
+        ]);
+
+        const ids = ["nws", "usgs", "eonet"];
+        const intel = [];
+        let okCount = 0;
+
+        results.forEach((result, index) => {
+          const source = ids[index];
+          const countEl = document.getElementById(source + "-count");
+
+          if (result.status === "fulfilled") {
+            okCount += 1;
+            const data = result.value;
+            countEl.textContent = String(data.count ?? 0);
+            (data.events || []).slice(0, 2).forEach((event) => {
+              intel.push(formatIntel(source, event));
+            });
+          } else {
+            countEl.textContent = "N/A";
+          }
+        });
+
+        document.getElementById("hero-feeds").textContent = okCount + "/3 LIVE";
+        setDot("feeds-dot", okCount === 3);
+
+        const list = document.getElementById("intel-list");
+        list.innerHTML = "";
+        if (intel.length) {
+          intel.slice(0, 6).forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "intel-item";
+            div.innerHTML = item;
+            list.appendChild(div);
+          });
+        } else {
+          list.innerHTML = '<div class="intel-item">No live feed items available in the current sample.</div>';
+        }
+
+        document.getElementById("feeds-error").textContent =
+          okCount === 3 ? "" : "One or more public feeds are temporarily unavailable.";
+      } catch (error) {
+        document.getElementById("hero-feeds").textContent = "N/A";
+        document.getElementById("feeds-error").textContent = error.message;
+        setDot("feeds-dot", false);
+      }
+    }
 
     function getAssistantToken() {
-      return (
-        sessionStorage.getItem(
-          assistantTokenKey
-        ) || ""
-      );
+      return sessionStorage.getItem(assistantTokenKey) || "";
     }
 
     function assistantAuthHeaders() {
-      const token =
-        getAssistantToken();
-
-      return token
-        ? {
-            authorization:
-              `Bearer ${token}`
-          }
-        : {};
+      const token = getAssistantToken();
+      return token ? { authorization: "Bearer " + token } : {};
     }
 
     async function assistantAuthorized() {
-      const token =
-        getAssistantToken();
-
-      if (!token) {
-        return false;
-      }
-
+      if (!getAssistantToken()) return false;
       try {
-        const res =
-          await fetch(
-            "/api/assistant/auth-check",
-            {
-              headers:
-                assistantAuthHeaders()
-            }
-          );
-
+        const res = await fetch("/api/assistant/auth-check", { headers: assistantAuthHeaders() });
         return res.ok;
       } catch {
         return false;
@@ -815,398 +1091,181 @@
     }
 
     async function fetchAssistantStatus() {
-      const badge =
-        document.getElementById("assistant-badge");
-
-      const detail =
-        document.getElementById("assistant-model");
-
+      const badge = document.getElementById("assistant-badge");
+      const detail = document.getElementById("assistant-model");
       try {
-        const res =
-          await fetch("/api/assistant/status");
+        const data = await getJson("/api/assistant/status");
+        const authorized = data.accessConfigured ? await assistantAuthorized() : false;
 
-        const data =
-          await res.json();
-
-        const authorized =
-          data.accessConfigured
-            ? await assistantAuthorized()
-            : false;
-
-        if (
-          data.accessConfigured &&
-          authorized &&
-          data.configured
-        ) {
-          badge.textContent =
-            "✓ AI + FREE MODE • PRIVATE";
-
-          badge.className =
-            "assistant-badge status-online";
-
-          detail.textContent =
-            `${data.model || "Unknown model"} • ` +
-            `${data.transport || "Unknown transport"} • ` +
-            `${Array.isArray(data.readOnlyTools)
-              ? data.readOnlyTools.length
-              : 0} read-only tools • free fallback ready`;
-        } else if (
-          data.accessConfigured &&
-          authorized &&
-          data.freeMode
-        ) {
-          badge.textContent =
-            "✓ FREE MODE • PRIVATE";
-
-          badge.className =
-            "assistant-badge status-online";
-
-          detail.textContent =
-            "Mission Brief, live health, metrics, Railway status, NWS, USGS and NASA EONET commands are ready without OpenAI credits.";
-        } else if (
-          data.accessConfigured
-        ) {
-          badge.textContent =
-            "🔒 LOCKED";
-
-          badge.className =
-            "assistant-badge";
-
-          detail.textContent =
-            data.configured
-              ? "Private access is enabled. Enter the Railway access token to unlock AI + free commands."
-              : "Private access is enabled. Enter the Railway access token to unlock free command mode.";
+        if (data.accessConfigured && authorized && data.configured) {
+          badge.textContent = "AI + FREE • PRIVATE";
+          detail.textContent = (data.model || "Configured model") + " • " +
+            (Array.isArray(data.readOnlyTools) ? data.readOnlyTools.length : 0) +
+            " read-only tools • free fallback ready";
+          document.getElementById("hero-assistant").textContent = "AI + FREE";
+        } else if (data.accessConfigured && authorized && data.freeMode) {
+          badge.textContent = "FREE MODE • PRIVATE";
+          detail.textContent = "Protected free command mode is online without OpenAI credits.";
+          document.getElementById("hero-assistant").textContent = "FREE";
+        } else if (data.accessConfigured) {
+          badge.textContent = "LOCKED";
+          detail.textContent = "Enter the Railway command-center access token to unlock.";
+          document.getElementById("hero-assistant").textContent = "LOCKED";
         } else {
-          badge.textContent =
-            "🔒 SERVER LOCKED";
-
-          badge.className =
-            "assistant-badge status-offline";
-
-          detail.textContent =
-            "Set COMMAND_CENTER_ACCESS_TOKEN in Railway before using commands.";
+          badge.textContent = "SERVER LOCKED";
+          detail.textContent = "COMMAND_CENTER_ACCESS_TOKEN must be configured in Railway.";
+          document.getElementById("hero-assistant").textContent = "LOCKED";
         }
       } catch {
-        badge.textContent =
-          "✗ UNAVAILABLE";
-
-        badge.className =
-          "assistant-badge status-offline";
-
-        detail.textContent =
-          "Assistant status endpoint unavailable";
+        badge.textContent = "UNAVAILABLE";
+        detail.textContent = "Assistant status endpoint unavailable.";
+        document.getElementById("hero-assistant").textContent = "N/A";
       }
     }
 
     function addMessage(type, text) {
-      const log =
-        document.getElementById("assistant-log");
-
-      const message =
-        document.createElement("div");
-
-      message.className =
-        `message message-${type}`;
-
-      message.textContent =
-        text;
-
+      const log = document.getElementById("assistant-log");
+      const message = document.createElement("div");
+      message.className = "message message-" + type;
+      message.textContent = text;
       log.appendChild(message);
-
-      log.scrollTop =
-        log.scrollHeight;
-
+      log.scrollTop = log.scrollHeight;
       return message;
     }
 
     function parseSSEBlock(block) {
       let eventName = "message";
       const dataLines = [];
-
       for (const line of block.split("\n")) {
-        if (line.startsWith("event:")) {
-          eventName =
-            line.slice(6).trim();
-        }
-
-        if (line.startsWith("data:")) {
-          dataLines.push(
-            line.slice(5).trimStart()
-          );
-        }
+        if (line.startsWith("event:")) eventName = line.slice(6).trim();
+        if (line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());
       }
-
-      if (!dataLines.length) {
-        return null;
-      }
-
-      const raw =
-        dataLines.join("\n");
-
+      if (!dataLines.length) return null;
       try {
-        return {
-          eventName,
-          data: JSON.parse(raw)
-        };
+        return { eventName, data: JSON.parse(dataLines.join("\n")) };
       } catch {
         return null;
       }
     }
 
     async function sendCommand(message) {
-      const sendButton =
-        document.getElementById("assistant-send");
-
-      const errorBox =
-        document.getElementById("assistant-error");
-
+      const button = document.getElementById("assistant-send");
+      const errorBox = document.getElementById("assistant-error");
       errorBox.textContent = "";
-      sendButton.disabled = true;
-      sendButton.textContent = "RUNNING...";
+      button.disabled = true;
+      button.textContent = "RUNNING…";
 
-      addMessage("user", `YOU:\n${message}`);
-
-      const reply =
-        addMessage("assistant", "EAGLE EYES:\n");
+      addMessage("user", "YOU:\n" + message);
+      const reply = addMessage("assistant", "EAGLE EYES:\n");
 
       try {
-        const response =
-          await fetch("/api/assistant/stream", {
-            method: "POST",
-
-            headers: {
-              "content-type": "application/json",
-              ...assistantAuthHeaders()
-            },
-
-            body: JSON.stringify({
-              message
-            })
-          });
+        const response = await fetch("/api/assistant/stream", {
+          method: "POST",
+          headers: { "content-type": "application/json", ...assistantAuthHeaders() },
+          body: JSON.stringify({ message })
+        });
 
         if (!response.ok) {
-          const raw =
-            await response.text();
-
+          const raw = await response.text();
           let reason = raw;
-
-          try {
-            reason =
-              JSON.parse(raw).error || raw;
-          } catch {}
-
-          throw new Error(
-            reason ||
-            `HTTP ${response.status}`
-          );
+          try { reason = JSON.parse(raw).error || raw; } catch {}
+          throw new Error(reason || "HTTP " + response.status);
         }
 
-        if (!response.body) {
-          throw new Error(
-            "Streaming response body unavailable"
-          );
-        }
+        if (!response.body) throw new Error("Streaming response body unavailable");
 
-        const reader =
-          response.body.getReader();
-
-        const decoder =
-          new TextDecoder();
-
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
         let buffer = "";
 
         while (true) {
-          const result =
-            await reader.read();
+          const result = await reader.read();
+          if (result.done) break;
 
-          if (result.done) {
-            break;
-          }
-
-          buffer += decoder
-            .decode(result.value, {
-              stream: true
-            })
-            .replace(/\r\n/g, "\n");
+          buffer += decoder.decode(result.value, { stream: true }).replace(/\r\n/g, "\n");
 
           let boundary;
+          while ((boundary = buffer.indexOf("\n\n")) !== -1) {
+            const block = buffer.slice(0, boundary);
+            buffer = buffer.slice(boundary + 2);
+            const parsed = parseSSEBlock(block);
+            if (!parsed) continue;
 
-          while (
-            (boundary =
-              buffer.indexOf("\n\n")) !== -1
-          ) {
-            const block =
-              buffer.slice(0, boundary);
+            const { eventName, data } = parsed;
 
-            buffer =
-              buffer.slice(boundary + 2);
-
-            const parsed =
-              parseSSEBlock(block);
-
-            if (!parsed) {
-              continue;
-            }
-
-            const {
-              eventName,
-              data
-            } = parsed;
-
-            if (
-              eventName === "delta" &&
-              typeof data.text === "string"
-            ) {
-              reply.textContent +=
-                data.text;
-
-              document
-                .getElementById("assistant-log")
-                .scrollTop =
-                document
-                  .getElementById("assistant-log")
-                  .scrollHeight;
+            if (eventName === "delta" && typeof data.text === "string") {
+              reply.textContent += data.text;
+              document.getElementById("assistant-log").scrollTop =
+                document.getElementById("assistant-log").scrollHeight;
             }
 
             if (eventName === "tool_call") {
-              document.getElementById(
-                "assistant-model"
-              ).textContent =
-                `Using tool: ${data.name || "unknown"}...`;
+              document.getElementById("assistant-model").textContent =
+                "Using " + (data.name || "read-only tool") + "…";
             }
 
             if (eventName === "tool_result") {
-              document.getElementById(
-                "assistant-model"
-              ).textContent =
-                `${data.name || "Tool"}: ` +
-                `${data.ok ? "complete" : "failed"}`;
+              document.getElementById("assistant-model").textContent =
+                (data.name || "Tool") + ": " + (data.ok ? "complete" : "failed");
             }
 
             if (eventName === "done") {
-              document.getElementById(
-                "assistant-model"
-              ).textContent =
-                `${data.model || "gpt-5.6"} • command complete`;
+              document.getElementById("assistant-model").textContent =
+                (data.model || "Eagle Eyes") + " • command complete";
             }
 
             if (eventName === "error") {
-              throw new Error(
-                data.message ||
-                "Assistant stream error"
-              );
+              throw new Error(data.message || "Assistant stream error");
             }
           }
         }
 
-        if (
-          reply.textContent.trim() ===
-          "EAGLE EYES:"
-        ) {
-          reply.textContent +=
-            "\nCommand completed with no text response.";
+        if (reply.textContent.trim() === "EAGLE EYES:") {
+          reply.textContent += "\nCommand completed with no text response.";
         }
       } catch (error) {
-        reply.textContent +=
-          `\nERROR: ${error.message}`;
-
-        errorBox.textContent =
-          `✗ ${error.message}`;
+        reply.textContent += "\nERROR: " + error.message;
+        errorBox.textContent = "✗ " + error.message;
       } finally {
-        sendButton.disabled = false;
-        sendButton.textContent =
-          "SEND COMMAND";
-
+        button.disabled = false;
+        button.textContent = "EXECUTE";
         fetchAssistantStatus();
       }
     }
 
-    const tokenInput =
-      document.getElementById(
-        "assistant-token"
-      );
+    const tokenInput = document.getElementById("assistant-token");
+    tokenInput.value = getAssistantToken();
 
-    tokenInput.value =
-      getAssistantToken();
+    document.getElementById("assistant-unlock").addEventListener("click", async () => {
+      const token = tokenInput.value.trim();
+      if (token) sessionStorage.setItem(assistantTokenKey, token);
+      else sessionStorage.removeItem(assistantTokenKey);
+      await fetchAssistantStatus();
+    });
 
-    document
-      .getElementById(
-        "assistant-unlock"
-      )
-      .addEventListener(
-        "click",
-        async () => {
-          const token =
-            tokenInput.value.trim();
+    document.getElementById("assistant-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = document.getElementById("assistant-input");
+      const message = input.value.trim();
+      if (!message) return;
+      input.value = "";
+      await sendCommand(message);
+    });
 
-          if (token) {
-            sessionStorage.setItem(
-              assistantTokenKey,
-              token
-            );
-          } else {
-            sessionStorage.removeItem(
-              assistantTokenKey
-            );
-          }
-
-          await fetchAssistantStatus();
-        }
-      );
-
-    document
-      .getElementById("assistant-form")
-      .addEventListener(
-        "submit",
-        async (event) => {
-          event.preventDefault();
-
-          const input =
-            document.getElementById(
-              "assistant-input"
-            );
-
-          const message =
-            input.value.trim();
-
-          if (!message) {
-            return;
-          }
-
-          input.value = "";
-
-          await sendCommand(message);
-        }
-      );
-
-    document
-      .querySelectorAll(".quick-command")
-      .forEach((button) => {
-        button.addEventListener(
-          "click",
-          async () => {
-            const prompt =
-              button.dataset.prompt;
-
-            if (prompt) {
-              await sendCommand(prompt);
-            }
-          }
-        );
+    document.querySelectorAll(".quick-command").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const prompt = button.dataset.prompt;
+        if (prompt) await sendCommand(prompt);
       });
+    });
 
-    fetchData();
+    fetchRuntime();
+    fetchFeeds();
     fetchAssistantStatus();
 
-    setInterval(
-      fetchData,
-      2000
-    );
-
-    setInterval(
-      fetchAssistantStatus,
-      30000
-    );
+    setInterval(fetchRuntime, 5000);
+    setInterval(fetchFeeds, 30000);
+    setInterval(fetchAssistantStatus, 30000);
   </script>
 </body>
-          </html>
+</html>
