@@ -150,6 +150,37 @@
       margin-bottom: 12px;
     }
 
+    .assistant-access {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .assistant-token {
+      width: 100%;
+      min-height: 44px;
+      background: #050916;
+      color: #e8fff4;
+      border: 1px solid #00aa66;
+      border-radius: 5px;
+      padding: 10px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .assistant-unlock {
+      min-width: 160px;
+      border: 0;
+      border-radius: 5px;
+      padding: 10px 14px;
+      background: #00ff88;
+      color: #04110b;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
     .assistant-log {
       width: 100%;
       min-height: 190px;
@@ -282,11 +313,13 @@
         font-size: 20px;
       }
 
-      .assistant-form {
+      .assistant-form,
+      .assistant-access {
         grid-template-columns: 1fr;
       }
 
-      .assistant-send {
+      .assistant-send,
+      .assistant-unlock {
         width: 100%;
         min-height: 48px;
       }
@@ -447,6 +480,24 @@
 
       <div class="assistant-model" id="assistant-model">
         Checking assistant connection...
+      </div>
+
+      <div class="assistant-access">
+        <input
+          class="assistant-token"
+          id="assistant-token"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Private assistant access token"
+        >
+
+        <button
+          class="assistant-unlock"
+          id="assistant-unlock"
+          type="button"
+        >
+          UNLOCK ASSISTANT
+        </button>
       </div>
 
       <div class="quick-commands">
@@ -673,6 +724,53 @@
         new Date().toLocaleString();
     }
 
+    const assistantTokenKey =
+      "eagleEyesAssistantToken";
+
+    function getAssistantToken() {
+      return (
+        sessionStorage.getItem(
+          assistantTokenKey
+        ) || ""
+      );
+    }
+
+    function assistantAuthHeaders() {
+      const token =
+        getAssistantToken();
+
+      return token
+        ? {
+            authorization:
+              `Bearer ${token}`
+          }
+        : {};
+    }
+
+    async function assistantAuthorized() {
+      const token =
+        getAssistantToken();
+
+      if (!token) {
+        return false;
+      }
+
+      try {
+        const res =
+          await fetch(
+            "/api/assistant/auth-check",
+            {
+              headers:
+                assistantAuthHeaders()
+            }
+          );
+
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+
     async function fetchAssistantStatus() {
       const badge =
         document.getElementById("assistant-badge");
@@ -687,26 +785,61 @@
         const data =
           await res.json();
 
-        if (data.configured) {
+        const authorized =
+          data.accessConfigured
+            ? await assistantAuthorized()
+            : false;
+
+        if (
+          data.configured &&
+          data.accessConfigured &&
+          authorized
+        ) {
           badge.textContent =
-            "✓ CONNECTED";
+            "✓ CONNECTED + PRIVATE";
 
           badge.className =
             "assistant-badge status-online";
-        } else {
+
+          detail.textContent =
+            `${data.model || "Unknown model"} • ` +
+            `${data.transport || "Unknown transport"} • ` +
+            `${Array.isArray(data.readOnlyTools)
+              ? data.readOnlyTools.length
+              : 0} read-only tools`;
+        } else if (
+          data.configured &&
+          data.accessConfigured
+        ) {
           badge.textContent =
-            "✗ NOT CONFIGURED";
+            "🔒 LOCKED";
+
+          badge.className =
+            "assistant-badge";
+
+          detail.textContent =
+            "Private access is enabled. Enter the Railway access token to unlock.";
+        } else if (
+          data.configured
+        ) {
+          badge.textContent =
+            "🔒 SERVER LOCKED";
 
           badge.className =
             "assistant-badge status-offline";
-        }
 
-        detail.textContent =
-          `${data.model || "Unknown model"} • ` +
-          `${data.transport || "Unknown transport"} • ` +
-          `${Array.isArray(data.readOnlyTools)
-            ? data.readOnlyTools.length
-            : 0} read-only tools`;
+          detail.textContent =
+            "Set COMMAND_CENTER_ACCESS_TOKEN in Railway before using commands.";
+        } else {
+          badge.textContent =
+            "✗ OPENAI NOT READY";
+
+          badge.className =
+            "assistant-badge status-offline";
+
+          detail.textContent =
+            "OPENAI_API_KEY is not configured.";
+        }
       } catch {
         badge.textContent =
           "✗ UNAVAILABLE";
@@ -796,7 +929,8 @@
             method: "POST",
 
             headers: {
-              "content-type": "application/json"
+              "content-type": "application/json",
+              ...assistantAuthHeaders()
             },
 
             body: JSON.stringify({
@@ -940,6 +1074,39 @@
         fetchAssistantStatus();
       }
     }
+
+    const tokenInput =
+      document.getElementById(
+        "assistant-token"
+      );
+
+    tokenInput.value =
+      getAssistantToken();
+
+    document
+      .getElementById(
+        "assistant-unlock"
+      )
+      .addEventListener(
+        "click",
+        async () => {
+          const token =
+            tokenInput.value.trim();
+
+          if (token) {
+            sessionStorage.setItem(
+              assistantTokenKey,
+              token
+            );
+          } else {
+            sessionStorage.removeItem(
+              assistantTokenKey
+            );
+          }
+
+          await fetchAssistantStatus();
+        }
+      );
 
     document
       .getElementById("assistant-form")
