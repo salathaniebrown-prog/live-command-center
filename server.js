@@ -374,6 +374,199 @@ async function world(source, limit = 10) {
   };
 }
 
+
+function pct(value) {
+  return Number.isFinite(value)
+    ? `${value}%`
+    : "N/A";
+}
+
+function compactEvent(event, source) {
+  if (source === "usgs") {
+    return [
+      event.title || event.place || "Earthquake",
+      Number.isFinite(event.magnitude)
+        ? `M${event.magnitude}`
+        : null,
+      event.time || null
+    ].filter(Boolean).join(" • ");
+  }
+
+  if (source === "nws") {
+    return [
+      event.event || "Weather alert",
+      event.severity || null,
+      event.area || null
+    ].filter(Boolean).join(" • ");
+  }
+
+  return [
+    event.title || "NASA EONET event",
+    Array.isArray(event.categories) && event.categories.length
+      ? event.categories.join(", ")
+      : null,
+    event.time || null
+  ].filter(Boolean).join(" • ");
+}
+
+async function freeCommand(message) {
+  const q = String(message || "")
+    .trim()
+    .toLowerCase();
+
+  if (!q) {
+    return null;
+  }
+
+  if (
+    /\b(help|commands|what can you do|free mode)\b/.test(q)
+  ) {
+    return {
+      handled: true,
+      tool: "free_help",
+      text: [
+        "FREE COMMAND MODE IS ONLINE.",
+        "",
+        "Available without OpenAI credits:",
+        "• health / system status",
+        "• live metrics / CPU / memory / storage / GPU",
+        "• Railway deployment status",
+        "• NWS weather alerts",
+        "• USGS earthquakes",
+        "• NASA EONET events",
+        "• world data sources",
+        "",
+        "These commands use live read-only data. GPT-5.6 commands will automatically become available when API billing is active."
+      ].join("\n")
+    };
+  }
+
+  if (/\b(deployment|deploy|railway)\b/.test(q)) {
+    const d = deployment();
+
+    return {
+      handled: true,
+      tool: "get_deployment_status",
+      text: [
+        "RAILWAY DEPLOYMENT",
+        `Stage: ${d.stage || "N/A"}`,
+        `Environment: ${d.environment || "N/A"}`,
+        `Service ID: ${d.serviceId || "N/A"}`,
+        `Deployment ID: ${d.deploymentId || "N/A"}`,
+        `Source: ${d.source}`,
+        `Checked: ${d.timestamp}`
+      ].join("\n")
+    };
+  }
+
+  if (
+    /\b(metric|metrics|cpu|memory|storage|gpu|temperature|container)\b/.test(q)
+  ) {
+    const m = await metrics();
+
+    return {
+      handled: true,
+      tool: "get_command_center_metrics",
+      text: [
+        "LIVE CONTAINER METRICS",
+        `CPU: ${pct(m.cpu)}`,
+        `Memory: ${pct(m.memory)}`,
+        `Storage: ${pct(m.storage)}`,
+        `GPU: ${pct(m.gpu)}`,
+        `Temperature: ${Number.isFinite(m.temperatureC) ? `${m.temperatureC}°C` : "N/A"}`,
+        `Source: ${m.source}`,
+        `Checked: ${m.timestamp}`
+      ].join("\n")
+    };
+  }
+
+  if (
+    /\b(source|sources|world data|feeds)\b/.test(q)
+  ) {
+    return {
+      handled: true,
+      tool: "get_world_sources",
+      text: [
+        "LIVE WORLD DATA SOURCES",
+        `USGS: ${SOURCES.usgs}`,
+        `NASA EONET: ${SOURCES.eonet}`,
+        `NOAA / NWS: ${SOURCES.nws}`,
+        "Simulation: OFF"
+      ].join("\n")
+    };
+  }
+
+  const worldSource =
+    /\b(usgs|earthquake|earthquakes|quake|quakes)\b/.test(q)
+      ? "usgs"
+      : /\b(nws|noaa|weather|alert|alerts|storm|storms)\b/.test(q)
+        ? "nws"
+        : /\b(nasa|eonet|wildfire|wildfires|natural event|natural events)\b/.test(q)
+          ? "eonet"
+          : null;
+
+  if (worldSource) {
+    try {
+      const data = await world(worldSource, 5);
+      const labels = {
+        usgs: "USGS EARTHQUAKES",
+        nws: "NOAA / NWS ALERTS",
+        eonet: "NASA EONET EVENTS"
+      };
+
+      const lines = (data.events || []).map(
+        (event, index) =>
+          `${index + 1}. ${compactEvent(event, worldSource)}`
+      );
+
+      return {
+        handled: true,
+        tool: `get_world_events:${worldSource}`,
+        text: [
+          labels[worldSource],
+          `Live results: ${data.count}`,
+          ...(lines.length ? lines : ["No active events returned."]),
+          `Checked: ${data.timestamp}`
+        ].join("\n")
+      };
+    } catch (error) {
+      return {
+        handled: true,
+        tool: `get_world_events:${worldSource}`,
+        text: [
+          "LIVE SOURCE TEMPORARILY UNAVAILABLE",
+          `Source: ${worldSource.toUpperCase()}`,
+          `Reason: ${error.message}`,
+          "No simulated data was substituted."
+        ].join("\n")
+      };
+    }
+  }
+
+  if (
+    /\b(health|healthy|status|online|uptime|system)\b/.test(q)
+  ) {
+    const s = status();
+    const h = health();
+
+    return {
+      handled: true,
+      tool: "get_system_health",
+      text: [
+        "COMMAND CENTER HEALTH",
+        `System: ${s.systemStatus}`,
+        `Online: ${s.online ? "YES" : "NO"}`,
+        `Mode: ${s.mode}`,
+        `Uptime: ${h.uptimeSeconds} seconds`,
+        `Source: ${s.source}`,
+        `Checked: ${h.time}`
+      ].join("\n")
+    };
+  }
+
+  return null;
+}
+
 async function runTool(call) {
   const args = call.arguments
     ? JSON.parse(call.arguments)
@@ -1036,6 +1229,14 @@ app.get(
           OPENAI_API_KEY
         ),
 
+      freeMode:
+        true,
+
+      commandMode:
+        OPENAI_API_KEY
+          ? "AI+FREE"
+          : "FREE",
+
       accessProtected:
         true,
 
@@ -1162,16 +1363,140 @@ app.post(
         });
     }
 
+    const local =
+      await freeCommand(
+        message
+      );
+
+    if (local) {
+      res
+        .status(200)
+        .set({
+          "content-type":
+            "text/event-stream; charset=utf-8",
+
+          "cache-control":
+            "no-cache, no-transform",
+
+          connection:
+            "keep-alive",
+
+          "x-accel-buffering":
+            "no"
+        });
+
+      res.flushHeaders();
+
+      sendSSE(
+        res,
+        "ready",
+        {
+          model:
+            "free-command-mode",
+          mode:
+            "free"
+        }
+      );
+
+      sendSSE(
+        res,
+        "tool_call",
+        {
+          name:
+            local.tool
+        }
+      );
+
+      sendSSE(
+        res,
+        "delta",
+        {
+          text:
+            local.text
+        }
+      );
+
+      sendSSE(
+        res,
+        "tool_result",
+        {
+          name:
+            local.tool,
+          ok:
+            true
+        }
+      );
+
+      sendSSE(
+        res,
+        "done",
+        {
+          model:
+            "free-command-mode",
+          mode:
+            "free"
+        }
+      );
+
+      return res.end();
+    }
+
     if (
       !OPENAI_API_KEY
     ) {
-      return res
-        .status(503)
-        .json({
-          ok: false,
-          error:
-            "OPENAI_API_KEY is not configured"
+      res
+        .status(200)
+        .set({
+          "content-type":
+            "text/event-stream; charset=utf-8",
+
+          "cache-control":
+            "no-cache, no-transform",
+
+          connection:
+            "keep-alive",
+
+          "x-accel-buffering":
+            "no"
         });
+
+      res.flushHeaders();
+
+      sendSSE(
+        res,
+        "ready",
+        {
+          model:
+            "free-command-mode",
+          mode:
+            "free"
+        }
+      );
+
+      sendSSE(
+        res,
+        "delta",
+        {
+          text: [
+            "GPT-5.6 is temporarily unavailable because API billing is not active.",
+            "",
+            "FREE COMMAND MODE is still online. Try: health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, or help."
+          ].join("\n")
+        }
+      );
+
+      sendSSE(
+        res,
+        "done",
+        {
+          model:
+            "free-command-mode",
+          mode:
+            "free"
+        }
+      );
+
+      return res.end();
     }
 
     res
