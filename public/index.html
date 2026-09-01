@@ -488,6 +488,65 @@
       font-weight: 650;
     }
 
+    .ops-map { grid-column: 1 / -1; }
+
+    .map-shell {
+      position: relative;
+      min-height: 390px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(216,170,87,.13);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(214,159,60,.08), transparent 38%),
+        #080807;
+    }
+
+    #ops-map-canvas {
+      display: block;
+      width: 100%;
+      height: 390px;
+      touch-action: manipulation;
+    }
+
+    .map-hud {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .map-chip {
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(216,170,87,.22);
+      background: rgba(7,7,6,.82);
+      backdrop-filter: blur(8px);
+      color: #cfc7bb;
+      font-size: 9px;
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+
+    .map-chip b {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .map-source-usgs { color: #8dc8ff; }
+    .map-source-eonet { color: #ffb968; }
+    .map-source-nws { color: #f2c66d; }
+
+    .map-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.6;
+    }
+
     .assistant-card {
       display: grid;
       grid-template-columns: minmax(0,1fr) 300px;
@@ -814,6 +873,36 @@
           </div>
         </article>
 
+        <article class="panel ops-map" id="global-map">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Live Global Operations Map</div>
+              <div class="panel-sub">Data Spine coordinate projection • source geometry only • simulation off</div>
+            </div>
+            <span class="dot" id="map-dot"></span>
+          </div>
+          <div class="panel-body">
+            <div class="map-shell">
+              <canvas id="ops-map-canvas" aria-label="Live Eagle Eyes global operations map">
+                Live geographic operations data requires a browser with canvas support.
+              </canvas>
+              <div class="map-hud">
+                <span class="map-chip map-source-usgs">USGS <b id="map-usgs-count">0</b></span>
+                <span class="map-chip map-source-eonet">NASA EONET <b id="map-eonet-count">0</b></span>
+                <span class="map-chip map-source-nws">NWS GEOMETRY <b id="map-nws-count">0</b></span>
+                <span class="map-chip">PLOTTED <b id="map-total-count">0</b></span>
+                <span class="map-chip">UPDATED <b id="map-updated">—</b></span>
+              </div>
+            </div>
+            <div class="map-note">
+              This surface plots coordinates and polygons preserved by <b>eagle-eyes.data-spine.v1</b>.
+              USGS earthquake points include real latitude/longitude and depth; NASA EONET uses its latest event geometry;
+              NWS polygons are drawn only when the alert source supplies geometry. The grid is a longitude/latitude projection,
+              not simulated geography.
+            </div>
+          </div>
+        </article>
+
         <article class="panel mission">
           <div class="panel-head">
             <div>
@@ -921,8 +1010,8 @@
     }
 
     function setPercent(id, value) {
-      const number = Number(value);
-      const available = Number.isFinite(number);
+      const number = value;
+      const available = typeof number === "number" && Number.isFinite(number);
       const bar = document.getElementById(id + "-bar");
       const label = document.getElementById(id + "-value");
       if (bar) bar.style.width = available ? Math.max(0, Math.min(100, number)) + "%" : "0%";
@@ -1018,12 +1107,210 @@
         .replaceAll("'", "&#039;");
     }
 
+    const feedCache = {
+      nws: null,
+      usgs: null,
+      eonet: null
+    };
+
+    function projectCoordinate(longitude, latitude, width, height) {
+      if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return null;
+      return {
+        x: ((longitude + 180) / 360) * width,
+        y: ((90 - latitude) / 180) * height
+      };
+    }
+
+    function eventPosition(event) {
+      const p = event?.spine?.position;
+      if (Number.isFinite(p?.longitude) && Number.isFinite(p?.latitude)) {
+        return { longitude: p.longitude, latitude: p.latitude };
+      }
+
+      const c = event?.coordinates;
+      if (Number.isFinite(c?.longitude) && Number.isFinite(c?.latitude)) {
+        return { longitude: c.longitude, latitude: c.latitude };
+      }
+
+      return null;
+    }
+
+    function drawGeometryPath(ctx, geometry, width, height) {
+      if (!geometry || !Array.isArray(geometry.coordinates)) return false;
+
+      const drawRing = (ring) => {
+        let started = false;
+        for (const pair of ring || []) {
+          const point = projectCoordinate(Number(pair?.[0]), Number(pair?.[1]), width, height);
+          if (!point) continue;
+          if (!started) {
+            ctx.moveTo(point.x, point.y);
+            started = true;
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        }
+        if (started) ctx.closePath();
+        return started;
+      };
+
+      ctx.beginPath();
+
+      if (geometry.type === "Polygon") {
+        let any = false;
+        for (const ring of geometry.coordinates) any = drawRing(ring) || any;
+        return any;
+      }
+
+      if (geometry.type === "MultiPolygon") {
+        let any = false;
+        for (const polygon of geometry.coordinates) {
+          for (const ring of polygon || []) any = drawRing(ring) || any;
+        }
+        return any;
+      }
+
+      return false;
+    }
+
+    function renderOperationsMap() {
+      const canvas = document.getElementById("ops-map-canvas");
+      if (!canvas) return;
+
+      const cssWidth = Math.max(320, canvas.clientWidth || 900);
+      const cssHeight = 390;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+
+      canvas.width = Math.round(cssWidth * dpr);
+      canvas.height = Math.round(cssHeight * dpr);
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, cssHeight);
+      bg.addColorStop(0, "#0d0c0a");
+      bg.addColorStop(1, "#060605");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, cssWidth, cssHeight);
+
+      ctx.strokeStyle = "rgba(242,198,109,.10)";
+      ctx.lineWidth = 1;
+      ctx.font = "9px system-ui, sans-serif";
+      ctx.fillStyle = "rgba(159,151,137,.6)";
+
+      for (let lon = -150; lon <= 150; lon += 30) {
+        const p = projectCoordinate(lon, 0, cssWidth, cssHeight);
+        ctx.beginPath();
+        ctx.moveTo(p.x, 0);
+        ctx.lineTo(p.x, cssHeight);
+        ctx.stroke();
+        ctx.fillText((lon < 0 ? Math.abs(lon) + "°W" : lon > 0 ? lon + "°E" : "0°"), p.x + 4, 12);
+      }
+
+      for (let lat = -60; lat <= 60; lat += 30) {
+        const p = projectCoordinate(0, lat, cssWidth, cssHeight);
+        ctx.beginPath();
+        ctx.moveTo(0, p.y);
+        ctx.lineTo(cssWidth, p.y);
+        ctx.stroke();
+        ctx.fillText((lat < 0 ? Math.abs(lat) + "°S" : lat > 0 ? lat + "°N" : "EQ"), 5, p.y - 4);
+      }
+
+      // Equator and prime meridian.
+      ctx.strokeStyle = "rgba(242,198,109,.22)";
+      const equator = projectCoordinate(0, 0, cssWidth, cssHeight);
+      ctx.beginPath();
+      ctx.moveTo(0, equator.y);
+      ctx.lineTo(cssWidth, equator.y);
+      ctx.moveTo(equator.x, 0);
+      ctx.lineTo(equator.x, cssHeight);
+      ctx.stroke();
+
+      let nwsPlotted = 0;
+      let eonetPlotted = 0;
+      let usgsPlotted = 0;
+
+      // NWS polygons under point events.
+      ctx.lineWidth = 1.2;
+      for (const event of feedCache.nws?.events || []) {
+        const geometry = event?.spine?.geometry;
+        if (geometry && (geometry.type === "Polygon" || geometry.type === "MultiPolygon")) {
+          if (drawGeometryPath(ctx, geometry, cssWidth, cssHeight)) {
+            ctx.fillStyle = "rgba(242,198,109,.10)";
+            ctx.strokeStyle = "rgba(242,198,109,.62)";
+            ctx.fill("evenodd");
+            ctx.stroke();
+            nwsPlotted += 1;
+          }
+        } else {
+          const pos = eventPosition(event);
+          if (pos) {
+            const p = projectCoordinate(pos.longitude, pos.latitude, cssWidth, cssHeight);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = "#f2c66d";
+            ctx.fill();
+            nwsPlotted += 1;
+          }
+        }
+      }
+
+      // EONET latest positions.
+      for (const event of feedCache.eonet?.events || []) {
+        const pos = eventPosition(event);
+        if (!pos) continue;
+        const p = projectCoordinate(pos.longitude, pos.latitude, cssWidth, cssHeight);
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = "#ffad55";
+        ctx.shadowColor = "rgba(255,173,85,.55)";
+        ctx.shadowBlur = 9;
+        ctx.fillRect(-4, -4, 8, 8);
+        ctx.restore();
+        eonetPlotted += 1;
+      }
+
+      // USGS earthquake points, sized by magnitude.
+      for (const event of feedCache.usgs?.events || []) {
+        const pos = eventPosition(event);
+        if (!pos) continue;
+        const p = projectCoordinate(pos.longitude, pos.latitude, cssWidth, cssHeight);
+        const mag = Number.isFinite(event.magnitude) ? event.magnitude : 0;
+        const radius = Math.max(3, Math.min(11, 3 + mag * 1.15));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(112,183,255,.86)";
+        ctx.shadowColor = "rgba(112,183,255,.5)";
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "rgba(225,240,255,.8)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        usgsPlotted += 1;
+      }
+
+      const total = nwsPlotted + eonetPlotted + usgsPlotted;
+      document.getElementById("map-usgs-count").textContent = String(usgsPlotted);
+      document.getElementById("map-eonet-count").textContent = String(eonetPlotted);
+      document.getElementById("map-nws-count").textContent = String(nwsPlotted);
+      document.getElementById("map-total-count").textContent = String(total);
+      document.getElementById("map-updated").textContent = total
+        ? new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        : "—";
+      setDot("map-dot", total > 0);
+    }
+
     async function fetchFeeds() {
       try {
         const results = await Promise.allSettled([
-          getJson("/api/eagle-eyes/events?source=nws&limit=5"),
-          getJson("/api/eagle-eyes/events?source=usgs&limit=5"),
-          getJson("/api/eagle-eyes/events?source=eonet&limit=5")
+          getJson("/api/eagle-eyes/events?source=nws&limit=12"),
+          getJson("/api/eagle-eyes/events?source=usgs&limit=12"),
+          getJson("/api/eagle-eyes/events?source=eonet&limit=12")
         ]);
 
         const ids = ["nws", "usgs", "eonet"];
@@ -1037,17 +1324,20 @@
           if (result.status === "fulfilled") {
             okCount += 1;
             const data = result.value;
+            feedCache[source] = data;
             countEl.textContent = String(data.count ?? 0);
             (data.events || []).slice(0, 2).forEach((event) => {
               intel.push(formatIntel(source, event));
             });
           } else {
+            feedCache[source] = null;
             countEl.textContent = "N/A";
           }
         });
 
         document.getElementById("hero-feeds").textContent = okCount + "/3 LIVE";
         setDot("feeds-dot", okCount === 3);
+        renderOperationsMap();
 
         const list = document.getElementById("intel-list");
         list.innerHTML = "";
@@ -1266,6 +1556,12 @@
     setInterval(fetchRuntime, 5000);
     setInterval(fetchFeeds, 30000);
     setInterval(fetchAssistantStatus, 30000);
+
+    let mapResizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(mapResizeTimer);
+      mapResizeTimer = setTimeout(renderOperationsMap, 120);
+    });
   </script>
 </body>
 </html>
