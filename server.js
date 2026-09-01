@@ -62,6 +62,14 @@ const TOOLS = [
   },
   {
     type: "function",
+    name: "get_operational_snapshot",
+    description:
+      "Get one combined live operational snapshot across Command Center health, container metrics, Railway deployment, NOAA/NWS, USGS, and NASA EONET for situation analysis and prioritization.",
+    strict: true,
+    parameters: EMPTY
+  },
+  {
+    type: "function",
     name: "get_world_events",
     description:
       "Get current public events from USGS, NASA EONET, or NOAA/NWS. Never simulate missing data.",
@@ -88,6 +96,8 @@ const TOOLS = [
 const INSTRUCTIONS = [
   "You are Eagle Eyes inside the Live Command Center.",
   "Use tools for current system state, metrics, deployment state, health, or world-event feeds.",
+  "For a mission brief, situation report, broad incident-priority request, or question about what matters now, call get_operational_snapshot before answering.",
+  "When prioritizing, distinguish source facts from interpretation and use explicit NWS severity, earthquake magnitude, recency, deployment health, and container pressure as evidence.",
   "Never invent telemetry, alerts, sensor values, or deployment state.",
   "If a value is unavailable, say N/A or unavailable.",
   "All tools are read-only; never claim you changed infrastructure, files, credentials, accounts, or deployments."
@@ -375,6 +385,267 @@ async function world(source, limit = 10) {
 }
 
 
+function severityScore(severity) {
+  const scores = {
+    Extreme: 100,
+    Severe: 85,
+    Moderate: 65,
+    Minor: 35,
+    Unknown: 20
+  };
+
+  return scores[severity] || 20;
+}
+
+function metricPriority(name, value) {
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
+  if (value >= 90) {
+    return {
+      score: 95,
+      level: "critical",
+      source: "container",
+      title: `${name}: ${value}%`
+    };
+  }
+
+  if (value >= 80) {
+    return {
+      score: 75,
+      level: "elevated",
+      source: "container",
+      title: `${name}: ${value}%`
+    };
+  }
+
+  return null;
+}
+
+function snapshotPriorities(snapshot) {
+  const items = [];
+
+  if (!snapshot.health?.ok) {
+    items.push({
+      score: 100,
+      level: "critical",
+      source: "health",
+      title: "Command Center health check is not OK"
+    });
+  }
+
+  if (
+    snapshot.deployment?.stage &&
+    snapshot.deployment.stage !== "RUNNING"
+  ) {
+    items.push({
+      score: 100,
+      level: "critical",
+      source: "railway",
+      title:
+        `Railway deployment stage: ${snapshot.deployment.stage}`
+    });
+  }
+
+  for (const [name, value] of [
+    ["CPU", snapshot.metrics?.cpu],
+    ["Memory", snapshot.metrics?.memory],
+    ["Storage", snapshot.metrics?.storage]
+  ]) {
+    const item = metricPriority(name, value);
+
+    if (item) {
+      items.push(item);
+    }
+  }
+
+  for (const event of snapshot.feeds?.nws?.events || []) {
+    const score = severityScore(event.severity);
+
+    if (score >= 65) {
+      items.push({
+        score,
+        level:
+          score >= 85
+            ? "high"
+            : "elevated",
+        source: "nws",
+        title: compactEvent(event, "nws")
+      });
+    }
+  }
+
+  for (const event of snapshot.feeds?.usgs?.events || []) {
+    const magnitude = event.magnitude;
+
+    if (!Number.isFinite(magnitude) || magnitude < 4) {
+      continue;
+    }
+
+    const score =
+      magnitude >= 6
+        ? 95
+        : magnitude >= 5
+          ? 80
+          : 65;
+
+    items.push({
+      score,
+      level:
+        score >= 95
+          ? "critical"
+          : score >= 80
+            ? "high"
+            : "elevated",
+      source: "usgs",
+      title: compactEvent(event, "usgs")
+    });
+  }
+
+  for (
+    const event of
+      (snapshot.feeds?.eonet?.events || []).slice(0, 3)
+  ) {
+    items.push({
+      score: 40,
+      level: "monitor",
+      source: "eonet",
+      title: compactEvent(event, "eonet")
+    });
+  }
+
+  return items
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 7);
+}
+
+function failedFeed(source, reason) {
+  return {
+    ok: false,
+    source,
+    simulated: false,
+    count: 0,
+    events: [],
+    error:
+      reason instanceof Error
+        ? reason.message
+        : String(reason || "unavailable"),
+    timestamp: new Date().toISOString()
+  };
+}
+
+async function operationalSnapshot(limit = 20) {
+  const [
+    metricResult,
+    usgsResult,
+    nwsResult,
+    eonetResult
+  ] = await Promise.allSettled([
+    metrics(),
+    world("usgs", limit),
+    world("nws", limit),
+    world("eonet", limit)
+  ]);
+
+  const snapshot = {
+    ok: true,
+    status: status(),
+    health: health(),
+    metrics:
+      metricResult.status === "fulfilled"
+        ? metricResult.value
+        : {
+            cpu: null,
+            gpu: null,
+            memory: null,
+            storage: null,
+            temperatureC: null,
+            source: "container",
+            error:
+              metricResult.reason?.message ||
+              "Metrics unavailable",
+            timestamp: new Date().toISOString()
+          },
+    deployment: deployment(),
+    feeds: {
+      usgs:
+        usgsResult.status === "fulfilled"
+          ? usgsResult.value
+          : failedFeed("usgs", usgsResult.reason),
+      nws:
+        nwsResult.status === "fulfilled"
+          ? nwsResult.value
+          : failedFeed("nws", nwsResult.reason),
+      eonet:
+        eonetResult.status === "fulfilled"
+          ? eonetResult.value
+          : failedFeed("eonet", eonetResult.reason)
+    },
+    simulated: false,
+    timestamp: new Date().toISOString()
+  };
+
+  snapshot.priorities =
+    snapshotPriorities(snapshot);
+
+  return snapshot;
+}
+
+function formatMissionBrief(snapshot) {
+  const m = snapshot.metrics || {};
+  const priorities =
+    snapshot.priorities || [];
+
+  const lines = [
+    "EAGLE EYES MISSION BRIEF",
+    `Command Center: ${snapshot.status?.systemStatus || "N/A"} • ${snapshot.status?.mode || "N/A"}`,
+    `Railway: ${snapshot.deployment?.stage || "N/A"} • ${snapshot.deployment?.environment || "N/A"}`,
+    `Container: CPU ${pct(m.cpu)} • Memory ${pct(m.memory)} • Storage ${pct(m.storage)}`,
+    "",
+    "TOP PRIORITIES:"
+  ];
+
+  if (priorities.length) {
+    priorities.forEach((item, index) => {
+      lines.push(
+        `${index + 1}. [${String(item.level || "monitor").toUpperCase()}] ${item.source.toUpperCase()} • ${item.title}`
+      );
+    });
+  } else {
+    lines.push(
+      "No elevated priority condition was detected in the current snapshot."
+    );
+  }
+
+  const feedWarnings = Object.entries(
+    snapshot.feeds || {}
+  )
+    .filter(([, feed]) => feed?.ok === false)
+    .map(
+      ([name, feed]) =>
+        `${name.toUpperCase()}: ${feed.error || "unavailable"}`
+    );
+
+  lines.push(
+    "",
+    `Live feeds: NWS ${snapshot.feeds?.nws?.count ?? 0} • USGS ${snapshot.feeds?.usgs?.count ?? 0} • NASA EONET ${snapshot.feeds?.eonet?.count ?? 0}`,
+    "Simulation: OFF"
+  );
+
+  if (feedWarnings.length) {
+    lines.push(
+      `Feed warning: ${feedWarnings.join(" • ")}`
+    );
+  }
+
+  lines.push(
+    `Checked: ${snapshot.timestamp}`
+  );
+
+  return lines.join("\n");
+}
+
 function pct(value) {
   return Number.isFinite(value)
     ? `${value}%`
@@ -431,6 +702,7 @@ async function freeCommand(message) {
         "• health / system status",
         "• live metrics / CPU / memory / storage / GPU",
         "• Railway deployment status",
+        "• Mission Brief / cross-feed priority snapshot",
         "• NWS weather alerts",
         "• USGS earthquakes",
         "• NASA EONET events",
@@ -438,6 +710,20 @@ async function freeCommand(message) {
         "",
         "These commands use live read-only data. GPT-5.6 commands will automatically become available when API billing is active."
       ].join("\n")
+    };
+  }
+
+  if (
+    /\b(mission brief|situation report|sitrep|operational snapshot|priority brief|prioritize incidents|what matters now)\b/.test(q)
+  ) {
+    const snapshot =
+      await operationalSnapshot(20);
+
+    return {
+      handled: true,
+      tool: "get_operational_snapshot",
+      text:
+        formatMissionBrief(snapshot)
     };
   }
 
@@ -584,6 +870,9 @@ async function runTool(call) {
 
     case "get_system_health":
       return health();
+
+    case "get_operational_snapshot":
+      return operationalSnapshot(20);
 
     case "get_world_events":
       return world(
@@ -1219,6 +1508,25 @@ app.get(
 );
 
 app.get(
+  "/api/eagle-eyes/snapshot",
+  requireAssistantAccess,
+  async (_req, res) => {
+    try {
+      res.json(
+        await operationalSnapshot(20)
+      );
+    } catch (e) {
+      res.status(502).json({
+        ok: false,
+        error: e.message,
+        timestamp:
+          new Date().toISOString()
+      });
+    }
+  }
+);
+
+app.get(
   "/api/assistant/status",
   (_req, res) =>
     res.json({
@@ -1337,7 +1645,7 @@ app.post(
             mode:
               "free",
             error:
-              "GPT-5.6 is temporarily unavailable. Free commands remain available: health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, or help."
+              "GPT-5.6 is temporarily unavailable. Free commands remain available: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, or help."
           });
       }
 
@@ -1513,7 +1821,7 @@ app.post(
           text: [
             "GPT-5.6 is temporarily unavailable because API billing is not active.",
             "",
-            "FREE COMMAND MODE is still online. Try: health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, or help."
+            "FREE COMMAND MODE is still online. Try: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, or help."
           ].join("\n")
         }
       );
