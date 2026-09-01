@@ -9,7 +9,8 @@ const {
   globalWeather,
   formatKnowledge,
   formatWeather,
-  worldOSStatus
+  worldOSStatus,
+  shouldUseFreeKnowledge
 } = require("./world-os");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
@@ -1228,11 +1229,25 @@ async function freeCommand(message) {
     };
   }
 
-  if (!OPENAI_API_KEY) {
+  if (
+    shouldUseFreeKnowledge(
+      message,
+      Boolean(OPENAI_API_KEY)
+    )
+  ) {
+    const knowledgeQuery =
+      String(message || "")
+        .replace(
+          /^\s*(?:world knowledge|wikipedia|encyclopedia)\s*[:-]?\s*/i,
+          ""
+        )
+        .trim() ||
+      message;
+
     try {
       const data =
         await knowledgeSearch(
-          message,
+          knowledgeQuery,
           3
         );
 
