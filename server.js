@@ -98,6 +98,7 @@ const INSTRUCTIONS = [
   "Use tools for current system state, metrics, deployment state, health, or world-event feeds.",
   "For a mission brief, situation report, broad incident-priority request, or question about what matters now, call get_operational_snapshot before answering.",
   "When prioritizing, distinguish source facts from interpretation and use explicit NWS severity, earthquake magnitude, recency, deployment health, and container pressure as evidence.",
+  "Keep mission briefs executive and mobile-friendly: group related alerts, show no more than five top incidents, shorten long area lists, separate system pressure from external incidents, explain why each priority matters, and finish with a short WATCH NEXT section.",
   "Never invent telemetry, alerts, sensor values, or deployment state.",
   "If a value is unavailable, say N/A or unavailable.",
   "All tools are read-only; never claim you changed infrastructure, files, credentials, accounts, or deployments."
@@ -420,61 +421,186 @@ function metricPriority(name, value) {
     };
   }
 
+  if (value >= 70) {
+    return {
+      score: 55,
+      level: "watch",
+      source: "container",
+      title: `${name}: ${value}%`
+    };
+  }
+
   return null;
+}
+
+function areaParts(area) {
+  return String(area || "")
+    .split(";")
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
+function summarizeAreas(areas, limit = 3) {
+  const unique = [
+    ...new Set(
+      (areas || [])
+        .flatMap((area) => areaParts(area))
+    )
+  ];
+
+  if (!unique.length) {
+    return "Area unavailable";
+  }
+
+  if (unique.length <= limit) {
+    return unique.join("; ");
+  }
+
+  return (
+    unique.slice(0, limit).join("; ") +
+    ` +${unique.length - limit} more`
+  );
+}
+
+function systemPressure(snapshot) {
+  const metricsList = [
+    ["CPU", snapshot.metrics?.cpu],
+    ["Memory", snapshot.metrics?.memory],
+    ["Storage", snapshot.metrics?.storage]
+  ].filter(([, value]) => Number.isFinite(value));
+
+  const highest = metricsList
+    .slice()
+    .sort((a, b) => b[1] - a[1])[0] || [null, null];
+
+  let level = "nominal";
+  let why =
+    "Health and Railway are normal; measured CPU, memory, and storage are below the 70% watch threshold.";
+
+  if (!snapshot.health?.ok) {
+    level = "critical";
+    why = "Command Center health check is not OK.";
+  } else if (
+    snapshot.deployment?.stage &&
+    snapshot.deployment.stage !== "RUNNING"
+  ) {
+    level = "critical";
+    why =
+      `Railway deployment stage is ${snapshot.deployment.stage}, not RUNNING.`;
+  } else if (Number.isFinite(highest[1]) && highest[1] >= 90) {
+    level = "critical";
+    why =
+      `${highest[0]} is ${highest[1]}%, at or above the 90% critical threshold.`;
+  } else if (Number.isFinite(highest[1]) && highest[1] >= 80) {
+    level = "elevated";
+    why =
+      `${highest[0]} is ${highest[1]}%, at or above the 80% elevated threshold.`;
+  } else if (Number.isFinite(highest[1]) && highest[1] >= 70) {
+    level = "watch";
+    why =
+      `${highest[0]} is ${highest[1]}%, above the 70% watch threshold and below the 80% elevated threshold.`;
+  }
+
+  return {
+    level,
+    why,
+    highestMetric:
+      highest[0]
+        ? {
+            name: highest[0],
+            value: highest[1]
+          }
+        : null,
+    thresholds: {
+      watch: 70,
+      elevated: 80,
+      critical: 90
+    }
+  };
+}
+
+function groupedNwsPriorities(events) {
+  const groups = new Map();
+
+  for (const event of events || []) {
+    const baseScore =
+      severityScore(event.severity);
+
+    if (baseScore < 65) {
+      continue;
+    }
+
+    const eventName =
+      event.event || "Weather alert";
+
+    const severity =
+      event.severity || "Unknown";
+
+    const key =
+      `${eventName}|${severity}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        eventName,
+        severity,
+        baseScore,
+        count: 0,
+        areas: []
+      });
+    }
+
+    const group =
+      groups.get(key);
+
+    group.count += 1;
+
+    if (event.area) {
+      group.areas.push(event.area);
+    }
+  }
+
+  return [...groups.values()]
+    .map((group) => {
+      const score = Math.min(
+        100,
+        group.baseScore +
+          Math.min(
+            10,
+            Math.max(0, group.count - 1) * 2
+          )
+      );
+
+      return {
+        score,
+        level:
+          score >= 95
+            ? "critical"
+            : score >= 85
+              ? "high"
+              : "elevated",
+        source: "nws",
+        title:
+          group.count > 1
+            ? `${group.eventName} (${group.count} related alerts)`
+            : group.eventName,
+        detail:
+          `${group.severity} • ${summarizeAreas(group.areas)}`,
+        why:
+          group.count > 1
+            ? `NWS severity is ${group.severity}; ${group.count} related active alerts are grouped here.`
+            : `NWS severity is ${group.severity}.`
+      };
+    });
 }
 
 function snapshotPriorities(snapshot) {
   const items = [];
 
-  if (!snapshot.health?.ok) {
-    items.push({
-      score: 100,
-      level: "critical",
-      source: "health",
-      title: "Command Center health check is not OK"
-    });
-  }
-
-  if (
-    snapshot.deployment?.stage &&
-    snapshot.deployment.stage !== "RUNNING"
-  ) {
-    items.push({
-      score: 100,
-      level: "critical",
-      source: "railway",
-      title:
-        `Railway deployment stage: ${snapshot.deployment.stage}`
-    });
-  }
-
-  for (const [name, value] of [
-    ["CPU", snapshot.metrics?.cpu],
-    ["Memory", snapshot.metrics?.memory],
-    ["Storage", snapshot.metrics?.storage]
-  ]) {
-    const item = metricPriority(name, value);
-
-    if (item) {
-      items.push(item);
-    }
-  }
-
-  for (const event of snapshot.feeds?.nws?.events || []) {
-    const score = severityScore(event.severity);
-
-    if (score >= 65) {
-      items.push({
-        score,
-        level:
-          score >= 85
-            ? "high"
-            : "elevated",
-        source: "nws",
-        title: compactEvent(event, "nws")
-      });
-    }
-  }
+  items.push(
+    ...groupedNwsPriorities(
+      snapshot.feeds?.nws?.events || []
+    )
+  );
 
   for (const event of snapshot.feeds?.usgs?.events || []) {
     const magnitude = event.magnitude;
@@ -499,25 +625,111 @@ function snapshotPriorities(snapshot) {
             ? "high"
             : "elevated",
       source: "usgs",
-      title: compactEvent(event, "usgs")
+      title:
+        `Earthquake M${magnitude} • ${event.place || event.title || "location unavailable"}`,
+      detail:
+        event.time
+          ? `Reported ${event.time}`
+          : "Report time unavailable",
+      why:
+        `Magnitude ${magnitude} meets the M4+ operational monitoring threshold.`
     });
   }
 
   for (
     const event of
-      (snapshot.feeds?.eonet?.events || []).slice(0, 3)
+      (snapshot.feeds?.eonet?.events || []).slice(0, 5)
   ) {
     items.push({
       score: 40,
       level: "monitor",
       source: "eonet",
-      title: compactEvent(event, "eonet")
+      title:
+        event.title || "NASA EONET event",
+      detail:
+        Array.isArray(event.categories) &&
+        event.categories.length
+          ? event.categories.join(", ")
+          : "Active natural event",
+      why:
+        "NASA EONET lists this as an active event; monitor for status or location changes."
     });
   }
 
   return items
     .sort((a, b) => b.score - a.score)
-    .slice(0, 7);
+    .slice(0, 5);
+}
+
+function buildWatchNext(snapshot) {
+  const watch = [];
+  const priorities =
+    snapshot.priorities || [];
+
+  const topNws =
+    priorities.find(
+      (item) => item.source === "nws"
+    );
+
+  if (topNws) {
+    watch.push(
+      `NWS: watch ${topNws.title} for severity, area, and expiration changes.`
+    );
+  }
+
+  const usgsEvents =
+    snapshot.feeds?.usgs?.events || [];
+
+  const strongestQuake =
+    usgsEvents
+      .filter((event) =>
+        Number.isFinite(event.magnitude)
+      )
+      .sort(
+        (a, b) =>
+          b.magnitude - a.magnitude
+      )[0];
+
+  if (
+    strongestQuake &&
+    strongestQuake.magnitude >= 4
+  ) {
+    watch.push(
+      `USGS: watch for magnitude/location updates or additional M4+ events; current strongest is M${strongestQuake.magnitude}.`
+    );
+  }
+
+  const pressure =
+    snapshot.systemPressure;
+
+  if (
+    pressure?.level &&
+    pressure.level !== "nominal"
+  ) {
+    const highest =
+      pressure.highestMetric;
+
+    watch.push(
+      highest
+        ? `SYSTEM: ${highest.name} is ${highest.value}%; watch the 80% elevated and 90% critical thresholds.`
+        : "SYSTEM: watch Command Center health and Railway deployment state."
+    );
+  } else {
+    watch.push(
+      "SYSTEM: no immediate infrastructure action; watch for Railway stage, health, or resource-threshold changes."
+    );
+  }
+
+  if (
+    watch.length < 3 &&
+    (snapshot.feeds?.eonet?.count || 0) > 0
+  ) {
+    watch.push(
+      "NASA EONET: monitor active events for new status or location changes."
+    );
+  }
+
+  return watch.slice(0, 3);
 }
 
 function failedFeed(source, reason) {
@@ -586,8 +798,14 @@ async function operationalSnapshot(limit = 20) {
     timestamp: new Date().toISOString()
   };
 
+  snapshot.systemPressure =
+    systemPressure(snapshot);
+
   snapshot.priorities =
     snapshotPriorities(snapshot);
+
+  snapshot.watchNext =
+    buildWatchNext(snapshot);
 
   return snapshot;
 }
@@ -596,14 +814,23 @@ function formatMissionBrief(snapshot) {
   const m = snapshot.metrics || {};
   const priorities =
     snapshot.priorities || [];
+  const pressure =
+    snapshot.systemPressure ||
+    systemPressure(snapshot);
+  const watchNext =
+    snapshot.watchNext ||
+    buildWatchNext(snapshot);
 
   const lines = [
-    "EAGLE EYES MISSION BRIEF",
+    "EAGLE EYES EXECUTIVE MISSION BRIEF",
+    "",
+    `SYSTEM PRESSURE: [${String(pressure.level || "unknown").toUpperCase()}]`,
     `Command Center: ${snapshot.status?.systemStatus || "N/A"} • ${snapshot.status?.mode || "N/A"}`,
     `Railway: ${snapshot.deployment?.stage || "N/A"} • ${snapshot.deployment?.environment || "N/A"}`,
-    `Container: CPU ${pct(m.cpu)} • Memory ${pct(m.memory)} • Storage ${pct(m.storage)}`,
+    `CPU ${pct(m.cpu)} • Memory ${pct(m.memory)} • Storage ${pct(m.storage)}`,
+    `Why: ${pressure.why || "No pressure assessment available."}`,
     "",
-    "TOP PRIORITIES:"
+    "TOP INCIDENTS:"
   ];
 
   if (priorities.length) {
@@ -611,10 +838,41 @@ function formatMissionBrief(snapshot) {
       lines.push(
         `${index + 1}. [${String(item.level || "monitor").toUpperCase()}] ${item.source.toUpperCase()} • ${item.title}`
       );
+
+      if (item.detail) {
+        lines.push(
+          `   ${item.detail}`
+        );
+      }
+
+      if (item.why) {
+        lines.push(
+          `   Why: ${item.why}`
+        );
+      }
     });
   } else {
     lines.push(
-      "No elevated priority condition was detected in the current snapshot."
+      "No elevated external incident was detected in the current snapshot."
+    );
+  }
+
+  lines.push(
+    "",
+    "WATCH NEXT:"
+  );
+
+  if (watchNext.length) {
+    watchNext.forEach(
+      (item, index) => {
+        lines.push(
+          `${index + 1}. ${item}`
+        );
+      }
+    );
+  } else {
+    lines.push(
+      "No specific watch item generated."
     );
   }
 
@@ -629,7 +887,7 @@ function formatMissionBrief(snapshot) {
 
   lines.push(
     "",
-    `Live feeds: NWS ${snapshot.feeds?.nws?.count ?? 0} • USGS ${snapshot.feeds?.usgs?.count ?? 0} • NASA EONET ${snapshot.feeds?.eonet?.count ?? 0}`,
+    `COVERAGE: NWS ${snapshot.feeds?.nws?.count ?? 0} • USGS ${snapshot.feeds?.usgs?.count ?? 0} • NASA EONET ${snapshot.feeds?.eonet?.count ?? 0}`,
     "Simulation: OFF"
   );
 
@@ -702,7 +960,7 @@ async function freeCommand(message) {
         "• health / system status",
         "• live metrics / CPU / memory / storage / GPU",
         "• Railway deployment status",
-        "• Mission Brief / cross-feed priority snapshot",
+        "• Executive Mission Brief / grouped cross-feed priority snapshot",
         "• NWS weather alerts",
         "• USGS earthquakes",
         "• NASA EONET events",
