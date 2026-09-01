@@ -1043,6 +1043,37 @@ async function freeCommand(message) {
     };
   }
 
+  if (
+    /\b(world os|world command|world command operating system|operating system|os status|capability|capabilities|modules)\b/.test(q)
+  ) {
+    const info =
+      worldOSStatus();
+
+    return {
+      handled: true,
+      tool: "get_world_os_status",
+      text: [
+        info.name,
+        `Version: ${info.version}`,
+        `Mode: ${info.mode}`,
+        "",
+        "ACTIVE MODULES:",
+        ...info.modules.map(
+          (item, index) =>
+            `${index + 1}. ${item}`
+        ),
+        "",
+        "FREE CAPABILITIES:",
+        ...info.freeCapabilities.map(
+          (item) =>
+            `• ${item}`
+        ),
+        "",
+        `Checked: ${info.timestamp}`
+      ].join("\n")
+    };
+  }
+
   const weatherMatch =
     String(message || "").match(
       /\b(?:weather|temperature|forecast)\s+(?:in|for|at)\s+(.+?)\s*$/i
