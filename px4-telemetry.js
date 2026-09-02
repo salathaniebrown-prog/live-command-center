@@ -494,11 +494,36 @@ class Px4TelemetryStore {
       };
     }
 
-    const ageMs = Math.max(
-      0,
-      new Date(now).getTime() -
-      new Date(this.latest.receivedAt).getTime()
-    );
+    const nowMs =
+      new Date(now).getTime();
+
+    const receivedAgeMs =
+      Math.max(
+        0,
+        nowMs -
+        new Date(
+          this.latest.receivedAt
+        ).getTime()
+      );
+
+    const sourceAgeMs =
+      this.latest.sourceObservedAt
+        ? Math.max(
+            0,
+            nowMs -
+            new Date(
+              this.latest.sourceObservedAt
+            ).getTime()
+          )
+        : null;
+
+    const ageMs =
+      Math.max(
+        receivedAgeMs,
+        Number.isFinite(sourceAgeMs)
+          ? sourceAgeMs
+          : 0
+      );
 
     return {
       ok: true,
@@ -513,6 +538,8 @@ class Px4TelemetryStore {
       receivedCount: this.receivedCount,
       telemetry: this.latest,
       ageMs,
+      receivedAgeMs,
+      sourceAgeMs,
       checkedAt
     };
   }
