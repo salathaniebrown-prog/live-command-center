@@ -122,6 +122,80 @@ function WebSearch() {
   );
 }
 
+
+function LaunchDeck({ productionState, onOpenWorld, onOpenCommand, onOpenSearch, onOpenStatus }) {
+  const statusLabel =
+    productionState === "online"
+      ? "PRODUCTION ONLINE"
+      : productionState === "offline"
+        ? "PRODUCTION UNREACHABLE"
+        : "CHECKING PRODUCTION";
+
+  return (
+    <ScrollView style={styles.launch} contentContainerStyle={styles.launchContent}>
+      <Text style={styles.eyebrow}>EAGLE EYES</Text>
+      <Text style={styles.launchTitle}>WORLD COMMAND</Text>
+      <Text style={styles.launchSubtitle}>
+        Real production systems · live intelligence · no simulated telemetry
+      </Text>
+
+      <View style={styles.launchStatus}>
+        <View
+          style={[
+            styles.dot,
+            productionState === "online"
+              ? styles.online
+              : productionState === "offline"
+                ? styles.offline
+                : styles.checking
+          ]}
+        />
+        <View style={styles.launchStatusTextWrap}>
+          <Text style={styles.launchStatusLabel}>{statusLabel}</Text>
+          <Text style={styles.launchStatusMeta}>
+            {productionState === "checking"
+              ? "Verifying /api/status before reporting live state"
+              : productionState === "online"
+                ? "Verified against the Eagle Eyes production backend"
+                : "No live claim is shown until the backend responds"}
+          </Text>
+        </View>
+      </View>
+
+      <Pressable style={styles.launchPrimary} onPress={onOpenWorld}>
+        <Text style={styles.launchPrimaryEyebrow}>ENTER EAGLE EYES</Text>
+        <Text style={styles.launchPrimaryText}>OPEN FULL COMMAND OS</Text>
+      </Pressable>
+
+      <View style={styles.launchGrid}>
+        <Pressable style={styles.launchCard} onPress={onOpenCommand}>
+          <Text style={styles.launchCardLabel}>COMMAND RAIL</Text>
+          <Text style={styles.launchCardText}>Open the protected command surface</Text>
+        </Pressable>
+
+        <Pressable style={styles.launchCard} onPress={onOpenSearch}>
+          <Text style={styles.launchCardLabel}>LIVE WEB SEARCH</Text>
+          <Text style={styles.launchCardText}>Search the live web inside Eagle Eyes</Text>
+        </Pressable>
+
+        <Pressable style={styles.launchCard} onPress={onOpenStatus}>
+          <Text style={styles.launchCardLabel}>SYSTEM STATUS</Text>
+          <Text style={styles.launchCardText}>Check Railway, metrics, and command mode</Text>
+        </Pressable>
+
+        <Pressable style={styles.launchCard} onPress={() => onOpenWorld("runtime")}>
+          <Text style={styles.launchCardLabel}>RUNTIME</Text>
+          <Text style={styles.launchCardText}>Open the production runtime surface</Text>
+        </Pressable>
+      </View>
+
+      <Text style={styles.launchFoot}>
+        Eagle Eyes does not invent telemetry. Unavailable live values remain unavailable or N/A.
+      </Text>
+    </ScrollView>
+  );
+}
+
 function Metric({ label, value }) {
   const shown =
     value === null || value === undefined || Number.isNaN(value) ? "N/A" : value + "%";
@@ -247,13 +321,37 @@ function LiveStatus() {
 }
 
 export default function App() {
-  const [tab, setTab] = useState("world");
+  const [tab, setTab] = useState("launch");
   const [section, setSection] = useState("overview");
+  const [productionState, setProductionState] = useState("checking");
 
-  const openWorld = (nextSection) => {
+  const openWorld = (nextSection = "overview") => {
     setSection(nextSection);
     setTab("world");
   };
+
+  useEffect(() => {
+    let active = true;
+
+    async function verifyProduction() {
+      try {
+        const response = await fetch(BASE_URL + "/api/status", {
+          headers: { Accept: "application/json" }
+        });
+        const data = response.ok ? await response.json() : null;
+        if (active) setProductionState(response.ok && data?.online ? "online" : "offline");
+      } catch {
+        if (active) setProductionState("offline");
+      }
+    }
+
+    verifyProduction();
+    const id = setInterval(verifyProduction, 15000);
+    return () => {
+      active = false;
+      clearInterval(id);
+    };
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -264,8 +362,29 @@ export default function App() {
           <Text style={styles.brandSub}>WORLD COMMAND MOBILE · FULL SYSTEM</Text>
         </View>
         <View style={styles.livePill}>
-          <View style={[styles.dot, styles.online]} />
-          <Text style={styles.liveText}>LIVE</Text>
+          <View
+            style={[
+              styles.dot,
+              productionState === "online"
+                ? styles.online
+                : productionState === "offline"
+                  ? styles.offline
+                  : styles.checking
+            ]}
+          />
+          <Text
+            style={[
+              styles.liveText,
+              productionState === "offline" && styles.liveTextOffline,
+              productionState === "checking" && styles.liveTextChecking
+            ]}
+          >
+            {productionState === "online"
+              ? "ONLINE"
+              : productionState === "offline"
+                ? "OFFLINE"
+                : "CHECKING"}
+          </Text>
         </View>
       </View>
 
@@ -275,6 +394,7 @@ export default function App() {
         style={styles.tabScroller}
         contentContainerStyle={styles.tabs}
       >
+        <TabButton active={tab === "launch"} label="HOME" onPress={() => setTab("launch")} />
         <TabButton
           active={tab === "world" && section === "overview"}
           label="FULL OS"
@@ -300,6 +420,15 @@ export default function App() {
       </ScrollView>
 
       <View style={styles.flex}>
+        {tab === "launch" ? (
+          <LaunchDeck
+            productionState={productionState}
+            onOpenWorld={() => openWorld("overview")}
+            onOpenCommand={() => openWorld("command")}
+            onOpenSearch={() => setTab("search")}
+            onOpenStatus={() => setTab("status")}
+          />
+        ) : null}
         {tab === "world" ? <WorldOS section={section} /> : null}
         {tab === "search" ? <WebSearch /> : null}
         {tab === "status" ? <LiveStatus /> : null}
@@ -334,6 +463,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6
   },
   liveText: { color: "#73e58c", fontSize: 10, fontWeight: "800", letterSpacing: 1 },
+  liveTextOffline: { color: "#ff8f90" },
+  liveTextChecking: { color: "#f2c66d" },
   tabScroller: {
     flexGrow: 0,
     backgroundColor: "#0b0a08",
@@ -386,6 +517,61 @@ const styles = StyleSheet.create({
   },
   browserText: { color: "#f2c66d", fontSize: 9, fontWeight: "800" },
   dim: { opacity: 0.35 },
+  launch: { flex: 1, backgroundColor: "#070706" },
+  launchContent: { padding: 20, paddingTop: 28, paddingBottom: 44 },
+  launchTitle: {
+    color: "#f7f1e7",
+    fontSize: 34,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+    marginTop: 7
+  },
+  launchSubtitle: {
+    color: "#9f978a",
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 7,
+    marginBottom: 20
+  },
+  launchStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#11100d",
+    borderWidth: 1,
+    borderColor: "rgba(242,198,109,.22)",
+    borderRadius: 14,
+    padding: 15,
+    marginBottom: 16
+  },
+  launchStatusTextWrap: { flex: 1 },
+  launchStatusLabel: { color: "#f7f1e7", fontSize: 12, fontWeight: "900", letterSpacing: 1 },
+  launchStatusMeta: { color: "#8f8779", fontSize: 10, lineHeight: 15, marginTop: 4 },
+  launchPrimary: {
+    backgroundColor: "#f2c66d",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 12
+  },
+  launchPrimaryEyebrow: { color: "#5c421b", fontSize: 9, fontWeight: "900", letterSpacing: 1.8 },
+  launchPrimaryText: { color: "#181108", fontSize: 20, fontWeight: "900", marginTop: 5 },
+  launchGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between"
+  },
+  launchCard: {
+    width: "48.5%",
+    minHeight: 118,
+    backgroundColor: "#11100d",
+    borderWidth: 1,
+    borderColor: "rgba(242,198,109,.18)",
+    borderRadius: 14,
+    padding: 15,
+    marginTop: 10
+  },
+  launchCardLabel: { color: "#f2c66d", fontSize: 10, fontWeight: "900", letterSpacing: 1.1 },
+  launchCardText: { color: "#c9c1b4", fontSize: 11, lineHeight: 17, marginTop: 9 },
+  launchFoot: { color: "#746e64", fontSize: 10, lineHeight: 16, marginTop: 20 },
   status: { flex: 1, backgroundColor: "#070706" },
   statusContent: { padding: 18, paddingBottom: 40 },
   eyebrow: { color: "#f2c66d", fontSize: 10, letterSpacing: 3, fontWeight: "800" },
@@ -403,6 +589,7 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 8, marginRight: 9 },
   online: { backgroundColor: "#73e58c" },
   offline: { backgroundColor: "#ff6f71" },
+  checking: { backgroundColor: "#f2c66d" },
   connectionText: { color: "#f7f1e7", fontWeight: "800" },
   connectionMeta: { marginLeft: "auto", color: "#8f8779", fontSize: 10 },
   error: {
