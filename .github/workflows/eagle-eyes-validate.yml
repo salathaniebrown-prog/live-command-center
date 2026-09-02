@@ -1,0 +1,31 @@
+name: Eagle Eyes Validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+      - "recovery/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Syntax and unit checks
+        run: npm run build
