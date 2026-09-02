@@ -1634,8 +1634,9 @@
         if (!authorized) {
           renderPx4Status({
             state:
-              data.px4Telemetry?.state ||
-              "LOCKED",
+              data.px4Telemetry?.ingestConfigured
+                ? "LOCKED"
+                : "UNCONFIGURED",
             telemetry: null
           });
         }
