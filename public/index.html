@@ -547,6 +547,54 @@
       line-height: 1.6;
     }
 
+    .px4-panel { grid-column: 1 / -1; }
+
+    .px4-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .px4-cell {
+      min-width: 0;
+      border: 1px solid rgba(216,170,87,.12);
+      border-radius: 12px;
+      padding: 11px;
+      background: rgba(255,255,255,.018);
+    }
+
+    .px4-cell .mini-label {
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .px4-cell strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .px4-warning {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.6;
+    }
+
+    .px4-warning strong {
+      color: var(--gold);
+    }
+
+    @media (max-width: 900px) {
+      .px4-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .px4-grid { grid-template-columns: 1fr 1fr; }
+    }
+
     .assistant-card {
       display: grid;
       grid-template-columns: minmax(0,1fr) 300px;
@@ -890,6 +938,7 @@
                 <span class="map-chip map-source-usgs">USGS <b id="map-usgs-count">0</b></span>
                 <span class="map-chip map-source-eonet">NASA EONET <b id="map-eonet-count">0</b></span>
                 <span class="map-chip map-source-nws">NWS GEOMETRY <b id="map-nws-count">0</b></span>
+                <span class="map-chip">PX4 <b id="map-px4-state">LOCKED</b></span>
                 <span class="map-chip">PLOTTED <b id="map-total-count">0</b></span>
                 <span class="map-chip">UPDATED <b id="map-updated">—</b></span>
               </div>
@@ -899,6 +948,35 @@
               USGS earthquake points include real latitude/longitude and depth; NASA EONET uses its latest event geometry;
               NWS polygons are drawn only when the alert source supplies geometry. The grid is a longitude/latitude projection,
               not simulated geography.
+            </div>
+          </div>
+        </article>
+
+        <article class="panel px4-panel" id="px4-telemetry">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">PX4 Flight Telemetry</div>
+              <div class="panel-sub">Validated companion ingest • protected read-only observation • no command authority</div>
+            </div>
+            <span class="dot" id="px4-dot"></span>
+          </div>
+          <div class="panel-body">
+            <div class="px4-grid">
+              <div class="px4-cell"><span class="mini-label">State</span><strong id="px4-state">LOCKED</strong></div>
+              <div class="px4-cell"><span class="mini-label">Vehicle</span><strong id="px4-vehicle">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Flight Mode</span><strong id="px4-mode">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Armed / Landed</span><strong id="px4-arm">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Position</span><strong id="px4-position">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Altitude</span><strong id="px4-altitude">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Battery</span><strong id="px4-battery">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Link</span><strong id="px4-link">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">GPS Fix / Satellites</span><strong id="px4-gps">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Telemetry Age</span><strong id="px4-age">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Observed</span><strong id="px4-observed">N/A</strong></div>
+              <div class="px4-cell"><span class="mini-label">Command Authority</span><strong>NONE</strong></div>
+            </div>
+            <div class="px4-warning" id="px4-note">
+              Unlock the Command Rail to read protected PX4 telemetry. <strong>No vehicle-control command is exposed to Eagle Eyes.</strong>
             </div>
           </div>
         </article>
@@ -978,6 +1056,7 @@
                 <button class="quick-command" data-prompt="Check current NOAA NWS alerts and summarize the most important ones.">NWS Alerts</button>
                 <button class="quick-command" data-prompt="Check current USGS earthquake events and summarize the most important ones.">USGS</button>
                 <button class="quick-command" data-prompt="Check current NASA EONET events and summarize the most important ones.">NASA EONET</button>
+                <button class="quick-command" data-prompt="PX4 telemetry status: show the latest validated vehicle telemetry and freshness state.">PX4 Telemetry</button>
                 <button class="quick-command" data-prompt="World OS status: show me every active capability and intelligence module.">World OS</button>
                 <button class="quick-command" data-prompt="Weather in Raleigh North Carolina">Global Weather</button>
                 <button class="quick-command" data-prompt="Who is Katherine Johnson?">World Knowledge</button>
@@ -1113,6 +1192,8 @@
       eonet: null
     };
 
+    let px4Cache = null;
+
     function projectCoordinate(longitude, latitude, width, height) {
       if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return null;
       return {
@@ -1232,6 +1313,7 @@
       let nwsPlotted = 0;
       let eonetPlotted = 0;
       let usgsPlotted = 0;
+      let px4Plotted = 0;
 
       // NWS polygons under point events.
       ctx.lineWidth = 1.2;
@@ -1294,10 +1376,44 @@
         usgsPlotted += 1;
       }
 
-      const total = nwsPlotted + eonetPlotted + usgsPlotted;
+      // PX4 vehicle is plotted only while freshness state is LIVE.
+      if (px4Cache?.state === "LIVE") {
+        const vehicle = px4Cache.telemetry;
+        const position = vehicle?.position;
+        if (
+          Number.isFinite(position?.longitude) &&
+          Number.isFinite(position?.latitude)
+        ) {
+          const p = projectCoordinate(
+            position.longitude,
+            position.latitude,
+            cssWidth,
+            cssHeight
+          );
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.beginPath();
+          ctx.moveTo(0, -10);
+          ctx.lineTo(8, 8);
+          ctx.lineTo(0, 5);
+          ctx.lineTo(-8, 8);
+          ctx.closePath();
+          ctx.fillStyle = "#73e58c";
+          ctx.shadowColor = "rgba(115,229,140,.75)";
+          ctx.shadowBlur = 14;
+          ctx.fill();
+          ctx.restore();
+          px4Plotted = 1;
+        }
+      }
+
+      const total = nwsPlotted + eonetPlotted + usgsPlotted + px4Plotted;
       document.getElementById("map-usgs-count").textContent = String(usgsPlotted);
       document.getElementById("map-eonet-count").textContent = String(eonetPlotted);
       document.getElementById("map-nws-count").textContent = String(nwsPlotted);
+      document.getElementById("map-px4-state").textContent =
+        px4Cache?.state || (getAssistantToken() ? "N/A" : "LOCKED");
       document.getElementById("map-total-count").textContent = String(total);
       document.getElementById("map-updated").textContent = total
         ? new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -1370,6 +1486,134 @@
       return token ? { authorization: "Bearer " + token } : {};
     }
 
+    function formatPx4Number(value, suffix = "") {
+      return typeof value === "number" && Number.isFinite(value)
+        ? value + suffix
+        : "N/A";
+    }
+
+    function renderPx4Status(status) {
+      const state = status?.state || "N/A";
+      const telemetry = status?.telemetry || null;
+
+      px4Cache = status || null;
+
+      document.getElementById("px4-state").textContent = state;
+      document.getElementById("px4-vehicle").textContent =
+        telemetry?.vehicleId || "N/A";
+      document.getElementById("px4-mode").textContent =
+        telemetry?.flightMode || "N/A";
+
+      const armed =
+        telemetry?.armed === null || telemetry?.armed === undefined
+          ? "N/A"
+          : telemetry.armed ? "ARMED" : "DISARMED";
+      const landed =
+        telemetry?.landed === null || telemetry?.landed === undefined
+          ? "N/A"
+          : telemetry.landed ? "LANDED" : "AIRBORNE";
+
+      document.getElementById("px4-arm").textContent =
+        armed === "N/A" && landed === "N/A"
+          ? "N/A"
+          : armed + " / " + landed;
+
+      document.getElementById("px4-position").textContent =
+        Number.isFinite(telemetry?.position?.latitude) &&
+        Number.isFinite(telemetry?.position?.longitude)
+          ? telemetry.position.latitude.toFixed(5) + ", " +
+            telemetry.position.longitude.toFixed(5)
+          : "N/A";
+
+      document.getElementById("px4-altitude").textContent =
+        formatPx4Number(
+          telemetry?.position?.altitudeM,
+          " m"
+        );
+
+      document.getElementById("px4-battery").textContent =
+        formatPx4Number(
+          telemetry?.battery?.remainingPct,
+          "%"
+        );
+
+      document.getElementById("px4-link").textContent =
+        Number.isFinite(telemetry?.link?.rssiPct)
+          ? telemetry.link.rssiPct + "% RSSI"
+          : "N/A";
+
+      document.getElementById("px4-gps").textContent =
+        Number.isFinite(telemetry?.gps?.fixType) ||
+        Number.isFinite(telemetry?.gps?.satellites)
+          ? formatPx4Number(telemetry?.gps?.fixType) + " / " +
+            formatPx4Number(telemetry?.gps?.satellites)
+          : "N/A";
+
+      document.getElementById("px4-age").textContent =
+        Number.isFinite(status?.ageMs)
+          ? (status.ageMs / 1000).toFixed(1) + " s"
+          : "N/A";
+
+      document.getElementById("px4-observed").textContent =
+        telemetry?.sourceObservedAt
+          ? new Date(telemetry.sourceObservedAt).toLocaleString()
+          : "N/A";
+
+      const dot = document.getElementById("px4-dot");
+      dot.className =
+        state === "LIVE"
+          ? "dot ok"
+          : state === "STALE"
+            ? "dot bad"
+            : "dot";
+
+      const note = document.getElementById("px4-note");
+      if (state === "UNCONFIGURED") {
+        note.innerHTML =
+          'PX4 companion ingest is not configured yet. <strong>No simulated telemetry is substituted.</strong>';
+      } else if (state === "WAITING") {
+        note.innerHTML =
+          'PX4 ingest is configured and waiting for the first validated snapshot. <strong>No command authority is exposed.</strong>';
+      } else if (state === "STALE") {
+        note.innerHTML =
+          '<strong>STALE:</strong> the last snapshot is retained for reference but is not treated as current vehicle state.';
+      } else if (state === "LIVE") {
+        note.innerHTML =
+          'Validated PX4 telemetry is fresh. <strong>Eagle Eyes remains observation-only.</strong>';
+      } else if (state === "LOCKED") {
+        note.innerHTML =
+          'Unlock the Command Rail to read protected PX4 telemetry. <strong>No vehicle-control command is exposed.</strong>';
+      }
+
+      renderOperationsMap();
+    }
+
+    async function fetchPx4Telemetry() {
+      if (!getAssistantToken()) {
+        renderPx4Status({
+          state: "LOCKED",
+          telemetry: null
+        });
+        return;
+      }
+
+      try {
+        const data = await getJson(
+          "/api/eagle-eyes/px4",
+          {
+            headers:
+              assistantAuthHeaders()
+          }
+        );
+        renderPx4Status(data);
+      } catch {
+        renderPx4Status({
+          state: "LOCKED",
+          telemetry: null
+        });
+      }
+    }
+
     async function assistantAuthorized() {
       if (!getAssistantToken()) return false;
       try {
@@ -1386,6 +1630,16 @@
       try {
         const data = await getJson("/api/assistant/status");
         const authorized = data.accessConfigured ? await assistantAuthorized() : false;
+
+        if (!authorized) {
+          renderPx4Status({
+            state:
+              data.px4Telemetry?.ingestConfigured
+                ? "LOCKED"
+                : "UNCONFIGURED",
+            telemetry: null
+          });
+        }
 
         if (data.accessConfigured && authorized && data.configured) {
           badge.textContent = "AI + FREE • PRIVATE";
@@ -1406,10 +1660,18 @@
           detail.textContent = "COMMAND_CENTER_ACCESS_TOKEN must be configured in Railway.";
           document.getElementById("hero-assistant").textContent = "LOCKED";
         }
+
+        if (authorized) {
+          await fetchPx4Telemetry();
+        }
       } catch {
         badge.textContent = "UNAVAILABLE";
         detail.textContent = "Assistant status endpoint unavailable.";
         document.getElementById("hero-assistant").textContent = "N/A";
+        renderPx4Status({
+          state: "N/A",
+          telemetry: null
+        });
       }
     }
 
@@ -1556,6 +1818,7 @@
     setInterval(fetchRuntime, 5000);
     setInterval(fetchFeeds, 30000);
     setInterval(fetchAssistantStatus, 30000);
+    setInterval(fetchPx4Telemetry, 5000);
 
     let mapResizeTimer = null;
     window.addEventListener("resize", () => {

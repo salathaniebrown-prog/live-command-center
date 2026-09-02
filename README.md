@@ -47,6 +47,26 @@ Free command mode works without OpenAI API credits for:
 
 When `OPENAI_API_KEY` is available, GPT-5.6 tool routing is added on top of the same read-only tools.
 
+## PX4 telemetry spine
+
+PX4 telemetry is an optional observation-only integration. Eagle Eyes accepts validated snapshots from a companion bridge, keeps unavailable fields as `N/A`, and never substitutes simulated vehicle data.
+
+The companion ingest uses a credential that is separate from Command Rail access:
+
+- `PX4_TELEMETRY_INGEST_TOKEN` — required for telemetry POSTs
+- `PX4_TELEMETRY_STALE_MS` — optional freshness threshold; defaults to 15000 ms
+
+The telemetry state is explicit:
+
+- `UNCONFIGURED` — no ingest token is configured
+- `WAITING` — ingest is configured but no validated snapshot has arrived
+- `LIVE` — the latest receive time and source observation time are both within the freshness threshold
+- `STALE` — the retained snapshot is too old to be treated as current vehicle state
+
+The current v1 store is process-local and in-memory. A Railway restart clears the latest snapshot back to `WAITING`; a future persistence layer is required before treating this as shared multi-replica telemetry storage.
+
+The Command Rail exposes PX4 telemetry only as a read-only tool. It has no arm, takeoff, navigation, mission-write, actuator, or other vehicle-control function.
+
 ## Core endpoints
 
 Public runtime/dashboard endpoints:
@@ -66,9 +86,14 @@ Protected command endpoints require `Authorization: Bearer <COMMAND_CENTER_ACCES
 - `GET /api/eagle-eyes/world-os`
 - `GET /api/eagle-eyes/knowledge?q=...`
 - `GET /api/eagle-eyes/weather?location=...`
+- `GET /api/eagle-eyes/px4`
 - `GET /api/assistant/auth-check`
 - `POST /api/assistant`
 - `POST /api/assistant/stream`
+
+PX4 companion ingest requires `Authorization: Bearer <PX4_TELEMETRY_INGEST_TOKEN>`:
+
+- `POST /api/eagle-eyes/px4/ingest`
 
 ## Run locally
 
