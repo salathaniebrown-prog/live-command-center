@@ -133,6 +133,27 @@ test("reports UNCONFIGURED, WAITING, LIVE and STALE honestly", () => {
   );
 });
 
+test("marks delayed source observations stale even when they were just received", () => {
+  const store = new Px4TelemetryStore({
+    staleAfterMs: 15000
+  });
+
+  store.ingest({
+    vehicleId: "eagle-1",
+    observedAt: "2026-09-02T02:29:00Z",
+    armed: true
+  }, "2026-09-02T02:30:00Z");
+
+  const status = store.status({
+    configured: true,
+    now: "2026-09-02T02:30:01Z"
+  });
+
+  assert.equal(status.receivedAgeMs, 1000);
+  assert.equal(status.sourceAgeMs, 61000);
+  assert.equal(status.state, "STALE");
+});
+
 test("formatted stale telemetry warns that it is not current vehicle state", () => {
   const store = new Px4TelemetryStore({
     staleAfterMs: 1000
