@@ -13,6 +13,10 @@ const {
   shouldUseFreeKnowledge
 } = require("./world-os");
 const { normalizeWorldData } = require("./data-spine");
+const {
+  Px4TelemetryStore,
+  formatPx4Telemetry
+} = require("./px4-telemetry");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
 
@@ -23,6 +27,14 @@ const startedAt = new Date();
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6";
 const COMMAND_CENTER_ACCESS_TOKEN = process.env.COMMAND_CENTER_ACCESS_TOKEN || "";
+const PX4_TELEMETRY_INGEST_TOKEN = process.env.PX4_TELEMETRY_INGEST_TOKEN || "";
+const PX4_TELEMETRY_STALE_MS = Math.max(
+  1000,
+  Number(process.env.PX4_TELEMETRY_STALE_MS) || 15000
+);
+const px4TelemetryStore = new Px4TelemetryStore({
+  staleAfterMs: PX4_TELEMETRY_STALE_MS
+});
 const OPENAI_URL = "https://api.openai.com/v1/responses";
 
 const SOURCES = {
@@ -141,6 +153,14 @@ const TOOLS = [
   },
   {
     type: "function",
+    name: "get_px4_telemetry",
+    description:
+      "Read the latest validated PX4 vehicle telemetry snapshot and freshness state. This tool is observation-only and cannot arm, move, navigate, or command a vehicle.",
+    strict: true,
+    parameters: EMPTY
+  },
+  {
+    type: "function",
     name: "get_world_os_status",
     description:
       "Get Eagle Eyes World Command Operating System capability and module status.",
@@ -151,7 +171,8 @@ const TOOLS = [
 
 const INSTRUCTIONS = [
   "You are Eagle Eyes, the intelligence core of the EAGLE EYES WORLD COMMAND OPERATING SYSTEM.",
-  "Use tools for current system state, metrics, deployment state, health, world-event feeds, global weather, and encyclopedic world knowledge.",
+  "Use tools for current system state, metrics, deployment state, health, world-event feeds, global weather, encyclopedic world knowledge, and validated PX4 telemetry when configured.",
+  "PX4 telemetry is observational only. Never claim flight-control authority, never invent vehicle state, and treat WAITING or STALE telemetry as non-current.",
   "For general factual questions that benefit from reference knowledge, call search_world_knowledge. For current weather by place, call get_global_weather.",
   "For a mission brief, situation report, broad incident-priority request, or question about what matters now, call get_operational_snapshot before answering.",
   "When prioritizing, distinguish source facts from interpretation and use explicit NWS severity, earthquake magnitude, recency, deployment health, and container pressure as evidence.",
@@ -210,6 +231,48 @@ function requireAssistantAccess(req, res, next) {
   }
 
   return next();
+}
+
+function requirePx4IngestAccess(req, res, next) {
+  if (!PX4_TELEMETRY_INGEST_TOKEN) {
+    return res.status(503).json({
+      ok: false,
+      error:
+        "PX4 telemetry ingest is locked until PX4_TELEMETRY_INGEST_TOKEN is configured"
+    });
+  }
+
+  const authorization =
+    req.get("authorization") || "";
+
+  const match =
+    authorization.match(
+      /^Bearer\s+(.+)$/i
+    );
+
+  if (
+    !match ||
+    !secretsMatch(
+      match[1],
+      PX4_TELEMETRY_INGEST_TOKEN
+    )
+  ) {
+    return res.status(401).json({
+      ok: false,
+      error: "Unauthorized"
+    });
+  }
+
+  return next();
+}
+
+function px4TelemetryStatus() {
+  return px4TelemetryStore.status({
+    configured:
+      Boolean(
+        PX4_TELEMETRY_INGEST_TOKEN
+      )
+  });
 }
 
 function cpuTimes() {
@@ -961,6 +1024,7 @@ async function freeCommand(message) {
         "• world data sources",
         "• world knowledge lookup (people, places, history, science, technology)",
         "• global current weather by city or place",
+        "• PX4 telemetry status / latest validated vehicle snapshot when configured",
         "• World OS capability status",
         "",
         "These commands use live read-only data. GPT-5.6 commands will automatically become available when API billing is active."
@@ -1042,6 +1106,22 @@ async function freeCommand(message) {
         ].join("\n")
       };
     }
+  }
+
+  if (
+    /\b(px4|uas telemetry|drone telemetry|vehicle telemetry|flight telemetry|flight mode|vehicle battery)\b/.test(q)
+  ) {
+    const telemetry =
+      px4TelemetryStatus();
+
+    return {
+      handled: true,
+      tool: "get_px4_telemetry",
+      text:
+        formatPx4Telemetry(
+          telemetry
+        )
+    };
   }
 
   if (/\b(deployment|deploy|railway)\b/.test(q)) {
@@ -1249,6 +1329,9 @@ async function runTool(call) {
       return globalWeather(
         args.location
       );
+
+    case "get_px4_telemetry":
+      return px4TelemetryStatus();
 
     case "get_world_os_status":
       return worldOSStatus();
@@ -1881,6 +1964,55 @@ app.get(
 );
 
 app.get(
+  "/api/eagle-eyes/px4",
+  requireAssistantAccess,
+  (_req, res) =>
+    res.json(
+      px4TelemetryStatus()
+    )
+);
+
+app.post(
+  "/api/eagle-eyes/px4/ingest",
+  requirePx4IngestAccess,
+  (req, res) => {
+    try {
+      const telemetry =
+        px4TelemetryStore.ingest(
+          req.body
+        );
+
+      return res
+        .status(202)
+        .json({
+          ok: true,
+          accepted: true,
+          simulated: false,
+          schemaVersion:
+            telemetry.schemaVersion,
+          vehicleId:
+            telemetry.vehicleId,
+          receivedAt:
+            telemetry.receivedAt,
+          state: "LIVE"
+        });
+    } catch (error) {
+      return res
+        .status(400)
+        .json({
+          ok: false,
+          accepted: false,
+          error:
+            error.message,
+          simulated: false,
+          timestamp:
+            new Date().toISOString()
+        });
+    }
+  }
+);
+
+app.get(
   "/api/eagle-eyes/snapshot",
   requireAssistantAccess,
   async (_req, res) => {
@@ -2011,6 +2143,21 @@ app.get(
       globalWeather:
         "Open-Meteo",
 
+      px4Telemetry: {
+        ingestConfigured:
+          Boolean(
+            PX4_TELEMETRY_INGEST_TOKEN
+          ),
+        state:
+          px4TelemetryStatus().state,
+        staleAfterMs:
+          px4TelemetryStore.staleAfterMs,
+        readOnlyCommandRail:
+          true,
+        commandAuthority:
+          false
+      },
+
       commandMode:
         OPENAI_API_KEY
           ? "AI+FREE"
@@ -2116,7 +2263,7 @@ app.post(
             mode:
               "free",
             error:
-              "GPT-5.6 is temporarily unavailable. Free commands remain available: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, global weather, world knowledge, World OS status, or help."
+              "GPT-5.6 is temporarily unavailable. Free commands remain available: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, PX4 telemetry, global weather, world knowledge, World OS status, or help."
           });
       }
 
@@ -2292,7 +2439,7 @@ app.post(
           text: [
             "GPT-5.6 is temporarily unavailable because API billing is not active.",
             "",
-            "FREE COMMAND MODE is still online. Try: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, weather in a city, a factual world-knowledge question, World OS status, or help."
+            "FREE COMMAND MODE is still online. Try: mission brief, health, live metrics, deployment, NWS alerts, USGS earthquakes, NASA EONET, PX4 telemetry, weather in a city, a factual world-knowledge question, World OS status, or help."
           ].join("\n")
         }
       );
