@@ -181,8 +181,10 @@ def main():
         elif kind == "GPS_RAW_INT":
             gps = {
                 "fixType": msg.fix_type,
-                "satellites": msg.satellites_visible,
             }
+            satellites = getattr(msg, "satellites_visible", 255)
+            if 0 <= satellites <= 100:
+                gps["satellites"] = satellites
             if getattr(msg, "eph", 65535) != 65535:
                 gps["hdop"] = msg.eph / 100.0
             if getattr(msg, "epv", 65535) != 65535:
