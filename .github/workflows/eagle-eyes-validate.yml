@@ -1,0 +1,61 @@
+name: Eagle Eyes Validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+      - "recovery/**"
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Backend syntax and unit checks
+        run: npm run build
+
+      - name: Check recovered bridge syntax
+        run: python3 -m py_compile bridges/px4-mavlink-bridge.py
+
+      - name: Check physical-server installer syntax
+        run: bash -n deploy/install-systemd.sh
+
+  mobile-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: clients/mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install mobile dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Bundle Android JavaScript
+        env:
+          CI: "1"
+          EXPO_NO_TELEMETRY: "1"
+        run: npx expo export --platform android --output-dir dist

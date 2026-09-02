@@ -1,0 +1,59 @@
+name: Build Eagle Eyes Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - "recovery/**"
+    paths:
+      - "clients/mobile/**"
+      - ".github/workflows/eagle-eyes-android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: clients/mobile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Generate Android project
+        env:
+          CI: "1"
+          EXPO_NO_TELEMETRY: "1"
+        run: npx expo prebuild --platform android --non-interactive
+
+      - name: Build installable debug APK
+        working-directory: clients/mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Eagle Eyes APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eagle-Eyes-Android
+          path: clients/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
