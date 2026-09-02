@@ -2148,8 +2148,6 @@ app.get(
           Boolean(
             PX4_TELEMETRY_INGEST_TOKEN
           ),
-        state:
-          px4TelemetryStatus().state,
         staleAfterMs:
           px4TelemetryStore.staleAfterMs,
         readOnlyCommandRail:
