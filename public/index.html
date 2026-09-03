@@ -541,6 +541,77 @@
     .map-source-nws { color: #f2c66d; }
     .map-source-satellite { color: #eef6ff; }
 
+    .map-satellite-detail {
+      margin-top: 10px;
+      border: 1px solid rgba(238,246,255,.18);
+      border-radius: 12px;
+      background: rgba(238,246,255,.035);
+      padding: 12px;
+    }
+
+    .map-satellite-detail[hidden] { display: none; }
+
+    .map-satellite-detail-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .map-satellite-detail-title {
+      color: #eef6ff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .map-satellite-clear {
+      border: 1px solid rgba(242,198,109,.25);
+      border-radius: 999px;
+      background: rgba(7,7,6,.7);
+      color: var(--gold);
+      padding: 6px 9px;
+      font-size: 9px;
+      cursor: pointer;
+    }
+
+    .map-satellite-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .map-satellite-cell {
+      min-width: 0;
+      padding: 8px;
+      border-radius: 9px;
+      background: rgba(255,255,255,.018);
+      border: 1px solid rgba(238,246,255,.09);
+    }
+
+    .map-satellite-cell span {
+      display: block;
+      color: var(--muted);
+      font-size: 8px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .map-satellite-cell b {
+      display: block;
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 760px) {
+      .map-satellite-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
     .map-note {
       margin-top: 10px;
       color: var(--muted);
@@ -946,7 +1017,22 @@
                 <span class="map-chip">UPDATED <b id="map-updated">—</b></span>
               </div>
             </div>
+            <div class="map-satellite-detail" id="map-satellite-detail" hidden>
+              <div class="map-satellite-detail-head">
+                <div class="map-satellite-detail-title">SELECTED SATELLITE · LIVE PROPAGATED POSITION</div>
+                <button class="map-satellite-clear" id="map-satellite-clear" type="button">CLEAR</button>
+              </div>
+              <div class="map-satellite-grid">
+                <div class="map-satellite-cell"><span>Name</span><b id="map-sat-name">N/A</b></div>
+                <div class="map-satellite-cell"><span>NORAD</span><b id="map-sat-norad">N/A</b></div>
+                <div class="map-satellite-cell"><span>Latitude</span><b id="map-sat-lat">N/A</b></div>
+                <div class="map-satellite-cell"><span>Longitude</span><b id="map-sat-lon">N/A</b></div>
+                <div class="map-satellite-cell"><span>Altitude</span><b id="map-sat-alt">N/A</b></div>
+                <div class="map-satellite-cell"><span>Positions At</span><b id="map-sat-time">N/A</b></div>
+              </div>
+            </div>
             <div class="map-note">
+              Tap a satellite marker to inspect its current CelesTrak/NORAD-derived position. Selected objects stay highlighted as the live satellite sample refreshes.
               This surface plots coordinates and polygons preserved by <b>eagle-eyes.data-spine.v1</b>.
               USGS earthquake points include real latitude/longitude and depth; NASA EONET uses its latest event geometry;
               NWS polygons are drawn only when the alert source supplies geometry. CelesTrak Weather-group objects are propagated
@@ -1198,6 +1284,70 @@
 
     let px4Cache = null;
     let satelliteCache = null;
+    let selectedSatelliteNoradId = null;
+    let satelliteHitTargets = [];
+
+    function selectedSatellite() {
+      return (satelliteCache?.satellites || []).find(
+        (item) => String(item?.noradId || "") === String(selectedSatelliteNoradId || "")
+      ) || null;
+    }
+
+    function renderSatelliteDetail() {
+      const detail = document.getElementById("map-satellite-detail");
+      if (!detail) return;
+
+      const satellite = selectedSatellite();
+      if (!satellite) {
+        detail.hidden = true;
+        return;
+      }
+
+      detail.hidden = false;
+      document.getElementById("map-sat-name").textContent = satellite.name || "N/A";
+      document.getElementById("map-sat-norad").textContent = satellite.noradId || "N/A";
+      document.getElementById("map-sat-lat").textContent =
+        Number.isFinite(satellite.latitude) ? satellite.latitude.toFixed(5) + "°" : "N/A";
+      document.getElementById("map-sat-lon").textContent =
+        Number.isFinite(satellite.longitude) ? satellite.longitude.toFixed(5) + "°" : "N/A";
+      document.getElementById("map-sat-alt").textContent =
+        Number.isFinite(satellite.altitudeKm) ? satellite.altitudeKm.toFixed(2) + " km" : "N/A";
+      document.getElementById("map-sat-time").textContent =
+        satelliteCache?.positionsAt
+          ? new Date(satelliteCache.positionsAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit"
+            })
+          : "N/A";
+    }
+
+    function selectSatelliteFromCanvas(event) {
+      const canvas = document.getElementById("ops-map-canvas");
+      if (!canvas || !satelliteHitTargets.length) return;
+
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const x = ((event.clientX - rect.left) / rect.width) * (canvas.clientWidth || rect.width);
+      const y = ((event.clientY - rect.top) / rect.height) * 390;
+
+      let best = null;
+      let bestDistance = Infinity;
+
+      for (const target of satelliteHitTargets) {
+        const distance = Math.hypot(target.x - x, target.y - y);
+        if (distance < bestDistance) {
+          best = target;
+          bestDistance = distance;
+        }
+      }
+
+      if (!best || bestDistance > 18) return;
+
+      selectedSatelliteNoradId = best.satellite.noradId;
+      renderOperationsMap();
+    }
 
     function projectCoordinate(longitude, latitude, width, height) {
       if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return null;
@@ -1320,6 +1470,7 @@
       let usgsPlotted = 0;
       let px4Plotted = 0;
       let satellitePlotted = 0;
+      satelliteHitTargets = [];
 
       // NWS polygons under point events.
       ctx.lineWidth = 1.2;
@@ -1420,6 +1571,32 @@
         ctx.stroke();
         ctx.restore();
 
+        satelliteHitTargets.push({
+          x: p.x,
+          y: p.y,
+          satellite
+        });
+
+        if (String(satellite.noradId) === String(selectedSatelliteNoradId || "")) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+          ctx.strokeStyle = "#f2c66d";
+          ctx.lineWidth = 1.5;
+          ctx.shadowColor = "rgba(242,198,109,.65)";
+          ctx.shadowBlur = 10;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "#f2c66d";
+          ctx.font = "9px system-ui, sans-serif";
+          ctx.fillText(
+            String(satellite.name || "SATELLITE").slice(0, 24),
+            p.x + 10,
+            p.y - 8
+          );
+          ctx.restore();
+        }
+
         satellitePlotted += 1;
       }
 
@@ -1467,6 +1644,7 @@
         ? new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         : "—";
       setDot("map-dot", total > 0);
+      renderSatelliteDetail();
     }
 
     async function fetchFeeds() {
@@ -1936,6 +2114,19 @@
         if (prompt) await sendCommand(prompt);
       });
     });
+
+    const operationsCanvas = document.getElementById("ops-map-canvas");
+    if (operationsCanvas) {
+      operationsCanvas.addEventListener("click", selectSatelliteFromCanvas);
+    }
+
+    const satelliteClear = document.getElementById("map-satellite-clear");
+    if (satelliteClear) {
+      satelliteClear.addEventListener("click", () => {
+        selectedSatelliteNoradId = null;
+        renderOperationsMap();
+      });
+    }
 
     fetchRuntime();
     fetchFeeds();
