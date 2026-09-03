@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - "recovery/**"
+      - "recover/**"
 
 permissions:
   contents: read
@@ -29,6 +30,12 @@ jobs:
 
       - name: Backend syntax and unit checks
         run: npm run build
+
+      - name: Check recovered World Data Worker syntax
+        run: |
+          node --check workers/world-data-edge/worker.mjs
+          node --check workers/world-data-v2-legacy-proxy/worker.mjs
+          node --check workers/world-data-v2/worker.mjs
 
       - name: Check recovered bridge syntax
         run: python3 -m py_compile bridges/px4-mavlink-bridge.py
