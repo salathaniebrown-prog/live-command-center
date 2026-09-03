@@ -11,3 +11,7 @@ The production `main` branch was not modified by this recovery. The current Rail
 Recommended promotion target after validation: `workers/world-data-v2/worker.mjs`.
 
 No simulated runtime data is introduced by these recovered Worker files.
+
+## Mobile wiring
+
+The recovered mobile client exposes a WORLD DATA tab. It reads the Worker URL from `EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL` at build time. If that variable is absent, the tab reports that World Data V2 is not configured and leaves the existing Railway World OS untouched.
