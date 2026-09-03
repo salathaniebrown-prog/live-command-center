@@ -39,21 +39,24 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Verify isolated recovery package
+        run: npx expo config --type public
+
       - name: Generate Android project
         env:
           CI: "1"
           EXPO_NO_TELEMETRY: "1"
         run: npx expo prebuild --platform android --non-interactive
 
-      - name: Build installable debug APK
+      - name: Build signed debug APK
         working-directory: clients/mobile/android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload Eagle Eyes APK
+      - name: Upload signed recovery APK
         uses: actions/upload-artifact@v4
         with:
-          name: Eagle-Eyes-Android
+          name: Eagle-Eyes-Recovery-Debug-Signed
           path: clients/mobile/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
