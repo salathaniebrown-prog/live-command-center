@@ -1,0 +1,129 @@
+name: Eagle Eyes Recovery Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "recovery/**"
+      - "recover/**"
+    paths:
+      - "server.js"
+      - "world-os.js"
+      - "data-spine.js"
+      - "px4-telemetry.js"
+      - "clients/mobile/**"
+      - "workers/**"
+      - ".github/workflows/eagle-eyes-recovery-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout recovery branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install backend dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Validate backend and recovered workers
+        run: |
+          npm run build
+          node --check workers/world-data-edge/worker.mjs
+          node --check workers/world-data-v2-legacy-proxy/worker.mjs
+          node --check workers/world-data-v2/worker.mjs
+
+      - name: Start Eagle Eyes locally
+        env:
+          PORT: "3000"
+        run: |
+          nohup node server.js > /tmp/eagle-eyes.log 2>&1 &
+          echo $! > /tmp/eagle-eyes.pid
+
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/eagle-eyes.log
+          exit 1
+
+      - name: Smoke test Eagle Eyes core endpoints
+        run: |
+          set -euo pipefail
+
+          curl --fail --silent http://127.0.0.1:3000/api/health | tee /tmp/health.json
+          curl --fail --silent http://127.0.0.1:3000/api/status | tee /tmp/status.json
+          curl --fail --silent http://127.0.0.1:3000/api/metrics | tee /tmp/metrics.json
+          curl --fail --silent http://127.0.0.1:3000/api/deployment | tee /tmp/deployment.json
+          curl --fail --silent http://127.0.0.1:3000/api/assistant/status | tee /tmp/assistant.json
+          curl --fail --silent http://127.0.0.1:3000/api/eagle-eyes/sources | tee /tmp/sources.json
+
+          node <<'NODE'
+          const fs = require('fs');
+
+          const read = (name) =>
+            JSON.parse(fs.readFileSync('/tmp/' + name + '.json', 'utf8'));
+
+          const health = read('health');
+          const status = read('status');
+          const deployment = read('deployment');
+          const assistant = read('assistant');
+          const sources = read('sources');
+
+          if (health.ok !== true) throw new Error('health endpoint is not OK');
+          if (status.online !== true) throw new Error('status endpoint is not ONLINE');
+          if (deployment.stage !== 'RUNNING') throw new Error('deployment stage is not RUNNING');
+          if (assistant.freeMode !== true) throw new Error('free command mode is not available');
+          if (sources.simulated !== false) throw new Error('source contract allows simulated data');
+
+          const required = ['usgs', 'eonet', 'nws'];
+          for (const source of required) {
+            if (!sources.sources.includes(source)) {
+              throw new Error('missing required source: ' + source);
+            }
+          }
+
+          console.log('Eagle Eyes recovery smoke test passed');
+          NODE
+
+      - name: Install mobile dependencies
+        working-directory: clients/mobile
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Export recovered Android bundle
+        working-directory: clients/mobile
+        env:
+          CI: "1"
+          EXPO_NO_TELEMETRY: "1"
+          EXPO_PUBLIC_EAGLE_EYES_BASE_URL: "https://live-command-center-production-31ed.up.railway.app"
+        run: npx expo export --platform android --output-dir dist
+
+      - name: Upload smoke-test evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eagle-Eyes-Recovery-Smoke-Evidence
+          path: |
+            /tmp/health.json
+            /tmp/status.json
+            /tmp/metrics.json
+            /tmp/deployment.json
+            /tmp/assistant.json
+            /tmp/sources.json
+            clients/mobile/dist
+          if-no-files-found: error
+
+      - name: Show server log on failure
+        if: failure()
+        run: cat /tmp/eagle-eyes.log || true
