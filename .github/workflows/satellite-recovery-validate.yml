@@ -1,0 +1,33 @@
+name: Satellite Recovery Validation
+
+on:
+  pull_request:
+    paths:
+      - "satellites.js"
+      - "server.js"
+      - "public/index.html"
+      - "package.json"
+      - "test/satellites.test.js"
+      - ".github/workflows/satellite-recovery-validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Run Eagle Eyes checks
+        run: npm run check
