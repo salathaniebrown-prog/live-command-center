@@ -539,6 +539,7 @@
     .map-source-usgs { color: #8dc8ff; }
     .map-source-eonet { color: #ffb968; }
     .map-source-nws { color: #f2c66d; }
+    .map-source-satellite { color: #eef6ff; }
 
     .map-note {
       margin-top: 10px;
@@ -913,6 +914,7 @@
               <div class="feed-row"><strong>NWS</strong><span>Active alerts sample</span><span class="feed-count" id="nws-count">—</span></div>
               <div class="feed-row"><strong>USGS</strong><span>Earthquake feed sample</span><span class="feed-count" id="usgs-count">—</span></div>
               <div class="feed-row"><strong>NASA EONET</strong><span>Active natural events sample</span><span class="feed-count" id="eonet-count">—</span></div>
+              <div class="feed-row"><strong>CELESTRAK</strong><span>Weather satellite orbital positions</span><span class="feed-count" id="celestrak-count">—</span></div>
               <div class="feed-row"><strong>WIKIPEDIA</strong><span>World knowledge</span><span class="feed-count">READY</span></div>
               <div class="feed-row"><strong>OPEN-METEO</strong><span>Global current weather</span><span class="feed-count">READY</span></div>
             </div>
@@ -938,6 +940,7 @@
                 <span class="map-chip map-source-usgs">USGS <b id="map-usgs-count">0</b></span>
                 <span class="map-chip map-source-eonet">NASA EONET <b id="map-eonet-count">0</b></span>
                 <span class="map-chip map-source-nws">NWS GEOMETRY <b id="map-nws-count">0</b></span>
+                <span class="map-chip map-source-satellite">SATELLITES <b id="map-satellite-count">0</b></span>
                 <span class="map-chip">PX4 <b id="map-px4-state">LOCKED</b></span>
                 <span class="map-chip">PLOTTED <b id="map-total-count">0</b></span>
                 <span class="map-chip">UPDATED <b id="map-updated">—</b></span>
@@ -946,8 +949,9 @@
             <div class="map-note">
               This surface plots coordinates and polygons preserved by <b>eagle-eyes.data-spine.v1</b>.
               USGS earthquake points include real latitude/longitude and depth; NASA EONET uses its latest event geometry;
-              NWS polygons are drawn only when the alert source supplies geometry. The grid is a longitude/latitude projection,
-              not simulated geography.
+              NWS polygons are drawn only when the alert source supplies geometry. CelesTrak Weather-group objects are propagated
+              from current NORAD GP orbital elements using SGP4 and plotted at the reported positionsAt time. The grid is a
+              longitude/latitude projection; no simulated geography or simulated orbit data is substituted.
             </div>
           </div>
         </article>
@@ -1193,6 +1197,7 @@
     };
 
     let px4Cache = null;
+    let satelliteCache = null;
 
     function projectCoordinate(longitude, latitude, width, height) {
       if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return null;
@@ -1314,6 +1319,7 @@
       let eonetPlotted = 0;
       let usgsPlotted = 0;
       let px4Plotted = 0;
+      let satellitePlotted = 0;
 
       // NWS polygons under point events.
       ctx.lineWidth = 1.2;
@@ -1376,6 +1382,47 @@
         usgsPlotted += 1;
       }
 
+      // CelesTrak weather satellites propagated from current NORAD GP data.
+      for (const satellite of satelliteCache?.satellites || []) {
+        if (
+          !Number.isFinite(satellite?.longitude) ||
+          !Number.isFinite(satellite?.latitude)
+        ) {
+          continue;
+        }
+
+        const p = projectCoordinate(
+          satellite.longitude,
+          satellite.latitude,
+          cssWidth,
+          cssHeight
+        );
+
+        if (!p) continue;
+
+        ctx.save();
+        ctx.fillStyle = "#eef6ff";
+        ctx.strokeStyle = "rgba(238,246,255,.78)";
+        ctx.shadowColor = "rgba(238,246,255,.62)";
+        ctx.shadowBlur = 8;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(p.x - 5, p.y);
+        ctx.lineTo(p.x + 5, p.y);
+        ctx.moveTo(p.x, p.y - 5);
+        ctx.lineTo(p.x, p.y + 5);
+        ctx.stroke();
+        ctx.restore();
+
+        satellitePlotted += 1;
+      }
+
       // PX4 vehicle is plotted only while freshness state is LIVE.
       if (px4Cache?.state === "LIVE") {
         const vehicle = px4Cache.telemetry;
@@ -1408,10 +1455,11 @@
         }
       }
 
-      const total = nwsPlotted + eonetPlotted + usgsPlotted + px4Plotted;
+      const total = nwsPlotted + eonetPlotted + usgsPlotted + satellitePlotted + px4Plotted;
       document.getElementById("map-usgs-count").textContent = String(usgsPlotted);
       document.getElementById("map-eonet-count").textContent = String(eonetPlotted);
       document.getElementById("map-nws-count").textContent = String(nwsPlotted);
+      document.getElementById("map-satellite-count").textContent = String(satellitePlotted);
       document.getElementById("map-px4-state").textContent =
         px4Cache?.state || (getAssistantToken() ? "N/A" : "LOCKED");
       document.getElementById("map-total-count").textContent = String(total);
@@ -1475,6 +1523,35 @@
         document.getElementById("feeds-error").textContent = error.message;
         setDot("feeds-dot", false);
       }
+    }
+
+    async function fetchSatellites() {
+      const countEl = document.getElementById("celestrak-count");
+
+      try {
+        const data =
+          await getJson(
+            "/api/eagle-eyes/satellites?limit=30"
+          );
+
+        satelliteCache = data;
+
+        if (countEl) {
+          countEl.textContent =
+            String(
+              data.count ?? 0
+            );
+        }
+      } catch {
+        satelliteCache = null;
+
+        if (countEl) {
+          countEl.textContent =
+            "N/A";
+        }
+      }
+
+      renderOperationsMap();
     }
 
     function getAssistantToken() {
@@ -1862,10 +1939,12 @@
 
     fetchRuntime();
     fetchFeeds();
+    fetchSatellites();
     fetchAssistantStatus();
 
     setInterval(fetchRuntime, 5000);
     setInterval(fetchFeeds, 30000);
+    setInterval(fetchSatellites, 60000);
     setInterval(fetchAssistantStatus, 30000);
     setInterval(fetchPx4Telemetry, 5000);
 
