@@ -14,6 +14,10 @@ const {
 } = require("./world-os");
 const { normalizeWorldData } = require("./data-spine");
 const {
+  CELESTRAK_WEATHER_URL,
+  weatherSatellites
+} = require("./satellites");
+const {
   Px4TelemetryStore,
   formatPx4Telemetry
 } = require("./px4-telemetry");
@@ -114,6 +118,25 @@ const TOOLS = [
   },
   {
     type: "function",
+    name: "get_weather_satellites",
+    description:
+      "Get up to 30 real weather-satellite positions propagated from current CelesTrak NORAD GP orbital elements. Never simulate missing orbital data.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: 30
+        }
+      },
+      required: ["limit"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
     name: "search_world_knowledge",
     description:
       "Search free encyclopedic world knowledge for people, places, organizations, history, science, technology, and general factual topics.",
@@ -174,6 +197,7 @@ const INSTRUCTIONS = [
   "Use tools for current system state, metrics, deployment state, health, world-event feeds, global weather, encyclopedic world knowledge, and validated PX4 telemetry when configured.",
   "PX4 telemetry is observational only. Never claim flight-control authority, never invent vehicle state, and treat WAITING or STALE telemetry as non-current.",
   "For general factual questions that benefit from reference knowledge, call search_world_knowledge. For current weather by place, call get_global_weather.",
+  "For current weather-satellite orbital positions, call get_weather_satellites. Treat CelesTrak GP-derived positions as propagated orbital estimates at the reported positionsAt time, not imagery and not sensor observations.",
   "For a mission brief, situation report, broad incident-priority request, or question about what matters now, call get_operational_snapshot before answering.",
   "When prioritizing, distinguish source facts from interpretation and use explicit NWS severity, earthquake magnitude, recency, deployment health, and container pressure as evidence.",
   "Keep mission briefs executive and mobile-friendly: group related alerts, show no more than five top incidents, shorten long area lists, separate system pressure from external incidents, explain why each priority matters, and finish with a short WATCH NEXT section.",
@@ -1021,6 +1045,7 @@ async function freeCommand(message) {
         "• NWS weather alerts",
         "• USGS earthquakes",
         "• NASA EONET events",
+        "• 30 real weather-satellite orbital positions from CelesTrak NORAD GP data",
         "• world data sources",
         "• world knowledge lookup (people, places, history, science, technology)",
         "• global current weather by city or place",
@@ -1174,9 +1199,52 @@ async function freeCommand(message) {
         `USGS: ${SOURCES.usgs}`,
         `NASA EONET: ${SOURCES.eonet}`,
         `NOAA / NWS: ${SOURCES.nws}`,
+        `CelesTrak Weather Satellites: ${CELESTRAK_WEATHER_URL}`,
         "Simulation: OFF"
       ].join("\n")
     };
+  }
+
+  if (
+    /\b(satellite|satellites|norad|orbital|orbit)\b/.test(q)
+  ) {
+    try {
+      const data =
+        await weatherSatellites(30);
+
+      const lines =
+        (data.satellites || [])
+          .slice(0, 10)
+          .map(
+            (item, index) =>
+              `${index + 1}. ${item.name} • NORAD ${item.noradId} • ${item.latitude}°, ${item.longitude}° • ${Number.isFinite(item.altitudeKm) ? item.altitudeKm + " km" : "altitude N/A"}`
+          );
+
+      return {
+        handled: true,
+        tool: "get_weather_satellites",
+        text: [
+          "CELESTRAK WEATHER SATELLITES",
+          `Live propagated positions: ${data.count}/${data.requested}`,
+          ...lines,
+          data.count > 10
+            ? `+ ${data.count - 10} more plotted on the Global Operations Map.`
+            : "",
+          "Simulation: OFF",
+          `Positions at: ${data.positionsAt}`
+        ].filter(Boolean).join("\n")
+      };
+    } catch (error) {
+      return {
+        handled: true,
+        tool: "get_weather_satellites",
+        text: [
+          "SATELLITE SOURCE TEMPORARILY UNAVAILABLE",
+          `Reason: ${error.message}`,
+          "No simulated orbit data was substituted."
+        ].join("\n")
+      };
+    }
   }
 
   const worldSource =
@@ -1316,6 +1384,11 @@ async function runTool(call) {
     case "get_world_events":
       return world(
         args.source,
+        args.limit
+      );
+
+    case "get_weather_satellites":
+      return weatherSatellites(
         args.limit
       );
 
@@ -1923,12 +1996,17 @@ app.get(
     res.json({
       ok: true,
       simulated: false,
-      sources:
-        Object.keys(
+      sources: [
+        ...Object.keys(
           SOURCES
         ),
-      urls:
-        SOURCES,
+        "celestrak-weather"
+      ],
+      urls: {
+        ...SOURCES,
+        "celestrak-weather":
+          CELESTRAK_WEATHER_URL
+      },
       timestamp:
         new Date().toISOString()
     })
@@ -1959,6 +2037,35 @@ app.get(
         timestamp:
           new Date().toISOString()
       });
+    }
+  }
+);
+
+app.get(
+  "/api/eagle-eyes/satellites",
+  async (req, res) => {
+    try {
+      return res.json(
+        await weatherSatellites(
+          Number(
+            req.query.limit ||
+              30
+          )
+        )
+      );
+    } catch (e) {
+      return res
+        .status(502)
+        .json({
+          ok: false,
+          error:
+            e.message,
+          source:
+            "celestrak",
+          simulated: false,
+          timestamp:
+            new Date().toISOString()
+        });
     }
   }
 );
