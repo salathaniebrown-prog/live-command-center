@@ -789,6 +789,147 @@
       .assistant-send { width: 100%; min-height: 44px; }
       .quick-commands { grid-template-columns: 1fr; }
     }
+  
+    /* Gold Network recovery layer: restored from the investor-demo UI, wired only to real command paths. */
+    .gold-network {
+      margin-bottom: 14px;
+      border: 1px solid rgba(246,196,105,.42);
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 85% 10%, rgba(242,198,109,.14), transparent 28rem),
+        linear-gradient(145deg, rgba(22,18,12,.98), rgba(7,7,6,.97));
+      box-shadow: 0 24px 70px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.025);
+    }
+    .gold-network-head {
+      padding: 18px 20px 12px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(216,170,87,.17);
+    }
+    .gold-network-title {
+      margin: 4px 0 0;
+      font-size: clamp(24px, 4vw, 46px);
+      line-height: .96;
+      letter-spacing: -.035em;
+      font-weight: 760;
+    }
+    .gold-network-badge {
+      flex: 0 0 auto;
+      border: 1px solid rgba(115,229,140,.32);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--green);
+      background: rgba(115,229,140,.055);
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .max-grid {
+      display: grid;
+      grid-template-columns: minmax(0,1.45fr) minmax(280px,.8fr);
+      gap: 0;
+    }
+    .max-main { padding: 18px 20px 20px; }
+    .max-side {
+      padding: 18px 20px 20px;
+      border-left: 1px solid rgba(216,170,87,.16);
+      background: rgba(0,0,0,.12);
+    }
+    .max-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-top: 13px;
+    }
+    .max-input {
+      min-width: 0;
+      min-height: 52px;
+      border: 1px solid rgba(246,196,105,.40);
+      border-radius: 14px;
+      padding: 0 15px;
+      outline: none;
+      color: var(--text);
+      background: rgba(0,0,0,.28);
+      box-shadow: inset 0 0 26px rgba(242,198,109,.025);
+    }
+    .max-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(242,198,109,.06);
+    }
+    .max-send {
+      min-width: 112px;
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      padding: 0 18px;
+      cursor: pointer;
+      font-weight: 850;
+      letter-spacing: .09em;
+      color: #171108;
+      background: linear-gradient(135deg, #f5d58e, #c98b32);
+    }
+    .max-hint {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.55;
+    }
+    .exec-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .exec-title strong { font-size: 14px; letter-spacing: .04em; }
+    .exec-tools {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 8px;
+    }
+    .exec-tool {
+      min-height: 44px;
+      border: 1px solid rgba(216,170,87,.20);
+      border-radius: 12px;
+      padding: 9px 10px;
+      cursor: pointer;
+      color: #d9d0c2;
+      background: rgba(255,255,255,.018);
+      text-align: left;
+      font-size: 10px;
+      line-height: 1.3;
+    }
+    .exec-tool b {
+      display: block;
+      color: var(--gold);
+      margin-bottom: 2px;
+      font-size: 10px;
+      letter-spacing: .05em;
+    }
+    .exec-tool:hover { border-color: var(--line-strong); }
+    .real-only-note {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(216,170,87,.12);
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.55;
+    }
+    @media (max-width: 900px) {
+      .max-grid { grid-template-columns: 1fr; }
+      .max-side { border-left: 0; border-top: 1px solid rgba(216,170,87,.16); }
+    }
+    @media (max-width: 560px) {
+      .gold-network { border-radius: 16px; }
+      .gold-network-head { padding: 15px 14px 11px; }
+      .max-main, .max-side { padding: 14px; }
+      .max-form { grid-template-columns: 1fr; }
+      .max-send { min-height: 48px; }
+      .exec-tools { grid-template-columns: 1fr 1fr; }
+    }
+
   </style>
 </head>
 <body>
@@ -803,7 +944,7 @@
       </div>
 
       <nav>
-        <a class="nav-item active" href="#overview">Overview</a>
+        <a class="nav-item active" href="#max">MAX / CEO</a>\n        <a class="nav-item" href="#overview">Overview</a>
         <a class="nav-item" href="#runtime">Runtime</a>
         <a class="nav-item" href="#intelligence">Intelligence</a>
         <a class="nav-item" href="#command">Command Rail</a>
@@ -820,8 +961,8 @@
       <header class="topbar">
         <div class="identity">
           <div class="eyebrow">Salathaniel Brown Sr • Command Center</div>
-          <h2>EAGLE EYES COMMAND CENTER V2</h2>
-          <p>REAL-TIME • READ-ONLY • WORLD INTELLIGENCE • PRODUCTION RUNTIME</p>
+          <h2>EAGLE EYES GOLD NETWORK</h2>
+          <p>WORLD COMMAND OS • EAGLE EYES MAX • EXECUTIVE CHIEF • REAL DATA ONLY</p>
         </div>
         <div class="top-status">
           <span class="dot" id="top-dot"></span>
@@ -831,6 +972,52 @@
           </div>
         </div>
       </header>
+
+
+      <section class="gold-network" id="max">
+        <div class="gold-network-head">
+          <div>
+            <div class="eyebrow">Gold Network • World Command Operating System</div>
+            <div class="gold-network-title">EAGLE EYES MAX</div>
+          </div>
+          <div class="gold-network-badge">REAL DATA ONLY</div>
+        </div>
+        <div class="max-grid">
+          <div class="max-main">
+            <div class="eyebrow">Ask • Research • Command</div>
+            <form class="max-form" id="max-form">
+              <input class="max-input" id="max-input" autocomplete="off"
+                placeholder="Ask anything: world brief, weather, research, system, GitHub, PX4…" />
+              <button class="max-send" type="submit">ASK</button>
+            </form>
+            <div class="max-hint">
+              This restored MAX bar uses the same protected Eagle Eyes command engine below.
+              Live values must come from connected sources; unavailable capability is reported as unavailable.
+            </div>
+          </div>
+          <aside class="max-side">
+            <div class="exec-title">
+              <div>
+                <div class="eyebrow">Executive Chief</div>
+                <strong>CEO / PRESIDENT COMMAND</strong>
+              </div>
+            </div>
+            <div class="exec-tools">
+              <button class="exec-tool max-command" data-prompt="CEO scorecard: use the live operational snapshot and current system state to give me the top executive priorities, risks, opportunities, and next decisions. Do not invent unavailable business or financial data."><b>CEO SCORECARD</b>Executive priorities</button>
+              <button class="exec-tool max-command" data-prompt="CTO audit: inspect the current live runtime, health, deployment state, metrics, public data feeds, and World OS capability. Identify the most important technical risks and next actions."><b>CTO AUDIT</b>Technical readiness</button>
+              <button class="exec-tool max-command" data-prompt="CFO brief: report only financial or cost information actually available to Eagle Eyes. If direct financial data is not connected, say so and give the operational cost questions the CEO should verify next."><b>CFO BRIEF</b>No invented financials</button>
+              <button class="exec-tool max-command" data-prompt="World brief: build a live operational snapshot using current NWS, USGS, NASA EONET, Railway, and runtime evidence and prioritize what matters now."><b>WORLD BRIEF</b>Live situation report</button>
+              <button class="exec-tool max-command" data-prompt="Weather: ask me for a location if none is provided, then use the live global weather capability."><b>WEATHER</b>Open-Meteo live weather</button>
+              <button class="exec-tool max-command" data-prompt="Crypto research: use only information actually available to Eagle Eyes. Do not claim current prices unless a live market source is connected; clearly state any live-market limitation."><b>CRYPTO</b>Research surface</button>
+              <button class="exec-tool max-command" data-prompt="Satellites: report the current orbital/satellite capability and source availability. Do not invent satellite positions or counts. If the live orbital feed is not connected, say UNAVAILABLE and identify that restoration requirement."><b>SATELLITES</b>Real orbital data only</button>
+              <button class="exec-tool max-command" data-prompt="System: check live Command Center health, metrics, Railway deployment state, World OS status, and PX4 telemetry freshness."><b>SYSTEM</b>Command Center state</button>
+            </div>
+            <div class="real-only-note">
+              Recovery rule: no simulated satellites, telemetry, prices, alerts, or deployment state.
+            </div>
+          </aside>
+        </div>
+      </section>
 
       <section class="hero" id="overview">
         <div class="hero-grid">
@@ -1032,7 +1219,7 @@
               </div>
               <div class="assistant-model" id="assistant-model">Checking command layer…</div>
               <div class="assistant-log" id="assistant-log">
-                <div class="message message-system">EAGLE EYES V2 ready. Unlock the protected command rail to use Mission Brief, telemetry, live public feeds, world knowledge, global weather, and GPT-5.6 routing when API access is active.</div>
+                <div class="message message-system">EAGLE EYES GOLD NETWORK recovery ready. Unlock the protected command rail to use Mission Brief, telemetry, live public feeds, world knowledge, global weather, and GPT-5.6 routing when API access is active.</div>
               </div>
               <form class="assistant-form" id="assistant-form">
                 <textarea class="assistant-input" id="assistant-input" placeholder="Command Eagle Eyes: mission brief, weather in Raleigh, USGS earthquakes, NWS alerts, World OS status…" required></textarea>
@@ -1851,6 +2038,30 @@
       if (!message) return;
       input.value = "";
       await sendCommand(message);
+    });
+
+
+    const maxForm = document.getElementById("max-form");
+    const maxInput = document.getElementById("max-input");
+
+    if (maxForm && maxInput) {
+      maxForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const message = maxInput.value.trim();
+        if (!message) return;
+        maxInput.value = "";
+        document.getElementById("command")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        await sendCommand(message);
+      });
+    }
+
+    document.querySelectorAll(".max-command").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const prompt = button.dataset.prompt;
+        if (!prompt) return;
+        document.getElementById("command")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        await sendCommand(prompt);
+      });
     });
 
     document.querySelectorAll(".quick-command").forEach((button) => {
