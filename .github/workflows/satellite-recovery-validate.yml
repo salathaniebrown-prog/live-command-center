@@ -31,3 +31,12 @@ jobs:
 
       - name: Run Eagle Eyes checks
         run: npm run check
+
+      - name: Verify full live-data recovery limits
+        run: |
+          grep -Fq 'const MAX_SATELLITES = 512;' satellites.js
+          grep -Fq '/api/eagle-eyes/satellites?limit=120' public/index.html
+          grep -Fq 'source=nws&limit=50' public/index.html
+          grep -Fq 'source=usgs&limit=50' public/index.html
+          grep -Fq 'source=eonet&limit=50' public/index.html
+          echo 'Full live-data recovery verified: satellites 512 backend / 120 dashboard; NWS/USGS/EONET 50 each.'
