@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "test": "node --test",
     "check": "node --check server.js && node --check world-os.js && node --check data-spine.js && node --check satellites.js && node --check px4-telemetry.js && node --test",
-    "build": "npm run check"
+    "build:wallet": "npm --prefix wallet install --no-audit --no-fund && npm --prefix wallet run build",
+    "build": "npm run check && npm run build:wallet"
   },
   "keywords": [
     "dashboard",
