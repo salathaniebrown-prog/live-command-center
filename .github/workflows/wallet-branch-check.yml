@@ -1,0 +1,39 @@
+name: Check Eagle Eyes Wallet Branch
+
+on:
+  push:
+    branches:
+      - wallet/reown-support
+    paths:
+      - "wallet/**"
+      - "package.json"
+      - ".github/workflows/wallet-branch-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-wallet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install command center dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate command center
+        run: npm run check
+
+      - name: Install wallet dependencies
+        run: npm --prefix wallet install --no-audit --no-fund
+
+      - name: Build wallet
+        run: npm --prefix wallet run build
