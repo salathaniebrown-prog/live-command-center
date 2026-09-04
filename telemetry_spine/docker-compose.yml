@@ -1,0 +1,52 @@
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.2
+    container_name: eagle_eyes_broker
+    command:
+      - redpanda
+      - start
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --overprovisioned
+      - --kafka-addr
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "19092:19092"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster info --brokers=localhost:9092 >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  telemetry-spine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eagle_eyes_telemetry_spine
+    environment:
+      KAFKA_BROKER: redpanda:9092
+      TELEMETRY_TOPIC: eagle.eyes.field.telemetry
+      WEBSOCKET_HOST: 0.0.0.0
+      WEBSOCKET_PORT: "8080"
+      VOXEL_ORIGIN_LAT: ${VOXEL_ORIGIN_LAT:-35.6895}
+      VOXEL_ORIGIN_LON: ${VOXEL_ORIGIN_LON:-139.6917}
+      SATELLITE_BASE_URL: ${SATELLITE_BASE_URL:-}
+      SATELLITE_API_KEY: ${SATELLITE_API_KEY:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  redpanda_data:
