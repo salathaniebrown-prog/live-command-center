@@ -7,7 +7,8 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "APP_VARIANT": "preview"
+        "APP_VARIANT": "preview",
+        "EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL": "https://eagle-eyes-world-data-v2.salathaniebrown.chatgpt.site"
       },
       "android": {
         "buildType": "apk",
@@ -17,6 +18,9 @@
     "device": {
       "distribution": "internal",
       "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL": "https://eagle-eyes-world-data-v2.salathaniebrown.chatgpt.site"
+      },
       "android": {
         "buildType": "apk",
         "image": "latest"
@@ -24,6 +28,9 @@
     },
     "production": {
       "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL": "https://eagle-eyes-world-data-v2.salathaniebrown.chatgpt.site"
+      },
       "android": {
         "buildType": "app-bundle",
         "image": "latest"

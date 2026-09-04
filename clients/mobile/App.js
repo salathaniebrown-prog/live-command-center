@@ -17,6 +17,9 @@ const BASE_URL = (
   "https://live-command-center-production-31ed.up.railway.app"
 ).replace(/\/$/, "");
 const SEARCH_HOME = "https://www.google.com/";
+const WORLD_DATA_URL = (
+  process.env.EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL || ""
+).replace(/\/$/, "");
 
 function LoadingView({ label }) {
   return (
@@ -53,6 +56,40 @@ function WorldOS({ section = "overview" }) {
       setSupportMultipleWindows={false}
       startInLoadingState
       renderLoading={() => <LoadingView label="Opening full Eagle Eyes World OS…" />}
+    />
+  );
+}
+
+function WorldData() {
+  if (!WORLD_DATA_URL) {
+    return (
+      <ScrollView style={styles.status} contentContainerStyle={styles.statusContent}>
+        <Text style={styles.eyebrow}>EAGLE EYES</Text>
+        <Text style={styles.title}>WORLD DATA V2</Text>
+        <Text style={styles.subtitle}>
+          Recovered Cloudflare World Data layer · direct verified public sources
+        </Text>
+        <View style={styles.infoCard}>
+          <Text style={styles.infoLabel}>STATUS</Text>
+          <Text style={styles.infoValue}>NOT CONFIGURED IN THIS BUILD</Text>
+          <Text style={styles.infoMeta}>
+            Set EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL to the validated World Data V2 Worker URL.
+            The existing Railway World OS remains online and unchanged.
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  return (
+    <WebView
+      source={{ uri: WORLD_DATA_URL }}
+      style={styles.web}
+      originWhitelist={["https://*"]}
+      javaScriptEnabled
+      domStorageEnabled
+      startInLoadingState
+      renderLoading={() => <LoadingView label="Opening Eagle Eyes World Data V2…" />}
     />
   );
 }
@@ -295,12 +332,14 @@ export default function App() {
           label="COMMAND"
           onPress={() => openWorld("command")}
         />
+        <TabButton active={tab === "data"} label="WORLD DATA" onPress={() => setTab("data")} />
         <TabButton active={tab === "search"} label="WEB SEARCH" onPress={() => setTab("search")} />
         <TabButton active={tab === "status"} label="STATUS" onPress={() => setTab("status")} />
       </ScrollView>
 
       <View style={styles.flex}>
         {tab === "world" ? <WorldOS section={section} /> : null}
+        {tab === "data" ? <WorldData /> : null}
         {tab === "search" ? <WebSearch /> : null}
         {tab === "status" ? <LiveStatus /> : null}
       </View>

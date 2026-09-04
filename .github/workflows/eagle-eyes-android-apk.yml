@@ -17,6 +17,8 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL: "https://eagle-eyes-world-data-v2.salathaniebrown.chatgpt.site"
     defaults:
       run:
         working-directory: clients/mobile
@@ -45,15 +47,15 @@ jobs:
           EXPO_NO_TELEMETRY: "1"
         run: npx expo prebuild --platform android --non-interactive
 
-      - name: Build installable debug APK
+      - name: Build standalone release APK
         working-directory: clients/mobile/android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
-      - name: Upload Eagle Eyes APK
+      - name: Upload Eagle Eyes standalone APK
         uses: actions/upload-artifact@v4
         with:
-          name: Eagle-Eyes-Android
-          path: clients/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          name: Eagle-Eyes-Android-Standalone
+          path: clients/mobile/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
