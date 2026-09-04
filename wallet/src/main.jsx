@@ -8,7 +8,9 @@ import { base, mainnet } from "@reown/appkit/networks";
 import { useAppKitWallet } from "@reown/appkit-wallet-button/react";
 import "./styles.css";
 
-const projectId = import.meta.env.VITE_REOWN_PROJECT_ID?.trim();
+const projectId =
+  import.meta.env.VITE_REOWN_PROJECT_ID?.trim() ||
+  "2d96093f0de0a2b88730f312e2675e1b";
 const networks = [base, mainnet];
 const queryClient = new QueryClient();
 let wagmiAdapter = null;
