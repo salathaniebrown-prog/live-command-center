@@ -17,6 +17,8 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL: "https://eagle-eyes-world-data-v2.salathaniebrown.chatgpt.site"
     defaults:
       run:
         working-directory: clients/mobile
