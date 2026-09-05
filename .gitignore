@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+!.env.example
+telemetry_spine/.env
+__pycache__/
+*.py[cod]
+.venv/
+venv/

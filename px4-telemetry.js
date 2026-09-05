@@ -2,6 +2,111 @@
 
 const SCHEMA_VERSION = "eagle-eyes.px4-telemetry.v1";
 const DEFAULT_STALE_AFTER_MS = 15000;
+const TELEMETRY_RELAY_URL = String(process.env.TELEMETRY_RELAY_URL || "").trim();
+const TELEMETRY_RELAY_TOKEN = String(process.env.TELEMETRY_RELAY_TOKEN || "").trim();
+const TELEMETRY_RELAY_TIMEOUT_MS = Math.max(
+  250,
+  Math.min(5000, Number(process.env.TELEMETRY_RELAY_TIMEOUT_MS) || 1500)
+);
+
+const relayState = {
+  lastAttemptAt: null,
+  lastSuccessAt: null,
+  lastFailureAt: null,
+  lastError: null
+};
+
+function relayUrlAllowed(rawUrl = TELEMETRY_RELAY_URL) {
+  if (!rawUrl) {
+    return false;
+  }
+
+  try {
+    const url = new URL(rawUrl);
+    if (url.protocol === "https:") {
+      return true;
+    }
+
+    return (
+      url.protocol === "http:" &&
+      (
+        url.hostname === "localhost" ||
+        url.hostname === "127.0.0.1" ||
+        url.hostname.endsWith(".railway.internal")
+      )
+    );
+  } catch {
+    return false;
+  }
+}
+
+function telemetryRelayConfigured() {
+  return Boolean(
+    TELEMETRY_RELAY_TOKEN &&
+    relayUrlAllowed()
+  );
+}
+
+function telemetryRelayStatus() {
+  return {
+    configured: telemetryRelayConfigured(),
+    lastAttemptAt: relayState.lastAttemptAt,
+    lastSuccessAt: relayState.lastSuccessAt,
+    lastFailureAt: relayState.lastFailureAt,
+    lastError: relayState.lastError
+  };
+}
+
+async function relayPx4Telemetry(snapshot) {
+  if (!telemetryRelayConfigured()) {
+    return false;
+  }
+
+  relayState.lastAttemptAt = new Date().toISOString();
+
+  const response = await fetch(
+    TELEMETRY_RELAY_URL,
+    {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${TELEMETRY_RELAY_TOKEN}`,
+        "content-type": "application/json",
+        accept: "application/json"
+      },
+      body: JSON.stringify(snapshot),
+      signal: AbortSignal.timeout(
+        TELEMETRY_RELAY_TIMEOUT_MS
+      )
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `telemetry relay returned HTTP ${response.status}`
+    );
+  }
+
+  relayState.lastSuccessAt = new Date().toISOString();
+  relayState.lastError = null;
+  return true;
+}
+
+function queuePx4Relay(snapshot) {
+  if (!telemetryRelayConfigured()) {
+    return;
+  }
+
+  void relayPx4Telemetry(snapshot).catch((error) => {
+    relayState.lastFailureAt = new Date().toISOString();
+    relayState.lastError = String(
+      error?.message || "telemetry relay failed"
+    ).slice(0, 160);
+
+    console.error(
+      `[eagle-eyes] PX4 telemetry relay failed: ${relayState.lastError}`
+    );
+  });
+}
 
 function finiteOrNull(value) {
   return typeof value === "number" && Number.isFinite(value)
@@ -453,6 +558,7 @@ class Px4TelemetryStore {
 
     this.latest = snapshot;
     this.receivedCount += 1;
+    queuePx4Relay(snapshot);
 
     return snapshot;
   }
@@ -475,6 +581,7 @@ class Px4TelemetryStore {
         receivedCount: this.receivedCount,
         telemetry: null,
         ageMs: null,
+        relay: telemetryRelayStatus(),
         checkedAt
       };
     }
@@ -490,6 +597,7 @@ class Px4TelemetryStore {
         receivedCount: this.receivedCount,
         telemetry: null,
         ageMs: null,
+        relay: telemetryRelayStatus(),
         checkedAt
       };
     }
@@ -540,6 +648,7 @@ class Px4TelemetryStore {
       ageMs,
       receivedAgeMs,
       sourceAgeMs,
+      relay: telemetryRelayStatus(),
       checkedAt
     };
   }
@@ -624,5 +733,7 @@ module.exports = {
   DEFAULT_STALE_AFTER_MS,
   normalizePx4Telemetry,
   Px4TelemetryStore,
-  formatPx4Telemetry
+  formatPx4Telemetry,
+  telemetryRelayConfigured,
+  telemetryRelayStatus
 };
