@@ -1,4 +1,5 @@
 aiokafka==0.8.1
+kafka-python==2.0.2
 websockets==11.0.3
 aiohttp==3.9.1
 numpy==1.26.4
