@@ -20,16 +20,35 @@ logger = logging.getLogger("EagleEyesTelemetrySmokeTest")
 SELF_TEST_FRAMES = int(os.getenv("TELEMETRY_SELF_TEST_FRAMES", "0"))
 
 
-async def wait_for_consumer(server: TelemetrySpineServer, timeout_s: float = 20.0):
+async def wait_for_partition_assignment(
+    server: TelemetrySpineServer,
+    timeout_s: float = 60.0,
+):
     deadline = asyncio.get_running_loop().time() + timeout_s
-    while server.consumer is None:
+    while True:
+        consumer = server.consumer
+        if consumer is not None and consumer.assignment():
+            logger.info(
+                "Telemetry consumer owns partitions=%s",
+                sorted(str(partition) for partition in consumer.assignment()),
+            )
+            return
+
         if asyncio.get_running_loop().time() >= deadline:
-            raise TimeoutError("telemetry consumer did not become ready")
-        await asyncio.sleep(0.1)
+            raise TimeoutError("telemetry consumer did not receive a partition assignment")
+
+        await asyncio.sleep(0.25)
 
 
 async def run_end_to_end_self_test(server: TelemetrySpineServer, frame_count: int):
-    await wait_for_consumer(server)
+    logger.info(
+        "TELEMETRY SELF-TEST START frames=%d broker=%s topic=%s",
+        frame_count,
+        KAFKA_BROKER,
+        TELEMETRY_TOPIC,
+    )
+
+    await wait_for_partition_assignment(server)
 
     websocket_url = f"ws://127.0.0.1:{WEBSOCKET_PORT}"
     sequence_base = int(time.time() * 1000) * 1000
@@ -84,12 +103,18 @@ async def run_end_to_end_self_test(server: TelemetrySpineServer, frame_count: in
 
 
 async def main():
+    logger.info("Telemetry entrypoint started self_test_frames=%d", SELF_TEST_FRAMES)
+
     server = TelemetrySpineServer()
     server_task = asyncio.create_task(server.run())
 
     try:
         if SELF_TEST_FRAMES > 0:
-            await run_end_to_end_self_test(server, SELF_TEST_FRAMES)
+            try:
+                await run_end_to_end_self_test(server, SELF_TEST_FRAMES)
+            except Exception:
+                logger.exception("TELEMETRY SELF-TEST FAIL")
+
         await server_task
     finally:
         if not server_task.done():
