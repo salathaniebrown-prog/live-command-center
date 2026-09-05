@@ -40,3 +40,153 @@ jobs:
           grep -Fq 'source=usgs&limit=50' public/index.html
           grep -Fq 'source=eonet&limit=50' public/index.html
           echo 'Full live-data recovery verified: satellites 512 backend / 120 dashboard; NWS/USGS/EONET 50 each.'
+
+      - name: Smoke-test transformed HTTP route limits
+        env:
+          PORT: "31337"
+        run: |
+          cat > /tmp/eagle-eyes-mock-fetch.cjs <<'EOF'
+          const makeJsonResponse = (value) =>
+            new Response(JSON.stringify(value), {
+              status: 200,
+              headers: { "content-type": "application/json" }
+            });
+
+          const point = (index) => [
+            -120 + (index % 60),
+            20 + (index % 40),
+            5
+          ];
+
+          const usgs = {
+            metadata: {
+              generated: Date.now(),
+              title: "CI fixture",
+              api: "1.0",
+              count: 60,
+              status: 200
+            },
+            features: Array.from({ length: 60 }, (_, index) => ({
+              id: `usgs-${index}`,
+              type: "Feature",
+              geometry: { type: "Point", coordinates: point(index) },
+              properties: {
+                mag: 3,
+                place: `CI place ${index}`,
+                time: Date.now(),
+                updated: Date.now(),
+                url: `https://example.test/usgs/${index}`,
+                title: `CI earthquake ${index}`,
+                type: "earthquake"
+              }
+            }))
+          };
+
+          const eonet = {
+            title: "CI fixture",
+            events: Array.from({ length: 60 }, (_, index) => ({
+              id: `eonet-${index}`,
+              title: `CI event ${index}`,
+              categories: [{ title: "Storms" }],
+              geometry: [{
+                date: new Date().toISOString(),
+                type: "Point",
+                coordinates: point(index).slice(0, 2)
+              }]
+            }))
+          };
+
+          const nws = {
+            title: "CI fixture",
+            features: Array.from({ length: 60 }, (_, index) => ({
+              id: `nws-${index}`,
+              type: "Feature",
+              geometry: { type: "Point", coordinates: point(index).slice(0, 2) },
+              properties: {
+                id: `nws-${index}`,
+                event: "Severe Thunderstorm Warning",
+                headline: `CI alert ${index}`,
+                severity: "Severe",
+                areaDesc: `CI area ${index}`,
+                sent: new Date().toISOString(),
+                effective: new Date().toISOString(),
+                expires: new Date(Date.now() + 3600000).toISOString()
+              }
+            }))
+          };
+
+          const epoch = new Date().toISOString().replace("Z", "");
+          const satellites = Array.from({ length: 130 }, (_, index) => ({
+            OBJECT_NAME: `CI WEATHER ${index}`,
+            OBJECT_ID: `2026-${String(index + 1).padStart(3, "0")}A`,
+            EPOCH: epoch,
+            MEAN_MOTION: 15.00555103,
+            ECCENTRICITY: 0.000583,
+            INCLINATION: 98.3164,
+            RA_OF_ASC_NODE: 103.8411,
+            ARG_OF_PERICENTER: 20.5667,
+            MEAN_ANOMALY: 339.5789,
+            EPHEMERIS_TYPE: 0,
+            CLASSIFICATION_TYPE: "U",
+            NORAD_CAT_ID: 28492 + index,
+            ELEMENT_SET_NO: 999,
+            REV_AT_EPOCH: 8655,
+            BSTAR: 0.00048021,
+            MEAN_MOTION_DOT: 0.00005995,
+            MEAN_MOTION_DDOT: 0
+          }));
+
+          globalThis.fetch = async (input) => {
+            const url = String(input);
+            if (url.includes("earthquake.usgs.gov")) return makeJsonResponse(usgs);
+            if (url.includes("eonet.gsfc.nasa.gov")) return makeJsonResponse(eonet);
+            if (url.includes("api.weather.gov")) return makeJsonResponse(nws);
+            if (url.includes("celestrak.org")) return makeJsonResponse(satellites);
+            throw new Error(`Unexpected CI fetch: ${url}`);
+          };
+          EOF
+
+          NODE_OPTIONS="--require=/tmp/eagle-eyes-mock-fetch.cjs" node server.js > /tmp/eagle-eyes-smoke.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS "http://127.0.0.1:${PORT}/api/health" >/dev/null 2>&1; then
+              break
+            fi
+            sleep 0.25
+          done
+
+          curl -fsS "http://127.0.0.1:${PORT}/api/eagle-eyes/satellites?limit=120" > /tmp/satellites.json
+          curl -fsS "http://127.0.0.1:${PORT}/api/eagle-eyes/events?source=nws&limit=50" > /tmp/nws.json
+          curl -fsS "http://127.0.0.1:${PORT}/api/eagle-eyes/events?source=usgs&limit=50" > /tmp/usgs.json
+          curl -fsS "http://127.0.0.1:${PORT}/api/eagle-eyes/events?source=eonet&limit=50" > /tmp/eonet.json
+
+          node <<'NODE'
+          const fs = require("fs");
+          const read = (name) => JSON.parse(fs.readFileSync(`/tmp/${name}.json`, "utf8"));
+
+          const satelliteResult = read("satellites");
+          if (satelliteResult.requested !== 120 || satelliteResult.count !== 120) {
+            throw new Error(
+              `Expected HTTP satellite route to accept/return 120; got requested=${satelliteResult.requested} count=${satelliteResult.count}`
+            );
+          }
+          if (satelliteResult.simulated !== false) {
+            throw new Error("Satellite smoke response must remain marked simulated=false");
+          }
+
+          for (const source of ["nws", "usgs", "eonet"]) {
+            const result = read(source);
+            if (result.count !== 50) {
+              throw new Error(`Expected HTTP ${source} route to return 50 CI fixture records; got ${result.count}`);
+            }
+            if (result.simulated !== false) {
+              throw new Error(`${source} smoke response must remain marked simulated=false`);
+            }
+          }
+
+          console.log("HTTP smoke test verified: 120 satellites and 50 NWS/USGS/EONET records through transformed server routes.");
+          NODE
+
+          cat /tmp/eagle-eyes-smoke.log
