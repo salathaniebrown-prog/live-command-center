@@ -241,7 +241,7 @@ const serverCheck = spawnSync(process.execPath, ["--check", serverPath], {
 let dashboardSyntaxError = null;
 try {
   const start = dashboard.lastIndexOf("<script>");
-  const end = dashboard.lastIndexOf("</script>");
+  const end = dashboard.indexOf("</script>", start);
   if (start === -1 || end === -1 || end <= start) {
     throw new Error("inline Chronicle script block not found");
   }
