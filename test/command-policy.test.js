@@ -70,3 +70,19 @@ test("observation payloads carry explicit non-command authority", () => {
   assert.equal(payload.commandEligible, false);
   assert.equal(payload.provenance.authoritativeSource, "NOAA/NWS");
 });
+
+test("observation payload authority cannot be overridden", () => {
+  const payload = markObservationPayload(
+    {
+      authority: "command",
+      commandEligible: true
+    },
+    {
+      authority: "command",
+      commandEligible: true
+    }
+  );
+
+  assert.equal(payload.authority, "observation");
+  assert.equal(payload.commandEligible, false);
+});
