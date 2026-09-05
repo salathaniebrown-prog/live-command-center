@@ -1,0 +1,72 @@
+name: Hyper Velocity Observation Stack Validate
+
+on:
+  push:
+    branches:
+      - experiment/hyper-velocity-observation-stack
+    paths:
+      - "experiments/hyper-velocity-stack/**"
+      - ".github/workflows/hyper-velocity-stack-validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Docker Compose + Observation Safety
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: experiments/hyper-velocity-stack
+
+    steps:
+      - name: Checkout experimental branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile Python sources
+        run: python -m py_compile main.py hyper_velocity_spine.py test_security.py
+
+      - name: Validate Docker Compose model
+        run: docker compose config --quiet
+
+      - name: Build experimental engine image
+        run: docker compose build eagle-eyes-engine
+
+      - name: Run observation-boundary regression tests
+        run: docker compose run --rm --no-deps eagle-eyes-engine python -m unittest -v test_security.py
+
+      - name: Start validation services
+        run: docker compose up -d redpanda eagle-eyes-engine prometheus
+
+      - name: Verify engine health and metrics
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8000/health > /tmp/eagle-eyes-health.json; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              docker compose ps
+              docker compose logs --no-color redpanda eagle-eyes-engine
+              exit 1
+            fi
+            sleep 2
+          done
+          cat /tmp/eagle-eyes-health.json
+          curl --fail --silent http://127.0.0.1:8000/metrics | grep -q "eagle_eyes_"
+          curl --fail --silent http://127.0.0.1:8000/api/v1/nasa/config > /tmp/nasa-config.json
+          cat /tmp/nasa-config.json
+
+      - name: Show service status
+        if: always()
+        run: docker compose ps
+
+      - name: Tear down validation stack
+        if: always()
+        run: docker compose down --volumes --remove-orphans
