@@ -60,14 +60,14 @@ function assertObservationToolset(tools) {
 function markObservationPayload(payload, extra = {}) {
   return {
     ...payload,
-    ...OBSERVATION_AUTHORITY,
     provenance: {
       ...(payload && payload.provenance ? payload.provenance : {}),
       ...(extra.provenance || {})
     },
     ...Object.fromEntries(
       Object.entries(extra).filter(([key]) => key !== "provenance")
-    )
+    ),
+    ...OBSERVATION_AUTHORITY
   };
 }
 
