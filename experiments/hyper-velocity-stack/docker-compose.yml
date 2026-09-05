@@ -1,0 +1,61 @@
+name: eagle-eyes-hyper-velocity-experiment
+
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.2
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "19092:19092"
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "info"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  eagle-eyes-engine:
+    build: .
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      TELEMETRY_TOPIC: planetary-simulation-stream
+    ports:
+      - "8000:8000"
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  hypersonic-simulator:
+    build: .
+    command: ["python", "hyper_velocity_spine.py"]
+    environment:
+      INGEST_URL: http://eagle-eyes-engine:8000/api/v1/telemetry/ingest
+      SIMULATION_INTERVAL_SECONDS: "0.5"
+    depends_on:
+      eagle-eyes-engine:
+        condition: service_healthy
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      eagle-eyes-engine:
+        condition: service_healthy
+    restart: unless-stopped
