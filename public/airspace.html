@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Eagle Eyes Airspace</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.7.0/dist/maplibre-gl.css" />
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body, #map { width: 100%; height: 100%; margin: 0; }
+    body { overflow: hidden; background: #010405; color: #00ffcc; font-family: "Courier New", monospace; }
+    #map { position: fixed; inset: 0; }
+    #hud { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+    #cross-v { position: absolute; left: 50%; top: 0; width: 1px; height: 100%; background: rgba(0,255,204,.22); }
+    #cross-h { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(0,255,204,.22); }
+    .panel { pointer-events: auto; position: absolute; background: rgba(2,12,14,.88); border: 1px solid #00ffcc; border-radius: 5px; box-shadow: 0 0 20px rgba(0,255,204,.18); backdrop-filter: blur(5px); }
+    #control { top: max(14px, env(safe-area-inset-top)); left: 14px; width: min(360px, calc(100vw - 28px)); padding: 16px; }
+    #logbox { right: 14px; bottom: max(14px, env(safe-area-inset-bottom)); width: min(430px, calc(100vw - 28px)); max-height: 190px; overflow: hidden; padding: 14px; }
+    h1 { margin: 0 0 10px; padding-bottom: 7px; border-bottom: 1px dashed rgba(0,255,204,.55); font-size: 17px; letter-spacing: 2px; }
+    .line { display: flex; gap: 12px; justify-content: space-between; margin: 7px 0; font-size: 12px; }
+    .label { color: rgba(0,255,204,.6); }
+    .value { text-align: right; font-weight: 700; color: #e9ffff; }
+    .good { color: #33ff66; }
+    .warn { color: #ffd84d; }
+    #logs { font-size: 11px; line-height: 1.45; }
+    .marker { width: 12px; height: 12px; border: 2px solid white; border-radius: 50%; background: #00ffcc; box-shadow: 0 0 12px #00ffcc; }
+    .marker::after { content: ""; position: absolute; width: 22px; height: 22px; border: 1px solid rgba(0,255,204,.45); border-radius: 50%; left: -7px; top: -7px; }
+    .maplibregl-ctrl-top-right { top: max(8px, env(safe-area-inset-top)); }
+    @media (max-width: 720px) {
+      #control { padding: 12px; }
+      #logbox { max-height: 135px; }
+      h1 { font-size: 15px; }
+      .line { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="hud">
+    <div id="cross-v"></div>
+    <div id="cross-h"></div>
+    <section id="control" class="panel">
+      <h1>EAGLE EYES AIRSPACE</h1>
+      <div class="line"><span class="label">EARTH IMAGERY</span><span class="value">NASA GIBS TRUE COLOR</span></div>
+      <div class="line"><span class="label">IMAGERY DATE</span><span class="value" id="imagery-date">LOADING</span></div>
+      <div class="line"><span class="label">ORBIT SOURCE</span><span class="value">CELESTRAK / SGP4</span></div>
+      <div class="line"><span class="label">SATELLITES</span><span class="value good" id="sat-count">SCANNING</span></div>
+      <div class="line"><span class="label">COMMAND CENTER</span><span class="value" id="system-state">CHECKING</span></div>
+      <div class="line"><span class="label">SIMULATION</span><span class="value good">OFF</span></div>
+    </section>
+    <section id="logbox" class="panel">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;border-bottom:1px solid rgba(0,255,204,.3);padding-bottom:5px;margin-bottom:7px">SPACEBORNE FEED</div>
+      <div id="logs">Initializing NASA GIBS imagery and orbital feed…</div>
+    </section>
+  </div>
+
+  <script type="module">
+    import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.7.0/dist/maplibre-gl.mjs';
+
+    const DAY_MS = 86400000;
+    const imageryDate = new Date(Date.now() - (3 * DAY_MS)).toISOString().slice(0, 10);
+    const tileUrl = `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${imageryDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
+    document.getElementById('imagery-date').textContent = imageryDate;
+
+    const map = new maplibregl.Map({
+      container: 'map',
+      center: [0, 15],
+      zoom: 1.15,
+      minZoom: 0,
+      maxZoom: 9,
+      attributionControl: true,
+      style: {
+        version: 8,
+        projection: { type: 'globe' },
+        sources: {
+          'nasa-gibs': {
+            type: 'raster',
+            tiles: [tileUrl],
+            tileSize: 256,
+            minzoom: 0,
+            maxzoom: 9,
+            attribution: 'NASA EOSDIS GIBS / Worldview'
+          }
+        },
+        layers: [
+          {
+            id: 'nasa-true-color',
+            type: 'raster',
+            source: 'nasa-gibs',
+            paint: { 'raster-opacity': 1, 'raster-fade-duration': 150 }
+          }
+        ],
+        sky: {
+          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0]
+        }
+      }
+    });
+
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+    if (maplibregl.GlobeControl) map.addControl(new maplibregl.GlobeControl(), 'top-right');
+
+    const logEl = document.getElementById('logs');
+    const satCountEl = document.getElementById('sat-count');
+    const systemStateEl = document.getElementById('system-state');
+    const markers = new Map();
+
+    function log(message, level = 'ok') {
+      const stamp = new Date().toISOString().slice(11, 19);
+      const color = level === 'error' ? '#ff6688' : level === 'warn' ? '#ffd84d' : '#00ffcc';
+      const row = `<div style="color:${color}">[${stamp}] ${message}</div>`;
+      logEl.innerHTML = row + logEl.innerHTML;
+      while (logEl.children.length > 7) logEl.removeChild(logEl.lastChild);
+    }
+
+    map.on('load', () => log(`NASA GIBS TRUE COLOR ${imageryDate} loaded`));
+    map.on('error', (event) => {
+      const msg = event?.error?.message || 'Map tile error';
+      if (!/AbortError/i.test(msg)) log(`MAP: ${msg}`, 'warn');
+    });
+
+    function validNumber(value) {
+      return typeof value === 'number' && Number.isFinite(value);
+    }
+
+    function updateMarker(item) {
+      if (!validNumber(item.longitude) || !validNumber(item.latitude)) return;
+      const id = String(item.noradId || item.name || `${item.longitude}:${item.latitude}`);
+      let entry = markers.get(id);
+      if (!entry) {
+        const el = document.createElement('div');
+        el.className = 'marker';
+        entry = new maplibregl.Marker({ element: el })
+          .setLngLat([item.longitude, item.latitude])
+          .setPopup(new maplibregl.Popup({ offset: 18 }).setHTML(
+            `<strong>${String(item.name || 'Satellite')}</strong><br>` +
+            `NORAD ${String(item.noradId || 'N/A')}<br>` +
+            `${validNumber(item.altitudeKm) ? item.altitudeKm.toFixed(1) + ' km' : 'Altitude N/A'}`
+          ))
+          .addTo(map);
+        markers.set(id, entry);
+      } else {
+        entry.setLngLat([item.longitude, item.latitude]);
+      }
+      return id;
+    }
+
+    async function refreshSatellites() {
+      try {
+        const response = await fetch('/api/eagle-eyes/satellites?limit=30', { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const satellites = Array.isArray(data.satellites) ? data.satellites : [];
+        const active = new Set();
+        satellites.forEach(item => {
+          const id = updateMarker(item);
+          if (id) active.add(id);
+        });
+        for (const [id, marker] of markers) {
+          if (!active.has(id)) {
+            marker.remove();
+            markers.delete(id);
+          }
+        }
+        satCountEl.textContent = String(satellites.length);
+        satCountEl.className = 'value good';
+        log(`CelesTrak orbital positions: ${satellites.length}`);
+      } catch (error) {
+        satCountEl.textContent = 'UNAVAILABLE';
+        satCountEl.className = 'value warn';
+        log(`SATELLITES: ${error.message}`, 'error');
+      }
+    }
+
+    async function refreshStatus() {
+      try {
+        const response = await fetch('/api/status', { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const online = data.online !== false;
+        systemStateEl.textContent = online ? 'ONLINE' : 'DEGRADED';
+        systemStateEl.className = online ? 'value good' : 'value warn';
+      } catch (error) {
+        systemStateEl.textContent = 'UNAVAILABLE';
+        systemStateEl.className = 'value warn';
+      }
+    }
+
+    refreshSatellites();
+    refreshStatus();
+    setInterval(refreshSatellites, 15000);
+    setInterval(refreshStatus, 5000);
+  </script>
+</body>
+</html>
