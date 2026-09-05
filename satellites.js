@@ -1,5 +1,8 @@
 "use strict";
 
+const fs = require("node:fs/promises");
+const path = require("node:path");
+
 const CELESTRAK_WEATHER_URL =
   "https://celestrak.org/NORAD/elements/gp.php?GROUP=WEATHER&FORMAT=JSON";
 const MAX_SATELLITES = 30;
@@ -32,6 +35,84 @@ function validOmm(record) {
   );
 }
 
+function resolveStatePath(value) {
+  const candidate =
+    value ||
+    process.env.SATELLITE_STATE_PATH ||
+    null;
+
+  return candidate
+    ? path.resolve(String(candidate))
+    : null;
+}
+
+async function persistWeatherElements(
+  statePath,
+  records,
+  fetchedAt
+) {
+  const target =
+    resolveStatePath(statePath);
+
+  if (!target) return false;
+
+  await fs.mkdir(
+    path.dirname(target),
+    { recursive: true }
+  );
+
+  const temp =
+    `${target}.${process.pid}.${Date.now()}.tmp`;
+
+  const payload = {
+    version: 1,
+    source: "celestrak-weather",
+    fetchedAt,
+    records
+  };
+
+  await fs.writeFile(
+    temp,
+    JSON.stringify(payload),
+    "utf8"
+  );
+
+  await fs.rename(temp, target);
+  return true;
+}
+
+async function loadPersistedWeatherElements(
+  statePath
+) {
+  const target =
+    resolveStatePath(statePath);
+
+  if (!target) return null;
+
+  try {
+    const raw =
+      await fs.readFile(target, "utf8");
+    const payload =
+      JSON.parse(raw);
+    const records =
+      Array.isArray(payload.records)
+        ? payload.records.filter(validOmm)
+        : [];
+
+    if (!records.length) return null;
+
+    return {
+      records,
+      fetchedAt:
+        typeof payload.fetchedAt === "string"
+          ? payload.fetchedAt
+          : null
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function satelliteLibrary() {
   if (!satelliteLibraryPromise) {
     satelliteLibraryPromise =
@@ -43,7 +124,8 @@ async function satelliteLibrary() {
 
 async function fetchWeatherElements({
   fetchImpl = globalThis.fetch,
-  nowMs = Date.now()
+  nowMs = Date.now(),
+  statePath = null
 } = {}) {
   if (
     Array.isArray(elementCache.records) &&
@@ -52,68 +134,117 @@ async function fetchWeatherElements({
     return {
       records: elementCache.records,
       fetchedAt: elementCache.fetchedAt,
-      cached: true
+      cached: true,
+      persistentFallback: false,
+      persistentSaved: false
     };
   }
 
-  if (typeof fetchImpl !== "function") {
-    throw new Error(
-      "Fetch is unavailable for CelesTrak weather data"
-    );
+  let liveError = null;
+
+  try {
+    if (typeof fetchImpl !== "function") {
+      throw new Error(
+        "Fetch is unavailable for CelesTrak weather data"
+      );
+    }
+
+    const response =
+      await fetchImpl(
+        CELESTRAK_WEATHER_URL,
+        {
+          headers: {
+            accept: "application/json",
+            "user-agent":
+              "Eagle-Eyes-Live-Command-Center/1.0"
+          },
+          signal:
+            AbortSignal.timeout(10000)
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        `CelesTrak returned HTTP ${response.status}`
+      );
+    }
+
+    const data =
+      await response.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error(
+        "CelesTrak weather response was not an array"
+      );
+    }
+
+    const records =
+      data.filter(validOmm);
+
+    if (!records.length) {
+      throw new Error(
+        "CelesTrak returned no usable weather GP records"
+      );
+    }
+
+    const fetchedAt =
+      new Date(nowMs).toISOString();
+
+    elementCache = {
+      records,
+      fetchedAtMs: nowMs,
+      fetchedAt
+    };
+
+    let persistentSaved = false;
+
+    try {
+      persistentSaved =
+        await persistWeatherElements(
+          statePath,
+          records,
+          fetchedAt
+        );
+    } catch {
+      persistentSaved = false;
+    }
+
+    return {
+      records,
+      fetchedAt,
+      cached: false,
+      persistentFallback: false,
+      persistentSaved
+    };
+  } catch (error) {
+    liveError = error;
   }
 
-  const response =
-    await fetchImpl(
-      CELESTRAK_WEATHER_URL,
-      {
-        headers: {
-          accept: "application/json",
-          "user-agent":
-            "Eagle-Eyes-Live-Command-Center/1.0"
-        },
-        signal:
-          AbortSignal.timeout(10000)
-      }
+  const persisted =
+    await loadPersistedWeatherElements(
+      statePath
     );
 
-  if (!response.ok) {
-    throw new Error(
-      `CelesTrak returned HTTP ${response.status}`
-    );
+  if (persisted) {
+    elementCache = {
+      records: persisted.records,
+      fetchedAtMs: 0,
+      fetchedAt: persisted.fetchedAt
+    };
+
+    return {
+      records: persisted.records,
+      fetchedAt: persisted.fetchedAt,
+      cached: true,
+      persistentFallback: true,
+      persistentSaved: false,
+      fallbackReason:
+        liveError?.message ||
+        "CelesTrak live fetch unavailable"
+    };
   }
 
-  const data =
-    await response.json();
-
-  if (!Array.isArray(data)) {
-    throw new Error(
-      "CelesTrak weather response was not an array"
-    );
-  }
-
-  const records =
-    data.filter(validOmm);
-
-  if (!records.length) {
-    throw new Error(
-      "CelesTrak returned no usable weather GP records"
-    );
-  }
-
-  const fetchedAt =
-    new Date(nowMs).toISOString();
-
-  elementCache = {
-    records,
-    fetchedAtMs: nowMs,
-    fetchedAt
-  };
-
-  return {
-    records,
-    fetchedAt,
-    cached: false
-  };
+  throw liveError;
 }
 
 function projectOmm(
@@ -277,6 +408,10 @@ async function weatherSatellites(
       source.fetchedAt,
     upstreamCached:
       source.cached,
+    persistentFallback:
+      Boolean(source.persistentFallback),
+    fallbackReason:
+      source.fallbackReason || null,
     positionsAt:
       at.toISOString(),
     satellites,
