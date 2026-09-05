@@ -8,18 +8,26 @@ const OBSERVATION_AUTHORITY = Object.freeze({
 const PROHIBITED_COMMAND_PATTERNS = [
   /\barm\b/i,
   /\bdisarm\b/i,
-  /\btake[ -]?off\b/i,
+  /\btake\s*off\b/i,
   /\bland\b/i,
   /\bnavigate\b/i,
   /\bmission\s*(start|upload|execute)\b/i,
-  /\bset[_ -]?(mode|position|velocity|attitude|throttle)\b/i,
+  /\bset\s*(mode|position|velocity|attitude|throttle)\b/i,
   /\bgoto\b/i,
   /\bmove\b/i,
   /\bactuate\b/i
 ];
 
+function normalizeToolName(name) {
+  return String(name || "")
+    .trim()
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .toLowerCase();
+}
+
 function isProhibitedCommandName(name) {
-  const value = String(name || "").trim();
+  const value = normalizeToolName(name);
   return PROHIBITED_COMMAND_PATTERNS.some((pattern) => pattern.test(value));
 }
 
@@ -66,6 +74,7 @@ function markObservationPayload(payload, extra = {}) {
 module.exports = {
   OBSERVATION_AUTHORITY,
   PROHIBITED_COMMAND_PATTERNS,
+  normalizeToolName,
   isProhibitedCommandName,
   assertObservationTool,
   assertObservationToolset,
