@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 
 const {
   OBSERVATION_AUTHORITY,
+  normalizeToolName,
   isProhibitedCommandName,
   assertObservationTool,
   assertObservationToolset,
@@ -16,14 +17,27 @@ test("observation authority can never authorize commands", () => {
   assert.equal(OBSERVATION_AUTHORITY.commandEligible, false);
 });
 
+test("tool-name normalization handles snake, kebab, spaces, and camelCase", () => {
+  assert.equal(normalizeToolName("arm_vehicle"), "arm vehicle");
+  assert.equal(normalizeToolName("take-off"), "take off");
+  assert.equal(normalizeToolName("setVelocity"), "set velocity");
+});
+
 test("prohibited PX4 command names are rejected", () => {
   const prohibited = [
     "arm_vehicle",
+    "disarm-vehicle",
     "takeoff",
+    "take_off",
     "land_vehicle",
     "goto_waypoint",
     "set_velocity",
-    "mission_execute"
+    "setVelocity",
+    "mission_execute",
+    "missionStart",
+    "navigate_vehicle",
+    "move_vehicle",
+    "actuate_servo"
   ];
 
   for (const name of prohibited) {
