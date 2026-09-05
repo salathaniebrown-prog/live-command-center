@@ -153,7 +153,8 @@ test("subsequent Scribe cycle detects new, updated, and window-exit records", ()
   assert.equal(second.changes.notReturned.length, 1);
   assert.equal(second.changes.notReturned[0].kind, "not_returned");
   assert.match(second.changes.notReturned[0].note, /not treated as resolved/i);
-  assert.doesNotMatch(second.text, /resolved\.$/m);
+  assert.match(second.text, /WINDOW EXIT .* not treated as resolved/i);
+  assert.match(second.text, /missing from a later window is not assumed resolved/i);
 });
 
 test("simulated feed data is excluded from Scribe coverage and facts", () => {
