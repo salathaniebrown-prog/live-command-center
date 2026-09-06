@@ -7,3 +7,11 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+config.json
+.mp/
+Songs/
+google-maps-scraper-0.9.7/
+niche.txt
+*.exe
+auto.sh
+.DS_Store
