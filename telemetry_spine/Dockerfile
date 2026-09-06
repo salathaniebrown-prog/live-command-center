@@ -9,6 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY eagle_eyes_telemetry_spine.py .
+COPY gpu_telemetry.py .
 COPY main.py .
 
 EXPOSE 8080
