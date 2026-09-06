@@ -1,0 +1,45 @@
+name: GPU Telemetry Validate
+
+on:
+  pull_request:
+    paths:
+      - "telemetry_spine/gpu_telemetry.py"
+      - "telemetry_spine/test_gpu_telemetry.py"
+      - "telemetry_spine/Dockerfile"
+      - "telemetry_spine/docker-compose.yml"
+      - "telemetry_spine/.env.example"
+      - ".github/workflows/gpu-telemetry-validate.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: telemetry_spine
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile GPU telemetry collector
+        run: python -m py_compile gpu_telemetry.py test_gpu_telemetry.py
+
+      - name: Run GPU telemetry unit tests
+        run: python -m unittest -v test_gpu_telemetry.py
+
+      - name: Validate Compose model
+        run: docker compose config >/tmp/eagle-eyes-compose.yml
+
+      - name: Build telemetry image
+        run: docker compose build telemetry-spine gpu-telemetry
+
+      - name: Confirm GPU service is observation-only in code
+        run: |
+          grep -q '"authority": "observation"' gpu_telemetry.py
+          grep -q '"commandEligible": False' gpu_telemetry.py
+
+      - name: Note hardware validation boundary
+        run: echo "CI validates code/build only; live nvidia-smi requires an NVIDIA host with Container Toolkit."
