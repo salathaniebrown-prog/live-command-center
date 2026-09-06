@@ -14,7 +14,7 @@ client.on('message', async (topic, buf) => {
   try {
     const p = JSON.parse(buf.toString());
     const nodeId = topic.split('/').pop();
-    await pool.query('INSERT INTO telemetry(time,node_id,latitude,longitude,altitude_m,payload) VALUES(COALESCE($1,NOW()),$2,$3,$4,$5,$6)', [p.time || null,nodeId,p.latitude ?? null,p.longitude ?? null,p.altitude_m ?? null,p]);
+    await pool.query('INSERT INTO telemetry(time,node_id,latitude,longitude,altitude_m,payload) VALUES(COALESCE($1,NOW()),$2,$3,$4,$5,$6)', [p.time || null,nodeId,p.latitude ?? null,p.longitude ?? null,p.altitude_m ?? null,JSON.stringify(p)]);
   } catch (e) { console.error('telemetry ingest failed:', e.message); }
 });
 app.get('/api/health', async (_req,res) => {
@@ -32,6 +32,6 @@ app.get('/api/telemetry/latest', async (_req,res) => {
 app.post('/api/telemetry/:nodeId', (req,res) => {
   const nodeId=String(req.params.nodeId).replace(/[^a-zA-Z0-9_.-]/g,'');
   if(!nodeId) return res.status(400).json({ok:false,error:'invalid node id'});
-  client.publish(`eagle-eyes/telemetry/${nodeId}`, JSON.stringify({...req.body,time:req.body.time||new Date().toISOString()}), {qos:1}, err => err ? res.status(503).json({ok:false}) : res.status(202).json({ok:true,nodeId}));
+  client.publish(`eagle-eyes/telemetry/${nodeId}`, JSON.stringify({...req.body,time:req.body.time||new Date().toISOString()}), {qos:1}, err => err ? res.status(503).json({ok:false}) : res.status(200).json({ok:true}));
 });
 app.listen(PORT,'0.0.0.0',()=>console.log(`Power Blueprint listening on ${PORT}`));
