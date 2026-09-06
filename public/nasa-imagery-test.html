@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#060706" />
+  <title>Eagle Eyes • NASA Imagery Recovery</title>
+  <style>
+    :root { --bg:#060706; --panel:#0f100d; --line:#5b4827; --gold:#f2c66d; --text:#f7f1e7; --muted:#aaa395; --green:#76e390; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:radial-gradient(circle at top,#1b160c 0,#060706 42%); color:var(--text); font-family:system-ui,-apple-system,sans-serif; }
+    main { max-width:980px; margin:auto; padding:18px; }
+    header { border:1px solid var(--line); border-radius:18px; padding:18px; background:rgba(15,16,13,.92); }
+    .eyebrow { color:var(--gold); font-size:11px; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:8px 0 6px; font-size:clamp(24px,6vw,42px); }
+    p { color:var(--muted); line-height:1.5; }
+    button { background:var(--gold); color:#171208; border:0; border-radius:10px; padding:11px 14px; font-weight:800; }
+    #status { margin:12px 0; color:var(--green); font-size:12px; }
+    .grid { display:grid; gap:12px; }
+    .card { border:1px solid var(--line); border-radius:15px; background:rgba(15,16,13,.94); padding:14px; }
+    .title { font-weight:800; margin-bottom:4px; }
+    .meta { color:var(--muted); font-size:11px; line-height:1.45; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+    .chip { border:1px solid #6c5732; border-radius:999px; padding:5px 8px; color:var(--gold); font-size:10px; }
+    details { margin-top:9px; }
+    summary { cursor:pointer; color:var(--gold); }
+    .layer { margin-top:8px; padding:9px; border-radius:10px; background:#090a08; border:1px solid #2d281c; overflow-wrap:anywhere; }
+    .layer strong { font-size:11px; }
+    .layer div { color:var(--muted); font-size:10px; margin-top:4px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Eagle Eyes • Recovery Branch</div>
+    <h1>NASA EONET Imagery Resolver</h1>
+    <p>Live open EONET events → event categories → NASA-linked WMS/WMTS imagery services. Observation-only. No simulated events. No PX4 command path.</p>
+    <button id="refresh">Load Live NASA Events</button>
+    <div id="status">Ready.</div>
+  </header>
+  <section id="events" class="grid"></section>
+</main>
+<script>
+const API = 'https://eonet.gsfc.nasa.gov/api/v3';
+const statusEl = document.getElementById('status');
+const eventsEl = document.getElementById('events');
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function getJson(url) {
+  const response = await fetch(url, { headers: { accept:'application/json' } });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+
+async function layersFor(categoryId) {
+  const payload = await getJson(`${API}/layers/${encodeURIComponent(categoryId)}`);
+  const categories = Array.isArray(payload.categories) ? payload.categories : [];
+  return categories.flatMap(category =>
+    (Array.isArray(category.layers) ? category.layers : [])
+      .filter(layer => layer && layer.name && layer.serviceUrl && layer.serviceTypeId)
+      .map(layer => ({
+        categoryTitle: category.title || categoryId,
+        name: layer.name,
+        serviceUrl: layer.serviceUrl,
+        serviceTypeId: layer.serviceTypeId,
+        parameters: layer.parameters || {}
+      }))
+  );
+}
+
+function layerHtml(layer) {
+  return `<div class="layer"><strong>${esc(layer.name)}</strong><div>${esc(layer.serviceTypeId)} • ${esc(layer.categoryTitle)}</div><div>${esc(layer.serviceUrl)}</div></div>`;
+}
+
+async function renderEvent(event) {
+  const categories = Array.isArray(event.categories) ? event.categories : [];
+  const latest = Array.isArray(event.geometry) && event.geometry.length ? event.geometry[event.geometry.length - 1] : null;
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="title">${esc(event.title || event.id)}</div>
+    <div class="meta">${esc(event.id)}${latest?.date ? ' • ' + esc(latest.date) : ''}</div>
+    <div class="chips">${categories.map(c => `<span class="chip">${esc(c.title || c.id)}</span>`).join('')}</div>
+    <details><summary>Resolve imagery layers</summary><div class="layers meta">Loading…</div></details>`;
+  eventsEl.appendChild(card);
+
+  const details = card.querySelector('details');
+  let loaded = false;
+  details.addEventListener('toggle', async () => {
+    if (!details.open || loaded) return;
+    loaded = true;
+    const target = card.querySelector('.layers');
+    try {
+      const results = await Promise.all(categories.slice(0,3).map(c => layersFor(c.id)));
+      const layers = results.flat().filter(l => l.serviceTypeId === 'WMTS_1_0_0').slice(0,8);
+      target.innerHTML = layers.length
+        ? layers.map(layerHtml).join('')
+        : 'No WMTS_1_0_0 imagery layers are currently mapped to this event category.';
+    } catch (error) {
+      target.textContent = `Imagery resolution unavailable: ${error.message}`;
+    }
+  });
+}
+
+async function load() {
+  statusEl.textContent = 'Loading live NASA EONET events…';
+  eventsEl.innerHTML = '';
+  try {
+    const payload = await getJson(`${API}/events?status=open&limit=12`);
+    const events = Array.isArray(payload.events) ? payload.events : [];
+    for (const event of events) await renderEvent(event);
+    statusEl.textContent = `LIVE • ${events.length} open NASA EONET events loaded • click an event to resolve imagery`;
+  } catch (error) {
+    statusEl.textContent = `NASA EONET unavailable: ${error.message}`;
+  }
+}
+
+document.getElementById('refresh').addEventListener('click', load);
+load();
+</script>
+</body>
+</html>
