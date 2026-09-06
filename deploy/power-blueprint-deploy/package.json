@@ -1,1 +1,15 @@
-{"name":"power-blueprint-command-center","version":"1.0.0","private":true,"main":"server.js","scripts":{"start":"node server.js"},"dependencies":{"express":"^4.21.2","mqtt":"^5.10.4","pg":"^8.13.1"}}
+{
+  "name": "power-blueprint-command-center",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && bash -n power-blueprint-tool.sh"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mqtt": "^5.10.4",
+    "pg": "^8.13.1"
+  }
+}
