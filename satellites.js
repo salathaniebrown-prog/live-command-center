@@ -5,7 +5,7 @@ const path = require("node:path");
 
 const CELESTRAK_WEATHER_URL =
   "https://celestrak.org/NORAD/elements/gp.php?GROUP=WEATHER&FORMAT=JSON";
-const MAX_SATELLITES = 30;
+const MAX_SATELLITES = 512;
 const CACHE_MS = 2 * 60 * 60 * 1000;
 
 let elementCache = {
