@@ -1,6 +1,6 @@
 services:
   command-center:
-    build: ./app
+    build: .
     restart: unless-stopped
     environment:
       PORT: 3000
