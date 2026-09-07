@@ -20,6 +20,7 @@
   "author": "Salathanielbrown SR",
   "license": "MIT",
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "express": "^4.21.2",
     "satellite.js": "7.1.0"
   },
