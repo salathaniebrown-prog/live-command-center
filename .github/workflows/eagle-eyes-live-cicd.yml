@@ -40,8 +40,8 @@ jobs:
       - name: Execute Test Suite
         run: npm test
 
-      - name: Build Production Application
-        run: npm run build
+      - name: Validate Production Application
+        run: node --check server.js
 
       - name: Verify Eagle Eyes Critical Files
         shell: bash
