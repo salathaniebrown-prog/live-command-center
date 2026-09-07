@@ -71,3 +71,26 @@ field. Production Vercel still needs the missing deployment credentials.
 Standalone Android APK compilation is running in workflow 34078833102; the
 JavaScript bundle export already passed. Check that workflow before distributing
 an APK.
+
+## MCP / UDP integration checkpoint
+
+The recovery branch now includes a local-only MCP/UDP integration layer:
+
+- `server-mcp.js` exposes `get_cluster_metrics` and guarded
+  `tune_udp_backplane` over MCP-compatible stdio JSON-RPC.
+- `src/security/mcpFirewall.js` enforces strict numeric 0-250 ms bounds,
+  rejects extra fields, and applies a 5-second execution cooldown.
+- `server-udp.js` separates telemetry ingress (`127.0.0.1:5050`) from the
+  control socket (`127.0.0.1:5051`) and independently validates tuning commands.
+- Tuning is acknowledgement-based; a sent UDP packet is not reported as applied
+  unless the daemon confirms it.
+- `src/database/analytics.js` reports observed runtime/backplane state without
+  pretending that the presence of `DATABASE_URL` proves database connectivity.
+- `scripts/simulate-load.js` labels all synthetic traffic with `simulated: true`,
+  and live/simulated node counts remain separate.
+- Focused local validation for the new layer: 8 tests passed plus Node syntax
+  checks before repository write.
+
+This layer is not a production deployment authorization and does not change the
+existing PX4 observation-only rule, payment execution safeguards, or PR #40's
+staging-before-main requirement.

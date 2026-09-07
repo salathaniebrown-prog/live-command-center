@@ -163,3 +163,80 @@ initialization SQL applied separately. Keep credential files out of Git.
 GitHub Vercel deployment requires `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and
 `VERCEL_PROJECT_ID` in repository or production-environment secrets. An existing
 Railway health response does not establish that a new Git revision is deployed.
+
+## MCP / UDP supercomputer hub
+
+Eagle Eyes now has an isolated local MCP control plane for cluster observation and
+guarded UDP backplane tuning. It is intentionally separate from the production web
+command rail.
+
+```text
+MCP host/client
+     |
+     | stdio JSON-RPC
+     v
+server-mcp.js
+     |
+     +--> get_cluster_metrics --> runtime + data/v1 UDP state
+     |
+     +--> tune_udp_backplane
+              |
+              v
+       McpToolFirewall
+       0-250 ms / 5 s cooldown
+              |
+              | loopback UDP + acknowledgement
+              v
+        127.0.0.1:5051
+         server-udp.js
+              |
+              +--> telemetry ingress: 127.0.0.1:5050
+```
+
+The MCP broker uses the standard newline-delimited JSON-RPC stdio transport and
+advertises only two tools. `get_cluster_metrics` is read-only. `tune_udp_backplane`
+changes only the local UDP processing throttle and cannot address remote hosts,
+vehicles, payment systems, or hardware actuators.
+
+Safety boundaries:
+
+- MCP tuning accepts only finite numeric values from 0 through 250 ms.
+- A 5-second firewall cooldown blocks rapid AI command loops.
+- The MCP broker sends control packets only to `127.0.0.1`.
+- The UDP daemon independently revalidates every control command.
+- A tuning call is reported successful only after the UDP daemon acknowledges it.
+- Load-test packets carry `simulated: true`; analytics keeps simulated and live
+  packet/node counts separate.
+- `DATABASE_URL` being present is reported only as configuration state. The MCP
+  analytics module does not claim a successful database query unless one is
+  actually implemented and observed.
+
+Run the local backplane and an explicitly simulated 50-node load pass:
+
+```bash
+npm run udp &
+UDP_PID=$!
+npm run simulate-load
+kill "$UDP_PID"
+```
+
+An MCP host should spawn the broker itself rather than backgrounding it manually:
+
+```json
+{
+  "mcpServers": {
+    "supercomputer-hub": {
+      "command": "node",
+      "args": ["/absolute/path/to/live-command-center/server-mcp.js"],
+      "env": {
+        "UDP_CONTROL_HOST": "127.0.0.1",
+        "UDP_CONTROL_PORT": "5051"
+      }
+    }
+  }
+}
+```
+
+Do not commit database passwords, API keys, wallet material, or other credentials
+into MCP configuration files. Inject secrets through the host environment or the
+platform's secret manager.
