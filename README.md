@@ -107,6 +107,21 @@ npm start
 
 Then open `http://localhost:3000`.
 
+## Cloud coding agents
+
+Useful Claude Cloud and Vercel AI Gateway coding-agent commands:
+
+```bash
+claude -p "your message" --cloud <session-id>
+CCR_FORCE_BUNDLE=1 claude --cloud "Run the test suite and fix any failures"
+claude --cloud "Fix the flaky test in auth.spec.ts"
+claude --cloud "Update the API documentation"
+claude --cloud "Refactor the logger to use structured output"
+claude --cloud "Execute the migration plan in docs/migration-plan.md"
+claude --permission-mode plan
+vercel ai-gateway coding-agents setup
+```
+
 ## Operational note
 
 `/api/deployment` describes the Railway runtime environment visible to the currently running process. A `RUNNING` stage means the serving container is running; it is not a substitute for Railway's build/deploy job history.
