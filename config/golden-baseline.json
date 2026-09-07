@@ -28,8 +28,8 @@
     {
       "id": "airspace-orbits",
       "status": "required",
-      "evidence": ["satellites.js", "server.js"],
-      "requiredText": ["get_weather_satellites", "CelesTrak"]
+      "evidence": ["satellites.js", "server.js", "public/index.html"],
+      "requiredText": ["get_weather_satellites", "CelesTrak", "LIVE EARTH + ORBITAL OPERATIONS", "/api/eagle-eyes/satellites?limit=120"]
     },
     {
       "id": "chronicle-lab-v13",
@@ -41,7 +41,7 @@
       "id": "executive-intelligence",
       "status": "required",
       "evidence": ["public/index.html", "server.js"],
-      "requiredText": ["CEO", "CFO", "CTO"]
+      "requiredText": ["EXECUTIVE CHIEF", "CEO SCORECARD", "PRESIDENT BRIEF", "CFO BRIEF", "CTO AUDIT"]
     },
     {
       "id": "telemetry-integrity",
@@ -87,7 +87,8 @@
     {
       "id": "crypto-sandbox",
       "status": "required",
-      "evidence": ["crypto-payments.js", "test/crypto-payments.test.js"],
+      "evidence": ["crypto-payments.js", "test/crypto-payments.test.js", "scripts/enable-crypto-dashboard.js"],
+      "requiredText": ["Base Sepolia", "walletApprovalRequired", "mainnetLocked", "CRYPTO FUNDING RAIL // BASE USDC"],
       "safety": "Sandbox/testnet boundaries remain separate from live signing or custody."
     }
   ],
