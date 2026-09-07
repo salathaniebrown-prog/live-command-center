@@ -1,0 +1,133 @@
+name: Eagle Eyes Live CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eagle-eyes-production-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-test:
+    name: Validate Eagle Eyes V13
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Execute Test Suite
+        run: npm test
+
+      - name: Build Production Application
+        run: npm run build
+
+      - name: Verify Eagle Eyes Critical Files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Checking Eagle Eyes Version 13 baseline..."
+
+          test -f package.json
+          test -f package-lock.json
+          test -f server.js
+          test -f vercel.json
+
+          echo "Repository validation complete."
+
+  deploy-to-vercel:
+    name: Deploy Eagle Eyes Production
+    needs: validate-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' ||
+       github.ref == 'refs/heads/master')
+
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@59.11.7
+
+      - name: Pull Production Configuration
+        run: >
+          vercel pull
+          --yes
+          --environment=production
+          --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build Production Target
+        run: >
+          vercel build
+          --prod
+          --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy Production Target
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          DEPLOYMENT_URL="$(
+            vercel deploy \
+              --prebuilt \
+              --prod \
+              --token="${{ secrets.VERCEL_TOKEN }}"
+          )"
+
+          echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
+          echo "Production deployment: $DEPLOYMENT_URL"
+
+      - name: Verify Production Health
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+        run: |
+          set -euo pipefail
+
+          echo "Checking production deployment..."
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 5 \
+            --retry-delay 5 \
+            "${DEPLOYMENT_URL}/api/health"
+
+          echo
+          echo "Eagle Eyes production health verification passed."
