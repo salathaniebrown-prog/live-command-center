@@ -144,3 +144,22 @@ vercel ai-gateway coding-agents setup
 ## Operational note
 
 `/api/deployment` describes the Railway runtime environment visible to the currently running process. A `RUNNING` stage means the serving container is running; it is not a substitute for Railway's build/deploy job history.
+
+## Consolidated recovery — September 7, 2026
+
+The consolidation preserves Chronicle Lab V13 and its WORLD/LIVE/LAB/INTEL/LINKS/MAX
+navigation. `npm run ci` now checks the V13 identity as well as backend behavior.
+The recovered histories include PRs #19 and #32–#39, ASSM phase 2, and Reality
+Engine phase 1. See `RECOVERY-STATUS.md` for verification and remaining deployment gates.
+
+For a local physical-server stack, set `POSTGRES_PASSWORD` in `.env`, then run
+`docker compose up -d --build`. The V13 dashboard is on `127.0.0.1:3000`; the
+separate Power Blueprint storage API is on `127.0.0.1:3001`. PostgreSQL initializes
+its telemetry table on first volume creation. MQTT is anonymous for local testing
+and bound to loopback port 1883. These services require a configured reverse proxy
+and authentication before external exposure. Existing database volumes need the
+initialization SQL applied separately. Keep credential files out of Git.
+
+GitHub Vercel deployment requires `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and
+`VERCEL_PROJECT_ID` in repository or production-environment secrets. An existing
+Railway health response does not establish that a new Git revision is deployed.

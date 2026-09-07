@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "system": "Eagle Eyes Command Rail",
+  "policy": {
+    "previewBeforeProduction": true,
+    "observationByDefault": true,
+    "requireHealthEndpoint": true,
+    "requireCiBeforeMerge": true
+  },
+  "services": [
+    {
+      "id": "command-center",
+      "runtime": "node",
+      "entrypoint": "npm start",
+      "healthPath": "/api/health",
+      "role": "command-rail-api",
+      "productionCritical": true
+    },
+    {
+      "id": "telemetry-spine",
+      "runtime": "python",
+      "path": "telemetry_spine",
+      "role": "live-telemetry-ingest",
+      "productionCritical": true
+    },
+    {
+      "id": "nasa-eonet-imagery",
+      "runtime": "browser-preview",
+      "path": "public/nasa-imagery-test.html",
+      "role": "earth-imagery-preview",
+      "productionCritical": false
+    },
+    {
+      "id": "gpu-telemetry",
+      "runtime": "python-nvidia",
+      "path": "telemetry_spine/gpu_telemetry.py",
+      "role": "gpu-hardware-observation",
+      "productionCritical": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "nws",
+      "authority": "observation",
+      "freshnessRequired": true
+    },
+    {
+      "id": "usgs",
+      "authority": "observation",
+      "freshnessRequired": true
+    },
+    {
+      "id": "eonet",
+      "authority": "observation",
+      "freshnessRequired": true
+    },
+    {
+      "id": "px4",
+      "authority": "observation",
+      "freshnessRequired": true
+    },
+    {
+      "id": "nvidia",
+      "authority": "observation",
+      "freshnessRequired": true
+    }
+  ],
+  "aiProviders": [
+    {
+      "id": "openai",
+      "priority": 1,
+      "enabledByCredential": "OPENAI_API_KEY"
+    },
+    {
+      "id": "anthropic",
+      "priority": 2,
+      "enabledByCredential": "ANTHROPIC_API_KEY",
+      "routingImplemented": false
+    }
+  ]
+}

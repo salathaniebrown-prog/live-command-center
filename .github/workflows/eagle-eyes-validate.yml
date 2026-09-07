@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - "recovery/**"
+      - "recover/**"
 
 permissions:
   contents: read
@@ -25,12 +26,18 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Backend syntax and unit checks
         run: |
           node --check server.js
           npm test
+
+      - name: Check recovered World Data Worker syntax
+        run: |
+          node --check workers/world-data-edge/worker.mjs
+          node --check workers/world-data-v2-legacy-proxy/worker.mjs
+          node --check workers/world-data-v2/worker.mjs
 
       - name: Check recovered bridge syntax
         run: python3 -m py_compile bridges/px4-mavlink-bridge.py
@@ -54,7 +61,7 @@ jobs:
           node-version: "22"
 
       - name: Install mobile dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Bundle Android JavaScript
         env:

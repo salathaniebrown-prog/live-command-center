@@ -1,0 +1,54 @@
+services:
+  command-center:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      COMMAND_CENTER_ACCESS_TOKEN: ${COMMAND_CENTER_ACCESS_TOKEN:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  power-blueprint:
+    build: ./deploy/power-blueprint-deploy
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://blueprint:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/blueprint
+      MQTT_URL: mqtt://mqtt:1883
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mqtt:
+        condition: service_started
+
+  postgres:
+    image: timescale/timescaledb-ha:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: blueprint
+      POSTGRES_USER: blueprint
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/home/postgres/pgdata/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blueprint -d blueprint"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - mqttdata:/mosquitto/data
+
+volumes:
+  pgdata:
+  mqttdata:

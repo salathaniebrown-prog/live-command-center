@@ -1,0 +1,49 @@
+name: Power Blueprint Validate
+
+on:
+  push:
+    branches:
+      - power-blueprint-v1
+    paths:
+      - 'deploy/power-blueprint-deploy/**'
+      - '.github/workflows/power-blueprint-validate.yml'
+  pull_request:
+    paths:
+      - 'deploy/power-blueprint-deploy/**'
+      - '.github/workflows/power-blueprint-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: deploy/power-blueprint-deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate operator tool syntax
+        run: bash -n power-blueprint-tool.sh
+
+      - name: Validate JavaScript syntax
+        run: node --check server.js
+
+      - name: Validate package.json
+        run: node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json valid')"
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Build Docker image
+        run: docker build -t eagle-eyes-power-blueprint:ci .

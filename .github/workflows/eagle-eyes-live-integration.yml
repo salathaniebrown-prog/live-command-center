@@ -1,0 +1,141 @@
+name: Eagle Eyes Live Integration Gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "recovery/**"
+      - "recover/**"
+    paths:
+      - "server.js"
+      - "world-os.js"
+      - "data-spine.js"
+      - "clients/mobile/**"
+      - "workers/**"
+      - ".github/workflows/eagle-eyes-live-integration.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  live-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      EAGLE_EYES_BASE_URL: https://live-command-center-production-31ed.up.railway.app
+      WORLD_DATA_URL: ${{ vars.EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL }}
+
+    steps:
+      - name: Checkout recovery branch
+        uses: actions/checkout@v4
+
+      - name: Verify production Command Center
+        run: |
+          set -euo pipefail
+
+          get() {
+            local path="$1"
+            local out="$2"
+            curl               --fail               --silent               --show-error               --retry 3               --retry-delay 2               --connect-timeout 10               --max-time 30               "$EAGLE_EYES_BASE_URL$path"               | tee "$out"
+          }
+
+          get "/api/health" /tmp/live-health.json
+          get "/api/status" /tmp/live-status.json
+          get "/api/metrics" /tmp/live-metrics.json
+          get "/api/deployment" /tmp/live-deployment.json
+          get "/api/assistant/status" /tmp/live-assistant.json
+          get "/api/eagle-eyes/sources" /tmp/live-sources.json
+
+      - name: Verify live Eagle Eyes source feeds
+        run: |
+          set -euo pipefail
+
+          for source in usgs eonet nws; do
+            curl               --fail               --silent               --show-error               --retry 3               --retry-delay 2               --connect-timeout 10               --max-time 40               "$EAGLE_EYES_BASE_URL/api/eagle-eyes/events?source=$source&limit=2"               | tee "/tmp/live-$source.json"
+          done
+
+      - name: Assert real-only live contract
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+
+          const read = (name) =>
+            JSON.parse(fs.readFileSync('/tmp/' + name + '.json', 'utf8'));
+
+          const health = read('live-health');
+          const status = read('live-status');
+          const deployment = read('live-deployment');
+          const assistant = read('live-assistant');
+          const sources = read('live-sources');
+
+          if (health.ok !== true) {
+            throw new Error('production health is not OK');
+          }
+
+          if (status.online !== true || status.mode !== 'LIVE') {
+            throw new Error('production status is not LIVE');
+          }
+
+          if (deployment.stage !== 'RUNNING') {
+            throw new Error('Railway deployment is not RUNNING');
+          }
+
+          if (assistant.freeMode !== true) {
+            throw new Error('free command mode is unavailable');
+          }
+
+          if (sources.simulated !== false) {
+            throw new Error('production source contract is not real-only');
+          }
+
+          for (const source of ['usgs', 'eonet', 'nws']) {
+            if (!sources.sources.includes(source)) {
+              throw new Error('missing configured source: ' + source);
+            }
+
+            const feed = read('live-' + source);
+
+            if (feed.simulated === true) {
+              throw new Error(source + ' returned simulated data');
+            }
+
+            if (!Array.isArray(feed.events)) {
+              throw new Error(source + ' response has no events array');
+            }
+          }
+
+          console.log('Eagle Eyes live integration gate passed');
+          NODE
+
+      - name: Verify optional World Data V2 deployment
+        if: ${{ env.WORLD_DATA_URL != '' }}
+        run: |
+          set -euo pipefail
+
+          WORLD_DATA_URL="${WORLD_DATA_URL%/}"
+
+          curl             --fail             --silent             --show-error             --retry 3             --retry-delay 2             --connect-timeout 10             --max-time 30             "$WORLD_DATA_URL/healthz"             | tee /tmp/world-data-health.json
+
+          curl             --fail             --silent             --show-error             --retry 3             --retry-delay 2             --connect-timeout 10             --max-time 40             "$WORLD_DATA_URL/api/source-health"             | tee /tmp/world-data-source-health.json
+
+      - name: Note World Data V2 not configured
+        if: ${{ env.WORLD_DATA_URL == '' }}
+        run: |
+          echo '{"configured":false,"status":"skipped","reason":"EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL repository variable is not set"}'             | tee /tmp/world-data-not-configured.json
+
+      - name: Upload live integration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eagle-Eyes-Live-Integration-Evidence
+          path: |
+            /tmp/live-health.json
+            /tmp/live-status.json
+            /tmp/live-metrics.json
+            /tmp/live-deployment.json
+            /tmp/live-assistant.json
+            /tmp/live-sources.json
+            /tmp/live-usgs.json
+            /tmp/live-eonet.json
+            /tmp/live-nws.json
+            /tmp/world-data-*.json
+          if-no-files-found: error

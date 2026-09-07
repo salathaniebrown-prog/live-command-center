@@ -68,7 +68,25 @@ jobs:
     environment:
       name: production
 
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
     steps:
+      - name: Verify deployment credentials and target
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Configure $name in GitHub production environment or repository secrets."
+              missing=1
+            fi
+          done
+          exit "$missing"
+
       - name: Checkout Code Repository
         uses: actions/checkout@v4
 
@@ -85,13 +103,13 @@ jobs:
           vercel pull
           --yes
           --environment=production
-          --token="${{ secrets.VERCEL_TOKEN }}"
+          --token="$VERCEL_TOKEN"
 
       - name: Build Production Target
         run: >
           vercel build
           --prod
-          --token="${{ secrets.VERCEL_TOKEN }}"
+          --token="$VERCEL_TOKEN"
 
       - name: Deploy Production Target
         id: deploy
@@ -103,7 +121,7 @@ jobs:
             vercel deploy \
               --prebuilt \
               --prod \
-              --token="${{ secrets.VERCEL_TOKEN }}"
+              --token="$VERCEL_TOKEN"
           )"
 
           echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"

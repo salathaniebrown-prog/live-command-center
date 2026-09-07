@@ -1,0 +1,15 @@
+{
+  "name": "eagle-eyes-assm-mesh",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Read-only accelerator layer for Eagle Eyes deterministic state telemetry",
+  "main": "src/ingest-router.js",
+  "scripts": {
+    "start": "node src/ingest-router.js",
+    "benchmark": "node src/benchmark.js",
+    "check": "node --check src/state-adapter.js && node --check src/anomaly-engine.js && node --check src/metrics.js && node --check src/worker.js && node --check src/worker-pool.js && node --check src/benchmark.js && node --check src/ingest-router.js",
+    "test": "node --test test/*.test.js",
+    "ci": "npm run check && npm test"
+  },
+  "license": "MIT"
+}
