@@ -75,7 +75,7 @@ executiveText('cfoFacts','Decision support only • no payment or wallet executi
 executiveText('cfoUnknown','Provider usage and hosting cost are not exposed by this runtime.');
 executiveText('cfoAction','Keep Base USDC draft/testnet-only; do not enable mainnet or store seed phrases.');
 executiveText('ctoPriority','Security, truthful telemetry, and exact-revision verification.');
-executiveText('ctoFacts',`CPU ${m.cpu??'N/A'}% • GPU ${m.gpu??'N/A'}% • Memory ${m.memory??'N/A'}% • Temp ${m.temperatureC??'N/A'}`);
+const fmtPct=v=>v===null||v===undefined||v===''?'N/A':v+'%',fmtTemp=v=>v===null||v===undefined||v===''?'N/A':v+'°C';executiveText('ctoFacts',`CPU ${fmtPct(m.cpu)} • GPU ${fmtPct(m.gpu)} • Memory ${fmtPct(m.memory)} • Temp ${fmtTemp(m.temperatureC)}`);
 executiveText('ctoRisks','PX4 and NVIDIA require authenticated checks on their actual hardware hosts.');
 executiveText('ctoAction','Prove deployed SHA, rerun CI, then perform end-to-end staging validation.')}
 function localBrief(){const total=Object.values(S.events).reduce((n,a)=>n+a.length,0),sat=S.satellites.length,m=S.metrics||{},d=S.deployment||{};return ['EXECUTIVE CHIEF // LIVE SNAPSHOT','',`System: ${S.status?.systemStatus||'UNAVAILABLE'} | Railway: ${d.stage||'UNAVAILABLE'}`,`Resources: CPU ${m.cpu??'N/A'}% • GPU ${m.gpu??'N/A'}% • Memory ${m.memory??'N/A'}% • Storage ${m.storage??'N/A'}%`,`World feeds: ${total} returned live records • Satellites: ${sat}`,`USGS ${S.events.usgs.length} • NASA EONET ${S.events.eonet.length} • NOAA/NWS ${S.events.nws.length}`,'','WATCH NEXT','• Resource pressure at or above 80%','• Severe/Extreme NWS alerts in the returned feed','• Large or recent earthquake records','• Any source changing from LIVE to UNAVAILABLE'].join('\n')}
