@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "name": "Eagle Eyes Golden Baseline",
+  "policy": "Preserve first. Expand second. No expansion may silently remove an established Eagle Eyes capability.",
+  "branchPolicy": {
+    "productionMainProtected": true,
+    "recoveryBranch": "recovery/complete-eagle-eyes-20260907"
+  },
+  "capabilities": [
+    {
+      "id": "command-center",
+      "status": "required",
+      "evidence": ["server.js", "public/index.html"],
+      "requiredText": ["get_command_center_status", "get_command_center_metrics"]
+    },
+    {
+      "id": "max-assistant",
+      "status": "required",
+      "evidence": ["server.js", "public/index.html"],
+      "requiredText": ["OPENAI_URL", "Eagle Eyes"]
+    },
+    {
+      "id": "live-world-data",
+      "status": "required",
+      "evidence": ["server.js", "data-spine.js", "world-os.js"],
+      "requiredText": ["usgs", "eonet", "nws"]
+    },
+    {
+      "id": "airspace-orbits",
+      "status": "required",
+      "evidence": ["satellites.js", "server.js"],
+      "requiredText": ["get_weather_satellites", "CelesTrak"]
+    },
+    {
+      "id": "chronicle-lab-v13",
+      "status": "required",
+      "evidence": ["chronicle-scribe.js", "public/index.html", "scripts/verify-v13.js"],
+      "requiredText": ["CHRONICLE LAB V13"]
+    },
+    {
+      "id": "executive-intelligence",
+      "status": "required",
+      "evidence": ["public/index.html", "server.js"],
+      "requiredText": ["CEO", "CFO", "CTO"]
+    },
+    {
+      "id": "telemetry-integrity",
+      "status": "required",
+      "evidence": ["telemetry-integrity.js", "public/secure-telemetry-status.js"]
+    },
+    {
+      "id": "px4-telemetry",
+      "status": "required",
+      "evidence": ["px4-telemetry.js", "server.js"],
+      "requiredText": ["get_px4_telemetry"]
+    },
+    {
+      "id": "gpu-telemetry",
+      "status": "required",
+      "evidence": ["telemetry_spine/gpu_telemetry.py", "telemetry_spine/test_gpu_telemetry.py"]
+    },
+    {
+      "id": "mobile-apk",
+      "status": "required",
+      "evidence": ["clients/mobile/package.json", ".github/workflows/eagle-eyes-android-apk.yml"]
+    },
+    {
+      "id": "mcp",
+      "status": "required",
+      "evidence": ["server-mcp.js", "src/security/mcpFirewall.js"]
+    },
+    {
+      "id": "udp-backplane",
+      "status": "required",
+      "evidence": ["server-udp.js", "test/udp-backplane.test.js"]
+    },
+    {
+      "id": "reality-engine-xr",
+      "status": "required",
+      "evidence": ["reality-engine/reality_engine/xr.py", "vr/eagle_eyes_vr_baseline_v1.py"]
+    },
+    {
+      "id": "power-blueprint",
+      "status": "required",
+      "evidence": ["deploy/power-blueprint-deploy/server.js", ".github/workflows/power-blueprint-validate.yml"]
+    },
+    {
+      "id": "crypto-sandbox",
+      "status": "required",
+      "evidence": ["crypto-payments.js", "test/crypto-payments.test.js"],
+      "safety": "Sandbox/testnet boundaries remain separate from live signing or custody."
+    }
+  ],
+  "recoveryTargets": [
+    {
+      "id": "project-builder",
+      "status": "missing-action-layer",
+      "description": "Create/edit/run/test projects from Eagle Eyes with authenticated, auditable actions."
+    },
+    {
+      "id": "github-operator",
+      "status": "missing-action-layer",
+      "description": "Authenticated repository/branch/commit/PR actions with explicit scope and audit trail."
+    },
+    {
+      "id": "deployment-operator",
+      "status": "missing-action-layer",
+      "description": "Authenticated staging build/deploy/validation actions without silently modifying production."
+    }
+  ]
+}
