@@ -1,0 +1,7 @@
+data/v1/
+etc/pgbouncer/
+etc/nginx/
+production.log
+nohup.out
+src/telemetry/spine/tests/
+src/satellite/china/
