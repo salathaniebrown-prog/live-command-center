@@ -19,6 +19,7 @@ const NETWORKS = Object.freeze({
 
 const DEFAULT_NETWORK = "base-sepolia";
 const USDC_DECIMALS = 6;
+const DEFAULT_MAX_SEND_USDC = "5";
 const MAX_MEMO_LENGTH = 140;
 const ERC20_TRANSFER_SELECTOR = "a9059cbb";
 
@@ -83,12 +84,14 @@ function getCryptoConfig(env = process.env) {
   const receiveAddress = normalizeAddress(env.CRYPTO_RECEIVE_ADDRESS);
   const sendAddress = normalizeAddress(env.CRYPTO_SEND_ADDRESS);
   const liveEnabled = parseBoolean(env.CRYPTO_LIVE);
+  const maxSend = parseUsdcAmount(env.CRYPTO_MAX_SEND_USDC || DEFAULT_MAX_SEND_USDC);
 
   return {
     network,
     receiveAddress,
     sendAddress,
     liveEnabled,
+    maxSend,
     configured: Boolean(receiveAddress),
     mainnetLocked: network.mainnet && !liveEnabled,
     mode: network.mainnet && liveEnabled ? "mainnet-wallet-approved" : "sandbox"
@@ -115,6 +118,7 @@ function getCryptoStatus(env = process.env) {
     },
     receiveAddress: config.receiveAddress,
     sendAddress: config.sendAddress,
+    maxSendUsdc: config.maxSend.amountUsdc,
     mainnetLocked: config.mainnetLocked,
     capabilities: {
       receivePaymentRequests: true,
@@ -200,6 +204,10 @@ function createTransferRequest({
   }
 
   const parsed = parseUsdcAmount(amountUsdc);
+  if (BigInt(parsed.minorUnits) > BigInt(config.maxSend.minorUnits)) {
+    throw new Error(`amountUsdc exceeds configured send cap of ${config.maxSend.amountUsdc} USDC`);
+  }
+
   const safeMemo = String(memo || "").trim().slice(0, MAX_MEMO_LENGTH);
   const data = encodeTransferData(recipient, parsed.minorUnits);
 
@@ -221,6 +229,7 @@ function createTransferRequest({
     recipient,
     amountUsdc: parsed.amountUsdc,
     amountMinorUnits: parsed.minorUnits,
+    maxSendUsdc: config.maxSend.amountUsdc,
     memo: safeMemo || null,
     unsignedTransaction: {
       from: sender,
@@ -242,6 +251,7 @@ module.exports = {
   NETWORKS,
   DEFAULT_NETWORK,
   USDC_DECIMALS,
+  DEFAULT_MAX_SEND_USDC,
   normalizeAddress,
   parseUsdcAmount,
   encodeTransferData,
