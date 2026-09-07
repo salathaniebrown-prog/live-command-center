@@ -57,6 +57,17 @@ The consolidated container builds, starts, and serves the V13 identity in CI.
 Backend, mobile bundle, GPU image, telemetry security, Power Blueprint, ASSM,
 Reality Engine, satellite recovery, recovery smoke, and existing-live-service
 checks passed. Browser verification exposed a mobile status badge overlapping
-MAX; its layout is corrected and the browser gate is rerunning.
+MAX; its layout is corrected and desktop/mobile browser verification now passes
+(CI run 34078969734).
 Railway staging currently follows main and must be switched to this recovery
 branch for staging verification.
+
+A separate Railway staging service was attempted but rejected with:
+"Free plan resource provision limit exceeded." No new service was deployed.
+The existing staging service remains on main. Reusing it requires changing its
+source branch; the available direct configuration tool does not support that
+field. Production Vercel still needs the missing deployment credentials.
+
+Standalone Android APK compilation is running in workflow 34078833102; the
+JavaScript bundle export already passed. Check that workflow before distributing
+an APK.
