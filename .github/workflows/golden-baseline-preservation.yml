@@ -1,0 +1,34 @@
+name: Eagle Eyes Golden Baseline Preservation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "recovery/**"
+      - "recover/**"
+
+permissions:
+  contents: read
+
+jobs:
+  preserve-established-capabilities:
+    name: Preserve established Eagle Eyes capabilities
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify golden capability baseline
+        run: node scripts/verify-golden-baseline.js
+
+      - name: Run existing Eagle Eyes CI
+        run: |
+          npm ci
+          npm run ci
