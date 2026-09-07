@@ -1,0 +1,41 @@
+name: ASSM Phase 2 CI
+
+on:
+  push:
+    branches:
+      - assm-phase2
+  pull_request:
+    paths:
+      - "assm/**"
+      - ".github/workflows/assm-phase2.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-assm-phase2:
+    name: Validate ASSM Phase 2
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: assm
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run ASSM Syntax Checks and Tests
+        run: npm run ci
+
+      - name: Run Four-Worker Benchmark Smoke Test
+        env:
+          ASSM_WORKERS: "4"
+          ASSM_BENCHMARK_RECORDS: "1000"
+        run: npm run benchmark
