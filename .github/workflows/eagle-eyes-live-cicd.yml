@@ -37,11 +37,8 @@ jobs:
       - name: Install Project Dependencies
         run: npm ci
 
-      - name: Execute Test Suite
-        run: npm test
-
-      - name: Validate Production Application
-        run: node --check server.js
+      - name: Run Syntax Checks and Test Suite
+        run: npm run ci
 
       - name: Verify Eagle Eyes Critical Files
         shell: bash

@@ -15,3 +15,5 @@ niche.txt
 *.exe
 auto.sh
 .DS_Store
+production.log
+nohup.out
