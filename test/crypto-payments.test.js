@@ -26,6 +26,7 @@ test("Base Sepolia uses Circle test USDC and stays sandboxed by default", () => 
   assert.equal(status.asset.contract, NETWORKS["base-sepolia"].usdcAddress);
   assert.equal(status.receiveAddress, RECEIVE_ADDRESS);
   assert.equal(status.sendAddress, SEND_ADDRESS);
+  assert.equal(status.maxSendUsdc, "5");
   assert.equal(status.capabilities.prepareSendTransactions, true);
   assert.equal(status.capabilities.walletApprovalRequired, true);
   assert.equal(status.capabilities.signTransactions, false);
@@ -86,6 +87,7 @@ test("send request prepares an unsigned Base Sepolia USDC transaction", () => {
   assert.equal(result.sender, SEND_ADDRESS);
   assert.equal(result.recipient, RECIPIENT_ADDRESS);
   assert.equal(result.amountMinorUnits, "4250000");
+  assert.equal(result.maxSendUsdc, "5");
   assert.equal(result.unsignedTransaction.from, SEND_ADDRESS);
   assert.equal(result.unsignedTransaction.to, NETWORKS["base-sepolia"].usdcAddress);
   assert.equal(result.unsignedTransaction.value, "0x0");
@@ -95,6 +97,33 @@ test("send request prepares an unsigned Base Sepolia USDC transaction", () => {
   assert.equal(result.transactionSigned, false);
   assert.equal(result.transactionSubmitted, false);
   assert.equal(result.privateKeyRequiredByServer, false);
+});
+
+test("send request enforces configured USDC cap", () => {
+  assert.throws(
+    () =>
+      createTransferRequest({
+        toAddress: RECIPIENT_ADDRESS,
+        amountUsdc: "5.000001",
+        env: {
+          CRYPTO_SEND_ADDRESS: SEND_ADDRESS,
+          CRYPTO_NETWORK: "base-sepolia",
+          CRYPTO_MAX_SEND_USDC: "5"
+        }
+      }),
+    /exceeds configured send cap of 5 USDC/
+  );
+
+  const result = createTransferRequest({
+    toAddress: RECIPIENT_ADDRESS,
+    amountUsdc: "2",
+    env: {
+      CRYPTO_SEND_ADDRESS: SEND_ADDRESS,
+      CRYPTO_NETWORK: "base-sepolia",
+      CRYPTO_MAX_SEND_USDC: "2"
+    }
+  });
+  assert.equal(result.maxSendUsdc, "2");
 });
 
 test("mainnet stays locked unless CRYPTO_LIVE is explicitly enabled", () => {
@@ -131,13 +160,15 @@ test("mainnet wallet-approved mode can be enabled without a server private key",
     env: {
       CRYPTO_SEND_ADDRESS: SEND_ADDRESS,
       CRYPTO_NETWORK: "base-mainnet",
-      CRYPTO_LIVE: "true"
+      CRYPTO_LIVE: "true",
+      CRYPTO_MAX_SEND_USDC: "5"
     }
   });
 
   assert.equal(result.mode, "mainnet-wallet-approved");
   assert.equal(result.network.chainId, 8453);
   assert.equal(result.asset.contract, NETWORKS["base-mainnet"].usdcAddress);
+  assert.equal(result.maxSendUsdc, "5");
   assert.equal(result.walletApprovalRequired, true);
   assert.equal(result.transactionSigned, false);
 });
