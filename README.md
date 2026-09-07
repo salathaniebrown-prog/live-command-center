@@ -24,8 +24,25 @@ Eagle Eyes reads current public data from:
 - NASA EONET active natural events
 - Wikipedia for free encyclopedic world knowledge
 - Open-Meteo for global current weather
+- chainid.network aggregated EVM chain registry
 
 The API marks these results as non-simulated and returns an error instead of inventing missing upstream data.
+
+## EVM chain registry
+
+The EVM registry is observation-only. Eagle Eyes reads the aggregated `https://chainid.network/chains.json` dataset and exposes chain identity and network metadata without connecting a wallet, signing payloads, or submitting transactions.
+
+Returned metadata can include:
+
+- chain name, short name, chain ID, network ID, and CAIP-2 identity
+- native currency
+- status (`active`, `incubating`, or `deprecated` when supplied upstream)
+- RPC URL listings and explorers as reference metadata only
+- feature names such as `EIP155` and `EIP1559`
+- parent/L2 relationships and bridge URLs when supplied upstream
+- upstream red flags such as reused chain-ID warnings
+
+The upstream source repository maintains individual chain records under `_data/chains` and icon metadata under `_data/icons`. Eagle Eyes consumes the automatically aggregated registry and does not modify upstream chain records.
 
 ## Command modes
 
@@ -40,6 +57,7 @@ Free command mode works without OpenAI API credits for:
 - NWS alerts
 - USGS earthquakes
 - NASA EONET events
+- EVM chain registry lookup by chain name or chain ID
 - World-source status
 - World knowledge lookup
 - Global weather
@@ -78,6 +96,7 @@ Public runtime/dashboard endpoints:
 - `GET /api/health`
 - `GET /api/eagle-eyes/sources`
 - `GET /api/eagle-eyes/events?source=usgs|nws|eonet&limit=10`
+- `GET /api/eagle-eyes/chains?q=ethereum&limit=10`
 - `GET /api/assistant/status`
 
 Protected command endpoints require `Authorization: Bearer <COMMAND_CENTER_ACCESS_TOKEN>`:
