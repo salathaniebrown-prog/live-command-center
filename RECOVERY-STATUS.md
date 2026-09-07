@@ -50,3 +50,13 @@ container-startup, and browser CI gates.
 - Provider health selection is a tested module, not an implemented Anthropic API
   adapter. Imagery remains a separate preview. ASSM/Reality Engine remain isolated
   modules rather than silently changing the production ingestion path.
+
+## GitHub verification update
+
+The consolidated container builds, starts, and serves the V13 identity in CI.
+Backend, mobile bundle, GPU image, telemetry security, Power Blueprint, ASSM,
+Reality Engine, satellite recovery, recovery smoke, and existing-live-service
+checks passed. Browser verification exposed a mobile status badge overlapping
+MAX; its layout is corrected and the browser gate is rerunning.
+Railway staging currently follows main and must be switched to this recovery
+branch for staging verification.
