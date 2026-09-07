@@ -28,7 +28,9 @@ jobs:
         run: npm install --ignore-scripts --no-audit --no-fund
 
       - name: Backend syntax and unit checks
-        run: npm run build
+        run: |
+          node --check server.js
+          npm test
 
       - name: Check recovered bridge syntax
         run: python3 -m py_compile bridges/px4-mavlink-bridge.py
