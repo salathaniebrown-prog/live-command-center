@@ -45,6 +45,8 @@ export default function ProtectionConsole({ baseUrl }) {
     ]);
 
     if (results[0].status === "fulfilled") setShell(results[0].value);
+    else setShell(null);
+
     if (results[1].status === "fulfilled") setHealth(results[1].value);
 
     const failures = results.filter((item) => item.status === "rejected");
@@ -61,7 +63,10 @@ export default function ProtectionConsole({ baseUrl }) {
     return () => clearInterval(id);
   }, [baseUrl]);
 
-  const domains = Array.isArray(shell?.domains) ? shell.domains : ["api", "shell", "air", "water", "ground", "system"];
+  const operational = shell?.operational === true;
+  const domains = Array.isArray(shell?.domains)
+    ? shell.domains
+    : ["api", "shell", "air", "water", "ground", "system"];
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -72,11 +77,17 @@ export default function ProtectionConsole({ baseUrl }) {
       </Text>
 
       <View style={styles.hero}>
-        <View style={[styles.dot, shell?.operational ? styles.good : styles.bad]} />
+        <View style={[styles.dot, operational ? styles.good : styles.bad]} />
         <View style={styles.heroCopy}>
           <Text style={styles.heroLabel}>PROTECTION STATE</Text>
-          <Text style={styles.heroValue}>{shell?.operational ? "OPERATIONAL" : loading ? "CHECKING" : "UNAVAILABLE"}</Text>
-          <Text style={styles.meta}>{shell?.mode || "LIVE_DEFENSIVE_OBSERVATION"}</Text>
+          <Text style={styles.heroValue}>
+            {operational ? "OPERATIONAL" : loading ? "CHECKING" : "PENDING BACKEND"}
+          </Text>
+          <Text style={styles.meta}>
+            {operational
+              ? shell?.mode || "LIVE_DEFENSIVE_OBSERVATION"
+              : "APK surface installed · waiting for the Shell Catcher endpoint on the selected backend"}
+          </Text>
         </View>
         {loading ? <ActivityIndicator size="small" /> : null}
       </View>
@@ -93,7 +104,9 @@ export default function ProtectionConsole({ baseUrl }) {
         {domains.map((domain) => (
           <View key={domain} style={styles.domainCard}>
             <Text style={styles.domainName}>{DOMAIN_LABELS[domain] || String(domain).toUpperCase()}</Text>
-            <Text style={styles.domainState}>WATCHING</Text>
+            <Text style={[styles.domainState, !operational && styles.domainPending]}>
+              {operational ? "WATCHING" : "PENDING"}
+            </Text>
           </View>
         ))}
       </View>
@@ -101,13 +114,19 @@ export default function ProtectionConsole({ baseUrl }) {
       <Text style={styles.section}>CAPTURE STATE</Text>
       <View style={styles.card}>
         <Text style={styles.label}>EVENTS SEEN</Text>
-        <Text style={styles.value}>{shell?.records?.total ?? 0}</Text>
-        <Text style={styles.meta}>Flagged: {shell?.records?.flagged ?? 0} · retained: {shell?.records?.retained ?? 0}/{shell?.records?.maxRetained ?? "N/A"}</Text>
+        <Text style={styles.value}>{operational ? shell?.records?.total ?? 0 : "N/A"}</Text>
+        <Text style={styles.meta}>
+          {operational
+            ? `Flagged: ${shell?.records?.flagged ?? 0} · retained: ${shell?.records?.retained ?? 0}/${shell?.records?.maxRetained ?? "N/A"}`
+            : "No detector counts are claimed until the backend endpoint is live."}
+        </Text>
       </View>
 
       <View style={styles.card}>
         <Text style={styles.label}>INGEST</Text>
-        <Text style={styles.value}>{shell?.ingestConfigured ? "CONFIGURED" : "LOCKED"}</Text>
+        <Text style={styles.value}>
+          {operational ? (shell?.ingestConfigured ? "CONFIGURED" : "LOCKED") : "PENDING"}
+        </Text>
         <Text style={styles.meta}>
           Remote ingest requires the backend SHELL_CATCHER_INGEST_TOKEN. No ingest secret is stored in this APK.
         </Text>
@@ -124,7 +143,9 @@ export default function ProtectionConsole({ baseUrl }) {
       <View style={styles.card}>
         <Text style={styles.label}>COMMAND CENTER HEALTH</Text>
         <Text style={styles.value}>{health?.ok ? "ONLINE" : "CHECKING"}</Text>
-        <Text style={styles.meta}>Uptime: {Number.isFinite(health?.uptimeSeconds) ? `${health.uptimeSeconds}s` : "N/A"}</Text>
+        <Text style={styles.meta}>
+          Uptime: {Number.isFinite(health?.uptimeSeconds) ? `${health.uptimeSeconds}s` : "N/A"}
+        </Text>
       </View>
 
       <Pressable style={styles.refresh} onPress={load}>
@@ -152,6 +173,7 @@ const styles = StyleSheet.create({
   domainCard: { width: "48%", padding: 13, marginBottom: 10, borderRadius: 12, borderWidth: 1, borderColor: "rgba(242,198,109,.16)", backgroundColor: "#11100d" },
   domainName: { color: "#d4c8b4", fontSize: 10, fontWeight: "900" },
   domainState: { color: "#73e58c", fontSize: 9, marginTop: 6, fontWeight: "900", letterSpacing: 1 },
+  domainPending: { color: "#f2c66d" },
   card: { padding: 15, marginBottom: 10, borderRadius: 13, borderWidth: 1, borderColor: "rgba(242,198,109,.16)", backgroundColor: "#11100d" },
   label: { color: "#8f8779", fontSize: 9, fontWeight: "900", letterSpacing: 1 },
   value: { color: "#f7f1e7", fontSize: 18, fontWeight: "900", marginTop: 5 },
