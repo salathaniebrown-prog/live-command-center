@@ -1,0 +1,57 @@
+name: Shell Catcher Live Smoke
+
+on:
+  push:
+    branches:
+      - recovery/complete-eagle-eyes-20260907
+    paths:
+      - shell-catcher.js
+      - scripts/enable-shell-catcher.js
+      - package.json
+      - .github/workflows/shell-catcher-live-smoke.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shell-catcher-live-smoke
+  cancel-in-progress: true
+
+jobs:
+  staging-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe deployed Shell Catcher
+        env:
+          SHELL_CATCHER_HEALTH_URL: https://live-command-center-deploy.up.railway.app/api/eagle-eyes/shell-catcher/health
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 36); do
+            body="$(curl -fsS --max-time 10 "$SHELL_CATCHER_HEALTH_URL" || true)"
+            if BODY="$body" node - <<'NODE'
+          const body = process.env.BODY || "";
+          try {
+            const data = JSON.parse(body);
+            const domains = Array.isArray(data.domains) ? data.domains : [];
+            const ok =
+              data.ok === true &&
+              data.operational === true &&
+              data.service === "eagle-eyes-shell-catcher" &&
+              data.arbitraryShellExecution === false &&
+              data.commandAuthority === false &&
+              ["air", "water", "ground"].every((name) => domains.includes(name));
+            process.exit(ok ? 0 : 1);
+          } catch {
+            process.exit(1);
+          }
+          NODE
+            then
+              echo "Shell Catcher staging health probe passed."
+              echo "$body"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Shell Catcher staging health probe failed."
+          exit 1
