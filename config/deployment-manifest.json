@@ -36,6 +36,20 @@
       "path": "telemetry_spine/gpu_telemetry.py",
       "role": "gpu-hardware-observation",
       "productionCritical": false
+    },
+    {
+      "id": "bci-telemetry",
+      "runtime": "node",
+      "path": "bci-telemetry.js",
+      "role": "read-only-bci-observation",
+      "productionCritical": false
+    },
+    {
+      "id": "future-command-lab",
+      "runtime": "node",
+      "path": "future-command-lab.js",
+      "role": "future-capability-planning",
+      "productionCritical": false
     }
   ],
   "sources": [
@@ -63,18 +77,37 @@
       "id": "nvidia",
       "authority": "observation",
       "freshnessRequired": true
+    },
+    {
+      "id": "bci",
+      "authority": "observation",
+      "freshnessRequired": true
     }
   ],
   "aiProviders": [
     {
       "id": "openai",
       "priority": 1,
-      "enabledByCredential": "OPENAI_API_KEY"
+      "enabledByCredential": "OPENAI_API_KEY",
+      "apiStyle": "responses",
+      "supportsTools": true
+    },
+    {
+      "id": "moonshot",
+      "priority": 2,
+      "enabledByCredential": "MOONSHOT_API_KEY",
+      "defaultModel": "kimi-k3",
+      "endpoint": "https://api.moonshot.ai/v1/chat/completions",
+      "apiStyle": "chat-completions",
+      "supportsTools": true,
+      "routingImplemented": false
     },
     {
       "id": "anthropic",
-      "priority": 2,
+      "priority": 3,
       "enabledByCredential": "ANTHROPIC_API_KEY",
+      "apiStyle": "messages",
+      "supportsTools": false,
       "routingImplemented": false
     }
   ]
