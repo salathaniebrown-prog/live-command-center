@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - master
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -61,12 +62,15 @@ jobs:
     timeout-minutes: 20
 
     if: >
-      github.event_name == 'push' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       (github.ref == 'refs/heads/main' ||
        github.ref == 'refs/heads/master')
 
     environment:
       name: production
+
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
     steps:
       - name: Checkout Code Repository
@@ -77,6 +81,18 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Verify Vercel Authentication Secret
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "::error::VERCEL_TOKEN is unavailable to the production job."
+            exit 1
+          fi
+
+          echo "Vercel authentication secret is available."
+
       - name: Install Vercel CLI
         run: npm install --global vercel@59.11.7
 
@@ -85,13 +101,13 @@ jobs:
           vercel pull
           --yes
           --environment=production
-          --token="${{ secrets.VERCEL_TOKEN }}"
+          --token="$VERCEL_TOKEN"
 
       - name: Build Production Target
         run: >
           vercel build
           --prod
-          --token="${{ secrets.VERCEL_TOKEN }}"
+          --token="$VERCEL_TOKEN"
 
       - name: Deploy Production Target
         id: deploy
@@ -103,7 +119,7 @@ jobs:
             vercel deploy \
               --prebuilt \
               --prod \
-              --token="${{ secrets.VERCEL_TOKEN }}"
+              --token="$VERCEL_TOKEN"
           )"
 
           echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
