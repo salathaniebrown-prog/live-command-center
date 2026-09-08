@@ -90,6 +90,20 @@
       "evidence": ["crypto-payments.js", "test/crypto-payments.test.js", "scripts/enable-crypto-dashboard.js"],
       "requiredText": ["Base Sepolia", "walletApprovalRequired", "mainnetLocked", "CRYPTO FUNDING RAIL // BASE USDC"],
       "safety": "Sandbox/testnet boundaries remain separate from live signing or custody."
+    },
+    {
+      "id": "bci-telemetry",
+      "status": "required",
+      "evidence": ["bci-telemetry.js", "test/bci-telemetry.test.js", "server.js"],
+      "requiredText": ["bciTelemetryStatus", "/api/eagle-eyes/bci/status", "single-self-candidate"],
+      "safety": "Read-only BCI telemetry lane only; no diagnosis, treatment, control output, or command authority."
+    },
+    {
+      "id": "future-command-lab",
+      "status": "required",
+      "evidence": ["future-command-lab.js", "test/future-command-lab.test.js", "server.js", "public/index.html"],
+      "requiredText": ["PROJECT FUTURE COMMAND LAB", "/api/eagle-eyes/future-command-lab", "liveExecution", "EAGLE EYES PLANNING LANE", "supercomputer-nexusbrown-command-center"],
+      "safety": "Planning and roadmap surface only; no live execution, production mutation, or command authority."
     }
   ],
   "recoveryTargets": [
