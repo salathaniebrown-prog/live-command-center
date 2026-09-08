@@ -862,6 +862,10 @@
       .quick-commands { grid-template-columns: 1fr; }
     }
   </style>
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
   <div class="shell">
@@ -1650,9 +1654,9 @@
     async function fetchFeeds() {
       try {
         const results = await Promise.allSettled([
-          getJson("/api/eagle-eyes/events?source=nws&limit=12"),
-          getJson("/api/eagle-eyes/events?source=usgs&limit=12"),
-          getJson("/api/eagle-eyes/events?source=eonet&limit=12")
+          getJson("/api/eagle-eyes/events?source=nws&limit=50"),
+          getJson("/api/eagle-eyes/events?source=usgs&limit=50"),
+          getJson("/api/eagle-eyes/events?source=eonet&limit=50")
         ]);
 
         const ids = ["nws", "usgs", "eonet"];
@@ -1709,7 +1713,7 @@
       try {
         const data =
           await getJson(
-            "/api/eagle-eyes/satellites?limit=30"
+            "/api/eagle-eyes/satellites?limit=120"
           );
 
         satelliteCache = data;
