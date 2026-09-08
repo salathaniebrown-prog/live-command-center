@@ -22,8 +22,8 @@ const FUTURE_LAB_ITEMS = Object.freeze([
   Object.freeze({
     id: "bci-telemetry",
     status: "registered",
-    boundary: "read-only-observation",
-    next: "Accept only validated telemetry observations; no diagnosis or control output."
+    boundary: "single-self-candidate-read-only-observation",
+    next: "Keep Salathaniel Brown Sr as the only authorized self-candidate; accept only validated observations with no diagnosis or control output."
   }),
   Object.freeze({
     id: "supercomputer-nexusbrown-command-center",
