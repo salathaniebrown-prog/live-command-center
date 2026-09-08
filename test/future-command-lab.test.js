@@ -17,7 +17,13 @@ test("Future Command Lab tracks planned work without command authority", () => {
   assert.ok(status.items.some((item) => item.id === "project-builder"));
   assert.ok(status.items.some((item) => item.id === "github-operator"));
   assert.ok(status.items.some((item) => item.id === "deployment-operator"));
-  assert.ok(status.items.some((item) => item.id === "bci-telemetry"));
+  assert.ok(
+    status.items.some(
+      (item) =>
+        item.id === "bci-telemetry" &&
+        item.boundary === "single-self-candidate-read-only-observation"
+    )
+  );
   assert.ok(
     status.items.some((item) => item.id === "supercomputer-nexusbrown-command-center")
   );
