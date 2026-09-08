@@ -26,6 +26,7 @@ test("Base Sepolia uses Circle test USDC and stays sandboxed by default", () => 
   assert.equal(status.asset.contract, NETWORKS["base-sepolia"].usdcAddress);
   assert.equal(status.receiveAddress, RECEIVE_ADDRESS);
   assert.equal(status.sendAddress, SEND_ADDRESS);
+  assert.equal(status.mainnetLocked, true);
   assert.equal(status.capabilities.prepareSendTransactions, true);
   assert.equal(status.capabilities.walletApprovalRequired, true);
   assert.equal(status.capabilities.signTransactions, false);
