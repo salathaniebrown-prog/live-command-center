@@ -63,7 +63,21 @@ function normalizeBaseUrl(value) {
     );
   }
 
-  return parsed.toString().replace(/\/+$/, "");
+  const cleanPath =
+    parsed.pathname.replace(/\/+$/, "");
+
+  if (!cleanPath || cleanPath === "/") {
+    parsed.pathname = "/api";
+  } else {
+    parsed.pathname = cleanPath;
+  }
+
+  parsed.search = "";
+  parsed.hash = "";
+
+  return parsed
+    .toString()
+    .replace(/\/+$/, "");
 }
 
 function computerFilter(target = {}) {
@@ -224,9 +238,13 @@ class DeepSecurityClient {
       );
     }
 
+    const relativePath =
+      String(pathname || "")
+        .replace(/^\/+/, "");
+
     const url =
       new URL(
-        pathname,
+        relativePath,
         `${this.baseUrl}/`
       );
 
