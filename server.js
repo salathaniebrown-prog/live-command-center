@@ -36,6 +36,7 @@ const {
   createPaymentRequest,
   createTransferRequest
 } = require("./crypto-payments");
+const { registerLeadIntake } = require("./lead-intake-preload");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
 
@@ -259,6 +260,7 @@ const INSTRUCTIONS = [
 app.disable("x-powered-by");
 app.use(express.json({ limit: "256kb" }));
 app.use(express.static(path.join(__dirname, "public")));
+registerLeadIntake(app);
 
 function secretsMatch(received, expected) {
   if (!received || !expected) {
