@@ -10,6 +10,7 @@ import {
   TextInput,
   View
 } from "react-native";
+import { fetch as expoFetch } from "expo/fetch";
 
 const STARTER_TASKS = [
   "Give me an Eagle Eyes mission brief and tell me what matters now.",
@@ -67,13 +68,13 @@ export default function ChatConsole({ baseUrl }) {
   const [authState, setAuthState] = useState("LOCKED");
   const [streamState, setStreamState] = useState("IDLE");
   const [activeTool, setActiveTool] = useState("");
-  const xhrRef = useRef(null);
+  const abortRef = useRef(null);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    fetch(baseUrl + "/api/assistant/status", {
+    expoFetch(baseUrl + "/api/assistant/status", {
       headers: { Accept: "application/json" }
     })
       .then(async (response) => {
@@ -92,7 +93,7 @@ export default function ChatConsole({ baseUrl }) {
 
     return () => {
       cancelled = true;
-      xhrRef.current?.abort();
+      abortRef.current?.abort();
     };
   }, [baseUrl]);
 
@@ -110,7 +111,7 @@ export default function ChatConsole({ baseUrl }) {
 
     setAuthState("CHECKING");
     try {
-      const response = await fetch(baseUrl + "/api/assistant/auth-check", {
+      const response = await expoFetch(baseUrl + "/api/assistant/auth-check", {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${token}`
@@ -142,13 +143,13 @@ export default function ChatConsole({ baseUrl }) {
   }
 
   function stopStream() {
-    xhrRef.current?.abort();
-    xhrRef.current = null;
+    abortRef.current?.abort();
+    abortRef.current = null;
     setStreamState("STOPPED");
     setActiveTool("");
   }
 
-  function sendTask(taskText) {
+  async function sendTask(taskText) {
     const text = String(taskText || message).trim();
     const token = accessToken.trim();
 
@@ -163,6 +164,8 @@ export default function ChatConsole({ baseUrl }) {
 
     const userId = `user-${Date.now()}`;
     const assistantId = `assistant-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setMessages((current) => [
       ...current,
@@ -173,9 +176,6 @@ export default function ChatConsole({ baseUrl }) {
     setStreamState("CONNECTING");
     setActiveTool("");
 
-    const xhr = new XMLHttpRequest();
-    xhrRef.current = xhr;
-    let consumed = 0;
     let buffer = "";
     let streamCompleted = false;
 
@@ -213,62 +213,60 @@ export default function ChatConsole({ baseUrl }) {
       }
     }
 
-    function consumeProgress(final = false) {
-      const responseText = xhr.responseText || "";
-      if (responseText.length <= consumed && !final) return;
-
-      buffer += responseText.slice(consumed);
-      consumed = responseText.length;
-      buffer = buffer.replace(/\r\n/g, "\n");
-
+    function consumeText(chunk, final = false) {
+      buffer = (buffer + chunk).replace(/\r\n/g, "\n");
       const blocks = buffer.split("\n\n");
       buffer = blocks.pop() || "";
 
       for (const block of blocks) {
         if (!block.trim()) continue;
-        try {
-          handleBlock(block);
-        } catch (error) {
-          appendAssistantError(error.message || "Unable to parse stream");
-        }
+        handleBlock(block);
       }
 
       if (final && buffer.trim()) {
-        try {
-          handleBlock(buffer);
-        } catch {}
+        handleBlock(buffer);
         buffer = "";
       }
     }
 
-    xhr.open("POST", baseUrl + "/api/assistant/stream", true);
-    xhr.setRequestHeader("content-type", "application/json");
-    xhr.setRequestHeader("accept", "text/event-stream");
-    xhr.setRequestHeader("authorization", `Bearer ${token}`);
+    try {
+      const response = await expoFetch(baseUrl + "/api/assistant/stream", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          accept: "text/event-stream",
+          authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: text }),
+        signal: controller.signal
+      });
 
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 3) consumeProgress(false);
-    };
-
-    xhr.onprogress = () => consumeProgress(false);
-
-    xhr.onload = () => {
-      consumeProgress(true);
-      xhrRef.current = null;
-
-      if (xhr.status < 200 || xhr.status >= 300) {
-        let reason = `HTTP ${xhr.status}`;
+      if (!response.ok) {
+        const raw = await response.text();
+        let reason = `HTTP ${response.status}`;
         try {
-          reason = JSON.parse(xhr.responseText)?.error || reason;
+          reason = JSON.parse(raw)?.error || reason;
         } catch {}
-        setStreamState("ERROR");
-        updateAssistantMessage(assistantId, (item) => ({
-          text: item.text || `Request failed: ${reason}`,
-          meta: "REQUEST FAILED"
-        }));
-        if (xhr.status === 401) setAuthState("DENIED");
-        return;
+        if (response.status === 401) setAuthState("DENIED");
+        throw new Error(reason);
       }
+
+      if (!response.body) {
+        throw new Error("Streaming response body is unavailable");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      setStreamState("STREAMING");
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) consumeText(decoder.decode(value, { stream: true }));
+      }
+
+      consumeText(decoder.decode(), true);
+      abortRef.current = null;
 
       if (!streamCompleted) {
         setStreamState("DONE");
@@ -277,28 +275,25 @@ export default function ChatConsole({ baseUrl }) {
           meta: "STREAM CLOSED"
         }));
       }
-    };
+    } catch (error) {
+      abortRef.current = null;
+      setActiveTool("");
 
-    xhr.onerror = () => {
-      xhrRef.current = null;
+      if (error?.name === "AbortError") {
+        setStreamState("STOPPED");
+        updateAssistantMessage(assistantId, (item) => ({
+          text: item.text || "Stream stopped.",
+          meta: "STOPPED"
+        }));
+        return;
+      }
+
       setStreamState("ERROR");
-      setActiveTool("");
       updateAssistantMessage(assistantId, (item) => ({
-        text: item.text || "Network error while connecting to Eagle Eyes ChatGPT.",
-        meta: "NETWORK ERROR"
+        text: item.text || `Request failed: ${error?.message || "Unknown error"}`,
+        meta: "REQUEST FAILED"
       }));
-    };
-
-    xhr.onabort = () => {
-      xhrRef.current = null;
-      setActiveTool("");
-      updateAssistantMessage(assistantId, (item) => ({
-        text: item.text || "Stream stopped.",
-        meta: "STOPPED"
-      }));
-    };
-
-    xhr.send(JSON.stringify({ message: text }));
+    }
   }
 
   const configured = assistantStatus?.configured === true;
@@ -362,9 +357,7 @@ export default function ChatConsole({ baseUrl }) {
             <Text style={styles.thinkingText}>Connecting to Eagle Eyes ChatGPT…</Text>
           </View>
         ) : null}
-        {activeTool ? (
-          <Text style={styles.toolText}>TOOL ACTIVE · {activeTool}</Text>
-        ) : null}
+        {activeTool ? <Text style={styles.toolText}>TOOL ACTIVE · {activeTool}</Text> : null}
       </ScrollView>
 
       <ScrollView
