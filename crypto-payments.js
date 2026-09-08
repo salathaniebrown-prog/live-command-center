@@ -90,7 +90,7 @@ function getCryptoConfig(env = process.env) {
     sendAddress,
     liveEnabled,
     configured: Boolean(receiveAddress),
-    mainnetLocked: network.mainnet && !liveEnabled,
+    mainnetLocked: !liveEnabled,
     mode: network.mainnet && liveEnabled ? "mainnet-wallet-approved" : "sandbox"
   };
 }
