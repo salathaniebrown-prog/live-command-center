@@ -116,3 +116,13 @@ Snapshot before this integration commit. Ancestor means history is contained in 
 | `salathaniebrown-prog-patch-2` | `6894058bf10c60437ff22a761a1321186d313316` | Ancestor |
 | `security/private-assistant-access` | `59a3c1c35a673d0266ba6462aebee02ddbc58f51` | Review |
 | `wallet/reown-support` | `7bb8184f546c1591adbec4e4e6d1bc437d77cbf8` | Review |
+
+
+## 2026-09-08 deployment recovery
+
+Recovery source: `5eb0184ea16b30bc3c6f5fa14d164ebda205cbb6`.
+Production source: `b0070dac03bff512f9bdd88b3cd49fd9b125d32b`.
+
+Combined the current recovery build with production Deep Security, preserving all startup transformations, Chronicle Lab V13, the executive council, Scribe, Shell Catcher, native mobile streaming, and testnet boundaries. Restored the Vercel organization/project secret references during the workflow merge. The runtime deployment response now includes the hosting-provided commit and branch so a running service can be matched to its source.
+
+Validation: `npm run build` passed all 83 backend tests and both V13/golden-baseline checks. Existing Railway recovery dashboard was separately observed with live USGS, EONET, NWS and CelesTrak data and working MAX navigation. That browser evidence is for the earlier deployed build; this combined revision must still pass staging before production promotion. No hardware activity or deployment success is inferred from these code tests.

@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - master
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -61,7 +62,7 @@ jobs:
     timeout-minutes: 20
 
     if: >
-      github.event_name == 'push' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       (github.ref == 'refs/heads/main' ||
        github.ref == 'refs/heads/master')
 
@@ -94,6 +95,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Verify Vercel Authentication Secret
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "::error::VERCEL_TOKEN is unavailable to the production job."
+            exit 1
+          fi
+
+          echo "Vercel authentication secret is available."
 
       - name: Install Vercel CLI
         run: npm install --global vercel@59.11.7
