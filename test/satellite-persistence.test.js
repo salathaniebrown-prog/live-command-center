@@ -18,6 +18,39 @@ const sample = {
   EPOCH: "2026-09-04T20:00:00.000000"
 };
 
+test("keeps last-good CelesTrak elements in memory during a short upstream outage", async () => {
+  resetCache();
+
+  const nowMs = Date.parse("2026-09-04T20:00:00.000Z");
+  const online = await fetchWeatherElements({
+    nowMs,
+    fetchImpl: async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [sample]
+    })
+  });
+
+  assert.equal(online.cached, false);
+  assert.equal(online.staleMemoryFallback, false);
+
+  const offline = await fetchWeatherElements({
+    nowMs: nowMs + CACHE_MS + 1,
+    fetchImpl: async () => {
+      throw new Error("test upstream offline");
+    }
+  });
+
+  assert.equal(offline.cached, true);
+  assert.equal(offline.staleMemoryFallback, true);
+  assert.equal(offline.persistentFallback, false);
+  assert.equal(offline.records.length, 1);
+  assert.equal(offline.records[0].OBJECT_NAME, sample.OBJECT_NAME);
+  assert.match(offline.fallbackReason, /upstream offline/);
+
+  resetCache();
+});
+
 test("recovers persisted CelesTrak elements when the live source is unavailable", async (t) => {
   const dir = await fs.mkdtemp(
     path.join(os.tmpdir(), "eagle-eyes-satellite-state-")
