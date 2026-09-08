@@ -8,7 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "check": "expo-doctor",
+    "check": "expo config --type public",
     "bundle:android": "expo export --platform android --output-dir dist"
   },
   "dependencies": {
