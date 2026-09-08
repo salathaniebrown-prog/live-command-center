@@ -26,7 +26,23 @@ class ProviderHealthRegistry {
         keyEnv: "OPENAI_API_KEY",
         modelEnv: "OPENAI_MODEL",
         defaultModel: "gpt-5.6",
-        priority: 1
+        priority: 1,
+        endpointEnv: "OPENAI_URL",
+        defaultEndpoint: "https://api.openai.com/v1/responses",
+        apiStyle: "responses",
+        supportsTools: true
+      },
+      {
+        id: "moonshot",
+        label: "Moonshot Kimi",
+        keyEnv: "MOONSHOT_API_KEY",
+        modelEnv: "MOONSHOT_MODEL",
+        defaultModel: "kimi-k3",
+        priority: 2,
+        endpointEnv: "MOONSHOT_URL",
+        defaultEndpoint: "https://api.moonshot.ai/v1/chat/completions",
+        apiStyle: "chat-completions",
+        supportsTools: true
       },
       {
         id: "anthropic",
@@ -34,7 +50,11 @@ class ProviderHealthRegistry {
         keyEnv: "ANTHROPIC_API_KEY",
         modelEnv: "ANTHROPIC_MODEL",
         defaultModel: "",
-        priority: 2
+        priority: 3,
+        endpointEnv: "ANTHROPIC_URL",
+        defaultEndpoint: null,
+        apiStyle: "messages",
+        supportsTools: false
       }
     ];
   }
@@ -84,6 +104,10 @@ class ProviderHealthRegistry {
       status,
       priority: definition.priority,
       model: String(this.env[definition.modelEnv] || definition.defaultModel || "").trim() || null,
+      endpoint:
+        String(this.env[definition.endpointEnv] || definition.defaultEndpoint || "").trim() || null,
+      apiStyle: definition.apiStyle,
+      supportsTools: Boolean(definition.supportsTools),
       consecutiveFailures: runtime.consecutiveFailures || 0,
       lastSuccessAt: runtime.lastSuccessAt ? nowIso(runtime.lastSuccessAt) : null,
       lastFailureAt: runtime.lastFailureAt ? nowIso(runtime.lastFailureAt) : null,
