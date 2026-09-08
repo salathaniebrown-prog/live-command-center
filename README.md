@@ -2,6 +2,9 @@
 
 Eagle Eyes is a live, read-only command rail and World Command Operating System running on Railway.
 
+Project identity: Eagle Eyes Command OS by Salathaniel Brown Sr, used here with
+explicit project permission.
+
 ## What is live
 
 The application reports real runtime/container state from the process that is currently serving the dashboard:
@@ -64,6 +67,11 @@ Free command mode works without OpenAI API credits for:
 - World OS capability status
 
 When `OPENAI_API_KEY` is available, GPT-5.6 tool routing is added on top of the same read-only tools.
+The provider health registry also recognizes Moonshot/Kimi with `MOONSHOT_API_KEY`
+and `MOONSHOT_MODEL=kimi-k3` using the OpenAI-compatible
+`/v1/chat/completions` shape. Kimi is tracked as a configured provider option
+with tool-call metadata, but runtime routing remains explicit and does not store
+API keys, private keys, wallet secrets, or live execution authority in the repo.
 
 ## PX4 telemetry spine
 
@@ -85,6 +93,24 @@ The current v1 store is process-local and in-memory. A Railway restart clears th
 
 The Command Rail exposes PX4 telemetry only as a read-only tool. It has no arm, takeoff, navigation, mission-write, actuator, or other vehicle-control function.
 
+## BCI telemetry lane
+
+Eagle Eyes now reserves a read-only BCI telemetry lane for future validated
+observations. It is scoped to single self-candidate mode for Salathaniel Brown
+Sr and is not open enrollment. It starts as `UNCONFIGURED` until
+`BCI_TELEMETRY_INGEST_TOKEN` is set, then reports `WAITING` until real
+observations are wired in. This lane is not a medical device, does not diagnose
+or treat anything, and has no control output or command authority.
+
+## Project Future Command Lab
+
+Project Future Command Lab tracks the next Eagle Eyes action layers without
+mixing them into the live observation system. It keeps project-builder,
+GitHub-operator, deployment-operator, BCI telemetry, and Supercomputer
+NexusBrown Command Center work visible as planned or registered capabilities
+while preserving Chronicle Lab V13, requiring
+authenticated scope, and blocking live execution by default.
+
 ## Core endpoints
 
 Public runtime/dashboard endpoints:
@@ -97,6 +123,8 @@ Public runtime/dashboard endpoints:
 - `GET /api/eagle-eyes/sources`
 - `GET /api/eagle-eyes/events?source=usgs|nws|eonet&limit=10`
 - `GET /api/eagle-eyes/chains?q=ethereum&limit=10`
+- `GET /api/eagle-eyes/bci/status`
+- `GET /api/eagle-eyes/future-command-lab`
 - `GET /api/assistant/status`
 
 Protected command endpoints require `Authorization: Bearer <COMMAND_CENTER_ACCESS_TOKEN>`:
