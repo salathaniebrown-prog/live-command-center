@@ -45,3 +45,9 @@ cd android
 
 The production EAS configuration and project ID from the original mobile
 repository are preserved in `app.json` and `eas.json`.
+
+## Mission Core APK recovery checkpoint
+
+The `recovery/mobile-mission-core-apk-20260908` branch exists only to build and
+verify the Eagle Eyes 1.1.1 Mission Core APK from the same application source
+validated in PR #50. This checkpoint does not authorize production promotion.
