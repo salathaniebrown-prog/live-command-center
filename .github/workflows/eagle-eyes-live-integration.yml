@@ -10,6 +10,7 @@ on:
       - "server.js"
       - "world-os.js"
       - "data-spine.js"
+      - "satellites.js"
       - "clients/mobile/**"
       - "workers/**"
       - ".github/workflows/eagle-eyes-live-integration.yml"
@@ -22,21 +23,30 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
-      EAGLE_EYES_BASE_URL: https://live-command-center-production-31ed.up.railway.app
+      EAGLE_EYES_BASE_URL: https://live-command-center-deploy.up.railway.app
       WORLD_DATA_URL: ${{ vars.EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL }}
 
     steps:
       - name: Checkout recovery branch
         uses: actions/checkout@v4
 
-      - name: Verify production Command Center
+      - name: Verify recovery Command Center
         run: |
           set -euo pipefail
 
           get() {
             local path="$1"
             local out="$2"
-            curl               --fail               --silent               --show-error               --retry 3               --retry-delay 2               --connect-timeout 10               --max-time 30               "$EAGLE_EYES_BASE_URL$path"               | tee "$out"
+            curl \
+              --fail \
+              --silent \
+              --show-error \
+              --retry 3 \
+              --retry-delay 2 \
+              --connect-timeout 10 \
+              --max-time 30 \
+              "$EAGLE_EYES_BASE_URL$path" \
+              | tee "$out"
           }
 
           get "/api/health" /tmp/live-health.json
@@ -51,8 +61,28 @@ jobs:
           set -euo pipefail
 
           for source in usgs eonet nws; do
-            curl               --fail               --silent               --show-error               --retry 3               --retry-delay 2               --connect-timeout 10               --max-time 40               "$EAGLE_EYES_BASE_URL/api/eagle-eyes/events?source=$source&limit=2"               | tee "/tmp/live-$source.json"
+            curl \
+              --fail \
+              --silent \
+              --show-error \
+              --retry 3 \
+              --retry-delay 2 \
+              --connect-timeout 10 \
+              --max-time 40 \
+              "$EAGLE_EYES_BASE_URL/api/eagle-eyes/events?source=$source&limit=2" \
+              | tee "/tmp/live-$source.json"
           done
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 3 \
+            --retry-delay 2 \
+            --connect-timeout 10 \
+            --max-time 40 \
+            "$EAGLE_EYES_BASE_URL/api/eagle-eyes/satellites?limit=5" \
+            | tee /tmp/live-satellites.json
 
       - name: Assert real-only live contract
         run: |
@@ -67,17 +97,18 @@ jobs:
           const deployment = read('live-deployment');
           const assistant = read('live-assistant');
           const sources = read('live-sources');
+          const satellites = read('live-satellites');
 
           if (health.ok !== true) {
-            throw new Error('production health is not OK');
+            throw new Error('recovery health is not OK');
           }
 
           if (status.online !== true || status.mode !== 'LIVE') {
-            throw new Error('production status is not LIVE');
+            throw new Error('recovery status is not LIVE');
           }
 
           if (deployment.stage !== 'RUNNING') {
-            throw new Error('Railway deployment is not RUNNING');
+            throw new Error('Railway recovery deployment is not RUNNING');
           }
 
           if (assistant.freeMode !== true) {
@@ -85,7 +116,7 @@ jobs:
           }
 
           if (sources.simulated !== false) {
-            throw new Error('production source contract is not real-only');
+            throw new Error('recovery source contract is not real-only');
           }
 
           for (const source of ['usgs', 'eonet', 'nws']) {
@@ -104,7 +135,25 @@ jobs:
             }
           }
 
-          console.log('Eagle Eyes live integration gate passed');
+          if (!sources.sources.includes('celestrak-weather')) {
+            throw new Error('CelesTrak weather satellite source is missing');
+          }
+
+          if (satellites.simulated !== false) {
+            throw new Error('satellite response is not explicitly real-only');
+          }
+
+          if (!Array.isArray(satellites.satellites) || satellites.satellites.length < 1) {
+            throw new Error('live satellite route returned no propagated satellites');
+          }
+
+          if (satellites.source !== 'celestrak') {
+            throw new Error('satellite route is not backed by CelesTrak');
+          }
+
+          console.log(
+            `Eagle Eyes live integration gate passed with ${satellites.satellites.length} live satellites.`
+          );
           NODE
 
       - name: Verify optional World Data V2 deployment
@@ -114,14 +163,33 @@ jobs:
 
           WORLD_DATA_URL="${WORLD_DATA_URL%/}"
 
-          curl             --fail             --silent             --show-error             --retry 3             --retry-delay 2             --connect-timeout 10             --max-time 30             "$WORLD_DATA_URL/healthz"             | tee /tmp/world-data-health.json
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 3 \
+            --retry-delay 2 \
+            --connect-timeout 10 \
+            --max-time 30 \
+            "$WORLD_DATA_URL/healthz" \
+            | tee /tmp/world-data-health.json
 
-          curl             --fail             --silent             --show-error             --retry 3             --retry-delay 2             --connect-timeout 10             --max-time 40             "$WORLD_DATA_URL/api/source-health"             | tee /tmp/world-data-source-health.json
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 3 \
+            --retry-delay 2 \
+            --connect-timeout 10 \
+            --max-time 40 \
+            "$WORLD_DATA_URL/api/source-health" \
+            | tee /tmp/world-data-source-health.json
 
       - name: Note World Data V2 not configured
         if: ${{ env.WORLD_DATA_URL == '' }}
         run: |
-          echo '{"configured":false,"status":"skipped","reason":"EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL repository variable is not set"}'             | tee /tmp/world-data-not-configured.json
+          echo '{"configured":false,"status":"skipped","reason":"EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL repository variable is not set"}' \
+            | tee /tmp/world-data-not-configured.json
 
       - name: Upload live integration evidence
         uses: actions/upload-artifact@v4
@@ -137,5 +205,6 @@ jobs:
             /tmp/live-usgs.json
             /tmp/live-eonet.json
             /tmp/live-nws.json
+            /tmp/live-satellites.json
             /tmp/world-data-*.json
           if-no-files-found: error
