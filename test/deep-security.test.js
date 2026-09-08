@@ -77,6 +77,48 @@ test(
 );
 
 test(
+  "Deep Security API base path is preserved and auto-added",
+  async () => {
+    const urls = [];
+
+    const capture =
+      async (url) => {
+        urls.push(String(url));
+        return jsonResponse({});
+      };
+
+    const hostOnly =
+      new DeepSecurityClient({
+        baseUrl:
+          "https://deep.example.test",
+        apiKey: "secret",
+        apiVersion: "v1",
+        fetchImpl: capture
+      });
+
+    const explicitApi =
+      new DeepSecurityClient({
+        baseUrl:
+          "https://deep.example.test/api",
+        apiKey: "secret",
+        apiVersion: "v1",
+        fetchImpl: capture
+      });
+
+    await hostOnly.listComputers();
+    await explicitApi.listComputers();
+
+    assert.deepEqual(
+      urls,
+      [
+        "https://deep.example.test/api/computers?expand=none",
+        "https://deep.example.test/api/computers?expand=none"
+      ]
+    );
+  }
+);
+
+test(
   "runScan sends an immediate allowlisted recommendation scan",
   async () => {
     let captured;
@@ -121,7 +163,7 @@ test(
 
     assert.equal(
       captured.url,
-      "https://deep.example.test/scheduledtasks"
+      "https://deep.example.test/api/scheduledtasks"
     );
 
     assert.equal(
@@ -203,7 +245,7 @@ test(
 
     assert.equal(
       captured.url,
-      "https://deep.example.test/computers/3/firewall/assignments"
+      "https://deep.example.test/api/computers/3/firewall/assignments"
     );
 
     assert.deepEqual(
@@ -253,7 +295,7 @@ test(
 
     assert.equal(
       captured.url,
-      "https://deep.example.test/policies/5/settings/platformSettingRecommendationOngoingScansEnabled"
+      "https://deep.example.test/api/policies/5/settings/platformSettingRecommendationOngoingScansEnabled"
     );
 
     assert.deepEqual(
@@ -298,7 +340,7 @@ test(
 
     assert.equal(
       captured.url,
-      "https://deep.example.test/awsconnectors/8?sync=true"
+      "https://deep.example.test/api/awsconnectors/8?sync=true"
     );
 
     assert.deepEqual(
