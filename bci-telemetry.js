@@ -9,11 +9,18 @@ function bciTelemetryStatus(env = process.env) {
   const deviceProfile = String(env.BCI_DEVICE_PROFILE || "unconfigured")
     .trim()
     .slice(0, 80) || "unconfigured";
+  const candidateName = String(env.BCI_SELF_CANDIDATE_NAME || "Salathaniel Brown Sr")
+    .trim()
+    .slice(0, 80) || "Salathaniel Brown Sr";
 
   return {
     ok: true,
     status: ingestConfigured ? "WAITING" : "UNCONFIGURED",
     source: "bci-telemetry",
+    candidateMode: "single-self-candidate",
+    authorizedCandidate: candidateName,
+    enrollmentOpen: false,
+    selfUseOnly: true,
     deviceProfile,
     observationOnly: true,
     commandAuthority: false,
