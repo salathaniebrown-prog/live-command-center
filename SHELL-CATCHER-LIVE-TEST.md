@@ -43,3 +43,18 @@ Shell Catcher is a defensive observation API. It accepts authenticated security 
 ## Initial controlled corpus
 
 The module ships with benign API, shell-chain marker, command-substitution marker, path-traversal marker, air threshold alert, water critical alert, M4+ ground observation, and small-ground-event controls. These are strings/objects only; the self-test does not invoke a shell.
+
+## CI validation — September 8, 2026
+
+Branch head `a47dd482dd1996ee323fd28b398e8c42c012a7a7` completed these GitHub checks successfully before recovery-branch integration:
+
+- Shell Catcher Validate
+- Eagle Eyes Golden Baseline Preservation
+- Satellite Recovery Validation
+- Consolidated Container Validation
+
+The dedicated Shell Catcher workflow also completed syntax validation, the Shell Catcher regression suite, and the full Eagle Eyes recovery CI gate successfully.
+
+## Live deployment note
+
+A separate Railway test service could not be provisioned because the account is at the free-plan resource limit. The existing Railway `deploy` environment already tracks `recovery/complete-eagle-eyes-20260907`, so the live test path is to integrate Shell Catcher into that recovery branch while keeping production on `main`.
