@@ -1,0 +1,12 @@
+.git
+**/node_modules
+**/.env
+**/.env.*
+**/__pycache__
+**/*.pyc
+**/dist
+clients/mobile/android
+*.log
+*.db
+*.db-*
+.vercel

@@ -35,18 +35,52 @@ services:
     environment:
       KAFKA_BROKER: redpanda:9092
       TELEMETRY_TOPIC: eagle.eyes.field.telemetry
+      PX4_TELEMETRY_TOPIC: eagle.eyes.px4.telemetry
+      TELEMETRY_RELAY_TOKEN: ${TELEMETRY_RELAY_TOKEN:-}
+      SIGNED_TELEMETRY_HMAC_SECRET: ${SIGNED_TELEMETRY_HMAC_SECRET:-}
+      SIGNED_TELEMETRY_DB_PATH: /app/signed-state/ledger.db
+      SIGNED_TELEMETRY_MAX_CLOCK_SKEW_S: ${SIGNED_TELEMETRY_MAX_CLOCK_SKEW_S:-60}
       WEBSOCKET_HOST: 0.0.0.0
       WEBSOCKET_PORT: "8080"
       VOXEL_ORIGIN_LAT: ${VOXEL_ORIGIN_LAT:-35.6895}
       VOXEL_ORIGIN_LON: ${VOXEL_ORIGIN_LON:-139.6917}
       SATELLITE_BASE_URL: ${SATELLITE_BASE_URL:-}
       SATELLITE_API_KEY: ${SATELLITE_API_KEY:-}
+      EAGLE_EYES_METRICS_FILE: /app/live-metrics/live-metrics.json
     ports:
       - "8080:8080"
+    volumes:
+      - live_metrics:/app/live-metrics
+      - signed_state:/app/signed-state
     depends_on:
       redpanda:
         condition: service_healthy
     restart: unless-stopped
 
+  gpu-telemetry:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eagle_eyes_gpu_telemetry
+    command: ["python", "-u", "gpu_telemetry.py"]
+    environment:
+      EAGLE_EYES_METRICS_FILE: /app/live-metrics/live-metrics.json
+      EAGLE_EYES_GPU_POLL_SECONDS: ${EAGLE_EYES_GPU_POLL_SECONDS:-2}
+      EAGLE_EYES_GPU_TIMEOUT_SECONDS: ${EAGLE_EYES_GPU_TIMEOUT_SECONDS:-2}
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: utility
+    volumes:
+      - live_metrics:/app/live-metrics
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
 volumes:
   redpanda_data:
+  live_metrics:
+  signed_state:

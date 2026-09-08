@@ -1,5 +1,6 @@
 "use strict";
 
+const { assertObservationToolset } = require("./command-policy");
 const express = require("express");
 const os = require("os");
 const path = require("path");
@@ -13,6 +14,7 @@ const {
   shouldUseFreeKnowledge
 } = require("./world-os");
 const { normalizeWorldData } = require("./data-spine");
+const { buildChronicleScribe } = require("./chronicle-scribe");
 const {
   CELESTRAK_WEATHER_URL,
   weatherSatellites
@@ -21,6 +23,24 @@ const {
   Px4TelemetryStore,
   formatPx4Telemetry
 } = require("./px4-telemetry");
+const { bciTelemetryStatus } = require("./bci-telemetry");
+const { futureCommandLabStatus } = require("./future-command-lab");
+const { getTelemetryIntegrity } = require("./telemetry-integrity");
+const {
+  CHAIN_SOURCE_URL,
+  queryEvmChains,
+  formatEvmChains
+} = require("./evm-chains");
+const {
+  getCryptoStatus,
+  createPaymentRequest,
+  createTransferRequest
+} = require("./crypto-payments");
+const { registerLeadIntake } = require("./lead-intake-preload");
+const { registerShellCatcher } = require("./shell-catcher");
+const {
+  createDeepSecurityFromEnv
+} = require("./deep-security");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
 
@@ -40,6 +60,9 @@ const px4TelemetryStore = new Px4TelemetryStore({
   staleAfterMs: PX4_TELEMETRY_STALE_MS
 });
 const OPENAI_URL = "https://api.openai.com/v1/responses";
+const deepSecurity =
+  createDeepSecurityFromEnv();
+let chronicleScribeBaseline = null;
 
 const SOURCES = {
   usgs: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
@@ -109,7 +132,7 @@ const TOOLS = [
         limit: {
           type: "integer",
           minimum: 1,
-          maximum: 20
+          maximum: 250
         }
       },
       required: ["source", "limit"],
@@ -120,7 +143,7 @@ const TOOLS = [
     type: "function",
     name: "get_weather_satellites",
     description:
-      "Get up to 30 real weather-satellite positions propagated from current CelesTrak NORAD GP orbital elements. Never simulate missing orbital data.",
+      "Get current real weather-satellite positions propagated from CelesTrak NORAD GP orbital elements. The backend supports the full current WEATHER catalog up to its safety ceiling. Never simulate missing orbital data.",
     strict: true,
     parameters: {
       type: "object",
@@ -128,7 +151,7 @@ const TOOLS = [
         limit: {
           type: "integer",
           minimum: 1,
-          maximum: 30
+          maximum: 512
         }
       },
       required: ["limit"],
@@ -184,6 +207,136 @@ const TOOLS = [
   },
   {
     type: "function",
+    name: "get_evm_chains",
+    description:
+      "Search the canonical ChainID EVM registry by chain name, short name, symbol, CAIP-2 identifier, or chain ID. Metadata is observation-only; never sign or submit transactions.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string" },
+        limit: { type: "integer", minimum: 1, maximum: 20 }
+      },
+      required: ["query", "limit"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
+    name: "get_chronicle_scribe",
+    description:
+      "Build a read-only Chronicle Scribe brief from current official NWS, USGS, and NASA EONET feed windows, including source-grounded facts, priorities, and delta detection against the previous in-memory Scribe cycle. Never infer resolution from an event leaving the returned window.",
+    strict: true,
+    parameters: EMPTY
+  },
+  {
+    type: "function",
+    name: "get_deep_security_status",
+    description:
+      "Get Deep Security integration configuration and action-lock status.",
+    strict: true,
+    parameters: EMPTY
+  },
+  {
+    type: "function",
+    name: "deep_security_run_scan",
+    description:
+      "Execute an authorized Deep Security recommendation, malware, integrity, or open-port scan now.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        scanType: {
+          type: "string",
+          enum: ["recommendations", "malware", "integrity", "open-ports"]
+        },
+        targetType: {
+          type: "string",
+          enum: ["all-computers", "computer", "computers-in-group", "computers-in-group-or-subgroup", "computers-using-policy", "computers-using-policy-or-subpolicy", "computers-in-smart-folder"]
+        },
+        targetId: {
+          type: "integer",
+          minimum: 0
+        }
+      },
+      required: ["scanType", "targetType", "targetId"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
+    name: "deep_security_add_firewall_rules_to_computer",
+    description:
+      "Assign existing Deep Security firewall rule IDs to one authorized computer.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        computerID: { type: "integer", minimum: 1 },
+        ruleIDs: {
+          type: "array",
+          minItems: 1,
+          items: { type: "integer", minimum: 1 }
+        }
+      },
+      required: ["computerID", "ruleIDs"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
+    name: "deep_security_add_firewall_rules_to_policy",
+    description:
+      "Assign existing Deep Security firewall rule IDs to one authorized policy.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        policyID: { type: "integer", minimum: 1 },
+        ruleIDs: {
+          type: "array",
+          minItems: 1,
+          items: { type: "integer", minimum: 1 }
+        }
+      },
+      required: ["policyID", "ruleIDs"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
+    name: "deep_security_set_policy_setting",
+    description:
+      "Set one named Deep Security policy setting on an authorized policy.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        policyID: { type: "integer", minimum: 1 },
+        name: { type: "string" },
+        value: { type: "string" }
+      },
+      required: ["policyID", "name", "value"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
+    name: "deep_security_sync_aws_connector",
+    description:
+      "Immediately synchronize one existing authorized AWS connector in Deep Security.",
+    strict: true,
+    parameters: {
+      type: "object",
+      properties: {
+        awsConnectorID: { type: "integer", minimum: 1 }
+      },
+      required: ["awsConnectorID"],
+      additionalProperties: false
+    }
+  },
+  {
+    type: "function",
     name: "get_world_os_status",
     description:
       "Get Eagle Eyes World Command Operating System capability and module status.",
@@ -192,23 +345,37 @@ const TOOLS = [
   }
 ];
 
+assertObservationToolset(TOOLS);
+
+const AI_TOOLS = [
+  { type: "web_search" },
+  ...TOOLS
+];
+
 const INSTRUCTIONS = [
   "You are Eagle Eyes, the intelligence core of the EAGLE EYES WORLD COMMAND OPERATING SYSTEM.",
   "Use tools for current system state, metrics, deployment state, health, world-event feeds, global weather, encyclopedic world knowledge, and validated PX4 telemetry when configured.",
   "PX4 telemetry is observational only. Never claim flight-control authority, never invent vehicle state, and treat WAITING or STALE telemetry as non-current.",
   "For general factual questions that benefit from reference knowledge, call search_world_knowledge. For current weather by place, call get_global_weather.",
+  "Use the hosted web_search tool for current, recent, or internet-specific questions that are not fully answered by the dedicated Eagle Eyes live feeds. Prefer the dedicated live feeds for NWS, USGS, NASA EONET, Open-Meteo weather, CelesTrak satellites, and PX4 telemetry.",
   "For current weather-satellite orbital positions, call get_weather_satellites. Treat CelesTrak GP-derived positions as propagated orbital estimates at the reported positionsAt time, not imagery and not sensor observations.",
+  "For EVM chain-registry questions, call get_evm_chains. Treat RPC endpoints, explorers, parent/L2 relationships, status, and red flags as read-only metadata; never connect a wallet, sign a payload, or submit a transaction.",
   "For a mission brief, situation report, broad incident-priority request, or question about what matters now, call get_operational_snapshot before answering.",
+  "For Chronicle Scribe requests, call get_chronicle_scribe and preserve its distinction between verified source facts, interpretation, unknowns, and feed-window limits.",
   "When prioritizing, distinguish source facts from interpretation and use explicit NWS severity, earthquake magnitude, recency, deployment health, and container pressure as evidence.",
   "Keep mission briefs executive and mobile-friendly: group related alerts, show no more than five top incidents, shorten long area lists, separate system pressure from external incidents, explain why each priority matters, and finish with a short WATCH NEXT section.",
+  "Deep Security is the action-capable protection plane for authorized connected workloads. Use its action tools when the user asks to scan, protect, apply a security setting, assign firewall rules, or synchronize a connector.",
+  "Deep Security action tools are intentionally allowlisted. Never use them to create/delete administrators, rotate/delete API keys, delete policies, remove protection, or act on systems that are not authorized and connected.",
   "Never invent telemetry, alerts, sensor values, or deployment state.",
   "If a value is unavailable, say N/A or unavailable.",
-  "All tools are read-only; never claim you changed infrastructure, files, credentials, accounts, or deployments."
+  "Most tools are read-only. Deep Security tools may execute only the explicit allowlisted security actions when DEEP_SECURITY_ACTIONS_ENABLED=true. Report the actual upstream result and never claim an action succeeded unless Deep Security confirms it."
 ].join(" ");
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "256kb" }));
 app.use(express.static(path.join(__dirname, "public")));
+registerLeadIntake(app);
+registerShellCatcher(app, { readGuard: requireAssistantAccess });
 
 function secretsMatch(received, expected) {
   if (!received || !expected) {
@@ -406,6 +573,8 @@ function deployment() {
     serviceId: process.env.RAILWAY_SERVICE_ID || null,
     deploymentId: process.env.RAILWAY_DEPLOYMENT_ID || null,
     environment: process.env.RAILWAY_ENVIRONMENT_NAME || null,
+    commitSha: process.env.RAILWAY_GIT_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || null,
+    branch: process.env.RAILWAY_GIT_BRANCH || process.env.VERCEL_GIT_COMMIT_REF || null,
     source: "runtime-environment",
     timestamp: new Date().toISOString()
   };
@@ -439,7 +608,7 @@ async function world(source, limit = 10) {
 
   const n = Math.max(
     1,
-    Math.min(20, Number(limit) || 10)
+    Math.min(250, Number(limit) || 10)
   );
 
   const headers =
@@ -467,6 +636,41 @@ async function world(source, limit = 10) {
   );
 }
 
+async function chronicleScribeReport() {
+  const [usgsResult, nwsResult, eonetResult] = await Promise.allSettled([
+    world("usgs", 20),
+    world("nws", 20),
+    world("eonet", 20)
+  ]);
+
+  const asFeed = (result, source) =>
+    result.status === "fulfilled"
+      ? result.value
+      : {
+          ok: false,
+          source,
+          simulated: false,
+          count: 0,
+          events: [],
+          error: result.reason?.message || "source unavailable",
+          timestamp: new Date().toISOString()
+        };
+
+  const built = buildChronicleScribe(
+    {
+      feeds: {
+        usgs: asFeed(usgsResult, "usgs"),
+        nws: asFeed(nwsResult, "nws"),
+        eonet: asFeed(eonetResult, "eonet")
+      }
+    },
+    chronicleScribeBaseline
+  );
+
+  chronicleScribeBaseline = built.baseline;
+  const { baseline, ...report } = built;
+  return report;
+}
 function severityScore(severity) {
   const scores = {
     Extreme: 100,
@@ -1019,12 +1223,17 @@ function compactEvent(event, source) {
   ].filter(Boolean).join(" • ");
 }
 
-async function freeCommand(message) {
+async function freeCommand(message, forceFree = false) {
   const q = String(message || "")
     .trim()
     .toLowerCase();
 
   if (!q) {
+    return null;
+  }
+  // AI-first: when GPT is configured, let the model choose live tools.
+  // forceFree is reserved for graceful fallback after an AI failure.
+  if (OPENAI_API_KEY && !forceFree) {
     return null;
   }
 
@@ -1050,6 +1259,7 @@ async function freeCommand(message) {
         "• world knowledge lookup (people, places, history, science, technology)",
         "• global current weather by city or place",
         "• PX4 telemetry status / latest validated vehicle snapshot when configured",
+        "• EVM chain registry lookup by chain name or chain ID (read-only)",
         "• World OS capability status",
         "",
         "These commands use live read-only data. GPT-5.6 commands will automatically become available when API billing is active."
@@ -1057,6 +1267,16 @@ async function freeCommand(message) {
     };
   }
 
+  if (
+    /\b(chronicle scribe|scribe brief|what changed|scribe)\b/.test(q)
+  ) {
+    const report = await chronicleScribeReport();
+    return {
+      handled: true,
+      tool: "get_chronicle_scribe",
+      text: report.text
+    };
+  }
   if (
     /\b(mission brief|situation report|sitrep|operational snapshot|priority brief|prioritize incidents|what matters now)\b/.test(q)
   ) {
@@ -1149,6 +1369,31 @@ async function freeCommand(message) {
     };
   }
 
+  if (/\b(evm|chain\s*id|chainid|chain registry|ethereum network|rpc registry)\b/.test(q)) {
+    try {
+      const data = await queryEvmChains({
+        query: message,
+        limit: 10
+      });
+
+      return {
+        handled: true,
+        tool: "get_evm_chains",
+        text: formatEvmChains(data)
+      };
+    } catch (error) {
+      return {
+        handled: true,
+        tool: "get_evm_chains",
+        text: [
+          "EVM CHAIN REGISTRY TEMPORARILY UNAVAILABLE",
+          `Reason: ${error.message}`,
+          "No simulated chain metadata was substituted."
+        ].join("\n")
+      };
+    }
+  }
+
   if (/\b(deployment|deploy|railway)\b/.test(q)) {
     const d = deployment();
 
@@ -1200,6 +1445,7 @@ async function freeCommand(message) {
         `NASA EONET: ${SOURCES.eonet}`,
         `NOAA / NWS: ${SOURCES.nws}`,
         `CelesTrak Weather Satellites: ${CELESTRAK_WEATHER_URL}`,
+        `EVM Chain Registry: ${CHAIN_SOURCE_URL}`,
         "Simulation: OFF"
       ].join("\n")
     };
@@ -1406,6 +1652,69 @@ async function runTool(call) {
     case "get_px4_telemetry":
       return px4TelemetryStatus();
 
+    case "get_evm_chains":
+      return queryEvmChains({
+        query: args.query,
+        limit: args.limit
+      });
+
+    case "get_chronicle_scribe":
+      return chronicleScribeReport();
+    case "get_deep_security_status":
+      return deepSecurity.configuration();
+
+    case "deep_security_run_scan": {
+      const target = {
+        type: args.targetType
+      };
+
+      if (args.targetType === "computer") {
+        target.computerID = args.targetId;
+      } else if (
+        args.targetType === "computers-in-group" ||
+        args.targetType === "computers-in-group-or-subgroup"
+      ) {
+        target.computerGroupID = args.targetId;
+      } else if (
+        args.targetType === "computers-using-policy" ||
+        args.targetType === "computers-using-policy-or-subpolicy"
+      ) {
+        target.policyID = args.targetId;
+      } else if (
+        args.targetType === "computers-in-smart-folder"
+      ) {
+        target.smartFolderID = args.targetId;
+      }
+
+      return deepSecurity.runScan({
+        scanType: args.scanType,
+        target
+      });
+    }
+
+    case "deep_security_add_firewall_rules_to_computer":
+      return deepSecurity.addFirewallRulesToComputer(
+        args.computerID,
+        args.ruleIDs
+      );
+
+    case "deep_security_add_firewall_rules_to_policy":
+      return deepSecurity.addFirewallRulesToPolicy(
+        args.policyID,
+        args.ruleIDs
+      );
+
+    case "deep_security_set_policy_setting":
+      return deepSecurity.setPolicySetting(
+        args.policyID,
+        args.name,
+        args.value
+      );
+
+    case "deep_security_sync_aws_connector":
+      return deepSecurity.syncAwsConnector(
+        args.awsConnectorID
+      );
     case "get_world_os_status":
       return worldOSStatus();
 
@@ -1541,7 +1850,7 @@ async function assistant(
         model: OPENAI_MODEL,
         instructions: INSTRUCTIONS,
         input,
-        tools: TOOLS,
+        tools: AI_TOOLS,
         tool_choice: "auto",
         store: false
       },
@@ -1814,7 +2123,7 @@ async function assistantStream(
           input,
 
           tools:
-            TOOLS,
+            AI_TOOLS,
 
           tool_choice:
             "auto",
@@ -1991,6 +2300,22 @@ app.get(
 );
 
 app.get(
+  "/api/eagle-eyes/bci/status",
+  (_req, res) =>
+    res.json(
+      bciTelemetryStatus()
+    )
+);
+
+app.get(
+  "/api/eagle-eyes/future-command-lab",
+  (_req, res) =>
+    res.json(
+      futureCommandLabStatus()
+    )
+);
+
+app.get(
   "/api/eagle-eyes/sources",
   (_req, res) =>
     res.json({
@@ -2012,6 +2337,190 @@ app.get(
     })
 );
 
+app.get(
+  "/api/eagle-eyes/chains",
+  async (req, res) => {
+    try {
+      res.json(
+        await queryEvmChains({
+          query: req.query.q || req.query.query || "",
+          limit: req.query.limit
+        })
+      );
+    } catch (error) {
+      res.status(502).json({
+        ok: false,
+        source: CHAIN_SOURCE_URL,
+        observationOnly: true,
+        simulated: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/eagle-eyes/crypto/status",
+  (req, res) => {
+    res.json(getCryptoStatus());
+  }
+);
+
+app.post(
+  "/api/eagle-eyes/crypto/payment-request",
+  requireAssistantAccess,
+  (req, res) => {
+    try {
+      res.json(
+        createPaymentRequest({
+          amountUsdc: req.body?.amountUsdc,
+          memo: req.body?.memo
+        })
+      );
+    } catch (error) {
+      const configurationError = /CRYPTO_RECEIVE_ADDRESS|mainnet is locked/.test(
+        error.message
+      );
+
+      res.status(configurationError ? 503 : 400).json({
+        ok: false,
+        error: error.message,
+        transactionCreated: false,
+        transactionSigned: false,
+        transactionSubmitted: false,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/eagle-eyes/crypto/transfer-request",
+  requireAssistantAccess,
+  (req, res) => {
+    try {
+      res.json(
+        createTransferRequest({
+          fromAddress: req.body?.fromAddress,
+          toAddress: req.body?.toAddress,
+          amountUsdc: req.body?.amountUsdc,
+          memo: req.body?.memo
+        })
+      );
+    } catch (error) {
+      const configurationError = /mainnet is locked/.test(error.message);
+
+      res.status(configurationError ? 503 : 400).json({
+        ok: false,
+        error: error.message,
+        transactionPrepared: false,
+        walletApprovalRequired: true,
+        transactionSigned: false,
+        transactionSubmitted: false,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/eagle-eyes/deep-security/status",
+  requireAssistantAccess,
+  (_req, res) =>
+    res.json(
+      deepSecurity.configuration()
+    )
+);
+
+app.post(
+  "/api/eagle-eyes/deep-security/action",
+  requireAssistantAccess,
+  async (req, res) => {
+    try {
+      const action =
+        String(
+          req.body?.action || ""
+        ).trim();
+
+      const args =
+        req.body?.args || {};
+
+      let result;
+
+      switch (action) {
+        case "run-scan":
+          result =
+            await deepSecurity.runScan(args);
+          break;
+
+        case "add-firewall-rules-to-computer":
+          result =
+            await deepSecurity.addFirewallRulesToComputer(
+              args.computerID,
+              args.ruleIDs
+            );
+          break;
+
+        case "add-firewall-rules-to-policy":
+          result =
+            await deepSecurity.addFirewallRulesToPolicy(
+              args.policyID,
+              args.ruleIDs
+            );
+          break;
+
+        case "set-policy-setting":
+          result =
+            await deepSecurity.setPolicySetting(
+              args.policyID,
+              args.name,
+              args.value
+            );
+          break;
+
+        case "sync-aws-connector":
+          result =
+            await deepSecurity.syncAwsConnector(
+              args.awsConnectorID
+            );
+          break;
+
+        default:
+          return res.status(400).json({
+            ok: false,
+            error:
+              "Unsupported Deep Security action"
+          });
+      }
+
+      return res.json({
+        ok: true,
+        action,
+        result,
+        timestamp:
+          new Date().toISOString()
+      });
+    } catch (error) {
+      const statusCode =
+        Number(error.statusCode);
+
+      return res
+        .status(
+          statusCode >= 400 && statusCode < 600
+            ? statusCode
+            : 502
+        )
+        .json({
+          ok: false,
+          error:
+            error.message,
+          timestamp:
+            new Date().toISOString()
+        });
+    }
+  }
+);
 app.get(
   "/api/eagle-eyes/events",
   async (req, res) => {
@@ -2042,6 +2551,25 @@ app.get(
 );
 
 app.get(
+  "/api/eagle-eyes/chronicle/scribe",
+  async (_req, res) => {
+    try {
+      res.set("cache-control", "no-store");
+      res.json(await chronicleScribeReport());
+    } catch (error) {
+      res.status(502).json({
+        ok: false,
+        mode: "LIVE_ONLY",
+        authority: "observation",
+        commandEligible: false,
+        simulated: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+);
+app.get(
   "/api/eagle-eyes/satellites",
   async (req, res) => {
     try {
@@ -2070,6 +2598,13 @@ app.get(
   }
 );
 
+app.get(
+  "/api/eagle-eyes/telemetry-integrity",
+  async (_req, res) => {
+    res.set("cache-control", "no-store");
+    res.json(await getTelemetryIntegrity());
+  }
+);
 app.get(
   "/api/eagle-eyes/px4",
   requireAssistantAccess,
@@ -2282,7 +2817,30 @@ app.get(
       transport:
         "responses-api-sse",
 
-      readOnlyTools:
+      hostedTools:
+        OPENAI_API_KEY
+          ? ["web_search"]
+          : [],
+
+      webSearch:
+        Boolean(
+          OPENAI_API_KEY
+        ),
+
+      deepSecurity:
+        deepSecurity.configuration(),
+
+      actionTools:
+        TOOLS.filter(
+          (t) =>
+            t.name?.startsWith(
+              "deep_security_"
+            )
+        ).map(
+          (t) => t.name
+        ),
+
+      tools:
         TOOLS.map(
           (t) =>
             t.name
@@ -2380,6 +2938,19 @@ app.post(
         ))
       });
     } catch (e) {
+      // AI-FIRST-FALLBACK: preserve live functionality if GPT is unavailable.
+      const fallback = await freeCommand(message, true);
+      if (fallback) {
+        return res.json({
+          ok: true,
+          mode: "free-fallback",
+          model: "free-command-mode",
+          tool: fallback.tool,
+          text: fallback.text,
+          aiUnavailable: true
+        });
+      }
+
       return res
         .status(
           e.statusCode ||
@@ -2606,6 +3177,23 @@ app.post(
         controller.signal
       );
     } catch (e) {
+      // AI-FIRST-STREAM-FALLBACK: keep the command rail useful if GPT fails.
+      if (!controller.signal.aborted) {
+        const fallback = await freeCommand(message, true);
+        if (fallback) {
+          sendSSE(res, "fallback", {
+            mode: "free-fallback",
+            tool: fallback.tool
+          });
+          sendSSE(res, "delta", { text: fallback.text });
+          sendSSE(res, "done", {
+            model: "free-command-mode",
+            mode: "free-fallback"
+          });
+          return;
+        }
+      }
+
       if (
         !controller
           .signal

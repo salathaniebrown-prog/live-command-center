@@ -175,6 +175,9 @@ function LiveStatus() {
   const [metrics, setMetrics] = useState(null);
   const [deployment, setDeployment] = useState(null);
   const [assistant, setAssistant] = useState(null);
+  const [futureLab, setFutureLab] = useState(null);
+  const [bci, setBci] = useState(null);
+  const [crypto, setCrypto] = useState(null);
   const [error, setError] = useState("");
 
   async function getJson(path) {
@@ -190,13 +193,19 @@ function LiveStatus() {
       getJson("/api/status"),
       getJson("/api/metrics"),
       getJson("/api/deployment"),
-      getJson("/api/assistant/status")
+      getJson("/api/assistant/status"),
+      getJson("/api/eagle-eyes/future-command-lab"),
+      getJson("/api/eagle-eyes/bci/status"),
+      getJson("/api/eagle-eyes/crypto/status")
     ]);
 
     if (results[0].status === "fulfilled") setStatus(results[0].value);
     if (results[1].status === "fulfilled") setMetrics(results[1].value);
     if (results[2].status === "fulfilled") setDeployment(results[2].value);
     if (results[3].status === "fulfilled") setAssistant(results[3].value);
+    if (results[4].status === "fulfilled") setFutureLab(results[4].value);
+    if (results[5].status === "fulfilled") setBci(results[5].value);
+    if (results[6].status === "fulfilled") setCrypto(results[6].value);
 
     const failures = results.filter((item) => item.status === "rejected");
     if (failures.length) {
@@ -253,7 +262,35 @@ function LiveStatus() {
           {assistant?.commandMode || (assistant?.freeMode ? "FREE" : "CHECKING")}
         </Text>
         <Text style={styles.infoMeta}>
-          GPT-5.6 when available · protected free-command fallback stays online
+          GPT-5.6 when available · Kimi tracked by provider health · protected free-command fallback stays online
+        </Text>
+      </View>
+
+      <View style={styles.infoCard}>
+        <Text style={styles.infoLabel}>PROJECT FUTURE COMMAND LAB</Text>
+        <Text style={styles.infoValue}>{futureLab?.authority || "CHECKING"}</Text>
+        <Text style={styles.infoMeta}>
+          {futureLab?.lab || "Planning lane"} · live execution{" "}
+          {futureLab?.liveExecution ? "enabled" : "blocked"}
+        </Text>
+      </View>
+
+      <View style={styles.infoCard}>
+        <Text style={styles.infoLabel}>BCI TELEMETRY</Text>
+        <Text style={styles.infoValue}>{bci?.status || "CHECKING"}</Text>
+        <Text style={styles.infoMeta}>
+          {bci?.authorizedCandidate || "Single self-candidate"} · read-only observation · command authority{" "}
+          {bci?.commandAuthority ? "enabled" : "blocked"} · medical device{" "}
+          {bci?.medicalDevice ? "yes" : "no"}
+        </Text>
+      </View>
+
+      <View style={styles.infoCard}>
+        <Text style={styles.infoLabel}>CRYPTO RAIL</Text>
+        <Text style={styles.infoValue}>{crypto?.mode || "CHECKING"}</Text>
+        <Text style={styles.infoMeta}>
+          {crypto?.network?.name || "Base Sepolia"} · mainnet{" "}
+          {crypto?.mainnetLocked ? "locked" : "enabled"} · wallet approval required
         </Text>
       </View>
 
@@ -277,6 +314,11 @@ function LiveStatus() {
         <Text style={styles.capability}>• Wikipedia world knowledge lookup</Text>
         <Text style={styles.capability}>• Open-Meteo global current weather</Text>
         <Text style={styles.capability}>• PX4 validated observation-only telemetry surface</Text>
+        <Text style={styles.capability}>• BCI telemetry lane registered as read-only</Text>
+        <Text style={styles.capability}>• Project Future Command Lab planning lane</Text>
+        <Text style={styles.capability}>• Supercomputer NexusBrown Command Center planned lane</Text>
+        <Text style={styles.capability}>• Moonshot/Kimi provider metadata for future routing</Text>
+        <Text style={styles.capability}>• Base USDC sandbox rail with mainnet locked by default</Text>
         <Text style={styles.capability}>• Built-in live Web Search browser</Text>
       </View>
     </ScrollView>
@@ -318,19 +360,29 @@ export default function App() {
           onPress={() => openWorld("overview")}
         />
         <TabButton
-          active={tab === "world" && section === "runtime"}
-          label="RUNTIME"
-          onPress={() => openWorld("runtime")}
+          active={tab === "world" && section === "live"}
+          label="LIVE OPS"
+          onPress={() => openWorld("live")}
         />
         <TabButton
-          active={tab === "world" && section === "intelligence"}
+          active={tab === "world" && section === "intel"}
           label="INTEL"
-          onPress={() => openWorld("intelligence")}
+          onPress={() => openWorld("intel")}
         />
         <TabButton
-          active={tab === "world" && section === "command"}
-          label="COMMAND"
-          onPress={() => openWorld("command")}
+          active={tab === "world" && section === "future"}
+          label="FUTURE"
+          onPress={() => openWorld("future")}
+        />
+        <TabButton
+          active={tab === "world" && section === "crypto"}
+          label="CRYPTO"
+          onPress={() => openWorld("crypto")}
+        />
+        <TabButton
+          active={tab === "world" && section === "max"}
+          label="MAX"
+          onPress={() => openWorld("max")}
         />
         <TabButton active={tab === "data"} label="WORLD DATA" onPress={() => setTab("data")} />
         <TabButton active={tab === "search"} label="WEB SEARCH" onPress={() => setTab("search")} />

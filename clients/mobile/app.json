@@ -2,13 +2,13 @@
   "expo": {
     "name": "Eagle Eyes",
     "slug": "eagle-eyes",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "scheme": "eagleeyes",
     "android": {
       "package": "com.salathanielbrown.eagleeyes",
-      "versionCode": 2
+      "versionCode": 4
     },
     "extra": {
       "eas": {

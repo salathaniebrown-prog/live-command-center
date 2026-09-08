@@ -1,0 +1,35 @@
+name: ASSM Phase 1 CI
+
+on:
+  push:
+    branches:
+      - assm-phase1
+  pull_request:
+    paths:
+      - "assm/**"
+      - ".github/workflows/assm-phase1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-assm:
+    name: Validate ASSM Phase 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: assm
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run ASSM Syntax Checks and Tests
+        run: npm run ci

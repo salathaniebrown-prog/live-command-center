@@ -7,6 +7,7 @@ const CELESTRAK_WEATHER_URL =
   "https://celestrak.org/NORAD/elements/gp.php?GROUP=WEATHER&FORMAT=JSON";
 const MAX_SATELLITES = 512;
 const CACHE_MS = 2 * 60 * 60 * 1000;
+const STALE_CACHE_MS = 24 * 60 * 60 * 1000;
 
 let elementCache = {
   records: null,
@@ -135,6 +136,7 @@ async function fetchWeatherElements({
       records: elementCache.records,
       fetchedAt: elementCache.fetchedAt,
       cached: true,
+      staleMemoryFallback: false,
       persistentFallback: false,
       persistentSaved: false
     };
@@ -213,11 +215,35 @@ async function fetchWeatherElements({
       records,
       fetchedAt,
       cached: false,
+      staleMemoryFallback: false,
       persistentFallback: false,
       persistentSaved
     };
   } catch (error) {
     liveError = error;
+  }
+
+  const staleAgeMs =
+    nowMs - elementCache.fetchedAtMs;
+
+  if (
+    Array.isArray(elementCache.records) &&
+    elementCache.records.length &&
+    Number.isFinite(staleAgeMs) &&
+    staleAgeMs >= CACHE_MS &&
+    staleAgeMs <= STALE_CACHE_MS
+  ) {
+    return {
+      records: elementCache.records,
+      fetchedAt: elementCache.fetchedAt,
+      cached: true,
+      staleMemoryFallback: true,
+      persistentFallback: false,
+      persistentSaved: false,
+      fallbackReason:
+        liveError?.message ||
+        "CelesTrak live fetch unavailable"
+    };
   }
 
   const persisted =
@@ -236,6 +262,7 @@ async function fetchWeatherElements({
       records: persisted.records,
       fetchedAt: persisted.fetchedAt,
       cached: true,
+      staleMemoryFallback: false,
       persistentFallback: true,
       persistentSaved: false,
       fallbackReason:
@@ -408,6 +435,8 @@ async function weatherSatellites(
       source.fetchedAt,
     upstreamCached:
       source.cached,
+    staleMemoryFallback:
+      Boolean(source.staleMemoryFallback),
     persistentFallback:
       Boolean(source.persistentFallback),
     fallbackReason:
@@ -432,6 +461,7 @@ module.exports = {
   CELESTRAK_WEATHER_URL,
   MAX_SATELLITES,
   CACHE_MS,
+  STALE_CACHE_MS,
   fetchWeatherElements,
   projectOmm,
   projectWeatherOmms,

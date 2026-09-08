@@ -1,0 +1,60 @@
+name: Consolidated Container Validation
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate physical-server Compose
+        env:
+          POSTGRES_PASSWORD: ci-configuration-only
+        run: docker compose config --quiet
+      - name: Build complete Eagle Eyes container
+        run: docker build -t eagle-eyes:ci .
+      - name: Verify container startup and V13 identity
+        run: |
+          set -euo pipefail
+          docker run -d --name eagle-eyes-ci -p 127.0.0.1:31339:3000 eagle-eyes:ci
+          trap 'docker logs eagle-eyes-ci; docker rm -f eagle-eyes-ci' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:31339/api/health >/tmp/health.json; then break; fi
+            sleep 1
+          done
+          node -e "if(require('/tmp/health.json').ok!==true)process.exit(1)"
+          curl -fsS http://127.0.0.1:31339/ -o /tmp/dashboard.html
+          grep -q 'CHRONICLE LAB V13' /tmp/dashboard.html
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - name: Verify V13 in desktop and mobile browsers
+        run: |
+          set -euo pipefail
+          PORT=31338 npm start >/tmp/eagle-browser-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:31338/api/health >/dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/verify-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Eagle-Eyes-V13-Browser-Evidence
+          path: |
+            /tmp/eagle-eyes-desktop.png
+            /tmp/eagle-eyes-mobile.png
+            /tmp/eagle-browser-server.log

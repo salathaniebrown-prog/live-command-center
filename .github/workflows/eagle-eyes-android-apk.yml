@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - "recovery/**"
+      - "recover/**"
     paths:
       - "clients/mobile/**"
       - ".github/workflows/eagle-eyes-android-apk.yml"
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
-      EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL: "https://eagle-eyes-world-data-v2.salathaniebrown.chatgpt.site"
+      EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL: ${{ vars.EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL || 'https://eagle-eyes-world-data-v2.salathaniebrown.chatgpt.site' }}
     defaults:
       run:
         working-directory: clients/mobile
@@ -39,16 +40,21 @@ jobs:
           java-version: "17"
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Generate Android project
         env:
           CI: "1"
           EXPO_NO_TELEMETRY: "1"
+          EXPO_PUBLIC_EAGLE_EYES_BASE_URL: ${{ vars.EXPO_PUBLIC_EAGLE_EYES_BASE_URL }}
         run: npx expo prebuild --platform android --non-interactive
 
       - name: Build standalone release APK
         working-directory: clients/mobile/android
+        env:
+          CI: "1"
+          EXPO_NO_TELEMETRY: "1"
+          EXPO_PUBLIC_EAGLE_EYES_BASE_URL: ${{ vars.EXPO_PUBLIC_EAGLE_EYES_BASE_URL }}
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease

@@ -71,8 +71,23 @@ jobs:
 
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     steps:
+      - name: Verify deployment credentials and target
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Configure $name in GitHub production environment or repository secrets."
+              missing=1
+            fi
+          done
+          exit "$missing"
+
       - name: Checkout Code Repository
         uses: actions/checkout@v4
 

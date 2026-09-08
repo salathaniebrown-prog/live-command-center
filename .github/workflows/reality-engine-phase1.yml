@@ -1,0 +1,32 @@
+name: Eagle Eyes Reality Engine Phase 1
+
+on:
+  push:
+    branches:
+      - reality-engine-phase1
+  pull_request:
+    paths:
+      - "reality-engine/**"
+      - ".github/workflows/reality-engine-phase1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-reality-engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: reality-engine
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile Reality Engine
+        run: python -m compileall -q reality_engine tests
+      - name: Run Reality Engine Tests
+        run: python -m unittest discover -s tests -v

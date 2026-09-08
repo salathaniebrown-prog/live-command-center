@@ -25,11 +25,23 @@ npm install
 npx expo start
 ```
 
-## Build an APK in GitHub
+## Build an APK
 
 The repository includes `.github/workflows/eagle-eyes-android-apk.yml`. It
-prebuilds the Expo Android project and runs Gradle `assembleDebug`, then uploads
-the installable APK as the `Eagle-Eyes-Android` workflow artifact.
+prebuilds the Expo Android project and runs Gradle `assembleRelease`, then
+uploads the installable APK as the `Eagle-Eyes-Android-Standalone` workflow
+artifact.
+
+For local recovery builds:
+
+```bash
+cd clients/mobile
+npm run check
+npm run bundle:android
+npx expo prebuild --platform android --non-interactive
+cd android
+./gradlew assembleRelease
+```
 
 The production EAS configuration and project ID from the original mobile
 repository are preserved in `app.json` and `eas.json`.
