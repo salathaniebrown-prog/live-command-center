@@ -55,6 +55,27 @@ Branch head `a47dd482dd1996ee323fd28b398e8c42c012a7a7` completed these GitHub ch
 
 The dedicated Shell Catcher workflow also completed syntax validation, the Shell Catcher regression suite, and the full Eagle Eyes recovery CI gate successfully.
 
-## Live deployment note
+Railway's staging build then ran the recovered application CI gate with 76 tests: 76 passed and 0 failed.
 
-A separate Railway test service could not be provisioned because the account is at the free-plan resource limit. The existing Railway `deploy` environment already tracks `recovery/complete-eagle-eyes-20260907`, so the live test path is to integrate Shell Catcher into that recovery branch while keeping production on `main`.
+## Live staging verification — September 8, 2026
+
+Shell Catcher was integrated into `recovery/complete-eagle-eyes-20260907`, which is the source branch for the separate Railway `deploy` environment. Production remains on `main`.
+
+Railway staging deployment `2c3273c7-c15c-4987-ab59-9df041a52ed1` completed successfully from recovery commit `154292cd8fdefbf26e489f1eb65835ba2744b8a5`.
+
+Independent GitHub Actions smoke run `34224639466` reached the deployed staging API and passed. The live response reported:
+
+- `ok=true`
+- `service=eagle-eyes-shell-catcher`
+- `mode=LIVE_DEFENSIVE_OBSERVATION`
+- `operational=true`
+- `arbitraryShellExecution=false`
+- `commandAuthority=false`
+- domains: `api`, `shell`, `air`, `water`, `ground`, `system`
+- bounded ledger capacity: 500 records
+
+The same live response reported `ingestConfigured=false`. Therefore the Shell Catcher service and detector are operational on staging, while the authenticated external ingest lane remains intentionally locked until `SHELL_CATCHER_INGEST_TOKEN` is configured in the staging environment.
+
+## Resource note
+
+A separate fourth Railway test service could not be provisioned because the account is at the free-plan resource limit. The existing isolated `deploy` environment is therefore the live Shell Catcher staging lane; production is not used for detector experiments.
