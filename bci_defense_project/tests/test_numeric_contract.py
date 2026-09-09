@@ -4,6 +4,14 @@ from bci_analytics.engine import analyze_state, binary_signature, hamming_distan
 from bci_analytics.multi_domain import BCIDefenseEngine
 
 
+ARCH_HEALTHY_SIGNATURE = (1, 0, 1, 1, 0, 1, 0, 1, 1, 0)
+ARCH_THRESHOLDS = [0.5] * 10
+
+
+def _features_for_signature(signature):
+    return [0.9 if bit else 0.1 for bit in signature]
+
+
 def test_signature_contract():
     assert binary_signature(
         [0.2, 0.8, 0.5],
@@ -27,6 +35,46 @@ def test_nominal_anomaly_contract():
     assert state.signature == (1, 0, 1)
     assert state.anomaly_score == 0.0
     assert state.status == "NOMINAL"
+
+
+def test_10_bit_architecture_anomaly_bands():
+    nominal = analyze_state(
+        features=_features_for_signature(ARCH_HEALTHY_SIGNATURE),
+        thresholds=ARCH_THRESHOLDS,
+        healthy_signature=ARCH_HEALTHY_SIGNATURE,
+    )
+    assert nominal.anomaly_score == 0.0
+    assert nominal.status == "NOMINAL"
+
+    one_bit = (1, 0, 1, 1, 0, 1, 0, 1, 1, 1)
+    degraded_10 = analyze_state(
+        features=_features_for_signature(one_bit),
+        thresholds=ARCH_THRESHOLDS,
+        healthy_signature=ARCH_HEALTHY_SIGNATURE,
+    )
+    assert hamming_distance(one_bit, ARCH_HEALTHY_SIGNATURE) == 1
+    assert degraded_10.anomaly_score == 0.1
+    assert degraded_10.status == "DEGRADED"
+
+    two_bits = (1, 0, 1, 1, 0, 1, 0, 1, 0, 1)
+    degraded_20 = analyze_state(
+        features=_features_for_signature(two_bits),
+        thresholds=ARCH_THRESHOLDS,
+        healthy_signature=ARCH_HEALTHY_SIGNATURE,
+    )
+    assert hamming_distance(two_bits, ARCH_HEALTHY_SIGNATURE) == 2
+    assert degraded_20.anomaly_score == 0.2
+    assert degraded_20.status == "DEGRADED"
+
+    three_bits = (1, 0, 1, 1, 0, 1, 0, 0, 0, 1)
+    anomalous_30 = analyze_state(
+        features=_features_for_signature(three_bits),
+        thresholds=ARCH_THRESHOLDS,
+        healthy_signature=ARCH_HEALTHY_SIGNATURE,
+    )
+    assert hamming_distance(three_bits, ARCH_HEALTHY_SIGNATURE) == 3
+    assert anomalous_30.anomaly_score == 0.3
+    assert anomalous_30.status == "ANOMALOUS"
 
 
 def test_kinematics_contract():
@@ -54,7 +102,7 @@ def test_fft_contract():
     assert np.all(spectrum >= 0)
 
 
-def test_orbital_matrix_contract():
+def test_orbital_matrix_trace_fixture_contract():
     engine = BCIDefenseEngine(channels=8)
     matrix_a = np.array([[1, 2], [3, 4]], dtype=float)
     matrix_b = np.array([[5, 6], [7, 8]], dtype=float)
