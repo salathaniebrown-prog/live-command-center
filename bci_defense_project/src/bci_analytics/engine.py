@@ -82,3 +82,23 @@ def analyze_state(
         anomaly_score=anomaly_score,
         status=status,
     )
+
+
+def main() -> int:
+    """Run a deterministic self-check; this is not a live sensor reader."""
+    state = analyze_state(
+        features=[0.8, 0.2, 0.9],
+        thresholds=[0.5, 0.5, 0.5],
+        healthy_signature=(1, 0, 1),
+    )
+    print(
+        "BCI analytics deterministic self-check: "
+        f"signature={state.signature} "
+        f"anomaly_score={state.anomaly_score:.3f} "
+        f"status={state.status}"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
