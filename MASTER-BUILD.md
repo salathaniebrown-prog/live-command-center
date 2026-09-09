@@ -150,3 +150,13 @@ Mission Brief paths. Inline dashboard and workspace JavaScript syntax passed.
 No dependencies or startup transformations changed. Browser/device validation
 and deployment of this revision remain pending. Existing unfinished integration
 items above remain pending; directory links do not establish runtime integration.
+
+Deployment verification: 2026-09-09 14:15 UTC, Railway deploy environment,
+deployment `1cbf3876-3567-4bee-8408-1885928b62c5`, source
+`dab1eb93fbddbca3cda4f44e04a0915a12552bab`, status SUCCESS.
+https://live-command-center-deploy-1950.up.railway.app returned HTTP 200 for
+the dashboard, workspace.js, workspace.css and health (ok:true); /api/deployment
+returned the exact source SHA. GitHub container/app/satellite/preservation checks
+passed. Browser/device verification not performed. Vercel deployments failed
+with “Account is blocked”; production main was not promoted. PR #51 retains
+this upgrade for review. This documentation update is not the deployed revision.
