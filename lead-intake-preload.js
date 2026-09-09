@@ -2,6 +2,7 @@
 
 const crypto = require("crypto");
 const express = require("express");
+const { browserConfig, queueLeadCreated } = require("./openai-ads");
 
 const DATABASE_URL = process.env.DATABASE_URL || "";
 const COMMAND_CENTER_ACCESS_TOKEN =
@@ -176,6 +177,11 @@ function registerLeadIntake(app) {
   if (app.locals.__eagleEyesLeadIntakeRegistered) return;
   app.locals.__eagleEyesLeadIntakeRegistered = true;
 
+  app.get("/api/openai-ads/config", (_req, res) => {
+    res.set("cache-control", "no-store");
+    res.json(browserConfig());
+  });
+
   app.get("/api/leads/status", (_req, res) => {
     res.json({
       ok: true,
@@ -204,7 +210,8 @@ function registerLeadIntake(app) {
       return res.status(201).json({
         ok: true,
         leadId: crypto.randomUUID(),
-        received: true
+        received: true,
+        conversionEligible: false
       });
     }
 
@@ -243,10 +250,18 @@ function registerLeadIntake(app) {
         })
       );
 
+      queueLeadCreated({
+        req,
+        leadId,
+        email: lead.email,
+        sourceUrl: req.body?.sourceUrl
+      });
+
       return res.status(201).json({
         ok: true,
         leadId,
         received: true,
+        conversionEligible: true,
         message: "Deployment request received"
       });
     } catch (error) {
