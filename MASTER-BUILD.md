@@ -126,3 +126,37 @@ Production source: `b0070dac03bff512f9bdd88b3cd49fd9b125d32b`.
 Combined the current recovery build with production Deep Security, preserving all startup transformations, Chronicle Lab V13, the executive council, Scribe, Shell Catcher, native mobile streaming, and testnet boundaries. Restored the Vercel organization/project secret references during the workflow merge. The runtime deployment response now includes the hosting-provided commit and branch so a running service can be matched to its source.
 
 Validation: `npm run build` passed all 83 backend tests and both V13/golden-baseline checks. Existing Railway recovery dashboard was separately observed with live USGS, EONET, NWS and CelesTrak data and working MAX navigation. That browser evidence is for the earlier deployed build; this combined revision must still pass staging before production promotion. No hardware activity or deployment success is inferred from these code tests.
+
+## 2026-09-09 interior upgrade
+
+Source baseline: `79be758` on main, including recovery `bb1b3d4`.
+Interpreted “last five README GitHub” as the five latest root README revisions:
+`f0205b5`, `c13d5eb`, `65c83dd`, `60483e3`, `4f0284b`. Reviewed their changes
+and retained the current consolidated implementation rather than replacing it
+with older versions.
+
+Added a searchable 19-entry workspace with direct navigation to existing views
+and revision-pinned setup references. Added BCI status refresh, EVM chain search
+with unavailable/empty states, and serving-host revision display. Kept the local
+MCP/UDP broker separate from the web interface. Reduced the introductory hero
+and improved navigation/control text sizes and mobile workspace layout.
+
+Fixed Mission Brief destroying the CEO/President/CFO/CTO council DOM. Briefs
+now render in a dedicated output and preserve all role panels.
+
+Validation: npm run build passed existing 83 tests and V13/golden-baseline gates;
+one additional regression test passed for unauthenticated and authenticated
+Mission Brief paths. Inline dashboard and workspace JavaScript syntax passed.
+No dependencies or startup transformations changed. Browser/device validation
+and deployment of this revision remain pending. Existing unfinished integration
+items above remain pending; directory links do not establish runtime integration.
+
+Deployment verification: 2026-09-09 14:15 UTC, Railway deploy environment,
+deployment `1cbf3876-3567-4bee-8408-1885928b62c5`, source
+`dab1eb93fbddbca3cda4f44e04a0915a12552bab`, status SUCCESS.
+https://live-command-center-deploy-1950.up.railway.app returned HTTP 200 for
+the dashboard, workspace.js, workspace.css and health (ok:true); /api/deployment
+returned the exact source SHA. GitHub container/app/satellite/preservation checks
+passed. Browser/device verification not performed. Vercel deployments failed
+with “Account is blocked”; production main was not promoted. PR #51 retains
+this upgrade for review. This documentation update is not the deployed revision.

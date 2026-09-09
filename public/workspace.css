@@ -1,0 +1,13 @@
+#workspace{margin-bottom:16px}#workspace label,#chains label{display:block;font-size:16px;margin-bottom:8px}
+#moduleSearch,#chainQuery{width:100%;padding:12px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);color:var(--text);font-size:16px;min-width:0}
+.moduleGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px;max-height:380px;overflow:auto}
+.moduleCard{display:block;border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--panel2);text-decoration:none;color:var(--text)}
+.moduleCard:hover{border-color:var(--green)}.moduleCard strong{display:block;font-size:16px}.moduleCard span{display:block;color:var(--gold);font-size:14px;margin-top:5px}.moduleCard p{font-size:14px;color:var(--muted);margin:8px 0 0}
+.workspaceRow{display:flex;gap:8px}#chainResults,#bci .body{font-size:16px;overflow-wrap:anywhere}#chainResults{margin-top:14px}
+#workspaceRevision{overflow-wrap:anywhere;min-width:0;font-size:12px}.fact{min-width:0}#missionOutput{min-height:80px}
+.nav a,.btn{font-size:14px}.nav{overflow:auto}.rail{overflow:auto}.title{font-size:14px}.sub{font-size:12px}.head{flex-wrap:wrap}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}article,section[id]{scroll-margin-top:110px}
+.hero{min-height:0;margin-top:12px}.hero h2{font-size:clamp(24px,3vw,38px)}.heroCopy{font-size:16px}.hero{padding:20px}
+@media(max-width:760px){.moduleGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.nav a{font-size:14px}.workspaceRow{flex-wrap:wrap}.workspaceRow .btn{width:100%}}
+@media(max-width:480px){.moduleGrid{grid-template-columns:1fr;max-height:320px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
