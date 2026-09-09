@@ -60,11 +60,11 @@ test("source URL accepts trusted browser context and strips query and fragment",
   );
 });
 
-test("lead event preserves opaque oppref and hashes normalized email", () => {
+test("lead event preserves opaque attribution cookies and hashes normalized email", () => {
   const req = fakeRequest({
     host: "example.test",
     origin: "https://example.test",
-    cookie: "__oppref=opaque%2Bvalue; session=ignored",
+    cookie: "__oppref=opaque%2Bvalue; __obref=browser-ref%2Fraw; session=ignored",
     "user-agent": "EagleEyesTest/1.0"
   });
 
@@ -82,6 +82,7 @@ test("lead event preserves opaque oppref and hashes normalized email", () => {
   assert.equal(event.action_source, "web");
   assert.equal(event.timestamp_ms, 1770000000000);
   assert.equal(event.oppref, "opaque%2Bvalue");
+  assert.equal(event.user.obref, "browser-ref%2Fraw");
   assert.equal(event.source_url, "https://example.test/request-deployment.html");
   assert.deepEqual(event.data, { type: "customer_action" });
   assert.deepEqual(event.user.emails_sha256, [sha256("user@example.com")]);
