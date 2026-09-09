@@ -1,161 +1,36 @@
 name: Eagle Eyes Live CI/CD Pipeline
-
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main]
   pull_request:
-    branches:
-      - main
-      - master
-  workflow_dispatch:
-
+    branches: [main]
 permissions:
   contents: read
-
 concurrency:
   group: eagle-eyes-production-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   validate-and-test:
     name: Validate Eagle Eyes V13
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
-      - name: Checkout Code Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js Runtime
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '22'
           cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install Project Dependencies
-        run: npm ci
-
-      - name: Run Syntax Checks and Test Suite
-        run: npm run ci
-
-      - name: Verify Eagle Eyes Critical Files
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "Checking Eagle Eyes Version 13 baseline..."
-
-          test -f package.json
-          test -f package-lock.json
-          test -f server.js
-          test -f vercel.json
-
-          echo "Repository validation complete."
-
-  deploy-to-vercel:
-    name: Deploy Eagle Eyes Production
+      - run: npm ci --no-audit --no-fund
+      - run: npm run ci
+  verify-railway:
+    name: Verify Railway Production Revision
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate-and-test
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
-    if: >
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-      (github.ref == 'refs/heads/main' ||
-       github.ref == 'refs/heads/master')
-
-    environment:
-      name: production
-
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
     steps:
-      - name: Verify deployment credentials and target
-        shell: bash
-        run: |
-          set -euo pipefail
-          missing=0
-          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
-            if [ -z "${!name}" ]; then
-              echo "::error::Configure $name in GitHub production environment or repository secrets."
-              missing=1
-            fi
-          done
-          exit "$missing"
-
-      - name: Checkout Code Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js Runtime
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Verify Vercel Authentication Secret
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [ -z "${VERCEL_TOKEN:-}" ]; then
-            echo "::error::VERCEL_TOKEN is unavailable to the production job."
-            exit 1
-          fi
-
-          echo "Vercel authentication secret is available."
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@59.11.7
-
-      - name: Pull Production Configuration
-        run: >
-          vercel pull
-          --yes
-          --environment=production
-          --token="$VERCEL_TOKEN"
-
-      - name: Build Production Target
-        run: >
-          vercel build
-          --prod
-          --token="$VERCEL_TOKEN"
-
-      - name: Deploy Production Target
-        id: deploy
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          DEPLOYMENT_URL="$(
-            vercel deploy \
-              --prebuilt \
-              --prod \
-              --token="$VERCEL_TOKEN"
-          )"
-
-          echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
-          echo "Production deployment: $DEPLOYMENT_URL"
-
-      - name: Verify Production Health
-        shell: bash
+      - uses: actions/checkout@v4
+      - name: Verify GitHub-connected Railway deployment
         env:
-          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
-        run: |
-          set -euo pipefail
-
-          echo "Checking production deployment..."
-
-          curl \
-            --fail \
-            --silent \
-            --show-error \
-            --retry 5 \
-            --retry-delay 5 \
-            "${DEPLOYMENT_URL}/api/health"
-
-          echo
-          echo "Eagle Eyes production health verification passed."
+          EXPECTED_SHA: ${{ github.sha }}
+        run: python3 scripts/verify-deployed-revision.py --url https://live-command-center-production-31ed.up.railway.app --sha "$EXPECTED_SHA"

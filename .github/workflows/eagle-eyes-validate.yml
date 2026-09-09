@@ -37,27 +37,15 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Audit production environment contract
+      - name: Report optional mobile World Data configuration
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL: ${{ secrets.EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL }}
         run: |
-          echo "Verifying environment variables for Eagle Eyes Data Spine..."
-          REQUIRED_VARS=("EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL" "NODE_ENV" "VERCEL_TELEMETRY_DISABLED")
-          MISSING_VARS=0
-
-          for VAR in "${REQUIRED_VARS[@]}"; do
-            if [ -z "${!VAR}" ]; then
-              echo "Error: Required environment variable $VAR is missing or unconfigured."
-              MISSING_VARS=$((MISSING_VARS + 1))
-            else
-              echo "Verified: $VAR is set."
-            fi
-          done
-
-          if [ "$MISSING_VARS" -gt 0 ]; then
-            echo "Pipeline halted: production environment contract is incomplete."
-            exit 1
+          if [ -z "${EXPO_PUBLIC_EAGLE_EYES_WORLD_DATA_URL:-}" ]; then
+            echo 'Optional Android World Data URL is unconfigured; the client displays its existing setup state.'
+          else
+            echo 'Optional Android World Data URL is configured.'
           fi
 
       - name: Run full Eagle Eyes CI gate

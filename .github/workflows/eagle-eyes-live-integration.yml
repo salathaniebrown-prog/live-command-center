@@ -8,6 +8,8 @@ on:
       - "recover/**"
     paths:
       - "server.js"
+      - "deployment-center.js"
+      - "public/deployment-center.*"
       - "world-os.js"
       - "data-spine.js"
       - "satellites.js"
@@ -29,6 +31,18 @@ jobs:
     steps:
       - name: Checkout recovery branch
         uses: actions/checkout@v4
+
+      - name: Verify exact deployed recovery revision
+        if: github.ref == 'refs/heads/recovery/complete-eagle-eyes-20260907'
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: python3 scripts/verify-deployed-revision.py --url "$EAGLE_EYES_BASE_URL" --sha "$EXPECTED_SHA"
+
+      - name: Inspect measured Deployment Center feeds
+        if: github.ref == 'refs/heads/recovery/complete-eagle-eyes-20260907'
+        run: |
+          curl --fail --silent --show-error --max-time 30 "$EAGLE_EYES_BASE_URL/api/deployment-center/status" > /tmp/center-status.json
+          node -e "const s=require('/tmp/center-status.json');console.log(JSON.stringify({state:s.systemState,commit:s.deployment.commitSha,nodes:s.nodes.length,active:s.activeNodes,feeds:s.feeds.map(f=>({name:f.name,status:f.status})),markets:s.markets.map(m=>({name:m.name,status:m.status,value:m.value}))}));if(s.simulated!==false || s.nodes.length!==32)process.exit(1)"
 
       - name: Verify recovery Command Center
         run: |

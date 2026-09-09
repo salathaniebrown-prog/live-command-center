@@ -1,0 +1,57 @@
+name: Command Center One-Click Deployment
+run-name: Deploy verified main ${{ inputs.expected_sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Full commit SHA currently at main
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: command-center-manual-production
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate requested source revision
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          CHECKOUT_SHA: ${{ github.sha }}
+          SELECTED_REF: ${{ github.ref }}
+        run: |
+          test "$SELECTED_REF" = refs/heads/main
+          test "$EXPECTED_SHA" = "$CHECKOUT_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Build verified container
+        run: docker build -t eagle-eyes:verified .
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Request exact Railway revision
+        env:
+          RAILWAY_PROJECT_TOKEN: ${{ secrets.RAILWAY_PROJECT_TOKEN }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/trigger-railway-deployment.js
+      - name: Confirm live source revision and application health
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: python3 scripts/verify-deployed-revision.py --url https://live-command-center-production-31ed.up.railway.app --sha "$EXPECTED_SHA"

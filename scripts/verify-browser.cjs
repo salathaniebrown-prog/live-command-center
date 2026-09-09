@@ -18,6 +18,16 @@ const { chromium } = require('playwright');
       }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${name} horizontal overflow`);
       await page.screenshot({ path: `/tmp/eagle-eyes-${name}.png`, fullPage: true });
+      const base = process.env.EAGLE_EYES_TEST_URL || 'http://127.0.0.1:31338';
+      await page.goto(base + '/deployment-center.html', { waitUntil: 'domcontentloaded' });
+      assert.match(await page.title(), /Deployment Center/);
+      assert.equal(await page.locator('.node').count(), 32);
+      await page.locator('#verify').click();
+      await page.waitForFunction(() => document.getElementById('checked').textContent.startsWith('Collected '), { timeout: 25000 });
+      assert.equal(await page.locator('#active-nodes').textContent(), '0 / 32');
+      assert.equal(await page.locator('#deploy').isDisabled(), true);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${name} deployment center overflow`);
+      await page.screenshot({ path: `/tmp/eagle-center-${name}.png`, fullPage: true });
     }
     assert.deepEqual(errors, []);
     console.log('V13 desktop/mobile navigation and JavaScript checks passed');
