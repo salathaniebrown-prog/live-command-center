@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070706">
+  <title>Eagle Eyes · OpenAI Bridge</title>
+  <style>
+    :root { color-scheme: dark; --bg:#070706; --panel:#11100d; --line:#2d2a22; --text:#f7f1e7; --muted:#9d9588; --gold:#f2c66d; --good:#73e58c; --bad:#ff9c9e; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { width:min(960px,100%); min-height:100vh; margin:auto; display:grid; grid-template-rows:auto auto 1fr auto; }
+    header { padding:18px 16px 12px; border-bottom:1px solid var(--line); }
+    .eyebrow { color:var(--gold); font-size:11px; font-weight:900; letter-spacing:2px; }
+    h1 { margin:3px 0 2px; font-size:24px; }
+    .sub { color:var(--muted); font-size:12px; }
+    .status-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .pill { border:1px solid var(--line); border-radius:999px; padding:5px 9px; font-size:11px; font-weight:800; }
+    .pill.good { border-color:var(--good); color:var(--good); }
+    .pill.bad { border-color:var(--bad); color:var(--bad); }
+    .auth { margin:12px; padding:12px; background:var(--panel); border:1px solid var(--line); border-radius:12px; }
+    .auth-row { display:flex; gap:8px; }
+    input, textarea, button { font:inherit; }
+    input, textarea { width:100%; border:1px solid var(--line); border-radius:10px; background:#090908; color:var(--text); padding:11px; outline:none; }
+    input:focus, textarea:focus { border-color:var(--gold); }
+    button { border:1px solid var(--gold); border-radius:10px; background:#1b1710; color:var(--gold); font-weight:900; padding:10px 13px; cursor:pointer; }
+    button.secondary { border-color:var(--line); color:var(--muted); background:transparent; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    .auth-note { margin:8px 0 0; color:var(--muted); font-size:11px; }
+    #messages { overflow:auto; padding:4px 12px 16px; display:flex; flex-direction:column; gap:9px; }
+    .message { max-width:88%; border:1px solid var(--line); border-radius:14px; padding:10px 12px; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .assistant { align-self:flex-start; background:var(--panel); }
+    .user { align-self:flex-end; background:#17130c; border-color:#4a3b1e; }
+    .role { display:block; margin-bottom:4px; color:var(--gold); font-size:9px; font-weight:900; letter-spacing:1.2px; }
+    .meta { display:block; margin-top:7px; color:var(--muted); font-size:9px; }
+    .composer { position:sticky; bottom:0; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); background:rgba(7,7,6,.97); }
+    textarea { min-height:82px; resize:vertical; }
+    .actions { display:flex; justify-content:space-between; gap:8px; margin-top:8px; }
+    .right-actions { display:flex; gap:8px; }
+    .warning { color:var(--muted); font-size:10px; margin-top:8px; }
+    @media (max-width:600px) { .message{max-width:94%} h1{font-size:21px} .auth-row{align-items:stretch} }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">EAGLE EYES · OPENAI</div>
+    <h1>Direct Chat Bridge</h1>
+    <div class="sub">Protected server-side Responses API · streaming · Eagle Eyes tools · browser-session continuity</div>
+    <div class="status-row">
+      <span id="apiStatus" class="pill">CHECKING API</span>
+      <span id="authStatus" class="pill">LOCKED</span>
+      <span id="modelStatus" class="pill">MODEL N/A</span>
+    </div>
+  </header>
+
+  <section class="auth">
+    <div class="auth-row">
+      <input id="accessToken" type="password" autocomplete="off" spellcheck="false" placeholder="Command Center access token">
+      <button id="verifyButton" type="button">VERIFY</button>
+    </div>
+    <p class="auth-note">The OpenAI API key stays on the Eagle Eyes server. This page never saves your Command Center token.</p>
+  </section>
+
+  <section id="messages" aria-live="polite">
+    <div class="message assistant">
+      <span class="role">EAGLE EYES</span>
+      The bridge is ready. Verify your Command Center token, then send a message.
+      <span class="meta">This is an Eagle Eyes API session, not a copy of your private ChatGPT account history.</span>
+    </div>
+  </section>
+
+  <section class="composer">
+    <textarea id="messageInput" maxlength="4000" placeholder="Tell Eagle Eyes what you need…"></textarea>
+    <div class="actions">
+      <button id="newSessionButton" class="secondary" type="button">NEW SESSION</button>
+      <div class="right-actions">
+        <button id="stopButton" class="secondary" type="button" disabled>STOP</button>
+        <button id="sendButton" type="button">SEND</button>
+      </div>
+    </div>
+    <div class="warning">Session context stays in this open page only. Closing or refreshing starts a new session.</div>
+  </section>
+</main>
+<script src="./chat.js" defer></script>
+</body>
+</html>
