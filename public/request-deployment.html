@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Request an Eagle Eyes Live Command Center deployment from Nexus Brown." />
   <title>Request Eagle Eyes Deployment | Nexus Brown</title>
+  <script src="/openai-ads.js" defer></script>
   <style>
     :root {
       color-scheme: dark;
@@ -202,6 +203,7 @@
       button.disabled = true;
 
       const payload = Object.fromEntries(new FormData(form).entries());
+      payload.sourceUrl = window.location.href;
 
       try {
         const response = await fetch("/api/leads", {
@@ -218,6 +220,14 @@
 
         status.className = "status ok";
         status.textContent = `Request received. Reference: ${body.leadId}`;
+
+        if (body.conversionEligible && window.EagleEyesOpenAIAds) {
+          void window.EagleEyesOpenAIAds.measureLead({
+            eventId: body.leadId,
+            email: payload.email
+          });
+        }
+
         form.reset();
       } catch (error) {
         status.className = "status error";
