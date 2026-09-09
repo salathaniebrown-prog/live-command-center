@@ -23,7 +23,7 @@ def test_nominal_state():
     assert state.anomaly_score == 0.0
 
 
-def test_simulated_orbital_matrix_score_is_69():
+def test_matrix_trace_fixture_score_is_69():
     engine = BCIDefenseEngine(channels=8)
     matrix_a = np.array([[1, 2], [3, 4]], dtype=float)
     matrix_b = np.array([[5, 6], [7, 8]], dtype=float)
