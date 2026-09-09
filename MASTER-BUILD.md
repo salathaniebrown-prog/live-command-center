@@ -17,8 +17,10 @@ tests, V13/golden-baseline checks and production environment gates remain.
 Local verification: 91 backend tests passed, including seven new tests for
 unknown/stale nodes, raw-body signatures, replay rejection, slot authorization,
 unavailable upstreams, request coalescing, protected CSV/dispatch and SSE.
-Node/Python/shell syntax passed. Container/browser CI and exact-SHA staging and
-production verification are pending for this revision. Mobile hardware,
+Node/Python/shell syntax passed. Initial commit `580ec012` passed GitHub Docker
+and desktop/mobile browser checks (run `34393344783`) and all 15 triggered
+workflows. An exact-SHA staging check was added to the live integration gate;
+staging and production verification remain pending for this revision. Mobile hardware,
 deployment-button credentials and Railway log persistence remain unconfigured;
 no physical-node count or deployment success is inferred from code tests.
 
