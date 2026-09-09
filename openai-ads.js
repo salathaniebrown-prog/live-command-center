@@ -126,6 +126,9 @@ function buildLeadCreatedEvent({ req, leadId, email, sourceUrl, env = process.en
   const oppref = getOpaqueCookie(req, "__oppref");
   if (oppref) event.oppref = oppref;
 
+  const obref = getOpaqueCookie(req, "__obref");
+  if (obref) event.user.obref = obref;
+
   return event;
 }
 
