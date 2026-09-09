@@ -5,6 +5,9 @@ services:
     buildCommand: node scripts/verify-global-static.js
     staticPublishPath: public
     autoDeployTrigger: commit
+    envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
     routes:
       - type: rewrite
         source: /api/*
