@@ -16,6 +16,13 @@ jobs:
         run: docker compose config --quiet
       - name: Build complete Eagle Eyes container
         run: docker build -t eagle-eyes:ci .
+      - name: Validate Deployment Center Compose and probes
+        env:
+          COMMAND_CENTER_ACCESS_TOKEN: ci-configuration-only
+        run: |
+          docker compose -f deployment-center.yml config --quiet
+          bash -n deploy.sh provision.sh
+          python3 -m py_compile main_prober.py test_mesh.py scripts/send-mobile-heartbeat.py scripts/verify-deployed-revision.py
       - name: Verify container startup and V13 identity
         run: |
           set -euo pipefail
@@ -28,6 +35,10 @@ jobs:
           node -e "if(require('/tmp/health.json').ok!==true)process.exit(1)"
           curl -fsS http://127.0.0.1:31339/ -o /tmp/dashboard.html
           grep -q 'CHRONICLE LAB V13' /tmp/dashboard.html
+          curl -fsS http://127.0.0.1:31339/deployment-center.html -o /tmp/center.html
+          grep -q 'Command Deployment Center' /tmp/center.html
+          curl -fsS http://127.0.0.1:31339/api/deployment-center/status -o /tmp/center.json
+          node -e "const s=require('/tmp/center.json');if(s.simulated!==false||s.nodes.length!==32||s.activeNodes!==0)process.exit(1)"
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -57,4 +68,6 @@ jobs:
           path: |
             /tmp/eagle-eyes-desktop.png
             /tmp/eagle-eyes-mobile.png
+            /tmp/eagle-center-desktop.png
+            /tmp/eagle-center-mobile.png
             /tmp/eagle-browser-server.log

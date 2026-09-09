@@ -1,5 +1,29 @@
 # Eagle Eyes master build record
 
+## 2026-09-09 Command One-Click Deployment Center
+
+Source baseline: `989b0357d8eb381b9268bdcf1ae0f2b5b580143c` on main. This contains
+the recovery integration and the interior upgrade. Added the Deployment Center
+as a workspace entry, preserving the existing dashboard and startup hooks.
+Consolidated the supplied orchestration into `deployment-center.yml`, guarded
+local launch scripts, real feed/spot status, SSE snapshots, signed mobile
+reports, measured CSV records and a fixed GitHub deployment workflow.
+
+Removed the backend CI requirement for the optional Android World Data URL.
+Normal production verification now follows the actual Railway deployment;
+Vercel deployment is retained as a separate manual workflow. Existing source
+tests, V13/golden-baseline checks and production environment gates remain.
+
+Local verification: 91 backend tests passed, including seven new tests for
+unknown/stale nodes, raw-body signatures, replay rejection, slot authorization,
+unavailable upstreams, request coalescing, protected CSV/dispatch and SSE.
+Node/Python/shell syntax passed. Container/browser CI and exact-SHA staging and
+production verification are pending for this revision. Mobile hardware,
+deployment-button credentials and Railway log persistence remain unconfigured;
+no physical-node count or deployment success is inferred from code tests.
+
+See DEPLOYMENT-CENTER.md for configuration and operational boundaries.
+
 Updated 2026-09-07. Canonical integration branch: `recovery/complete-eagle-eyes-20260907`, PR #40.
 
 User requirement: preserve updates from every Eagle Eyes conversation in one build. Reopening Eagle Eyes must not silently revert to an older or incomplete interface. Conversation summaries, saved code, passing tests, and deployed features are different evidence states.

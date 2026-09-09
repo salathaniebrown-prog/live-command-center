@@ -17,3 +17,5 @@ auto.sh
 .DS_Store
 production.log
 nohup.out
+runtime/
+logs/network_stats.csv*

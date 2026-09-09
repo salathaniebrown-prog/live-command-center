@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Eagle Eyes · Deployment Center</title>
+  <link rel="stylesheet" href="/deployment-center.css">
+  <script src="/deployment-center.js" defer></script>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/#workspace">EAGLE EYES <span>COMMAND OS</span></a>
+    <a href="/#workspace">Back to workspace ↗</a>
+  </header>
+  <main>
+    <div class="heading"><div><p class="eyebrow">OPERATIONS / DEPLOYMENT</p><h1>Command Deployment Center</h1></div><span id="connection" class="badge">Connecting</span></div>
+    <div class="actions"><button id="verify">Check deployment</button><a class="button secondary" id="workflow" href="https://github.com/salathaniebrown-prog/live-command-center/actions/workflows/command-center-deploy.yml" target="_blank" rel="noreferrer">GitHub deployment workflow ↗</a><p id="checked">Waiting for the first measurement.</p></div>
+    <section class="overview" aria-label="System overview">
+      <article><h2>Runtime</h2><strong id="system-state">Awaiting data</strong><p id="runtime-note">Collecting upstream and host status.</p></article>
+      <article><h2>Reporting devices</h2><strong id="active-nodes">— / 32</strong><p id="enrolled">Enrollment status pending</p></article>
+      <article><h2>USDC / USD</h2><strong id="usdc">Unavailable</strong><p id="usdc-note">Coinbase spot price</p></article>
+      <article><h2>BTC / USD</h2><strong id="btc">Unavailable</strong><p id="btc-note">Coinbase spot price</p></article>
+    </section>
+    <div class="layout">
+      <section class="panel"><div class="panel-title"><h2>Device heartbeats</h2><span id="device-status">Awaiting telemetry</span></div>
+        <p class="note">32 observation slots. A device report expires after 60 seconds; a slot is healthy only after an authenticated PASS report.</p>
+        <div id="nodes" class="nodes" aria-label="32 device observation slots"></div>
+        <div class="legend"><span>○ Awaiting telemetry</span><span class="pass">● PASS</span><span class="fail">● FAIL</span><span class="stale">● Stale</span></div>
+      </section>
+      <section class="panel"><h2>Serving revision</h2><dl><dt>Environment</dt><dd id="environment">—</dd><dt>Source commit</dt><dd id="commit">Not supplied</dd><dt>Deployment ID</dt><dd id="deployment-id">Not supplied</dd><dt>Service</dt><dd id="service">—</dd></dl><p class="note">This identifies the running server. Workflow results are tracked separately on GitHub.</p></section>
+      <section class="panel"><div class="panel-title"><h2>Public telemetry feeds</h2><span>Latest fetch · up to 50 events</span></div><div id="feeds" class="feeds"></div></section>
+      <section class="panel"><h2>Host measurements</h2><div id="host" class="host"></div><p class="note">Measurements reflect the server environment. Unexposed hardware readings remain unavailable.</p></section>
+      <section class="panel"><div class="panel-title"><h2>Activity</h2><span>Current browser session</span></div><div id="activity" role="log" aria-live="polite"><p>Waiting for measured observations.</p></div></section>
+      <section class="panel"><h2>Deployment controls</h2><p class="note">Use your existing Command Rail access token for protected actions.</p><form id="access-form"><label for="access-token">Access token</label><input id="access-token" type="password" autocomplete="off" placeholder="Command Rail token"><button class="secondary" type="submit">Use for this session</button></form><button id="deploy" disabled>Deploy verified main revision</button><p id="deploy-note" class="note">Checking deployment configuration.</p><button id="download" class="secondary">Download heartbeat CSV</button><p class="note">CSV records server processing time, not Wi-Fi round-trip latency.</p></section>
+    </div>
+  </main>
+  <footer>Source: connected runtime, public feed APIs, and enrolled device reports. <a href="/#lab">Open Chronicle Lab ↗</a></footer>
+</body>
+</html>

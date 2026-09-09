@@ -1,0 +1,39 @@
+name: eagle-eyes-command-center
+
+services:
+  command-hub:
+    build: .
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "8080"
+      COMMAND_CENTER_ACCESS_TOKEN: ${COMMAND_CENTER_ACCESS_TOKEN:?Run ./provision.sh first}
+      MOBILE_DEVICES_JSON: ${MOBILE_DEVICES_JSON:-}
+      DEPLOYMENT_GITHUB_TOKEN: ${DEPLOYMENT_GITHUB_TOKEN:-}
+      DEPLOYMENT_LOG_DIR: /app/runtime
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CRYPTO_LIVE: "false"
+      CRYPTO_NETWORK: base-sepolia
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - deployment_runtime:/app/runtime
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/health').then(async r=>{if(!r.ok || (await r.json()).ok!==true)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  deployment_runtime:

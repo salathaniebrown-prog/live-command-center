@@ -2,6 +2,7 @@
 (() => {
   const repo = 'https://github.com/salathaniebrown-prog/live-command-center/blob/79be758/';
   const modules = [
+    ['Command Deployment Center', '/deployment-center.html', 'Runtime monitoring', 'Serving revision, public feeds, signed device heartbeats and deployment checks.'],
     ['Earth & satellites', '#live', 'Public observations', 'CelesTrak orbital positions and world events.'],
     ['Chronicle Lab & Scribe', '#lab', 'Source synthesis', 'USGS, NOAA/NWS and NASA EONET event records.'],
     ['Executive council', '#intel', 'Decision support', 'CEO, President, CFO and CTO alongside the mission brief.'],

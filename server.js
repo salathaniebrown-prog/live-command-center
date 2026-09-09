@@ -38,6 +38,7 @@ const {
 } = require("./crypto-payments");
 const { registerLeadIntake } = require("./lead-intake-preload");
 const { registerShellCatcher } = require("./shell-catcher");
+const { createDeploymentCenter } = require("./deployment-center");
 const {
   createDeepSecurityFromEnv
 } = require("./deep-security");
@@ -372,6 +373,8 @@ const INSTRUCTIONS = [
 ].join(" ");
 
 app.disable("x-powered-by");
+// Raw signed mobile bodies must be handled before the general JSON parser.
+app.use(createDeploymentCenter({ world, metrics, deployment, guard: requireAssistantAccess }).router);
 app.use(express.json({ limit: "256kb" }));
 app.use(express.static(path.join(__dirname, "public")));
 registerLeadIntake(app);
