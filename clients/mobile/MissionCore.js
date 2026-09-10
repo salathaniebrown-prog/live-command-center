@@ -54,6 +54,7 @@ export default function MissionCore({ baseUrl }) {
   const [section, setSection] = useState("live");
   const [loaded, setLoaded] = useState(false);
   const [webError, setWebError] = useState("");
+  const [reloadNonce, setReloadNonce] = useState(0);
 
   const selected = useMemo(
     () => CORE_SECTIONS.find((item) => item.id === section) || CORE_SECTIONS[0],
@@ -65,6 +66,7 @@ export default function MissionCore({ baseUrl }) {
     setLoaded(false);
     setWebError("");
     setSection(nextSection);
+    setReloadNonce((value) => value + 1);
   };
 
   return (
@@ -119,7 +121,7 @@ export default function MissionCore({ baseUrl }) {
       ) : null}
 
       <WebView
-        key={section}
+        key={`${section}-${reloadNonce}`}
         source={{ uri }}
         style={styles.web}
         originWhitelist={["https://*", "http://*"]}
