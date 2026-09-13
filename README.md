@@ -267,4 +267,4 @@ An MCP host should spawn the broker itself rather than backgrounding it manually
 
 Do not commit database passwords, API keys, wallet material, or other credentials
 into MCP configuration files. Inject secrets through the host environment or the
-platform's secret manager.
+platform's secret manager
