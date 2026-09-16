@@ -10,7 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY eagle_eyes_telemetry_spine.py .
 COPY main.py .
+COPY signed_ingest.py .
+COPY secure_main.py .
 
 EXPOSE 8080
 
-CMD ["python", "-u", "main.py"]
+CMD ["python", "-u", "secure_main.py"]

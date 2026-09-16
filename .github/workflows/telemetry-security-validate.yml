@@ -1,0 +1,49 @@
+name: Telemetry Security Validation
+
+on:
+  pull_request:
+    paths:
+      - "telemetry_spine/signed_ingest.py"
+      - "telemetry_spine/secure_main.py"
+      - "telemetry_spine/main.py"
+      - "telemetry_spine/Dockerfile"
+      - "telemetry_spine/.env.example"
+      - "telemetry_spine/test_signed_ingest.py"
+      - ".github/workflows/telemetry-security-validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Syntax check signed telemetry runtime
+        run: |
+          python -m py_compile telemetry_spine/signed_ingest.py
+          python -m py_compile telemetry_spine/secure_main.py
+          python -m py_compile telemetry_spine/main.py
+
+      - name: Run signed telemetry security tests
+        run: python -m unittest telemetry_spine.test_signed_ingest -v
+
+      - name: Verify secure runtime is the container entrypoint
+        run: |
+          grep -Fq 'COPY signed_ingest.py .' telemetry_spine/Dockerfile
+          grep -Fq 'COPY secure_main.py .' telemetry_spine/Dockerfile
+          grep -Fq 'CMD ["python", "-u", "secure_main.py"]' telemetry_spine/Dockerfile
+
+      - name: Verify no fallback signed-ingest secret is committed
+        run: |
+          grep -Fq 'SIGNED_TELEMETRY_HMAC_SECRET=' telemetry_spine/.env.example
+          ! grep -Eq 'SIGNED_TELEMETRY_HMAC_SECRET=.+$' telemetry_spine/.env.example

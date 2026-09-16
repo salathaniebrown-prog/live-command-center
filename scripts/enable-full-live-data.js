@@ -63,16 +63,25 @@ replaceExact(
   "world-event backend limit"
 );
 
-// Dashboard: show a much richer live world picture without rendering every
-// upstream record at once. AI can still request the larger backend datasets.
-for (const source of ["nws", "usgs", "eonet"]) {
-  replaceExact(
-    "dashboard",
-    `/api/eagle-eyes/events?source=${source}&limit=12`,
-    `/api/eagle-eyes/events?source=${source}&limit=50`,
-    `${source} dashboard sample limit`
+// Dashboard: support both the original V2 static source URLs and the Chronicle
+// Lab V13 dynamic source router. Both must request the same recovered live-data
+// sample size; unavailable upstream data is never simulated.
+const chronicleDynamicWorldLimit =
+  next.dashboard.includes(
+    "const url='/api/eagle-eyes/events?source='+src+'&limit=50';"
   );
+
+if (!chronicleDynamicWorldLimit) {
+  for (const source of ["nws", "usgs", "eonet"]) {
+    replaceExact(
+      "dashboard",
+      `/api/eagle-eyes/events?source=${source}&limit=12`,
+      `/api/eagle-eyes/events?source=${source}&limit=50`,
+      `${source} dashboard sample limit`
+    );
+  }
 }
+
 replaceExact(
   "dashboard",
   "/api/eagle-eyes/satellites?limit=30",
@@ -81,11 +90,6 @@ replaceExact(
 );
 
 const changed = Object.keys(next).filter((key) => next[key] !== originals[key]);
-
-if (!changed.length) {
-  console.log("Eagle Eyes full live-data limits already enabled.");
-  process.exit(0);
-}
 
 for (const key of changed) {
   fs.writeFileSync(targets[key], next[key], "utf8");
@@ -103,10 +107,16 @@ const checks = [
 ];
 
 const failed = checks.find(([, result]) => result.status !== 0);
-const dashboardOk =
+const staticWorldLimits =
   next.dashboard.includes("source=nws&limit=50") &&
   next.dashboard.includes("source=usgs&limit=50") &&
-  next.dashboard.includes("source=eonet&limit=50") &&
+  next.dashboard.includes("source=eonet&limit=50");
+const dynamicWorldLimits =
+  next.dashboard.includes(
+    "const url='/api/eagle-eyes/events?source='+src+'&limit=50';"
+  );
+const dashboardOk =
+  (staticWorldLimits || dynamicWorldLimits) &&
   next.dashboard.includes("satellites?limit=120");
 
 if (failed || !dashboardOk) {
@@ -121,6 +131,11 @@ if (failed || !dashboardOk) {
     console.error("Dashboard live-data markers were not applied as expected.");
   }
   process.exit(1);
+}
+
+if (!changed.length) {
+  console.log("Eagle Eyes full live-data limits already enabled and validated.");
+  process.exit(0);
 }
 
 console.log(

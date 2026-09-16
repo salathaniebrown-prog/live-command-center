@@ -61,6 +61,7 @@ test("read-only tool names remain allowed", () => {
     { name: "search_world_knowledge" },
     { name: "get_global_weather" },
     { name: "get_px4_telemetry" },
+    { name: "get_chronicle_scribe" },
     { name: "get_world_os_status" }
   ];
 
