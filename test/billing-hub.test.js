@@ -31,6 +31,15 @@ test("Project Billing Hub defaults to the approved $100 monthly ceiling", () => 
   assert.match(page, /id="capDisplay">\$100\.00/);
 });
 
+
+test("Project Billing Hub combines card planning with read-only crypto status", () => {
+  assert.match(page, /UNIFIED FUNDING BRIDGE/);
+  assert.match(page, /CARD \+ CRYPTO/);
+  assert.match(page, /\/api\/eagle-eyes\/crypto\/status/);
+  assert.match(page, /Card → crypto connection: NOT CONNECTED/);
+  assert.match(page, /No purchase, charge, transfer, signing, or broadcast was performed/);
+});
+
 test("Project Billing Hub does not collect sensitive payment or wallet credentials", () => {
   for (const forbidden of [
     'id="cardNumber"',
