@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#040806">
+<title>Eagle Eyes • Project Billing Hub</title>
+<style>
+:root{color-scheme:dark;--bg:#040806;--panel:#08110d;--panel2:#0b1711;--line:#183c2a;--line2:#2b6748;--text:#effff6;--muted:#86a394;--green:#6dffad;--gold:#f4ca72;--cyan:#6edcff;--red:#ff7180;--amber:#ffd365}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 90% -10%,rgba(54,154,101,.18),transparent 35rem),linear-gradient(180deg,#050a07,#020503 68%)}a{color:inherit}.wrap{max-width:1320px;margin:auto;padding:18px}.top{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px}.eyebrow{font:700 10px ui-monospace,monospace;letter-spacing:.17em;color:var(--green);text-transform:uppercase}.top h1{margin:5px 0 6px;font-size:clamp(26px,5vw,48px);line-height:1}.top p{margin:0;color:var(--muted);max-width:760px}.back{border:1px solid var(--line2);border-radius:10px;padding:9px 11px;text-decoration:none;font:800 10px ui-monospace,monospace;color:var(--green);white-space:nowrap}.guard{margin:16px 0;border:1px solid #5a4a23;background:#171307;border-radius:12px;padding:12px;color:#ffe7a3;font:700 10px/1.55 ui-monospace,monospace}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}.panel{grid-column:span 12;border:1px solid var(--line);border-radius:15px;background:linear-gradient(180deg,rgba(9,20,14,.94),rgba(4,10,7,.96));overflow:hidden}.head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;border-bottom:1px solid rgba(109,255,173,.1)}.title{font:800 10px ui-monospace,monospace;letter-spacing:.15em;color:var(--green);text-transform:uppercase}.sub{font:700 9px ui-monospace,monospace;color:var(--muted)}.body{padding:13px}.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.kpi{border:1px solid var(--line);border-radius:11px;background:#06100b;padding:12px}.kpi span{display:block;color:var(--muted);font:700 8px ui-monospace,monospace;letter-spacing:.1em}.kpi b{display:block;margin-top:5px;font:800 22px ui-monospace,monospace}.good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.services{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{border:1px solid var(--line);border-radius:12px;background:#06100b;padding:12px}.cardTop{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}.card h3{margin:0;color:var(--gold);font:800 13px ui-monospace,monospace}.meta{margin-top:4px;color:var(--muted);font:700 9px ui-monospace,monospace}.badge{border:1px solid var(--line);border-radius:999px;padding:4px 7px;font:800 8px ui-monospace,monospace;color:var(--muted);white-space:nowrap}.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}.field label{display:block;color:var(--muted);font:700 8px ui-monospace,monospace;margin-bottom:4px}.field input,.field select{width:100%;border:1px solid var(--line);background:#030906;color:var(--text);border-radius:8px;padding:8px;outline:none}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.btn{border:1px solid var(--line2);background:#0a1b12;color:#eafff3;border-radius:9px;padding:8px 10px;font:800 9px ui-monospace,monospace;letter-spacing:.05em;cursor:pointer;text-decoration:none}.btn.primary{background:linear-gradient(135deg,#9dffc8,#55d68d);color:#041008;border-color:var(--green)}.btn.gold{color:#171006;background:linear-gradient(135deg,#ffe2a0,#dca74c);border-color:var(--gold)}.btn.danger{color:#ffd2d7;border-color:#5b2630;background:#18080c}.row{display:grid;grid-template-columns:180px 1fr;gap:10px;align-items:center;margin:9px 0}.row label{color:var(--muted);font:700 9px ui-monospace,monospace}.row input{width:100%;border:1px solid var(--line);background:#030906;color:var(--text);border-radius:8px;padding:9px}.note{color:var(--muted);font:600 10px/1.55 ui-monospace,monospace}.statusBox{white-space:pre-wrap;border:1px solid var(--line);border-radius:10px;background:#030906;padding:11px;min-height:90px;font:600 10px/1.55 ui-monospace,monospace;color:#d9efe3}.ledger{width:100%;border-collapse:collapse}.ledger th,.ledger td{border-bottom:1px solid var(--line);padding:8px;text-align:left;font:700 9px ui-monospace,monospace}.ledger th{color:var(--green)}.ledger td{color:#d9efe3}.ledger input{width:100%;border:1px solid var(--line);background:#030906;color:var(--text);border-radius:7px;padding:7px}.footer{padding:18px 2px;text-align:center;color:#54705f;font:700 8px ui-monospace,monospace;letter-spacing:.1em}
+@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.services{grid-template-columns:1fr}.fields{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}}
+@media(max-width:520px){.wrap{padding:10px}.top{display:block}.back{display:inline-block;margin-top:12px}.summary{grid-template-columns:1fr 1fr}.fields{grid-template-columns:1fr}.ledger{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div><div class="eyebrow">SALATHANIEL BROWN SR • EAGLE EYES</div><h1>PROJECT BILLING HUB</h1><p>Career infrastructure ledger for the services that keep Eagle Eyes, Command Center, AI, deployment, and visual work productive. Billing values are manually entered unless a provider status is explicitly marked LIVE.</p></div>
+  <a class="back" href="/">← COMMAND CENTER</a>
+</header>
+
+<div class="guard">NO CARD NUMBERS • NO CVV • NO BANK LOGIN • NO API SECRETS • NO SEED PHRASES. This page stores only planning data in this browser. Payment still happens on each provider's official billing page.</div>
+
+<div class="grid">
+<section class="panel">
+ <div class="head"><div class="title">MONTHLY CONTROL</div><div class="sub">LOCAL CAREER BUDGET</div></div>
+ <div class="body">
+  <div class="summary">
+   <div class="kpi"><span>MONTHLY CAP</span><b id="capDisplay">$0.00</b></div>
+   <div class="kpi"><span>PLANNED</span><b id="plannedDisplay">$0.00</b></div>
+   <div class="kpi"><span>SPENT / ENTERED</span><b id="spentDisplay">$0.00</b></div>
+   <div class="kpi"><span>HEADROOM</span><b id="headroomDisplay">$0.00</b></div>
+  </div>
+  <div class="row"><label for="monthlyCap">Project monthly ceiling</label><input id="monthlyCap" type="number" min="0" step="1" inputmode="decimal" placeholder="Example: 250"></div>
+  <div class="note" id="capNote">Set a ceiling. This dashboard warns when manually entered spend reaches it; it cannot enforce provider-side billing limits by itself.</div>
+ </div>
+</section>
+
+<section class="panel">
+ <div class="head"><div class="title">FUNDING SOURCE LABEL</div><div class="sub">MASKED / BROWSER-LOCAL ONLY</div></div>
+ <div class="body">
+  <div class="row"><label for="fundingLabel">Label only</label><input id="fundingLabel" maxlength="80" placeholder="Example: Career card •••• 1234"></div>
+  <div class="note">Do not enter a full card number, bank account number, CVV, expiration date, login, or verification code. This label is stored only in this browser's localStorage and is never sent to the Command Center server.</div>
+ </div>
+</section>
+
+<section class="panel">
+ <div class="head"><div class="title">CORE SERVICES</div><div class="sub">PAY PROVIDERS DIRECTLY</div></div>
+ <div class="body"><div id="serviceGrid" class="services"></div></div>
+</section>
+
+<section class="panel">
+ <div class="head"><div class="title">LIVE PLATFORM SIGNALS</div><div class="sub">NO BILLING CLAIMS</div></div>
+ <div class="body">
+  <div class="actions"><button class="btn primary" type="button" onclick="refreshLive()">REFRESH LIVE STATUS</button></div>
+  <div id="liveStatus" class="statusBox">Not checked yet. Railway/runtime status will be read from this deployed Command Center only. Billing plan, credits, and card acceptance are not inferred from runtime health.</div>
+ </div>
+</section>
+
+<section class="panel">
+ <div class="head"><div class="title">CAREER SPEND LEDGER</div><div class="sub">MANUAL EVIDENCE TRACKING</div></div>
+ <div class="body">
+  <table class="ledger">
+   <thead><tr><th>DATE</th><th>PROVIDER / ITEM</th><th>AMOUNT</th><th>WHAT YOU RECEIVED</th><th>REFERENCE</th><th></th></tr></thead>
+   <tbody id="ledgerRows"></tbody>
+  </table>
+  <div class="actions"><button class="btn" onclick="addLedgerRow()">+ ADD ENTRY</button><button class="btn gold" onclick="exportData()">EXPORT JSON</button><button class="btn danger" onclick="resetLocal()">RESET LOCAL DATA</button></div>
+  <div class="note">For disputes, keep provider receipts, invoices, order IDs, emails, screenshots, and bank records separately. This ledger is an organizer, not a replacement for original evidence.</div>
+ </div>
+</section>
+</div>
+
+<div class="footer">EAGLE EYES • PROJECT BILLING HUB • LOCAL PLANNING + VERIFIED RUNTIME SIGNALS ONLY</div>
+</div>
+
+<script>
+const STORAGE_KEY='eagleEyesBillingHubV1';
+const SERVICES=[
+ {id:'railway',name:'Railway',group:'Deployment / hosting',url:'https://railway.com/',status:'LIVE runtime can be checked here'},
+ {id:'chatgpt',name:'ChatGPT',group:'AI workspace',url:'https://chatgpt.com/',status:'Manual billing entry'},
+ {id:'openai',name:'OpenAI API',group:'AI API',url:'https://platform.openai.com/settings/organization/billing/overview',status:'Manual billing entry'},
+ {id:'gemini',name:'Google AI Studio / Gemini',group:'AI build + API',url:'https://aistudio.google.com/',status:'Manual billing entry'},
+ {id:'gcloud',name:'Google Cloud Billing',group:'Cloud billing',url:'https://console.cloud.google.com/billing',status:'Manual billing entry'},
+ {id:'github',name:'GitHub',group:'Source + CI',url:'https://github.com/settings/billing',status:'Manual billing entry'},
+ {id:'cloudflare',name:'Cloudflare',group:'Edge / Workers / DNS',url:'https://dash.cloudflare.com/',status:'Manual billing entry'},
+ {id:'expo',name:'Expo / EAS',group:'Android builds',url:'https://expo.dev/',status:'Manual billing entry'},
+ {id:'figma',name:'Figma',group:'Design / visuals',url:'https://www.figma.com/',status:'Manual billing entry'},
+ {id:'runway',name:'Runway',group:'Visual generation',url:'https://app.runwayml.com/',status:'Manual billing entry'},
+ {id:'magnific',name:'Magnific',group:'Visual enhancement',url:'https://magnific.ai/',status:'Manual billing entry'},
+ {id:'other',name:'Other Career Tool',group:'Custom',url:'',status:'Manual billing entry'}
+];
+function emptyState(){return{monthlyCap:0,fundingLabel:'',services:Object.fromEntries(SERVICES.map(s=>[s.id,{plan:'',budget:0,spent:0,renewal:'',state:'UNSET'}])),ledger:[]}}
+function load(){try{const x=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return x&&typeof x==='object'?Object.assign(emptyState(),x):emptyState()}catch{return emptyState()}}
+let state=load();
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderSummary()}
+function money(v){return '$'+(Number(v)||0).toFixed(2)}
+function renderSummary(){const planned=SERVICES.reduce((n,s)=>n+(Number(state.services?.[s.id]?.budget)||0),0);const spent=SERVICES.reduce((n,s)=>n+(Number(state.services?.[s.id]?.spent)||0),0)+state.ledger.reduce((n,r)=>n+(Number(r.amount)||0),0);const cap=Number(state.monthlyCap)||0;const head=cap-spent;document.getElementById('capDisplay').textContent=money(cap);document.getElementById('plannedDisplay').textContent=money(planned);document.getElementById('spentDisplay').textContent=money(spent);const h=document.getElementById('headroomDisplay');h.textContent=money(head);h.className=head<0?'bad':cap&&head<cap*.2?'warn':'good';document.getElementById('capNote').textContent=cap===0?'Set a ceiling. This dashboard warns when manually entered spend reaches it; it cannot enforce provider-side billing limits by itself.':spent>cap?'WARNING: entered spend is above the project ceiling. Review renewals before adding more subscriptions.':planned>cap?'WARNING: planned service budgets exceed the project ceiling.':'Within the current project ceiling based on manually entered values.'}
+function renderServices(){const grid=document.getElementById('serviceGrid');grid.innerHTML='';SERVICES.forEach(s=>{const d=state.services[s.id]||{};const card=document.createElement('article');card.className='card';card.innerHTML=`<div class="cardTop"><div><h3>${s.name}</h3><div class="meta">${s.group}</div></div><span class="badge">${s.status}</span></div><div class="fields"><div class="field"><label>PLAN / TIER</label><input data-k="plan" value="${esc(d.plan||'')}" placeholder="Manual"></div><div class="field"><label>MONTHLY BUDGET</label><input data-k="budget" type="number" min="0" step=".01" value="${Number(d.budget)||''}" placeholder="0.00"></div><div class="field"><label>SPENT THIS MONTH</label><input data-k="spent" type="number" min="0" step=".01" value="${Number(d.spent)||''}" placeholder="0.00"></div><div class="field"><label>RENEWAL DATE</label><input data-k="renewal" type="date" value="${esc(d.renewal||'')}"></div><div class="field"><label>STATUS</label><select data-k="state"><option>UNSET</option><option>ACTIVE</option><option>TRIAL</option><option>PAST DUE</option><option>DECLINED</option><option>PAUSED</option><option>FREE</option></select></div></div><div class="actions">${s.url?`<a class="btn" href="${s.url}" target="_blank" rel="noopener noreferrer">OPEN OFFICIAL PROVIDER</a>`:''}</div>`;card.querySelector('select').value=d.state||'UNSET';card.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('change',()=>{const k=el.dataset.k;state.services[s.id]=state.services[s.id]||{};state.services[s.id][k]=(k==='budget'||k==='spent')?Number(el.value)||0:el.value;save()}));grid.appendChild(card)})}
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function addLedgerRow(row={date:'',provider:'',amount:0,received:'',reference:''}){state.ledger.push(row);save();renderLedger()}
+function renderLedger(){const body=document.getElementById('ledgerRows');body.innerHTML='';state.ledger.forEach((r,i)=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="date" data-k="date" value="${esc(r.date||'')}"></td><td><input data-k="provider" value="${esc(r.provider||'')}" placeholder="Railway, API, visual tool…"></td><td><input data-k="amount" type="number" min="0" step=".01" value="${Number(r.amount)||''}" placeholder="0.00"></td><td><input data-k="received" value="${esc(r.received||'')}" placeholder="What was delivered"></td><td><input data-k="reference" value="${esc(r.reference||'')}" placeholder="Invoice / receipt / order ID"></td><td><button class="btn danger" type="button">REMOVE</button></td>`;tr.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('change',()=>{const k=el.dataset.k;state.ledger[i][k]=k==='amount'?Number(el.value)||0:el.value;save()}));tr.querySelector('button').onclick=()=>{state.ledger.splice(i,1);save();renderLedger()};body.appendChild(tr)})}
+async function getj(url){const r=await fetch(url,{cache:'no-store'});let j=null;try{j=await r.json()}catch{}return{r,j}}
+async function refreshLive(){const out=document.getElementById('liveStatus');out.textContent='Checking real Command Center runtime…';const now=new Date().toISOString();const [health,deployment]=await Promise.allSettled([getj('/api/health'),getj('/api/deployment')]);const lines=['Checked: '+now];if(health.status==='fulfilled'&&health.value.r.ok){lines.push('Command Center health: LIVE / OK');lines.push('Uptime: '+(health.value.j?.uptimeSeconds??'N/A')+' seconds')}else lines.push('Command Center health: UNAVAILABLE');if(deployment.status==='fulfilled'&&deployment.value.r.ok){const d=deployment.value.j||{};lines.push('Railway/runtime stage: '+(d.stage||'N/A'));lines.push('Environment: '+(d.environment||'N/A'));lines.push('Service ID: '+(d.serviceId||'N/A'));lines.push('Deployment ID: '+(d.deploymentId||'N/A'));lines.push('Commit: '+(d.commitSha||'N/A'))}else lines.push('Railway/runtime deployment data: UNAVAILABLE');lines.push('Billing plan/credits/card status: NOT INFERRED');out.textContent=lines.join('\n')}
+function exportData(){const payload={exportedAt:new Date().toISOString(),source:'Eagle Eyes Project Billing Hub local browser data',data:state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='eagle-eyes-project-billing-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function resetLocal(){if(!confirm('Reset only the Billing Hub data stored in this browser?'))return;localStorage.removeItem(STORAGE_KEY);state=emptyState();document.getElementById('monthlyCap').value='';document.getElementById('fundingLabel').value='';renderServices();renderLedger();renderSummary()}
+document.getElementById('monthlyCap').value=state.monthlyCap||'';document.getElementById('fundingLabel').value=state.fundingLabel||'';document.getElementById('monthlyCap').addEventListener('change',e=>{state.monthlyCap=Number(e.target.value)||0;save()});document.getElementById('fundingLabel').addEventListener('change',e=>{state.fundingLabel=e.target.value;save()});renderServices();renderLedger();renderSummary();
+</script>
+</body>
+</html>
