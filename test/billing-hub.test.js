@@ -1,1 +1,56 @@
-"use strict";\n\nconst test = require("node:test");\nconst assert = require("node:assert/strict");\nconst fs = require("node:fs");\nconst path = require("node:path");\n\nconst billingPath = path.join(__dirname, "..", "public", "billing.html");\nconst page = fs.readFileSync(billingPath, "utf8");\n\ntest("Project Billing Hub exposes the expected career services", () => {\n  for (const label of [\n    "PROJECT BILLING HUB",\n    "Railway",\n    "ChatGPT",\n    "OpenAI API",\n    "Google AI Studio / Gemini",\n    "GitHub",\n    "Cloudflare",\n    "Expo / EAS",\n    "Figma",\n    "Runway",\n    "Magnific"\n  ]) {\n    assert.equal(page.includes(label), true, label);\n  }\n});\n\ntest("Project Billing Hub does not collect sensitive payment or wallet credentials", () => {\n  for (const forbidden of [\n    'id="cardNumber"',\n    'id="cvv"',\n    'id="expiration"',\n    'id="bankLogin"',\n    'id="privateKey"',\n    'id="seedPhrase"',\n    'type="password"'\n  ]) {\n    assert.equal(page.includes(forbidden), false, forbidden);\n  }\n  assert.match(page, /NO CARD NUMBERS/);\n  assert.match(page, /localStorage/);\n});\n\ntest("Project Billing Hub runtime checks remain read-only", () => {\n  assert.match(page, /getj\(\'\/api\/health\'\)/);\n  assert.match(page, /getj\(\'\/api\/deployment\'\)/);\n  assert.equal(page.includes("method:\'POST\'"), false);\n  assert.equal(page.includes('method:"POST"'), false);\n  assert.match(page, /Billing plan\/credits\/card status: NOT INFERRED/);\n});\n
+"use strict";
+
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const billingPath = path.join(__dirname, "..", "public", "billing.html");
+const page = fs.readFileSync(billingPath, "utf8");
+
+test("Project Billing Hub exposes the expected career services", () => {
+  for (const label of [
+    "PROJECT BILLING HUB",
+    "Railway",
+    "ChatGPT",
+    "OpenAI API",
+    "Google AI Studio / Gemini",
+    "GitHub",
+    "Cloudflare",
+    "Expo / EAS",
+    "Figma",
+    "Runway",
+    "Magnific"
+  ]) {
+    assert.equal(page.includes(label), true, label);
+  }
+});
+
+test("Project Billing Hub defaults to the approved $100 monthly ceiling", () => {
+  assert.match(page, /monthlyCap:100/);
+  assert.match(page, /id="capDisplay">\$100\.00/);
+});
+
+test("Project Billing Hub does not collect sensitive payment or wallet credentials", () => {
+  for (const forbidden of [
+    'id="cardNumber"',
+    'id="cvv"',
+    'id="expiration"',
+    'id="bankLogin"',
+    'id="privateKey"',
+    'id="seedPhrase"',
+    'type="password"'
+  ]) {
+    assert.equal(page.includes(forbidden), false, forbidden);
+  }
+  assert.match(page, /NO CARD NUMBERS/);
+  assert.match(page, /localStorage/);
+});
+
+test("Project Billing Hub runtime checks remain read-only", () => {
+  assert.match(page, /getj\('\/api\/health'\)/);
+  assert.match(page, /getj\('\/api\/deployment'\)/);
+  assert.equal(page.includes("method:'POST'"), false);
+  assert.equal(page.includes('method:"POST"'), false);
+  assert.match(page, /Billing plan\/credits\/card status: NOT INFERRED/);
+});
