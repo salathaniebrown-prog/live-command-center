@@ -65,6 +65,26 @@
 </section>
 
 <section class="panel">
+ <div class="head"><div class="title">COINBASE ONRAMP SETUP</div><div class="sub">OWNER AUTHORIZATION REQUIRED</div></div>
+ <div class="body">
+  <div class="summary">
+   <div class="kpi"><span>PROVIDER</span><b>COINBASE</b></div>
+   <div class="kpi"><span>PAYMENT METHOD</span><b id="coinbasePaymentState">NOT VERIFIED</b></div>
+   <div class="kpi"><span>PROJECT INTEGRATION</span><b id="coinbaseProjectState">PENDING</b></div>
+   <div class="kpi"><span>AUTO PURCHASE</span><b class="warn">OFF</b></div>
+  </div>
+  <div class="actions">
+   <a class="btn primary" href="https://www.coinbase.com/" target="_blank" rel="noopener noreferrer">OPEN COINBASE</a>
+   <a class="btn" href="https://help.coinbase.com/en/coinbase/getting-started/add-a-payment-method/manage-method" target="_blank" rel="noopener noreferrer">PAYMENT METHOD HELP</a>
+   <a class="btn" href="https://www.coinbase.com/developer-platform/products/onramp" target="_blank" rel="noopener noreferrer">COINBASE ONRAMP</a>
+  </div>
+  <div class="row"><label for="coinbaseLinked">After Coinbase confirms a supported payment method</label><select id="coinbaseLinked"><option value="no">NOT YET</option><option value="yes">USER CONFIRMED LINKED</option></select></div>
+  <div id="coinbaseStatus" class="statusBox">Complete payment-method verification inside Coinbase. This Command Center never receives the card number, CVV, bank login, Coinbase password, or 2FA code.</div>
+  <div class="note">A user-confirmed payment method is not the same as a verified Command Center API integration. Embedded Coinbase Onramp will remain pending until a Coinbase Developer Platform integration is configured with secrets stored outside the repository and outside this page.</div>
+ </div>
+</section>
+
+<section class="panel">
  <div class="head"><div class="title">LIVE PLATFORM SIGNALS</div><div class="sub">NO BILLING CLAIMS</div></div>
  <div class="body">
   <div class="actions"><button class="btn primary" type="button" onclick="refreshLive()">REFRESH LIVE STATUS</button></div>
@@ -104,7 +124,7 @@ const SERVICES=[
  {id:'magnific',name:'Magnific',group:'Visual enhancement',url:'https://magnific.ai/',status:'Manual billing entry'},
  {id:'other',name:'Other Career Tool',group:'Custom',url:'',status:'Manual billing entry'}
 ];
-function emptyState(){return{monthlyCap:100,fundingLabel:'',services:Object.fromEntries(SERVICES.map(s=>[s.id,{plan:'',budget:0,spent:0,renewal:'',state:'UNSET'}])),ledger:[]}}
+function emptyState(){return{monthlyCap:100,fundingLabel:'',coinbaseLinked:false,services:Object.fromEntries(SERVICES.map(s=>[s.id,{plan:'',budget:0,spent:0,renewal:'',state:'UNSET'}])),ledger:[]}}
 function load(){try{const x=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return x&&typeof x==='object'?Object.assign(emptyState(),x):emptyState()}catch{return emptyState()}}
 let state=load();
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderSummary()}
@@ -148,7 +168,7 @@ async function refreshFundingBridge(){
 async function refreshLive(){const out=document.getElementById('liveStatus');out.textContent='Checking real Command Center runtime…';const now=new Date().toISOString();const [health,deployment]=await Promise.allSettled([getj('/api/health'),getj('/api/deployment')]);const lines=['Checked: '+now];if(health.status==='fulfilled'&&health.value.r.ok){lines.push('Command Center health: LIVE / OK');lines.push('Uptime: '+(health.value.j?.uptimeSeconds??'N/A')+' seconds')}else lines.push('Command Center health: UNAVAILABLE');if(deployment.status==='fulfilled'&&deployment.value.r.ok){const d=deployment.value.j||{};lines.push('Railway/runtime stage: '+(d.stage||'N/A'));lines.push('Environment: '+(d.environment||'N/A'));lines.push('Service ID: '+(d.serviceId||'N/A'));lines.push('Deployment ID: '+(d.deploymentId||'N/A'));lines.push('Commit: '+(d.commitSha||'N/A'))}else lines.push('Railway/runtime deployment data: UNAVAILABLE');lines.push('Billing plan/credits/card status: NOT INFERRED');out.textContent=lines.join('\n')}
 function exportData(){const payload={exportedAt:new Date().toISOString(),source:'Eagle Eyes Project Billing Hub local browser data',data:state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='eagle-eyes-project-billing-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function resetLocal(){if(!confirm('Reset only the Billing Hub data stored in this browser?'))return;localStorage.removeItem(STORAGE_KEY);state=emptyState();document.getElementById('monthlyCap').value=state.monthlyCap;document.getElementById('fundingLabel').value='';renderServices();renderLedger();renderSummary()}
-document.getElementById('monthlyCap').value=state.monthlyCap||'';document.getElementById('fundingLabel').value=state.fundingLabel||'';document.getElementById('monthlyCap').addEventListener('change',e=>{state.monthlyCap=Number(e.target.value)||0;save()});document.getElementById('fundingLabel').addEventListener('change',e=>{state.fundingLabel=e.target.value;document.getElementById('bridgeCard').textContent=state.fundingLabel||'LABEL ONLY';save()});renderServices();renderLedger();renderSummary();document.getElementById('bridgeCard').textContent=state.fundingLabel||'LABEL ONLY';refreshFundingBridge();
+document.getElementById('monthlyCap').value=state.monthlyCap||'';document.getElementById('fundingLabel').value=state.fundingLabel||'';document.getElementById('coinbaseLinked').value=state.coinbaseLinked?'yes':'no';document.getElementById('coinbasePaymentState').textContent=state.coinbaseLinked?'USER CONFIRMED':'NOT VERIFIED';document.getElementById('coinbaseStatus').textContent=state.coinbaseLinked?'User reported that Coinbase accepted a payment method. Command Center API integration is still pending; no card credentials were imported.':'Complete payment-method verification inside Coinbase. This Command Center never receives the card number, CVV, bank login, Coinbase password, or 2FA code.';document.getElementById('monthlyCap').addEventListener('change',e=>{state.monthlyCap=Number(e.target.value)||0;save()});document.getElementById('fundingLabel').addEventListener('change',e=>{state.fundingLabel=e.target.value;document.getElementById('bridgeCard').textContent=state.fundingLabel||'LABEL ONLY';save()});document.getElementById('coinbaseLinked').addEventListener('change',e=>{state.coinbaseLinked=e.target.value==='yes';document.getElementById('coinbasePaymentState').textContent=state.coinbaseLinked?'USER CONFIRMED':'NOT VERIFIED';document.getElementById('coinbaseStatus').textContent=state.coinbaseLinked?'User reported that Coinbase accepted a payment method. Command Center API integration is still pending; no card credentials were imported.':'Complete payment-method verification inside Coinbase. This Command Center never receives the card number, CVV, bank login, Coinbase password, or 2FA code.';save()});renderServices();renderLedger();renderSummary();document.getElementById('bridgeCard').textContent=state.fundingLabel||'LABEL ONLY';refreshFundingBridge();
 </script>
 </body>
 </html>
