@@ -40,6 +40,16 @@ test("Project Billing Hub combines card planning with read-only crypto status", 
   assert.match(page, /No purchase, charge, transfer, signing, or broadcast was performed/);
 });
 
+
+test("Project Billing Hub exposes guarded Coinbase setup without importing credentials", () => {
+  assert.match(page, /COINBASE ONRAMP SETUP/);
+  assert.match(page, /USER CONFIRMED LINKED/);
+  assert.match(page, /COINBASE ONRAMP/);
+  assert.match(page, /Command Center never receives the card number, CVV, bank login, Coinbase password, or 2FA code/);
+  assert.match(page, /AUTO PURCHASE/);
+  assert.match(page, />OFF</);
+});
+
 test("Project Billing Hub does not collect sensitive payment or wallet credentials", () => {
   for (const forbidden of [
     'id="cardNumber"',
