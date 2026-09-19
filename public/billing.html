@@ -50,6 +50,21 @@
 </section>
 
 <section class="panel">
+ <div class="head"><div class="title">UNIFIED FUNDING BRIDGE</div><div class="sub">CARD + CRYPTO • READ ONLY UNTIL CONNECTED</div></div>
+ <div class="body">
+  <div class="summary">
+   <div class="kpi"><span>CARD SOURCE</span><b id="bridgeCard">LABEL ONLY</b></div>
+   <div class="kpi"><span>CRYPTO RAIL</span><b id="bridgeCrypto">CHECKING</b></div>
+   <div class="kpi"><span>NETWORK</span><b id="bridgeNetwork">N/A</b></div>
+   <div class="kpi"><span>CARD → CRYPTO</span><b id="bridgeLink" class="warn">NOT CONNECTED</b></div>
+  </div>
+  <div class="actions"><button class="btn primary" type="button" onclick="refreshFundingBridge()">CHECK COMBINED STATUS</button><a class="btn" href="/#crypto">OPEN CRYPTO LAB</a></div>
+  <div id="bridgeStatus" class="statusBox">The Billing Hub and Crypto Lab are combined for status and planning. No card charge, crypto purchase, transfer, signing, or broadcast can occur from this page.</div>
+  <div class="note">Until an approved payment/on-ramp integration exists, this page treats the card and crypto rail as separate systems. A masked card label is local-only; crypto status comes from the real Command Center crypto status endpoint. “Connected” is never inferred.</div>
+ </div>
+</section>
+
+<section class="panel">
  <div class="head"><div class="title">LIVE PLATFORM SIGNALS</div><div class="sub">NO BILLING CLAIMS</div></div>
  <div class="body">
   <div class="actions"><button class="btn primary" type="button" onclick="refreshLive()">REFRESH LIVE STATUS</button></div>
@@ -100,10 +115,40 @@ function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 function addLedgerRow(row={date:'',provider:'',amount:0,received:'',reference:''}){state.ledger.push(row);save();renderLedger()}
 function renderLedger(){const body=document.getElementById('ledgerRows');body.innerHTML='';state.ledger.forEach((r,i)=>{const tr=document.createElement('tr');tr.innerHTML=`<td><input type="date" data-k="date" value="${esc(r.date||'')}"></td><td><input data-k="provider" value="${esc(r.provider||'')}" placeholder="Railway, API, visual tool…"></td><td><input data-k="amount" type="number" min="0" step=".01" value="${Number(r.amount)||''}" placeholder="0.00"></td><td><input data-k="received" value="${esc(r.received||'')}" placeholder="What was delivered"></td><td><input data-k="reference" value="${esc(r.reference||'')}" placeholder="Invoice / receipt / order ID"></td><td><button class="btn danger" type="button">REMOVE</button></td>`;tr.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('change',()=>{const k=el.dataset.k;state.ledger[i][k]=k==='amount'?Number(el.value)||0:el.value;save()}));tr.querySelector('button').onclick=()=>{state.ledger.splice(i,1);save();renderLedger()};body.appendChild(tr)})}
 async function getj(url){const r=await fetch(url,{cache:'no-store'});let j=null;try{j=await r.json()}catch{}return{r,j}}
+async function refreshFundingBridge(){
+  const out=document.getElementById('bridgeStatus');
+  document.getElementById('bridgeCard').textContent=state.fundingLabel||'LABEL ONLY';
+  document.getElementById('bridgeLink').textContent='NOT CONNECTED';
+  document.getElementById('bridgeLink').className='warn';
+  out.textContent='Checking real crypto rail status…';
+  try{
+    const {r,j}=await getj('/api/eagle-eyes/crypto/status');
+    if(!r.ok)throw new Error(j?.error||('HTTP '+r.status));
+    document.getElementById('bridgeCrypto').textContent=j?.configured?'READY':'NOT CONFIGURED';
+    document.getElementById('bridgeNetwork').textContent=j?.network?.name||'N/A';
+    const lines=[
+      'Card source: '+(state.fundingLabel||'label not set'),
+      'Crypto rail: '+(j?.configured?'configured':'not configured'),
+      'Mode: '+(j?.mode||'N/A'),
+      'Network: '+(j?.network?.name||'N/A'),
+      'Asset: '+(j?.asset?.symbol||'N/A'),
+      'Mainnet locked: '+(j?.mainnetLocked===true?'YES':j?.mainnetLocked===false?'NO':'N/A'),
+      'Wallet approval required: '+(j?.capabilities?.walletApprovalRequired===true?'YES':'N/A'),
+      'Server signing: '+(j?.capabilities?.signTransactions===false?'DISABLED':'N/A'),
+      'Card → crypto connection: NOT CONNECTED',
+      'No purchase, charge, transfer, signing, or broadcast was performed.'
+    ];
+    out.textContent=lines.join('\n');
+  }catch(e){
+    document.getElementById('bridgeCrypto').textContent='UNAVAILABLE';
+    document.getElementById('bridgeNetwork').textContent='N/A';
+    out.textContent='Crypto rail status unavailable: '+e.message+'\nCard → crypto connection remains NOT CONNECTED.';
+  }
+}
 async function refreshLive(){const out=document.getElementById('liveStatus');out.textContent='Checking real Command Center runtime…';const now=new Date().toISOString();const [health,deployment]=await Promise.allSettled([getj('/api/health'),getj('/api/deployment')]);const lines=['Checked: '+now];if(health.status==='fulfilled'&&health.value.r.ok){lines.push('Command Center health: LIVE / OK');lines.push('Uptime: '+(health.value.j?.uptimeSeconds??'N/A')+' seconds')}else lines.push('Command Center health: UNAVAILABLE');if(deployment.status==='fulfilled'&&deployment.value.r.ok){const d=deployment.value.j||{};lines.push('Railway/runtime stage: '+(d.stage||'N/A'));lines.push('Environment: '+(d.environment||'N/A'));lines.push('Service ID: '+(d.serviceId||'N/A'));lines.push('Deployment ID: '+(d.deploymentId||'N/A'));lines.push('Commit: '+(d.commitSha||'N/A'))}else lines.push('Railway/runtime deployment data: UNAVAILABLE');lines.push('Billing plan/credits/card status: NOT INFERRED');out.textContent=lines.join('\n')}
 function exportData(){const payload={exportedAt:new Date().toISOString(),source:'Eagle Eyes Project Billing Hub local browser data',data:state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='eagle-eyes-project-billing-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function resetLocal(){if(!confirm('Reset only the Billing Hub data stored in this browser?'))return;localStorage.removeItem(STORAGE_KEY);state=emptyState();document.getElementById('monthlyCap').value=state.monthlyCap;document.getElementById('fundingLabel').value='';renderServices();renderLedger();renderSummary()}
-document.getElementById('monthlyCap').value=state.monthlyCap||'';document.getElementById('fundingLabel').value=state.fundingLabel||'';document.getElementById('monthlyCap').addEventListener('change',e=>{state.monthlyCap=Number(e.target.value)||0;save()});document.getElementById('fundingLabel').addEventListener('change',e=>{state.fundingLabel=e.target.value;save()});renderServices();renderLedger();renderSummary();
+document.getElementById('monthlyCap').value=state.monthlyCap||'';document.getElementById('fundingLabel').value=state.fundingLabel||'';document.getElementById('monthlyCap').addEventListener('change',e=>{state.monthlyCap=Number(e.target.value)||0;save()});document.getElementById('fundingLabel').addEventListener('change',e=>{state.fundingLabel=e.target.value;document.getElementById('bridgeCard').textContent=state.fundingLabel||'LABEL ONLY';save()});renderServices();renderLedger();renderSummary();document.getElementById('bridgeCard').textContent=state.fundingLabel||'LABEL ONLY';refreshFundingBridge();
 </script>
 </body>
 </html>
