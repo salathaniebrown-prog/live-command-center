@@ -62,7 +62,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method !== 'GET') return sendJson(res, 405, { error: 'read-only dashboard' });
 
-  if (pathname === '/dashboard-health') {
+  if (pathname === '/dashboard-health' || pathname === '/dashboard_health') {
     return sendJson(res, 200, {
       ok: true,
       service: 'railway-visual-dashboard',
