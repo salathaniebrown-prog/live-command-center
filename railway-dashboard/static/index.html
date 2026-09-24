@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#07111f" />
-<title>Salathaniel Command Center — Verified Runtime V1</title>
+<title>Eagle Eyes Command Center — Verified Runtime V2</title>
 <style>
 :root{--bg:#050a10;--panel:#0b1521;--panel2:#0e1b2b;--line:#21384d;--text:#edf6ff;--muted:#8ea6ba;--blue:#66b6ff;--green:#43d99a;--amber:#f2c85b;--red:#ff6d78}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0,#10243a 0,#050a10 38%,#03070b 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -12,29 +12,32 @@ header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-betwee
 .brand{display:flex;align-items:center;gap:12px}.mark{width:44px;height:44px;border:1px solid var(--blue);border-radius:12px;display:grid;place-items:center;font-weight:900;box-shadow:0 0 24px rgba(102,182,255,.16)}h1{margin:0;font-size:18px}.sub{font-size:12px;color:var(--muted);margin-top:3px}
 .badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);padding:7px 10px;border-radius:999px;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}.dot.ok{background:var(--green);box-shadow:0 0 12px rgba(67,217,154,.85)}.dot.bad{background:var(--red)}
 main{max-width:1500px;margin:auto;padding:18px}.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin-bottom:14px}.card{background:linear-gradient(180deg,rgba(14,27,43,.97),rgba(8,17,27,.97));border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 12px 38px rgba(0,0,0,.14)}.card h2{margin:0 0 12px;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#b9cde0}
-.heroTitle{font-size:31px;font-weight:850;line-height:1.04;margin:5px 0 10px}.heroText{color:var(--muted);font-size:13px;max-width:720px;line-height:1.55}.heroActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}button{border:1px solid #31516e;background:#102236;color:var(--text);border-radius:10px;padding:9px 12px;font:inherit;cursor:pointer}button:hover{border-color:var(--blue)}
+.heroTitle{font-size:31px;font-weight:850;line-height:1.04;margin:5px 0 10px}.heroText{color:var(--muted);font-size:13px;max-width:760px;line-height:1.55}.heroActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}button{border:1px solid #31516e;background:#102236;color:var(--text);border-radius:10px;padding:9px 12px;font:inherit;cursor:pointer}button:hover{border-color:var(--blue)}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.metric{grid-column:span 3;min-height:132px}.wide{grid-column:span 8}.side{grid-column:span 4}.half{grid-column:span 6}.full{grid-column:span 12}.value{font-size:30px;font-weight:850;margin:8px 0 4px}.small{font-size:12px;color:var(--muted)}.meter{height:8px;background:#07101a;border:1px solid #182c40;border-radius:999px;overflow:hidden;margin-top:13px}.meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,#4ca9ff,#46d5a0);transition:width .4s ease}
-.row{display:flex;justify-content:space-between;gap:20px;padding:9px 0;border-bottom:1px solid rgba(33,56,77,.65);font-size:13px}.row:last-child{border-bottom:0}.label{color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;word-break:break-all}.verified{color:var(--green);font-weight:700}.warn{color:var(--amber)}
+.row{display:flex;justify-content:space-between;gap:20px;padding:9px 0;border-bottom:1px solid rgba(33,56,77,.65);font-size:13px}.row:last-child{border-bottom:0}.label{color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;word-break:break-all}.verified{color:var(--green);font-weight:700}.warn{color:var(--amber)}.blocked{color:var(--green);font-weight:700}.critical{color:var(--red);font-weight:700}
 .topology{display:grid;grid-template-columns:1fr 110px 1fr 110px 1fr;gap:10px;align-items:center;min-height:210px}.node{padding:15px;border:1px solid #2a4965;border-radius:14px;background:#08131f;text-align:center}.node strong{display:block;margin-bottom:5px}.pipe{height:2px;background:linear-gradient(90deg,#213c54,#66b6ff,#213c54);position:relative}.pipe:after{content:"";position:absolute;top:-4px;left:46%;width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 14px var(--blue)}
-.console{height:240px;overflow:auto;background:#03080d;border:1px solid #15283a;border-radius:11px;padding:11px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#a9c0d3;white-space:pre-wrap}footer{text-align:center;color:var(--muted);font-size:11px;padding:20px}
-@media(max-width:980px){.hero{grid-template-columns:1fr}.metric{grid-column:span 6}.wide,.side{grid-column:span 12}.half{grid-column:span 12}.topology{grid-template-columns:1fr}.pipe{width:2px;height:42px;margin:auto}}
-@media(max-width:560px){header{align-items:flex-start;flex-direction:column}.metric{grid-column:span 12}.heroTitle{font-size:25px}main{padding:12px}.card{padding:14px}}
+.console{height:240px;overflow:auto;background:#03080d;border:1px solid #15283a;border-radius:11px;padding:11px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#a9c0d3;white-space:pre-wrap}
+.tableWrap{overflow:auto;border:1px solid #15283a;border-radius:11px}table{width:100%;border-collapse:collapse;min-width:920px;font-size:12px}th,td{text-align:left;padding:10px;border-bottom:1px solid rgba(33,56,77,.65);vertical-align:top}th{color:#b9cde0;background:#07101a;position:sticky;top:0}td{color:#d6e5f1}.empty{text-align:center;color:var(--muted);padding:24px}
+.gates{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.gate{border:1px solid #23435c;border-radius:12px;padding:12px;background:#07111c}.gate strong{display:block;font-size:13px}.gate span{display:block;color:var(--green);font-size:12px;margin-top:5px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:20px}
+@media(max-width:980px){.hero{grid-template-columns:1fr}.metric{grid-column:span 6}.wide,.side{grid-column:span 12}.half{grid-column:span 12}.topology{grid-template-columns:1fr}.pipe{width:2px;height:42px;margin:auto}.gates{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){header{align-items:flex-start;flex-direction:column}.metric{grid-column:span 12}.heroTitle{font-size:25px}main{padding:12px}.card{padding:14px}.gates{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><div class="mark">EE</div><div><h1>Eagle Eyes Command Center</h1><div class="sub">Verified Runtime V1 • Railway • real-only • read-only</div></div></div>
+  <div class="brand"><div class="mark">EE</div><div><h1>Eagle Eyes Command Center</h1><div class="sub">Verified Runtime V2 • Chaos Observer • real-only • read-only</div></div></div>
   <div class="badge"><span id="dot" class="dot"></span><span id="connection">Checking</span></div>
 </header>
 <main>
   <section class="hero">
     <article class="card">
-      <div class="small">VERIFIED RUNTIME V1</div>
-      <div class="heroTitle">Provider facts first.<br/>Unknown stays unknown.</div>
-      <div class="heroText">This surface separates Railway-provided runtime evidence from upstream Command Center telemetry. It exposes no write routes, shell commands, credentials, merge actions, or deployment controls. Missing values remain N/A.</div>
+      <div class="small">VERIFIED RUNTIME V2 — CHAOS OBSERVER</div>
+      <div class="heroTitle">Observe failures.<br/>Never auto-act.</div>
+      <div class="heroText">This surface observes provider runtime facts, upstream health, and an optional read-only chaos audit feed. Recovery output is advisory only. No Docker socket control, firewall mutation, nginx reload, PCI register write, restart, merge, or deployment action is exposed.</div>
       <div class="heroActions"><button id="refresh">Refresh now</button><button id="auto">Auto refresh: ON</button></div>
     </article>
-    <article class="card"><h2>Dashboard Service</h2><div class="row"><span class="label">Host</span><span>Railway</span></div><div class="row"><span class="label">Mode</span><span>Read-only</span></div><div class="row"><span class="label">Policy</span><span>Real-only</span></div><div class="row"><span class="label">Evidence</span><span class="verified">Railway runtime vars</span></div><div class="row"><span class="label">Last update</span><span id="lastUpdate">Never</span></div></article>
+    <article class="card"><h2>Observer State</h2><div class="row"><span class="label">Mode</span><span class="verified">Observation only</span></div><div class="row"><span class="label">Recovery</span><span class="blocked">Human approval required</span></div><div class="row"><span class="label">Chaos audit source</span><span id="chaosConfigured">Checking</span></div><div class="row"><span class="label">Last update</span><span id="lastUpdate">Never</span></div></article>
   </section>
 
   <section class="grid">
@@ -42,6 +45,33 @@ main{max-width:1500px;margin:auto;padding:18px}.hero{display:grid;grid-template-
     <article class="card metric"><h2>Memory</h2><div id="memory" class="value">N/A</div><div class="small">Upstream-reported</div><div class="meter"><span id="memoryBar"></span></div></article>
     <article class="card metric"><h2>Storage</h2><div id="storage" class="value">N/A</div><div class="small">Upstream-reported</div><div class="meter"><span id="storageBar"></span></div></article>
     <article class="card metric"><h2>Uptime</h2><div id="uptime" class="value">N/A</div><div class="small">Upstream-reported</div></article>
+
+    <article class="card full"><h2>Recovery Safety Gates</h2><div class="gates">
+      <div class="gate"><strong>Docker socket</strong><span>BLOCKED</span></div>
+      <div class="gate"><strong>Firewall mutation</strong><span>BLOCKED</span></div>
+      <div class="gate"><strong>nginx auto-reload</strong><span>BLOCKED</span></div>
+      <div class="gate"><strong>PCI register writes</strong><span>BLOCKED</span></div>
+      <div class="gate"><strong>Privileged container</strong><span>BLOCKED</span></div>
+      <div class="gate"><strong>Host network mutation</strong><span>BLOCKED</span></div>
+      <div class="gate"><strong>Process restart</strong><span>BLOCKED</span></div>
+      <div class="gate"><strong>Deployment writes</strong><span>BLOCKED</span></div>
+    </div></article>
+
+    <article class="card full"><h2>Chaos / Outage Audit Feed — Read Only</h2>
+      <div class="small" id="chaosNote">Loading observer source status…</div>
+      <div class="tableWrap" style="margin-top:12px"><table>
+        <thead><tr><th>Time</th><th>Event Type</th><th>Target</th><th>Recovery (s)</th><th>Status</th><th>Recommendation</th></tr></thead>
+        <tbody id="chaosRows"><tr><td colspan="6" class="empty">No observations loaded.</td></tr></tbody>
+      </table></div>
+    </article>
+
+    <article class="card half"><h2>Observer Snapshot</h2>
+      <div class="row"><span class="label">Health endpoint</span><span id="obsHealth">N/A</span></div>
+      <div class="row"><span class="label">Status endpoint</span><span id="obsStatus">N/A</span></div>
+      <div class="row"><span class="label">Deployment endpoint</span><span id="obsDeployment">N/A</span></div>
+      <div class="row"><span class="label">Recommendation</span><span id="obsRecommendation" class="small">N/A</span></div>
+    </article>
+    <article class="card half"><h2>Live Activity</h2><div id="console" class="console"></div></article>
 
     <article class="card full"><h2>Railway Runtime Evidence — Provider Supplied</h2>
       <div class="row"><span class="label">Project</span><span id="railProject">N/A</span></div>
@@ -58,14 +88,14 @@ main{max-width:1500px;margin:auto;padding:18px}.hero{display:grid;grid-template-
       <div class="row"><span class="label">Evidence source</span><span id="evidenceSource" class="verified">N/A</span></div>
     </article>
 
-    <article class="card wide"><h2>Observed Request Path</h2><div class="topology"><div class="node"><strong>Authorized Browser</strong><span class="small">phone • tablet • desktop</span></div><div class="pipe"></div><div class="node"><strong>Railway Dashboard</strong><span class="small">GET-only proxy • runtime evidence</span></div><div class="pipe"></div><div class="node"><strong>Configured API Base</strong><span class="small">status • metrics • health • deployment</span></div></div></article>
+    <article class="card wide"><h2>Observed Request Path</h2><div class="topology"><div class="node"><strong>Authorized Browser</strong><span class="small">phone • tablet • desktop</span></div><div class="pipe"></div><div class="node"><strong>Chaos Observer</strong><span class="small">GET only • sanitize • recommend</span></div><div class="pipe"></div><div class="node"><strong>Evidence Sources</strong><span class="small">Railway runtime • upstream API • optional audit feed</span></div></div></article>
     <article class="card side"><h2>Upstream Server Status</h2><div class="row"><span class="label">State</span><span id="state">N/A</span></div><div class="row"><span class="label">API health</span><span id="apiHealth">N/A</span></div><div class="row"><span class="label">Network</span><span id="network">N/A</span></div><div class="row"><span class="label">Temperature</span><span id="temperature">N/A</span></div><div class="row"><span class="label">Telemetry source</span><span id="source">N/A</span></div></article>
 
     <article class="card half"><h2>Upstream Deployment Observation</h2><div class="row"><span class="label">Environment</span><span id="environment">N/A</span></div><div class="row"><span class="label">Commit / SHA</span><span id="sha" class="mono">N/A</span></div><div class="row"><span class="label">Authority</span><span>Observation only</span></div><div class="row"><span class="label">Control-plane writes</span><span class="verified">Disabled</span></div></article>
-    <article class="card half"><h2>Live Activity</h2><div id="console" class="console"></div></article>
+    <article class="card half"><h2>Observer Policy</h2><div class="row"><span class="label">Real-only</span><span class="verified">TRUE</span></div><div class="row"><span class="label">Automatic recovery</span><span class="verified">FALSE</span></div><div class="row"><span class="label">Recommendation mode</span><span>Human approval</span></div><div class="row"><span class="label">Unverified values</span><span>N/A</span></div></article>
   </section>
 </main>
-<footer>Railway runtime fields come from Railway-provided deployment variables. Upstream telemetry is displayed separately. Unavailable data is N/A; no telemetry is invented.</footer>
+<footer>Observed facts and optional audit events are displayed separately. Missing data stays N/A. Recommendations never execute recovery actions.</footer>
 <script>
 const $=id=>document.getElementById(id);let timer=null;let auto=true;
 function log(msg){const t=new Date().toLocaleTimeString();$("console").textContent="["+t+"] "+msg+"\n"+$("console").textContent}
@@ -77,9 +107,15 @@ function duration(sec){if(sec===null||sec===undefined||Number.isNaN(Number(sec))
 async function get(path){const r=await fetch(path,{method:"GET",headers:{Accept:"application/json"},cache:"no-store"});if(!r.ok)throw new Error(path+" HTTP "+r.status);return r.json()}
 function connected(ok){$("dot").className="dot "+(ok?"ok":"bad");$("connection").textContent=ok?"Verified runtime online":"Unavailable"}
 function applyEvidence(e){const rw=e&&e.railway||{};const git=e&&e.git||{};const p=e&&e.process||{};text("railProject",rw.project);text("railEnvironment",rw.environment);text("railService",rw.service);text("railRegion",rw.region);text("railRepo",(git.repositoryOwner&&git.repositoryName)?git.repositoryOwner+"/"+git.repositoryName:null);text("railBranch",git.branch);text("railSha",git.commitSha);text("railDomain",rw.publicDomain);text("nodeVersion",p.nodeVersion);text("processUptime",duration(p.uptimeSeconds));text("processRss",bytes(p.rssBytes));text("evidenceSource",e&&e.source)}
+function obsValue(v){if(!v||!v.configured)return"N/A";if(v.httpStatus!==null)return(v.ok?"OK ":"FAIL ")+v.httpStatus;return v.ok?"OK":"UNAVAILABLE"}
+function applySnapshot(s){text("obsHealth",obsValue(s&&s.observations&&s.observations.health));text("obsStatus",obsValue(s&&s.observations&&s.observations.status));text("obsDeployment",obsValue(s&&s.observations&&s.observations.deployment));text("obsRecommendation",s&&s.recommendation)}
+function renderChaos(c){text("chaosConfigured",c&&c.configured?"Configured":"Not configured");$("chaosConfigured").className=c&&c.configured?"verified":"warn";$("chaosNote").textContent=c&&c.configured?("Source: "+(c.source||"configured read-only feed")):(c&&c.note||"No chaos audit source configured; no incidents inferred.");const rows=Array.isArray(c&&c.events)?c.events:[];const body=$("chaosRows");body.textContent="";if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=6;td.className="empty";td.textContent=c&&c.configured?"No chaos events returned.":"No chaos audit feed configured.";tr.appendChild(td);body.appendChild(tr);return}for(const e of rows){const tr=document.createElement("tr");for(const v of [e.time,e.eventType,e.targetInterface,e.recoveryDurationSeconds,e.status,e.recommendation]){const td=document.createElement("td");td.textContent=(v===null||v===undefined||v==="")?"N/A":String(v);tr.appendChild(td)}body.appendChild(tr)}}
 async function refresh(){let providerOk=false;let upstreamOk=false;connected(false);
-try{const h=await get('/dashboard-health');log("Dashboard service OK • upstream configured: "+h.upstreamConfigured)}catch(e){log(e.message)}
+try{const h=await get('/dashboard-health');log("Dashboard service OK • upstream: "+h.upstreamConfigured+" • chaos audit: "+h.chaosAuditConfigured)}catch(e){log(e.message)}
+try{const p=await get('/observer-policy');text("chaosConfigured",p.chaosAuditConfigured?"Configured":"Not configured")}catch(e){log(e.message)}
 try{const e=await get('/runtime-evidence');applyEvidence(e);providerOk=true;log("Railway runtime evidence received")}catch(e){log(e.message)}
+try{const s=await get('/observer-snapshot');applySnapshot(s);log("Observer snapshot received")}catch(e){log(e.message)}
+try{const c=await get('/chaos-events');renderChaos(c);log(c.configured?"Chaos audit observations received":"Chaos audit source not configured")}catch(e){renderChaos({configured:false,events:[],note:e.message});log(e.message)}
 try{const m=await get('/api/metrics');pct('cpu','cpuBar',pick(m,'cpu','cpuPercent','cpu_pct'));pct('memory','memoryBar',pick(m,'memory','memoryPercent','memory_pct'));pct('storage','storageBar',pick(m,'storage','storagePercent','storage_pct'));const up=pick(m,'uptime','uptimeSeconds','uptime_s');$('uptime').textContent=up===null?'N/A':(typeof up==='number'?duration(up):String(up));const temp=pick(m,'temperatureC','temperature','tempC');$('temperature').textContent=temp===null?'N/A':String(temp)+' °C';$('source').textContent=pick(m,'source')??'N/A';upstreamOk=true;log('Upstream metrics received')}catch(e){log(e.message)}
 try{const s=await get('/api/status');$('state').textContent=pick(s,'status','state','service')??'N/A';$('network').textContent=pick(s,'network','networkStatus')??'N/A';upstreamOk=true;log('Upstream status received')}catch(e){log(e.message)}
 try{const h=await get('/api/health');$('apiHealth').textContent=String(pick(h,'status','health','ok')??'N/A');upstreamOk=true;log('Upstream health received')}catch(e){log(e.message)}
