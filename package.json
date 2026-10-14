@@ -23,7 +23,7 @@
   "author": "Salathaniel Brown Sr",
   "license": "MIT",
   "dependencies": {
-    "express": "^5.2.1",
+    "express": "^5.3.0",
     "satellite.js": "7.1.0"
   },
   "devDependencies": {
