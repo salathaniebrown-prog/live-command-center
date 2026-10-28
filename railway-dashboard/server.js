@@ -34,13 +34,50 @@ function sendFile(res, filePath, contentType='text/html; charset=utf-8') {
   });
 }
 
+function envValue(name) {
+  const value = String(process.env[name] || '').trim();
+  return value || null;
+}
+
+function runtimeEvidence() {
+  const mem = process.memoryUsage();
+  return {
+    verifiedAt: new Date().toISOString(),
+    source: 'railway-provided-runtime-environment',
+    railway: {
+      project: envValue('RAILWAY_PROJECT_NAME'),
+      environment: envValue('RAILWAY_ENVIRONMENT_NAME'),
+      service: envValue('RAILWAY_SERVICE_NAME'),
+      region: envValue('RAILWAY_REPLICA_REGION'),
+      publicDomain: envValue('RAILWAY_PUBLIC_DOMAIN')
+    },
+    git: {
+      repositoryOwner: envValue('RAILWAY_GIT_REPO_OWNER'),
+      repositoryName: envValue('RAILWAY_GIT_REPO_NAME'),
+      branch: envValue('RAILWAY_GIT_BRANCH'),
+      commitSha: envValue('RAILWAY_GIT_COMMIT_SHA')
+    },
+    process: {
+      nodeVersion: process.version,
+      uptimeSeconds: Math.floor(process.uptime()),
+      rssBytes: mem.rss,
+      heapUsedBytes: mem.heapUsed
+    },
+    policy: {
+      mode: 'read-only',
+      realOnly: true,
+      writeRoutesExposed: false
+    }
+  };
+}
+
 async function proxyGet(req, res, pathname) {
   if (!ALLOWED.has(pathname)) return sendJson(res, 403, { error: 'endpoint not allowed', path: pathname });
   if (!API_BASE) return sendJson(res, 503, { error: 'API_BASE is not configured', path: pathname });
   try {
     const upstream = await fetch(API_BASE + pathname, {
       method: 'GET',
-      headers: { 'accept': 'application/json', 'user-agent': 'Salathaniel-Command-Dashboard/1.0' },
+      headers: { 'accept': 'application/json', 'user-agent': 'Salathaniel-Command-Dashboard/1.1' },
       signal: AbortSignal.timeout(8000)
     });
     const body = Buffer.from(await upstream.arrayBuffer());
@@ -72,11 +109,16 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  if (pathname === '/runtime-evidence') {
+    return sendJson(res, 200, runtimeEvidence());
+  }
+
   if (pathname === '/dashboard-meta') {
     return sendJson(res, 200, {
       name: 'Salathaniel Command Center',
       mode: 'read-only',
       realOnly: true,
+      evidencePath: '/runtime-evidence',
       allowedApiPaths: [...ALLOWED]
     });
   }
@@ -93,4 +135,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   console.log(`dashboard listening on ${HOST}:${PORT}`);
   console.log(`upstream configured: ${Boolean(API_BASE)}`);
+  console.log(`runtime evidence source: railway-provided-runtime-environment`);
 });
