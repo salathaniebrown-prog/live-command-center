@@ -311,7 +311,35 @@ async function runFableReasoning(){
 function renderLivePreview(){
   const raw = document.getElementById('cc-trace').innerText;
   const frame = document.getElementById('cc-preview-frame');
-  frame.srcdoc = '<body style="margin:8px;background:#050a10;color:#39ff14;font-family:monospace;font-size:12px">' + raw.replace(/\n/g,'<br>') + '</body>';
+  frame.srcdoc = '<body style="margin:8px;background:#050a10;color:#39ff14;font-family:monospace;font-size:12px">' + raw.replace(/\n/g,'<br>') + '
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('button').forEach(b => {
+    if (b.innerText.includes('VOICE LINK')) {
+      b.onclick = () => {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) { runFableReasoning(); return; }
+        const rec = new SR();
+        b.innerText = 'LISTENING (FABLE 5.2)...';
+        rec.onresult = async (e) => {
+          const spoken = e.results[0][0].transcript;
+          document.getElementById('cc-task').value = spoken;
+          b.innerText = 'INITIATE VOICE LINK';
+          await runFableReasoning();
+          if ('speechSynthesis' in window) {
+            const out = document.getElementById('cc-trace').innerText.slice(0, 260);
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(out));
+          }
+        };
+        rec.onerror = () => { b.innerText = 'INITIATE VOICE LINK'; };
+        rec.start();
+      };
+    }
+  });
+});
+</script>
+
+</body>';
 }
 </script>
 

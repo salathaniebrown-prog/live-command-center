@@ -96,6 +96,22 @@ def multi_step_reason(goal):
         f"[STEP 4 // SYNTHESIS & COMMIT] Executed directive '{goal}' -> State locked in permanent ledger."
     ]
     trace_txt = "\n".join(steps)
+    llm_reply = ""
+    if shutil.which("ollama"):
+        try:
+            out = subprocess.check_output(["ollama", "list"], timeout=2).decode("utf-8", "ignore")
+            ms = [l.split()[0] for l in out.splitlines()[1:] if l.strip()]
+            mdl = next((m for m in ms if "gemma" in m.lower()), ms[0] if ms else "")
+            if mdl:
+                rq = urllib.request.Request("http://127.0.0",
+                    data=json.dumps({"model": mdl, "prompt": f"Context:\n{trace_txt}\n\nProduce actionable code/legal/financial execution steps for: {goal}", "stream": False}).encode(),
+                    headers={"Content-Type": "application/json"})
+                llm_reply = json.loads(urllib.request.urlopen(rq, timeout=8).read().decode()).get("response", "").strip()
+                steps.append(f"[STEP 5 // {mdl.upper()} SYNTHESIS]\n{llm_reply}")
+                trace_txt = "\n".join(steps)
+        except Exception:
+            pass
+
     sid = "RSN-" + hashlib.sha256(f"{goal}{t0}".encode()).hexdigest()[:6].upper()
     c.execute("INSERT INTO reasoning_state VALUES(?,?,?,?)", (sid, goal, trace_txt, t0))
     c.commit(); c.close()
