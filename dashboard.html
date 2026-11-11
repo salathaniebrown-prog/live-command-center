@@ -42,6 +42,19 @@ async function sendPrompt(customText){
   }
 }
 
+
+async function pollLedger(){
+  try{
+    const rows = await (await fetch('/api/ledger')).json();
+    if(Array.isArray(rows) && rows.length){
+      g('dbCnt').innerText = 'ROW #' + rows + ' :: PERSISTENT';
+      g('dbBox').innerHTML = rows.map(r => '<div>[#' + r + ' | ' + r.slice(11,19) + '] <b>' + r + '</b> :: ' + r + '</div>').join('');
+    }
+  }catch(e){}
+}
+setInterval(pollLedger, 2500);
+pollLedger();
+
 </script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;font-family:monospace}
@@ -201,6 +214,12 @@ async function sendPrompt(customText){
       <button class="amber" style="margin:0" onclick="sendPrompt('Analyze my live CPU, RAM, thermal, and Python/Java HPC worker telemetry and recommend optimizations.')">AUDIT TELEMETRY</button>
     </div>
     <pre class="term" id="aiOut" style="height:125px;color:#d8f8ff;white-space:pre-wrap">AI Inference Console ready. Uses active model from Global AI Model Router + live telemetry context.</pre>
+  </div>
+
+  
+  <div class="box" style="grid-column:1/-1">
+    <h3><span>PERSISTENT SQLITE &amp; ETHEREUM MEMPOOL LEDGER</span><span class="pill" id="dbCnt">SQLITE-WAL</span></h3>
+    <div class="term" id="dbBox" style="height:95px;color:#0f8">Connecting to astra_ledger.db &amp; ETH Mainnet mempool...</div>
   </div>
 
   <!-- LIVE COMMAND STREAM -->

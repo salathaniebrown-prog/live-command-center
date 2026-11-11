@@ -27,3 +27,4 @@ logs/network_stats.csv*
 *.class
 *.jsonl
 *.gz
+*.db

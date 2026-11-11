@@ -11,6 +11,13 @@ http.createServer((req, res) => {
   if (req.method === "POST" && req.url === "/api/control") return handleControl(req, res);
 
   if (req.url === "/api/export") { res.writeHead(200, {"Content-Type":"application/jsonl","Content-Disposition":"attachment; filename=astra_telemetry.jsonl"}); return res.end(fs.existsSync("telemetry_spine.jsonl") ? fs.readFileSync("telemetry_spine.jsonl") : ""); }
+  if (req.url === "/api/ledger") {
+    const { execSync } = require("child_process");
+    let rows = "[]";
+    try { rows = execSync("python3 -c 'import sqlite3,json; c=sqlite3.connect(\"astra_ledger.db\"); print(json.dumps(c.execute(\"SELECT id,ts,kind,detail FROM ledger ORDER BY id DESC LIMIT 12\").fetchall()))'", {encoding:"utf8"}); } catch(e){}
+    res.writeHead(200, {"Content-Type": "application/json"});
+    return res.end(rows);
+  }
   if (req.url === "/api/health") { res.writeHead(200, {"Content-Type":"application/json"}); return res.end(JSON.stringify({ok:true, status:"healthy"})); }
   if (req.url === '/api/telemetry') {
     let payload = { ram: 'N/A', load: 'N/A', batt: 'N/A', log: '0 KB', py: 'WAITING', java: 'WAITING', net: '{}', time: new Date().toISOString() };
