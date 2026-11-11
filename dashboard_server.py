@@ -191,6 +191,26 @@ HTML_CONTENT = """
   <iframe src="/dealership" style="width:100%; height:440px; border:none; display:block;" title="Wyler Crypto Dealership"></iframe>
 </section>
 
+
+<!-- LIVE REAL.LOG TELEMETRY TICKER -->
+<div id="live-telemetry-bar" style="position:fixed; bottom:0; left:0; right:0; height:32px; background:#03080fee; border-top:1px solid #39ff1466; color:#39ff14; font-family:monospace; font-size:11px; display:flex; align-items:center; padding:0 12px; z-index:9999; overflow:hidden; white-space:nowrap;">
+  <strong style="color:#00f0ff; margin-right:10px;">[LIVE SPINE // REAL.log]</strong>
+  <span id="telemetry-stream-text">Connecting to telemetry spine...</span>
+</div>
+<script>
+async function pollTelemetry() {
+  try {
+    const r = await fetch('/api/telemetry');
+    const d = await r.json();
+    if (d.events && d.events.length) {
+      document.getElementById('telemetry-stream-text').innerText = d.events.slice(-2).join('   |   ');
+    }
+  } catch (e) {}
+}
+setInterval(pollTelemetry, 2500);
+pollTelemetry();
+</script>
+
 </body>
 </html>
 """
@@ -218,6 +238,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self._proxy_dealership('POST')
 
     def do_GET(self):
+        if self.path == '/api/telemetry':
+            import json
+            log_path = os.path.expanduser('~/telemetry-spine/REAL.log')
+            lines = []
+            if os.path.exists(log_path):
+                with open(log_path, 'r', encoding='utf-8', errors='ignore') as lf:
+                    lines = [l.strip() for l in lf.readlines()[-8:] if l.strip()]
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'events': lines}).encode('utf-8'))
+            return
+
         if self.path.startswith('/dealership') or self.path.startswith('/api/state'):
             if self.path.startswith('/api/state'):
                 self.path = '/dealership' + self.path
