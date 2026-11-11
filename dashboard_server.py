@@ -135,7 +135,7 @@ HTML_CONTENT = """
         const map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
         
         // Dark theme map tiles (CartoDB)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
             subdomains: 'abcd', maxZoom: 19
         }).addTo(map);
@@ -188,14 +188,28 @@ HTML_CONTENT = """
     <span>⚡ WYLER & CRYPTO VEHICLE ACQUISITION NODE (PORT 8099)</span>
     <span>DEEPSPACE LEDGER: SYNCED</span>
   </div>
-  <iframe src="/dealership" style="width:100%; height:440px; border:none; display:block;" title="Wyler Crypto Dealership"></iframe>
+  <iframe src="/dealership" style="width:100%; height:560px; border:none; display:block;" title="Wyler Crypto Dealership"></iframe>
 </section>
 
 
-<!-- LIVE REAL.LOG TELEMETRY TICKER -->
-<div id="live-telemetry-bar" style="position:fixed; bottom:0; left:0; right:0; height:32px; background:#03080fee; border-top:1px solid #39ff1466; color:#39ff14; font-family:monospace; font-size:11px; display:flex; align-items:center; padding:0 12px; z-index:9999; overflow:hidden; white-space:nowrap;">
-  <strong style="color:#00f0ff; margin-right:10px;">[LIVE SPINE // REAL.log]</strong>
-  <span id="telemetry-stream-text">Connecting to telemetry spine...</span>
+
+<!-- INTERACTIVE REAL-TIME TELEMETRY & COMMAND INJECTION BAR -->
+<div id="live-telemetry-bar" style="position:fixed; bottom:0; left:0; right:0; background:#03080ff5; border-top:1px solid #39ff1488; color:#39ff14; font-family:monospace; font-size:11px; padding:6px 10px; z-index:9999; display:flex; flex-direction:column; gap:5px; box-shadow:0 -4px 18px #00f0ff22;">
+  <div style="display:flex; justify-content:space-between; align-items:center; overflow:hidden; white-space:nowrap;">
+    <div><strong style="color:#00f0ff;">[ACTIVE SPINE // REAL.log]</strong> <span id="telemetry-stream-text">Streaming live...</span></div>
+    <span id="inject-ack" style="color:#ffaa00; font-size:10px; margin-left:8px;">READY</span>
+  </div>
+  <div style="display:grid; grid-template-columns:110px 1fr 95px 95px; gap:6px;">
+    <select id="inject-tag" style="background:#06121e; border:1px solid #00f0ff; color:#00f0ff; padding:5px; font-family:monospace; font-size:11px;">
+      <option value="ASTRA_CORE_01">ASTRA_CORE</option>
+      <option value="CRYPTO_NODE">CRYPTO_NODE</option>
+      <option value="WYLER_FLEET">WYLER_FLEET</option>
+      <option value="BCI_TELEMETRY">BCI_STREAM</option>
+    </select>
+    <input id="inject-input" placeholder="Enter live telemetry payload, node command, or JSON..." onkeydown="if(event.key==='Enter') sendLiveData()" style="background:#040c14; border:1px solid #39ff14; color:#e6ffff; padding:5px 8px; font-family:monospace; font-size:11px; width:100%;" />
+    <button onclick="sendLiveData()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">INJECT LIVE</button>
+    <button onclick="quickPulse()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">PULSE SYNC</button>
+  </div>
 </div>
 <script>
 async function pollTelemetry() {
@@ -207,63 +221,37 @@ async function pollTelemetry() {
     }
   } catch (e) {}
 }
-setInterval(pollTelemetry, 2500);
+
+async function sendLiveData() {
+  const inp = document.getElementById('inject-input');
+  const tag = document.getElementById('inject-tag').value;
+  const payload = inp.value.trim();
+  if (!payload) return;
+  const r = await fetch('/api/inject', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({tag, payload})
+  });
+  const out = await r.json();
+  inp.value = '';
+  document.getElementById('inject-ack').innerText = '[PUSHED: ' + out.tag + ']';
+  pollTelemetry();
+}
+
+async function quickPulse() {
+  const tag = document.getElementById('inject-tag').value;
+  await fetch('/api/inject', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({tag, payload: 'LIVE_HEARTBEAT_SYNC_OK // PORT_8088_8099_ACTIVE'})
+  });
+  document.getElementById('inject-ack').innerText = '[PULSE SENT]';
+  pollTelemetry();
+}
+
+setInterval(pollTelemetry, 2000);
 pollTelemetry();
 </script>
-
 </body>
+
 </html>
-"""
-
-class Handler(http.server.SimpleHTTPRequestHandler):
-    
-    def _proxy_dealership(self, method="GET"):
-        import urllib.request
-        target = "http://127.0.0.1:8099" + (self.path.replace("/dealership", "", 1) or "/")
-        length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(length) if length else None
-        req = urllib.request.Request(target, data=body, method=method)
-        if body:
-            req.add_header("Content-Type", "application/json")
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            data = resp.read()
-            self.send_response(resp.status)
-            self.send_header("Content-Type", resp.headers.get("Content-Type", "text/html"))
-            self.end_headers()
-            self.wfile.write(data)
-
-    def do_POST(self):
-        if self.path.startswith('/api/acquire') or self.path.startswith('/api/advance') or self.path.startswith('/api/reset') or self.path.startswith('/api/add_vehicle') or self.path.startswith('/api/acquire_batch') or self.path.startswith('/api/set_webhook'):
-            self.path = '/dealership' + self.path
-            return self._proxy_dealership('POST')
-
-    def do_GET(self):
-        if self.path == '/api/telemetry':
-            import json
-            log_path = os.path.expanduser('~/telemetry-spine/REAL.log')
-            lines = []
-            if os.path.exists(log_path):
-                with open(log_path, 'r', encoding='utf-8', errors='ignore') as lf:
-                    lines = [l.strip() for l in lf.readlines()[-8:] if l.strip()]
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({'events': lines}).encode('utf-8'))
-            return
-
-        if self.path.startswith('/dealership') or self.path.startswith('/api/state') or self.path.startswith('/api/receipt/'):
-            if self.path.startswith('/api/state') or self.path.startswith('/api/receipt/'):
-                self.path = '/dealership' + self.path
-            return self._proxy_dealership('GET')
-        # Serve the main dashboard UI
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.wfile.write(HTML_CONTENT.encode())
-
-if __name__ == "__main__":
-    PORT = 8088
-    socketserver.TCPServer.allow_reuse_address = True
-with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"Serving Astra Command Center on http://localhost:{PORT}")
-        httpd.serve_forever()
