@@ -9,7 +9,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "dealership_ledger.db")
-DEEPSPACE_DB = "/tmp/astra_deepspace_ledger.db"
+DEEPSPACE_DB = os.path.expanduser("~/astra_deepspace_ledger.db")
 HTML_PATH = os.path.join(BASE_DIR, "index.html")
 
 _RATE_CACHE = {"eth_usd": 3250.00, "ts": 0}
@@ -57,6 +57,25 @@ def sync_deepspace(order_id, vehicle_id, rail, payment_ref, tx_hash, amount_usd,
         conn.close()
     except Exception as e:
         print(f"[WARN] Deepspace sync deferred: {e}")
+    try:
+        real_log = os.path.expanduser("~/telemetry-spine/REAL.log")
+        os.makedirs(os.path.dirname(real_log), exist_ok=True)
+        event = {
+            "ts": time.time(),
+            "source": "WYLER_CRYPTO_DEALERSHIP",
+            "order_id": order_id,
+            "vehicle_id": vehicle_id,
+            "rail": rail,
+            "amount_usd": amount_usd,
+            "amount_eth": amount_eth,
+            "stage": stage,
+            "tx_hash": tx_hash
+        }
+        with open(real_log, "a", encoding="utf-8") as lf:
+            lf.write(json.dumps(event) + "\n")
+    except Exception as le:
+        print(f"[WARN] REAL.log stream deferred: {le}")
+
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -160,6 +179,15 @@ class DealershipHandler(BaseHTTPRequestHandler):
 
             sync_deepspace(order_id, veh_id, rail, payment_ref, tx_hash, price_usd, price_eth, initial_stage)
             self._send_json({"status": "SUCCESS", "order_id": order_id, "tx_hash": tx_hash, "amount_eth": price_eth, "stage": initial_stage})
+
+        elif self.path == "/api/reset":
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("UPDATE inventory SET status='AVAILABLE'")
+            c.execute("DELETE FROM orders")
+            conn.commit()
+            conn.close()
+            self._send_json({"status": "RESET_COMPLETE"})
 
         elif self.path == "/api/advance":
             order_id = payload.get("order_id")

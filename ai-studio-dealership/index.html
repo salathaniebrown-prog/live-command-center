@@ -45,7 +45,7 @@
   <div><strong>AI STUDIO // WYLER & CRYPTO DEALERSHIP NODE</strong></div>
   <div>
     <span class="badge" id="eth-ticker">ETH/USD: LOADING...</span>
-    <span class="badge">PORT: 8099</span>
+    <span class="badge">PORT: 8099</span> <button onclick="resetDemo()" style="width:auto; padding:2px 8px; margin:0 0 0 8px; font-size:10px; border-color:#ffaa00; color:#ffaa00;">RESET FLEET</button>
   </div>
 </header>
 
@@ -176,7 +176,14 @@ async function executePurchase() {
   });
   const out = await res.json();
   document.getElementById('telemetry-log').innerText = `[SETTLED] ${out.order_id} (${out.amount_eth} ETH) | TX: ${out.tx_hash}`;
+  
+async function resetDemo() {
+  await fetch('/api/reset', { method: 'POST' });
+  document.getElementById('telemetry-log').innerText = '[SYS] Demo inventory restored to AVAILABLE.';
   refresh();
+}
+
+refresh();
 }
 
 async function advance(order_id, stage) {
@@ -185,6 +192,20 @@ async function advance(order_id, stage) {
     body: JSON.stringify({ order_id, stage })
   });
   document.getElementById('telemetry-log').innerText = `[ESCROW] ${order_id} -> ${stage}`;
+  
+async function resetDemo() {
+  await fetch('/api/reset', { method: 'POST' });
+  document.getElementById('telemetry-log').innerText = '[SYS] Demo inventory restored to AVAILABLE.';
+  refresh();
+}
+
+refresh();
+}
+
+
+async function resetDemo() {
+  await fetch('/api/reset', { method: 'POST' });
+  document.getElementById('telemetry-log').innerText = '[SYS] Demo inventory restored to AVAILABLE.';
   refresh();
 }
 

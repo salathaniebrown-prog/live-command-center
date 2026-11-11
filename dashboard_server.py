@@ -188,7 +188,7 @@ HTML_CONTENT = """
     <span>⚡ WYLER & CRYPTO VEHICLE ACQUISITION NODE (PORT 8099)</span>
     <span>DEEPSPACE LEDGER: SYNCED</span>
   </div>
-  <iframe src="http://127.0.0.1:8099" style="width:100%; height:440px; border:none; display:block;" title="Wyler Crypto Dealership"></iframe>
+  <iframe src="/dealership" style="width:100%; height:440px; border:none; display:block;" title="Wyler Crypto Dealership"></iframe>
 </section>
 
 </body>
@@ -196,7 +196,32 @@ HTML_CONTENT = """
 """
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+    
+    def _proxy_dealership(self, method="GET"):
+        import urllib.request
+        target = "http://127.0.0.1:8099" + (self.path.replace("/dealership", "", 1) or "/")
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length) if length else None
+        req = urllib.request.Request(target, data=body, method=method)
+        if body:
+            req.add_header("Content-Type", "application/json")
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = resp.read()
+            self.send_response(resp.status)
+            self.send_header("Content-Type", resp.headers.get("Content-Type", "text/html"))
+            self.end_headers()
+            self.wfile.write(data)
+
+    def do_POST(self):
+        if self.path.startswith('/api/acquire') or self.path.startswith('/api/advance') or self.path.startswith('/api/reset'):
+            self.path = '/dealership' + self.path
+            return self._proxy_dealership('POST')
+
     def do_GET(self):
+        if self.path.startswith('/dealership') or self.path.startswith('/api/state'):
+            if self.path.startswith('/api/state'):
+                self.path = '/dealership' + self.path
+            return self._proxy_dealership('GET')
         # Serve the main dashboard UI
         self.send_response(200)
         self.send_header("Content-type", "text/html")
@@ -204,7 +229,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(HTML_CONTENT.encode())
 
 if __name__ == "__main__":
-    PORT = 8888
+    PORT = 8088
     socketserver.TCPServer.allow_reuse_address = True
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print(f"Serving Astra Command Center on http://localhost:{PORT}")
