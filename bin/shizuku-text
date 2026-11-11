@@ -1,0 +1,5 @@
+#!/bin/bash
+# Usage: shizuku-text "string_to_type"
+TEXT=$(echo "$1" | sed 's/ /%s/g')
+shizuku-exec "input text $TEXT"
+echo "[+] Dispatched Shizuku text input"

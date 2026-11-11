@@ -1,0 +1,15 @@
+nohup: ignoring input
+127.0.0.1 - - [07/Nov/2026 19:53:57] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:06] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:06] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:09] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:10] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:21] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:24] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:34] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:34] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:41] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 19:54:48] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 20:00:00] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 20:00:01] "POST /api/agent/command HTTP/1.1" 200 -
+127.0.0.1 - - [07/Nov/2026 20:15:00] "POST /api/agent/command HTTP/1.1" 200 -

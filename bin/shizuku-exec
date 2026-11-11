@@ -1,0 +1,13 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# Shizuku command bridge for Termux
+TARGET_CMD="$@"
+
+if [ -z "$TARGET_CMD" ]; then
+    echo "Usage: shizuku-exec '<command>'"
+    exit 1
+fi
+
+# Invoke Shizuku service via app_process binder injection
+app_process -Djava.class.path=/data/app/~~*/moe.shizuku.privileged.api-*/base.apk /data/local/tmp moe.shizuku.server.ShizukuService 2>/dev/null || {
+    su -c "$TARGET_CMD" 2>/dev/null || sh -c "$TARGET_CMD"
+}

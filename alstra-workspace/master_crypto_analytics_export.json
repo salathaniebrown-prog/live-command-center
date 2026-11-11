@@ -1,0 +1,17 @@
+{
+  "address": "0x5f04EBB30",
+  "oob_signature": "OOB-SHA256:8dc432c45e1af6818dd6ab229d4c64547253a2dd0985b7aa7ac92b7cf4c67041",
+  "telemetry_history": [
+    99.73,
+    98.42,
+    99.65,
+    99.72,
+    99.88,
+    99.28,
+    99.48,
+    98.29,
+    98.54,
+    98.77
+  ],
+  "svg_sparkline": "<svg width=\"300\" height=\"50\" xmlns=\"http://www.w3.org/2000/svg\" style=\"background:#0b0f19;\"><polyline fill=\"none\" stroke=\"#60a5fa\" stroke-width=\"2.5\" points=\"0.0,8.8 33.3,41.7 66.7,10.8 100.0,9.0 133.3,5.0 166.7,20.1 200.0,15.1 233.3,45.0 266.7,38.7 300.0,32.9\" /><circle cx=\"300.0\" cy=\"32.9\" r=\"4\" fill=\"#34d399\" /></svg>"
+}

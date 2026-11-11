@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALSTRA DEEP SPACE COMMAND</title>
+    <style>
+        body { background-color: #000; color: #00d4ff; font-family: 'Courier New', Courier, monospace; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-sizing: border-box; }
+        
+        .top-panels { display: flex; justify-content: space-between; width: 100%; gap: 10px; }
+        .panel { background: rgba(0, 15, 30, 0.85); border: 1px solid #00d4ff; padding: 15px; width: 340px; font-size: 12px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); pointer-events: auto; backdrop-filter: blur(4px); }
+        .panel h3 { margin: 0 0 10px 0; font-size: 14px; color: #fff; text-shadow: 0 0 5px #00d4ff; }
+        
+        .data-line { margin: 6px 0; border-bottom: 1px dotted #005580; padding-bottom: 4px; display: flex; justify-content: space-between; }
+        .data-line span.val { color: #fff; font-weight: bold; text-align: right; }
+        
+        .crypto-panel { width: 100%; max-width: 800px; margin: 0 auto; background: rgba(0, 15, 30, 0.9); border: 1px solid #00ff88; padding: 15px; font-size: 11px; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); pointer-events: auto; }
+        .crypto-panel h3 { color: #00ff88; margin: 0 0 5px 0; }
+        .hash-text { color: #00ff88; word-break: break-all; font-family: monospace; line-height: 1.4; }
+        .sig-text { color: #ffcc00; word-break: break-all; font-family: monospace; line-height: 1.4; }
+        
+        button { background: #002244; color: #00d4ff; border: 1px solid #00d4ff; padding: 12px; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 15px; width: 100%; transition: 0.3s; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        button:hover { background: #00d4ff; color: #000; box-shadow: 0 0 20px #00d4ff; }
+        button.active { background: #ff0044; color: #fff; border-color: #ff0044; box-shadow: 0 0 20px #ff0044; }
+
+        /* AI Input Panel */
+        .ai-panel { width: 100%; max-width: 800px; margin: 10px auto; background: rgba(0, 20, 40, 0.9); border: 1px solid #ffcc00; padding: 15px; pointer-events: auto; display: flex; gap: 10px; }
+        .ai-panel input { flex: 1; background: #000; border: 1px solid #ffcc00; color: #fff; padding: 10px; font-family: inherit; font-size: 14px; outline: none; }
+        .ai-panel button { margin-top: 0; width: auto; background: #ffcc00; color: #000; border-color: #ffcc00; padding: 10px 20px; }
+        .ai-panel button:hover { background: #fff; box-shadow: 0 0 20px #ffcc00; }
+        #ai-response { color: #ffcc00; font-size: 12px; margin-top: 10px; min-height: 20px; text-shadow: 0 0 5px #ffcc00; }
+
+        @media (max-width: 768px) {
+            .top-panels { flex-direction: column; }
+            .panel { width: 100%; box-sizing: border-box; }
+            .ai-panel { flex-direction: column; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <div class="top-panels">
+            <div class="panel">
+                <h3>🛰️ DEEP SPACE ORBITAL MECHANICS</h3>
+                <div class="data-line">Target: <span id="sat-name" class="val">ACQUIRING...</span></div>
+                <div class="data-line">Distance: <span id="sat-alt" class="val">--- km</span></div>
+                <div class="data-line">Velocity: <span id="sat-vel" class="val">--- km/s</span></div>
+            </div>
+
+            <div class="panel">
+                <h3>🧠 CPU SPINE & KERNEL</h3>
+                <div class="data-line">CPU Load: <span id="cpu-load" class="val">0%</span></div>
+                <div class="data-line">Cores: <span id="cpu-cores" class="val">0</span></div>
+                <div class="data-line">Clock Speed: <span id="cpu-freq" class="val">0 GHz</span></div>
+                <button id="stress-btn" onclick="toggleStress()">ENGAGE MAX CPU SPINE</button>
+            </div>
+        </div>
+
+        <div class="ai-panel">
+            <input type="text" id="ai-input" placeholder="Ask Jeti AI anything (e.g., 'Analyze our orbital status')..." onkeypress="handleEnter(event)">
+            <button onclick="askAI()">TRANSMIT</button>
+            <div id="ai-response"></div>
+        </div>
+
+        <div class="crypto-panel">
+            <h3>🔐 CRYPTOGRAPHY CHRONICLE (HASH-CHAIN LEDGER)</h3>
+            <div>Current Block Hash:</div>
+            <div id="block-hash" class="hash-text">Awaiting block...</div>
+            <div style="margin-top: 8px;">Ed25519 Signature:</div>
+            <div id="crypto-sig" class="sig-text">Awaiting signature...</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 3D ENGINE (Kept identical to Phase 2) ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        const geometry = new THREE.BufferGeometry();
+        const particleCount = 5000;
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            const r = 15 + Math.random() * 2; 
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos((Math.random() * 2) - 1);
+            positions[i] = r * Math.sin(phi) * Math.cos(theta);
+            positions[i+1] = r * Math.sin(phi) * Math.sin(theta);
+            positions[i+2] = r * Math.cos(phi);
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const material = new THREE.PointsMaterial({ color: 0x00d4ff, size: 0.15, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+        const particleSystem = new THREE.Points(geometry, material);
+        scene.add(particleSystem);
+        
+        const wireframeGeo = new THREE.IcosahedronGeometry(14, 2);
+        const wireframeMat = new THREE.MeshBasicMaterial({ color: 0x005580, wireframe: true, transparent: true, opacity: 0.3 });
+        const wireframeSphere = new THREE.Mesh(wireframeGeo, wireframeMat);
+        scene.add(wireframeSphere);
+
+        camera.position.z = 35;
+
+        let isStressing = false;
+        let targetScale = 1;
+        let currentColor = new THREE.Color(0x00d4ff);
+        let targetColor = new THREE.Color(0x00d4ff);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const rotSpeed = isStressing ? 0.05 : 0.005;
+            particleSystem.rotation.y += rotSpeed;
+            particleSystem.rotation.x += rotSpeed * 0.5;
+            wireframeSphere.rotation.y -= rotSpeed * 0.8;
+            particleSystem.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+            currentColor.lerp(targetColor, 0.05);
+            material.color = currentColor;
+            wireframeMat.color = currentColor;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- AI LOGIC ---
+        async function askAI() {
+            const input = document.getElementById('ai-input');
+            const responseDiv = document.getElementById('ai-response');
+            const query = input.value;
+            if(!query) return;
+
+            responseDiv.innerText = "JETI IS THINKING...";
+            input.value = '';
+
+            try {
+                const res = await fetch('/ask_jeti', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                const data = await res.json();
+                responseDiv.innerText = "JETI: " + data.response;
+            } catch (e) {
+                responseDiv.innerText = "AI UPLINK FAILED.";
+            }
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') askAI();
+        }
+
+        // --- WEBSOCKET DATA ---
+        const ws = new WebSocket(`ws://${window.location.host}/ws`);
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if(data.satellite.name) {
+                document.getElementById('sat-name').innerText = data.satellite.name;
+                document.getElementById('sat-alt').innerText = data.satellite.altitude_km + " km";
+                document.getElementById('sat-vel').innerText = data.satellite.velocity_kms + " km/s";
+            }
+            document.getElementById('cpu-load').innerText = data.hardware.cpu_percent;
+            document.getElementById('cpu-cores').innerText = data.hardware.cpu_cores;
+            document.getElementById('cpu-freq').innerText = data.hardware.cpu_freq + " GHz";
+            document.getElementById('block-hash').innerText = data.crypto.block_hash;
+            document.getElementById('crypto-sig').innerText = data.crypto.signature;
+
+            const btn = document.getElementById('stress-btn');
+            if(data.hardware.is_stressing !== isStressing) {
+                isStressing = data.hardware.is_stressing;
+                if (isStressing) {
+                    targetScale = 1.5;
+                    targetColor.setHex(0xff0044);
+                    btn.classList.add('active');
+                    btn.innerText = "REDUCE CPU LOAD";
+                } else {
+                    targetScale = 1.0;
+                    targetColor.setHex(0x00d4ff);
+                    btn.classList.remove('active');
+                    btn.innerText = "ENGAGE MAX CPU SPINE";
+                }
+            }
+        };
+
+        async function toggleStress() {
+            await fetch('/toggle_stress', { method: 'POST' });
+        }
+    </script>
+</body>
+</html>

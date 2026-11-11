@@ -1,0 +1,6 @@
+#!/bin/bash
+# Usage: shizuku-tap <x> <y>
+X=$1
+Y=$2
+shizuku-exec "input tap $X $Y"
+echo "[+] Dispatched Shizuku tap at ($X, $Y)"

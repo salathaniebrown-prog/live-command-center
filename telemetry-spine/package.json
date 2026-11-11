@@ -1,0 +1,15 @@
+{
+  "name": "telemetry-spine",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "pm2": "^7.1.2",
+    "ws": "^8.22.1"
+  }
+}

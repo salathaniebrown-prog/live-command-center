@@ -1,0 +1,14 @@
+{
+  "platform": "ALSTRA Sovereign Core Omniverse",
+  "authority": "Salathaniel S. A. Brown Sr.",
+  "builder_code": "bc_iqr25ias",
+  "beneficiary": "Alysia B. Saunders",
+  "vault_address": "0x5f04EBB30d3BBf356263c3ef4823080d05bEDDf5",
+  "operational_regions": ["Greensboro, NC", "Winston-Salem, NC"],
+  "modules": [
+    "mobile_automotive_and_lawn_dispatch",
+    "bioscience_genomic_1m_token_pipeline",
+    "datastax_astra_vector_memory",
+    "starlink_edge_telemetry_backhaul"
+  ]
+}
