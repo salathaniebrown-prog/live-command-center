@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "astra-enterprise-core"
+version = "0.1.0"
+description = "Astra Enterprise Core & Live Command Center"
+requires-python = ">=3.10"
+dependencies = [
+    "flask",
+]
+
+[tool.setuptools]
+py-modules = ["astra_unified_matrix", "vault_mock", "dashboard_8099"]
