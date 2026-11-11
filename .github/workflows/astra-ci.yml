@@ -24,3 +24,21 @@ jobs:
         run: python3 -m py_compile python_worker.py
       - name: Compile Java 21 SpineLogger
         run: javac SpineLogger.java
+
+  deploy-pages:
+    needs: verify-stack
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p _site && cp dashboard.html _site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

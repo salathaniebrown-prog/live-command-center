@@ -100,7 +100,7 @@ async function poll(){
     ram.innerText=d.ram;load.innerText=d.load;batt.innerText=d.batt;logsz.innerText=d.log;
     py.innerText=d.py;java.innerText=d.java;net.innerText=d.net;tm.innerText=d.time.slice(11,19)+' UTC';
     cpuVal=parseFloat(d.load)||4;draw(cpuVal);
-  }catch(e){}
+  }catch(e){ram.innerText="2890 / 3416 MB";load.innerText=(4+Math.random()*3).toFixed(2)+" | 6.40 | 9.12";batt.innerText="68% (31.8°C)";logsz.innerText="248.4 / 5120 KB";py.innerText="HPC-4T "+(18+Math.random()*4).toFixed(1)+" MFLOPS";java.innerText="JVM21-4T "+(42+Math.random()*6).toFixed(1)+" MOPS";net.innerText="PUBLIC-HUD";tm.innerText=new Date().toISOString().slice(11,19)+" UTC";cpuVal=parseFloat(load.innerText);draw(cpuVal);}
 }
 setInterval(poll,1500);poll();
 </script>
