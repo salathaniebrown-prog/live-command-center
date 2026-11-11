@@ -183,6 +183,139 @@ HTML_CONTENT = """
     </script>
 
 
+
+<!-- ASTRA 45M-TOKEN KNOWLEDGE GRAPH & MULTI-AGENT ROUTER -->
+<section id="astra-knowledge-graph" style="margin:10px 0; border:1px solid #00f0ff77; background:radial-gradient(circle at center, #081826 0%, #03070d 100%); padding:12px; font-family:monospace; color:#00f0ff; box-shadow:0 0 22px #00f0ff22;">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #00f0ff33; padding-bottom:6px; margin-bottom:8px;">
+    <strong>🧠 ASTRA OS // 45M-TOKEN KNOWLEDGE GRAPH & AUTONOMOUS TASK ROUTER</strong>
+    <div>
+      <span id="brain-stats" style="font-size:11px; color:#39ff14; border:1px solid #39ff14; padding:2px 6px;">CAPACITY: 45,000,000 TOKENS // SYNCED</span>
+    </div>
+  </div>
+  <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px; align-items:stretch;">
+    <div style="position:relative; border:1px solid #00f0ff33; background:#02060b; height:210px;">
+      <canvas id="kg-canvas" width="460" height="210" style="width:100%; height:100%; display:block;"></canvas>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:space-between; gap:6px;">
+      <div>
+        <div style="font-size:11px; color:#39ff14; margin-bottom:4px;">AUTONOMOUS TASK ROUTER & PERMANENT MEMORY</div>
+        <input id="brain-prompt" placeholder="Enter task or knowledge to remember & route..." onkeydown="if(event.key==='Enter') dispatchAstraTask()" style="width:100%; background:#040c14; border:1px solid #00f0ff; color:#fff; padding:6px; font-family:monospace; font-size:11px;" />
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:5px;">
+          <button onclick="dispatchAstraTask()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; padding:5px; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">ROUTE TO AGENT</button>
+          <button onclick="storeAstraMemory()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; padding:5px; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">REMEMBER FOREVER</button>
+        </div>
+      </div>
+      <div id="brain-route-log" style="background:#03080e; border:1px solid #00f0ff33; padding:6px; font-size:11px; color:#a8f9ff; min-height:76px; overflow:hidden;">
+        [ASTRA BRAIN] All 5 core domain nodes linked. Auto-updating every 30s.
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+let kgNodes = [];
+async function refreshBrainGraph() {
+  try {
+    const r = await fetch('/api/brain/graph');
+    const d = await r.json();
+    kgNodes = d.nodes || [];
+    document.getElementById('brain-stats').innerText =
+      `INDEXED: ${d.indexed_tokens.toLocaleString()} / 45,000,000 TOKENS (${d.node_count} NODES)`;
+    drawKnowledgeGraph();
+  } catch (e) {}
+}
+
+function drawKnowledgeGraph() {
+  const canvas = document.getElementById('kg-canvas');
+  if (!canvas || !kgNodes.length) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const cx = w / 2, cy = h / 2;
+  const positions = {};
+  const displayNodes = kgNodes.slice(0, 10);
+
+  displayNodes.forEach((n, idx) => {
+    if (n.node_id === 'NODE-CORE' || idx === 0) {
+      positions[n.node_id] = { x: cx, y: cy, node: n };
+    } else {
+      const angle = ((idx - 1) / Math.max(1, displayNodes.length - 1)) * Math.PI * 2;
+      const rx = w * 0.36, ry = h * 0.36;
+      positions[n.node_id] = { x: cx + Math.cos(angle) * rx, y: cy + Math.sin(angle) * ry, node: n };
+    }
+  });
+
+  // Draw synaptic edges
+  ctx.strokeStyle = 'rgba(0, 240, 255, 0.32)';
+  ctx.lineWidth = 1.2;
+  Object.values(positions).forEach(p => {
+    const links = (p.node.links || '').split(',');
+    links.forEach(targetId => {
+      const t = positions[targetId.trim()];
+      if (t) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(t.x, t.y);
+        ctx.stroke();
+      }
+    });
+  });
+
+  // Draw glowing nodes
+  Object.values(positions).forEach(p => {
+    const isCore = p.node.node_id === 'NODE-CORE';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, isCore ? 11 : 7, 0, Math.PI * 2);
+    ctx.fillStyle = isCore ? '#39ff14' : '#00f0ff';
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = '#e6ffff';
+    ctx.font = '10px monospace';
+    ctx.fillText(p.node.domain.slice(0, 14), p.x - 32, p.y - 11);
+  });
+}
+
+async function dispatchAstraTask() {
+  const inp = document.getElementById('brain-prompt');
+  const prompt = inp.value.trim();
+  if (!prompt) return;
+  const r = await fetch('/api/brain/route', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({prompt})
+  });
+  const out = await r.json();
+  inp.value = '';
+  const topMem = (out.recalled_context && out.recalled_context) ? out.recalled_context.title : 'Core Index';
+  document.getElementById('brain-route-log').innerHTML =
+    `<strong style="color:#39ff14;">[${out.route_id}] -> ${out.target_node} (${out.agent_workflow})</strong><br>RECALLED: ${topMem} | Saved to 45M Brain.`;
+  refreshBrainGraph();
+}
+
+async function storeAstraMemory() {
+  const inp = document.getElementById('brain-prompt');
+  const content = inp.value.trim();
+  if (!content) return;
+  const r = await fetch('/api/brain/remember', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({domain: 'ASTRA_MEMORY', title: content.slice(0, 36), content})
+  });
+  const out = await r.json();
+  inp.value = '';
+  document.getElementById('brain-route-log').innerHTML =
+    `<strong style="color:#39ff14;">[PERSISTED: ${out.node.node_id}]</strong> Indexed ${out.node.token_est} tokens permanently.`;
+  refreshBrainGraph();
+}
+
+setInterval(refreshBrainGraph, 10000);
+refreshBrainGraph();
+</script>
+
 <!-- ALSTRA LEGAL MASTERY & CRYPTO ASSET PROTECTION BRAIN -->
 <section id="alstra-legal-brain" style="margin:12px 0; border:1px solid #ffaa0088; background:#050b12; padding:12px; font-family:monospace; color:#e6f9ff; box-shadow:0 0 18px #ffaa0022;">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ffaa0044; padding-bottom:6px; margin-bottom:8px;">
