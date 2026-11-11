@@ -16,3 +16,4 @@ fi
 tmux attach-session -t $SESSION
 nohup python3 ~/ai-studio-dealership/dealership_core.py > ~/ai-studio-dealership/server.log 2>&1 &
 bash ~/start_tunnel.sh
+setsid nohup python3 ~/ai-studio-legal/legal_brain.py > ~/ai-studio-legal/legal.log 2>&1 < /dev/null &

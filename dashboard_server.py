@@ -182,6 +182,83 @@ HTML_CONTENT = """
         }
     </script>
 
+
+<!-- ALSTRA LEGAL MASTERY & CRYPTO ASSET PROTECTION BRAIN -->
+<section id="alstra-legal-brain" style="margin:12px 0; border:1px solid #ffaa0088; background:#050b12; padding:12px; font-family:monospace; color:#e6f9ff; box-shadow:0 0 18px #ffaa0022;">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ffaa0044; padding-bottom:6px; margin-bottom:8px;">
+    <strong style="color:#ffaa00;">⚖️ ALSTRA LEGAL MASTERY BRAIN // HARVARD & DUKE DOCTRINE (CRYPTO & BUILD SHIELD)</strong>
+    <span style="font-size:11px; color:#39ff14; border:1px solid #39ff14; padding:2px 6px;">PORT 8095 // ACTIVE</span>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 140px 160px; gap:6px; margin-bottom:8px;">
+    <input id="legal-query" placeholder="Audit crypto escrow, Wyler VIN title, LLC ring-fence, or AI build contract..." onkeydown="if(event.key==='Enter') runLegalAudit()" style="background:#03080e; border:1px solid #ffaa00; color:#fff; padding:6px; font-family:monospace; font-size:12px;" />
+    <button onclick="runLegalAudit()" style="background:#ffaa0022; border:1px solid #ffaa00; color:#ffaa00; font-family:monospace; font-weight:bold; cursor:pointer;">RUN DOCTRINE AUDIT</button>
+    <button onclick="copyModelDoctrine()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-weight:bold; cursor:pointer;">COPY AI MODEL BRAIN</button>
+  </div>
+  <div id="legal-output" style="background:#03070c; border:1px solid #00f0ff33; padding:8px; font-size:11px; color:#39ff14; line-height:1.5;">
+    [DOCTRINE READY] Harvard & Duke Commercial, UCC Art. 12 Digital Asset & Corporate Veil Shield loaded.
+  </div>
+</section>
+
+<script>
+let cachedDoctrinePrompt = "";
+async function loadLegalState() {
+  try {
+    const r = await fetch('/api/legal/state');
+    const d = await r.json();
+    cachedDoctrinePrompt = d.system_prompt || "";
+  } catch (e) {}
+}
+
+async function runLegalAudit() {
+  const q = document.getElementById('legal-query').value.trim() || "Protect crypto escrow and Wyler vehicle title";
+  const r = await fetch('/api/legal/audit', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({query: q})
+  });
+  const out = await r.json();
+  document.getElementById('legal-output').innerHTML =
+    `<strong>[${out.audit_id}] RISK: ${out.risk_score}</strong><br>${out.analysis}<br><span style="color:#00f0ff;">PROOF HASH: ${out.audit_hash}</span>`;
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance("Alstra Legal Doctrine Audit complete. Risk status: " + out.risk_score);
+    window.speechSynthesis.speak(utter);
+  }
+}
+
+function copyModelDoctrine() {
+  if (cachedDoctrinePrompt && navigator.clipboard) {
+    navigator.clipboard.writeText(cachedDoctrinePrompt);
+    document.getElementById('legal-output').innerText = "[COPIED] Master Harvard/Duke Legal & Crypto Protection Doctrine copied to clipboard for Ollama / Android Assistant.";
+  }
+}
+
+// Activate Voice Link button for live Android/Browser Voice Assistant commands
+document.addEventListener('DOMContentLoaded', () => {
+  loadLegalState();
+  document.querySelectorAll('button').forEach(btn => {
+    if (btn.innerText.includes('VOICE LINK')) {
+      btn.onclick = () => {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) {
+          runLegalAudit();
+          return;
+        }
+        const rec = new SpeechRec();
+        btn.innerText = 'LISTENING (ALSTRA LEGAL/CRYPTO)...';
+        rec.onresult = (e) => {
+          const transcript = e.results[0][0].transcript;
+          document.getElementById('legal-query').value = transcript;
+          btn.innerText = 'INITIATE VOICE LINK';
+          runLegalAudit();
+        };
+        rec.onerror = () => { btn.innerText = 'INITIATE VOICE LINK'; };
+        rec.start();
+      };
+    }
+  });
+});
+</script>
+
 <!-- WYLER CRYPTO DEALERSHIP EMBED MODULE -->
 <section id="wyler-dealership-node" style="margin-top:12px; border:1px solid #00f0ff55; background:#03060a; box-shadow:0 0 15px #00f0ff22;">
   <div style="padding:6px 12px; background:#061019; border-bottom:1px solid #00f0ff33; color:#39ff14; font-family:monospace; font-size:12px; display:flex; justify-content:space-between;">
