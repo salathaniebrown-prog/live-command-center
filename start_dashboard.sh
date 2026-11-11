@@ -18,3 +18,4 @@ nohup python3 ~/ai-studio-dealership/dealership_core.py > ~/ai-studio-dealership
 bash ~/start_tunnel.sh
 setsid nohup python3 ~/ai-studio-legal/legal_brain.py > ~/ai-studio-legal/legal.log 2>&1 < /dev/null &
 setsid nohup python3 ~/astra-memory-brain/astra_brain.py > ~/astra-memory-brain/brain.log 2>&1 < /dev/null &
+setsid nohup python3 ~/astra-ooda-os/ooda_os_core.py > ~/astra-ooda-os/ooda.log 2>&1 < /dev/null &

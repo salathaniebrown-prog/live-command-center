@@ -184,6 +184,56 @@ HTML_CONTENT = """
 
 
 
+
+<!-- INFINITE BRAIN OS // OODA LOOP, SOP & AI JUDGMENT LAYER -->
+<section id="infinite-brain-ooda" style="margin:10px 0; border:1px solid #39ff1488; background:linear-gradient(135deg, #06141f 0%, #03070c 100%); padding:12px; font-family:monospace; color:#e6ffff; box-shadow:0 0 22px #39ff1422;">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #39ff1444; padding-bottom:6px; margin-bottom:8px;">
+    <strong style="color:#39ff14;">⚡ INFINITE BRAIN OS // OODA LOOP, SOP ENGINE & AI JUDGMENT LAYER</strong>
+    <span id="ooda-health-badge" style="font-size:11px; color:#00f0ff; border:1px solid #00f0ff; padding:2px 6px;">PORT 8097 // EXPERT ACTIVE</span>
+  </div>
+  <div style="display:grid; grid-template-columns:1.5fr 0.6fr 130px; gap:6px; margin-bottom:8px;">
+    <input id="ooda-directive" placeholder="Issue business, crypto, legal, or fleet directive to OODA Judgment Engine..." onkeydown="if(event.key==='Enter') runOodaLoop()" style="background:#030910; border:1px solid #39ff14; color:#fff; padding:6px; font-family:monospace; font-size:12px;" />
+    <input id="ooda-amount" type="number" placeholder="USD Value (0)" style="background:#030910; border:1px solid #00f0ff; color:#00f0ff; padding:6px; font-family:monospace; font-size:12px;" />
+    <button onclick="runOodaLoop()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; font-family:monospace; font-weight:bold; cursor:pointer;">EXECUTE OODA</button>
+  </div>
+  <div id="ooda-verdict-box" style="background:#02060b; border:1px solid #39ff1444; padding:8px; font-size:11px; line-height:1.5; color:#a8f9ff;">
+    [OODA READY] Observe -> Orient (Operator Digital Twin) -> Decide (AI Judgment Layer) -> Act (SOPs 01-04).
+  </div>
+</section>
+
+<script>
+async function refreshOodaState() {
+  try {
+    const r = await fetch('/api/ooda/state');
+    const d = await r.json();
+    const online = Object.values(d.telemetry || {}).filter(v => v === 'ONLINE').length;
+    document.getElementById('ooda-health-badge').innerText = `NODES: ${online}/4 ONLINE // APPROVED VOL: $${(d.approved_volume_usd || 0).toLocaleString()}`;
+  } catch (e) {}
+}
+
+async function runOodaLoop() {
+  const directive = document.getElementById('ooda-directive').value.trim() || "Verify crypto escrow, legal ring-fence, and Wyler fleet readiness";
+  const amount_usd = parseFloat(document.getElementById('ooda-amount').value) || 0;
+  const r = await fetch('/api/ooda/execute', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({directive, amount_usd})
+  });
+  const out = await r.json();
+  document.getElementById('ooda-directive').value = '';
+  document.getElementById('ooda-verdict-box').innerHTML =
+    `<strong style="color:#39ff14;">[${out.cycle_id}] VERDICT: ${out.judgment.verdict} (${Math.round(out.judgment.confidence * 100)}% CONFIDENCE)</strong><br>` +
+    `<strong>OBSERVE:</strong> ${out.observe}<br>` +
+    `<strong>ORIENT & ACT:</strong> ${out.orient} -> <strong>${out.act.sop} (${out.act.name})</strong><br>` +
+    `<span style="color:#00f0ff;">PROOF: ${out.proof_hash}</span>`;
+  refreshOodaState();
+  if (typeof refreshBrainGraph === 'function') refreshBrainGraph();
+}
+
+setInterval(refreshOodaState, 15000);
+refreshOodaState();
+</script>
+
 <!-- ASTRA 45M-TOKEN KNOWLEDGE GRAPH & MULTI-AGENT ROUTER -->
 <section id="astra-knowledge-graph" style="margin:10px 0; border:1px solid #00f0ff77; background:radial-gradient(circle at center, #081826 0%, #03070d 100%); padding:12px; font-family:monospace; color:#00f0ff; box-shadow:0 0 22px #00f0ff22;">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #00f0ff33; padding-bottom:6px; margin-bottom:8px;">
