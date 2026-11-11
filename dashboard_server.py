@@ -349,6 +349,34 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+
+<section id="astra-workflows-backup" style="margin:10px 0;border:1px solid #39ff1488;background:#05110b;padding:10px;font-family:monospace;color:#e6fff2">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #39ff1444;padding-bottom:5px;margin-bottom:7px">
+    <strong style="color:#39ff14">AUTONOMOUS AGENT WORKFLOWS &amp; DAILY SQLITE BACKUPS (PORT 8102)</strong>
+    <span style="font-size:10px;color:#00f0ff;border:1px solid #00f0ff;padding:2px 6px">24H AUTO-SNAPSHOT ACTIVE</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px">
+    <button onclick="triggerAgentWF('WF-01')" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">WF-01: LEGAL SHIELD</button>
+    <button onclick="triggerAgentWF('WF-02')" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">WF-02: FLEET + BI</button>
+    <button onclick="triggerAgentWF('WF-03')" style="background:#ff66ff22;border:1px solid #ff66ff;color:#ff66ff;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">WF-03: FULL SYNC</button>
+    <button onclick="triggerHotBackup()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">BACKUP NOW</button>
+  </div>
+  <div id="wf-output" style="background:#020805;border:1px solid #39ff1433;padding:6px;font-size:11px;color:#a8ffce;white-space:pre-wrap">[WORKFLOWS READY] 7 SQLite WAL ledgers scheduled for automatic 24-hour hot backup.</div>
+</section>
+<script>
+async function triggerAgentWF(wf){
+  document.getElementById('wf-output').innerText = '> Executing ' + wf + ' across microservices...';
+  const r = await fetch('/api/wf/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:wf})});
+  const d = await r.json();
+  document.getElementById('wf-output').innerText = '[' + d.workflow + ' ' + d.status + ']\n' + (d.trace||[]).join('\n');
+}
+async function triggerHotBackup(){
+  const r = await fetch('/api/wf/backup',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const d = await r.json();
+  document.getElementById('wf-output').innerText = '[' + d.status + '] ' + d.snapshot + ' (' + d.dbs_backed_up + ' SQLite DBs) | PROOF: ' + d.proof_hash;
+}
+</script>
+
 </body>';
 }
 </script>
@@ -358,7 +386,52 @@ document.addEventListener('DOMContentLoaded', () => {
 """
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+
+    def _forward_api(self):
+        import urllib.request
+        routes = {
+            "/api/legal/": 8095,
+            "/api/brain/": 8096,
+            "/api/ooda/": 8097,
+            "/api/bi/": 8098,
+            "/api/nexus/": 8100,
+            "/api/os/": 8101,
+            "/api/wf/": 8102,
+            "/dealership": 8099,
+            "/api/state": 8099,
+            "/api/acquire": 8099,
+            "/api/advance": 8099,
+            "/api/reset": 8099,
+            "/api/add_vehicle": 8099,
+            "/api/set_webhook": 8099,
+            "/api/receipt/": 8099
+        }
+        target_port = next((port for prefix, port in routes.items() if self.path.startswith(prefix)), None)
+        if not target_port:
+            return False
+        sub = self.path.replace("/dealership", "", 1) or "/"
+        url = f"http://127.0.0.1:{target_port}{sub}"
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length) if (self.command == "POST" and length > 0) else (b"{}" if self.command == "POST" else None)
+        req = urllib.request.Request(url, data=body, method=self.command)
+        if body is not None:
+            req.add_header("Content-Type", "application/json")
+        with urllib.request.urlopen(req, timeout=8) as r:
+            data = r.read()
+            self.send_response(r.status)
+            self.send_header("Content-Type", r.headers.get("Content-Type", "application/json"))
+            self.end_headers()
+            self.wfile.write(data)
+        return True
+
+    def do_POST(self):
+        if self._forward_api():
+            return
+        self.send_error(404, "Endpoint not found")
+
     def do_GET(self):
+        if self._forward_api():
+            return
         if self.path.startswith('/api/os/'):
             import urllib.request
             b = self.rfile.read(int(self.headers.get('Content-Length',0))) if self.command=='POST' else None
