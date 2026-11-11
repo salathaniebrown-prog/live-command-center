@@ -137,7 +137,7 @@ HTML_CONTENT = """
         const map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
         
         // Dark theme map tiles (CartoDB)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
             subdomains: 'abcd', maxZoom: 19
         }).addTo(map);
@@ -271,6 +271,7 @@ refreshNexus177B();
     <button onclick="runClaudeUpgrade()" style="background:#d9775733;border:1px solid #d97757;color:#ffb49a;font-weight:bold;font-size:11px;cursor:pointer">BUILD + MEMORIZE</button>
     <button onclick="loadClaudeMemory()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:11px;cursor:pointer">READ CLAUDE.md</button>
   </div>
+  <button onclick="runFableReasoning()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:11px;cursor:pointer;margin-top:6px;width:100%;padding:5px">RUN MULTI-STEP REASONING &amp; STATE AUDIT (FABLE 5.2)</button>
   <div id="cc-trace" style="background:#0a0908;border:1px solid #d9775733;padding:8px;font-size:11px;color:#d6ccc2;white-space:pre-wrap">● Tool(Memory.Sync): Ready. Indexed CLAUDE.md into 45M-Token Brain (8096).</div>
 
   <div style="margin-top:8px;border:1px solid #d9775755;background:#0a0908;padding:6px">
@@ -295,6 +296,16 @@ async function loadClaudeMemory(){
   const d = await r.json();
   const eng = (d.nodes||[]).filter(n=>n.domain==='CLAUDE_CODE_ENG').map(n=>'+ '+n.title+': '+n.content.slice(0,110)).join('\n');
   document.getElementById('cc-trace').innerText = '● Read(CLAUDE.md & Brain Nodes):\n' + (eng || 'CLAUDE.md active in memory.');
+}
+
+
+async function runFableReasoning(){
+  const g = document.getElementById('cc-task').value.trim() || 'Track all ports, crypto orders, and memory nodes';
+  document.getElementById('cc-trace').innerText = '> Thinking (4-Step State Chain)...';
+  const r = await fetch('/api/os/reason',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal:g})});
+  const d = await r.json();
+  document.getElementById('cc-trace').innerText = '[' + d.step_id + ' | ' + d.latency_ms + 'ms]
+' + d.trace;
 }
 
 function renderLivePreview(){
