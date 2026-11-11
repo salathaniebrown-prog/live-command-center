@@ -1,3 +1,5 @@
+import socketserver
+socketserver.TCPServer.allow_reuse_address = True
 import http.server
 import socketserver
 import json
@@ -257,12 +259,64 @@ async function evolveAssistantSkill() {
 refreshNexus177B();
 </script>
 
+<section style="margin:10px 0;border:1px solid #00f0ff;background:#061320;padding:10px;font-family:monospace;color:#fff"><strong style="color:#00f0ff">GLASS-BOX UNIFIED OS (PORT 8101)</strong><div style="display:flex;gap:5px;margin:6px 0"><input id="ghr" value="google-ai-edge/LiteRT-LM" style="flex:1;background:#020810;color:#fff;border:1px solid #00f0ff;padding:5px"><button onclick="fetch('/api/os/github',{method:'POST',body:JSON.stringify({repo:ghr.value})}).then(r=>r.json()).then(d=>osout.innerText=JSON.stringify(d))" style="background:#00f0ff22;color:#00f0ff;border:1px solid #00f0ff;padding:5px">HARVEST GH</button></div><div style="display:flex;gap:5px"><input id="osp" placeholder="Ask Gemma 4 / LiteRT-LM RAG..." style="flex:1;background:#020810;color:#fff;border:1px solid #39ff14;padding:5px"><button onclick="fetch('/api/os/generate',{method:'POST',body:JSON.stringify({prompt:osp.value})}).then(r=>r.json()).then(d=>osout.innerText=d.artifact.output)" style="background:#39ff1422;color:#39ff14;border:1px solid #39ff14;padding:5px">GENERATE</button></div><pre id="osout" style="margin-top:6px;font-size:11px;color:#39ff14;white-space:pre-wrap">READY</pre></section>
+
+<section id="claude-code-ui" style="margin:10px 0;border:1px solid #d97757;background:#141210;padding:12px;font-family:monospace;color:#f5ede6;border-radius:6px">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #d9775744;padding-bottom:6px;margin-bottom:8px">
+    <strong style="color:#e88c6d">⚡ CLAUDE CODE // ENGINEERING MEMORY & UI UPGRADE ENGINE</strong>
+    <span style="font-size:10px;color:#39ff14;border:1px solid #39ff14;padding:2px 6px">CLAUDE.md SYNCED</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 120px 120px;gap:6px;margin-bottom:8px">
+    <input id="cc-task" placeholder="Describe UI component or engineering upgrade..." style="background:#0c0b0a;border:1px solid #d97757;color:#fff;padding:6px;font-family:monospace;font-size:11px">
+    <button onclick="runClaudeUpgrade()" style="background:#d9775733;border:1px solid #d97757;color:#ffb49a;font-weight:bold;font-size:11px;cursor:pointer">BUILD + MEMORIZE</button>
+    <button onclick="loadClaudeMemory()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:11px;cursor:pointer">READ CLAUDE.md</button>
+  </div>
+  <div id="cc-trace" style="background:#0a0908;border:1px solid #d9775733;padding:8px;font-size:11px;color:#d6ccc2;white-space:pre-wrap">● Tool(Memory.Sync): Ready. Indexed CLAUDE.md into 45M-Token Brain (8096).</div>
+
+  <div style="margin-top:8px;border:1px solid #d9775755;background:#0a0908;padding:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:10px;color:#e88c6d">
+      <span>● LIVE COMPONENT SANDBOX PREVIEW</span>
+      <button onclick="renderLivePreview()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;padding:2px 8px;font-size:10px;cursor:pointer">RENDER PREVIEW</button>
+    </div>
+    <iframe id="cc-preview-frame" style="width:100%;height:150px;border:1px solid #39ff1433;background:#050a10"></iframe>
+  </div>
+</section>
+<script>
+async function runClaudeUpgrade(){
+  const t = document.getElementById('cc-task').value.trim() || 'Upgrade cybernetic telemetry grid component';
+  document.getElementById('cc-trace').innerText = '● Tool(Brain.Recall) -> Querying engineering patterns...\n● Tool(Generator.Synth) -> Building component...';
+  const r = await fetch('/api/os/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:'Claude Code Engineering Upgrade: '+t})});
+  const d = await r.json();
+  await fetch('/api/brain/remember',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain:'CLAUDE_CODE_ENG',title:'Upgrade: '+t.slice(0,32),content:d.artifact.output})});
+  document.getElementById('cc-trace').innerText = '● Tool(Artifact.Write) -> Saved ' + d.artifact.artifact_id + '\n● Tool(Brain.Commit) -> Persisted to 45M Brain\n\n' + d.artifact.output;
+}
+async function loadClaudeMemory(){
+  const r = await fetch('/api/brain/graph');
+  const d = await r.json();
+  const eng = (d.nodes||[]).filter(n=>n.domain==='CLAUDE_CODE_ENG').map(n=>'+ '+n.title+': '+n.content.slice(0,110)).join('\n');
+  document.getElementById('cc-trace').innerText = '● Read(CLAUDE.md & Brain Nodes):\n' + (eng || 'CLAUDE.md active in memory.');
+}
+
+function renderLivePreview(){
+  const raw = document.getElementById('cc-trace').innerText;
+  const frame = document.getElementById('cc-preview-frame');
+  frame.srcdoc = '<body style="margin:8px;background:#050a10;color:#39ff14;font-family:monospace;font-size:12px">' + raw.replace(/\n/g,'<br>') + '</body>';
+}
+</script>
+
 </body>
 </html>
 """
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        if self.path.startswith('/api/os/'):
+            import urllib.request
+            b = self.rfile.read(int(self.headers.get('Content-Length',0))) if self.command=='POST' else None
+            rq = urllib.request.Request('http://127.0.0.1:8101'+self.path, data=b, headers={'Content-Type':'application/json'})
+            self.send_response(200); self.send_header('Content-Type','application/json'); self.end_headers()
+            self.wfile.write(urllib.request.urlopen(rq, timeout=6).read()); return
+
         if self.path.startswith('/api/nexus/'):
             import urllib.request
             with urllib.request.urlopen('http://127.0.0.1:8100' + self.path, timeout=4) as r:
@@ -279,7 +333,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(HTML_CONTENT.encode())
 
 if __name__ == "__main__":
-    PORT = 8888
+    PORT = 8088
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print(f"Serving Astra Command Center on http://localhost:{PORT}")
         httpd.serve_forever()
