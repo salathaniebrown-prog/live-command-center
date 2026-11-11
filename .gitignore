@@ -23,3 +23,7 @@ logs/network_stats.csv*
 *.gz
 *.log
 *.class
+*.bak*
+*.class
+*.jsonl
+*.gz

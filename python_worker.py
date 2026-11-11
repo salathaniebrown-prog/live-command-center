@@ -1,21 +1,27 @@
-import json
-import time
-from datetime import datetime, timezone
+import json, time, math, os, random
+from concurrent.futures import ThreadPoolExecutor
 
-def log_to_spine(worker_name, status, payload):
-    entry = {
-        "source": worker_name,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "status": status,
-        "data": payload
-    }
-    with open("telemetry_spine.jsonl", "a") as f:
-        f.write(json.dumps(entry) + "\n")
+def compute_tensor_block(seed):
+    acc = 0.0
+    for i in range(1, 35000):
+        acc += math.sin(i * seed) * math.cos(i / (seed + 1.0))
+    return acc
 
-if __name__ == "__main__":
-    print("[PYTHON-WORKER] Feeding telemetry into spine...")
-    count = 1
+cycle = 0
+with ThreadPoolExecutor(max_workers=4) as pool:
     while True:
-        log_to_spine("python-worker", "ACTIVE", {"tasks_completed": count})
-        count += 1
-        time.sleep(2)
+        t0 = time.perf_counter()
+        results = list(pool.map(compute_tensor_block, [1.1, 2.3, 3.7, 5.1]))
+        dt = max(1e-6, time.perf_counter() - t0)
+        ops = 4 * 35000 * 4
+        gflops = round((ops / dt) / 1e6, 2)
+        cycle += 1
+        entry = {
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "source": "python-worker",
+            "status": f"HPC-4T {gflops} MFLOPS",
+            "data": {"tasks_completed": cycle, "gflops": gflops, "checksum": round(sum(results), 4)}
+        }
+        with open("telemetry_spine.jsonl", "a") as f:
+            f.write(json.dumps(entry) + "\n")
+        time.sleep(0.8)

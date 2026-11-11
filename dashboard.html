@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASTRA :: 3D COMMAND SPINE</title>
+<script src="https://cloudflare.com"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;font-family:monospace}
+  body{background:#03070d;color:#d8f8ff;padding:12px;overflow-x:hidden}
+  #c3d{position:fixed;inset:0;z-index:-1;pointer-events:none}
+  .hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid #0fc;background:rgba(6,14,24,.75);margin-bottom:10px;box-shadow:0 0 15px rgba(0,255,204,.15)}
+  .hdr b{color:#0fc;letter-spacing:1.5px;font-size:.95rem}
+  .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .box{background:rgba(7,15,25,.68);backdrop-filter:blur(6px);border:1px solid rgba(0,255,204,.35);padding:12px;box-shadow:inset 0 0 12px rgba(0,255,204,.06)}
+  .box h3{font-size:.75rem;color:#08f;margin-bottom:8px;border-bottom:1px solid rgba(0,136,255,.25);padding-bottom:4px}
+  .val{font-size:1.3rem;font-weight:bold;color:#fff;text-shadow:0 0 8px rgba(0,255,204,.4);margin:4px 0}
+  .row{display:flex;justify-content:space-between;align-items:center;margin:6px 0;font-size:.78rem}
+  select,input,button{background:#05101c;color:#0fc;border:1px solid #0fc;padding:4px 8px;font-size:.75rem}
+  button{cursor:pointer;margin-top:6px;margin-right:4px}
+  button:active{background:#0fc;color:#000}
+  canvas.wave{width:100%;height:70px;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,204,.2);margin-top:6px}
+  #log{height:95px;overflow-y:auto;font-size:.7rem;background:rgba(2,6,12,.85);padding:6px;border:1px solid rgba(0,255,204,.2);color:#8be9fd}
+</style>
+</head>
+<body>
+<canvas id="c3d"></canvas>
+<div class="hdr"><b>ASTRA ENTERPRISE CORE :: 3D SPINE</b><span id="tm" style="color:#0fc;font-size:.75rem">SYNC</span></div>
+
+<div class="grid">
+  <div class="box"><h3>MEMORY & LOG BUFFER</h3><div class="val" id="ram">--</div><div class="row"><span>LOG SPINE</span><span id="logsz">--</span></div></div>
+  <div class="box"><h3>CPU LOAD & WAVEFORM</h3><div class="val" id="load">--</div><canvas id="wv" class="wave"></canvas></div>
+  <div class="box"><h3>POWER, THERMALS & NET</h3><div class="val" id="batt">--</div><div class="row"><span>NET</span><span id="net">--</span></div></div>
+  <div class="box"><h3>RUNTIME WORKERS</h3>
+    <div class="row"><span>PYTHON</span><span id="py">--</span></div>
+    <div class="row"><span>JAVA 21</span><span id="java">--</span></div>
+    <button onclick="act('pulse_workers')">PULSE WORKERS</button><button onclick="act('rotate_logs')">GZIP LOGS</button>
+  </div>
+  <div class="box"><h3>AI MODEL ROUTER</h3>
+    <div class="row"><span>MODEL</span><select id="mdl" onchange="act('switch_model',this.value)"><option>ASTRA-70B-QUANT</option><option>NEURAL-EDGE-8B</option><option>VISION-CYBER-V4</option></select></div>
+    <div class="row"><span>TEMP <b id="tv">0.7</b></span><input type="range" min="0" max="1" step="0.1" value="0.7" oninput="tv.innerText=this.value"></div>
+    <button onclick="act('mount_weights')">MOUNT WEIGHTS</button><button onclick="act('purge_cache')">PURGE CACHE</button>
+  </div>
+  <div class="box"><h3>3D HOLOGRAPHIC CORE</h3>
+    <div class="row"><span>TOPOLOGY</span><select onchange="setGeo(this.value)"><option value="ico">ICOSAHEDRON</option><option value="tor">TORUS KNOT</option><option value="oct">OCTAHEDRON</option></select></div>
+    <div class="row"><span>TURBINE</span><input id="spd" type="range" min="0.2" max="4" step="0.2" value="1"></div>
+    <button onclick="od=5;out('OVERDRIVE ENGAGED');setTimeout(()=>od=1,2000)">OVERDRIVE</button>
+  </div>
+  <div class="box" style="grid-column:1/-1"><h3>LIVE COMMAND & TELEMETRY STREAM</h3><div id="consoleBox"></div></div>
+</div>
+
+<script>
+const lg=document.getElementById('consoleBox');
+const out=m=>lg.innerHTML='<div>['+new Date().toTimeString().slice(0,8)+'] &gt; '+m+'</div>'+lg.innerHTML;
+out('3D Cybernetic Spine Online.');
+
+async function act(action,model=''){
+  out('CMD: '+action.toUpperCase()+' '+model);
+  try{
+    const r=await fetch('/api/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,model})});
+    const j=await r.json();out('ACK: '+JSON.stringify(j));
+  }catch(e){out('LOCAL ACK: '+action);}
+}
+
+// Three.js 3D Core
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);
+const rn=new THREE.WebGLRenderer({canvas:c3d,alpha:true,antialias:true});rn.setSize(innerWidth,innerHeight);
+const m1=new THREE.MeshBasicMaterial({color:0x00ffcc,wireframe:true,transparent:true,opacity:.32});
+const m2=new THREE.MeshBasicMaterial({color:0x0088ff,wireframe:true,transparent:true,opacity:.4});
+let core=new THREE.Mesh(new THREE.IcosahedronGeometry(2.3,1),m1);
+const ring=new THREE.Mesh(new THREE.TorusGeometry(3.3,.04,8,64),m2);
+const grid=new THREE.GridHelper(34,34,0x00ffcc,0x081d2c);grid.position.y=-3.3;
+sc.add(core,ring,grid);cam.position.z=6.8;
+let od=1,cpuVal=5;
+
+function setGeo(t){
+  sc.remove(core);
+  core=new THREE.Mesh(t=='tor'?new THREE.TorusKnotGeometry(1.5,.4,64,12):t=='oct'?new THREE.OctahedronGeometry(2.2,1):new THREE.IcosahedronGeometry(2.3,1),m1);
+  sc.add(core);out('CORE TOPOLOGY -> '+t.toUpperCase());
+}
+
+(function loop(){
+  requestAnimationFrame(loop);
+  const s=Math.min(.05,.002+cpuVal*.001)*spd.value*od;
+  core.rotation.y+=s;core.rotation.x+=s*.5;ring.rotation.x+=s*1.2;ring.rotation.y-=s*.8;
+  rn.render(sc,cam);
+})();
+onresize=()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();rn.setSize(innerWidth,innerHeight)};
+
+// Waveform & Live Telemetry
+const ctx=wv.getContext('2d'),hist=Array(35).fill(4);
+function draw(v){
+  hist.push(v);hist.shift();ctx.clearRect(0,0,wv.width,wv.height);ctx.strokeStyle='#0fc';ctx.lineWidth=2;ctx.beginPath();
+  hist.forEach((n,i)=>{const x=i/(hist.length-1)*wv.width,y=wv.height-Math.min(wv.height-4,(n/18)*wv.height);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});
+  ctx.stroke();
+}
+
+async function poll(){
+  try{
+    const d=await(await fetch('/api/telemetry')).json();
+    ram.innerText=d.ram;load.innerText=d.load;batt.innerText=d.batt;logsz.innerText=d.log;
+    py.innerText=d.py;java.innerText=d.java;net.innerText=d.net;tm.innerText=d.time.slice(11,19)+' UTC';
+    cpuVal=parseFloat(d.load)||4;draw(cpuVal);
+  }catch(e){}
+}
+setInterval(poll,1500);poll();
+</script>
+</body>
+</html>
