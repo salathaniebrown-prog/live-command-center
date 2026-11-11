@@ -36,6 +36,23 @@ class H(BaseHTTPRequestHandler):
         self.send_response(s); self.send_header("Content-Type","application/json"); self.end_headers()
         self.wfile.write(json.dumps(d).encode())
     def do_GET(self):
+        if self.path == "/api/os/export-zip":
+            import io, zipfile
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+                for fn in os.listdir(ARTS):
+                    fp = os.path.join(ARTS, fn)
+                    if os.path.isfile(fp):
+                        zf.write(fp, arcname=fn)
+            data = buf.getvalue()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/zip")
+            self.send_header("Content-Disposition", "attachment; filename=astra_artifacts_pack.zip")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
         if self.path == "/api/os/state":
             c = sqlite3.connect(DB)
             n = c.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
