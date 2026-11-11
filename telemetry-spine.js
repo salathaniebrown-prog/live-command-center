@@ -1,6 +1,7 @@
 const os = require('os');
 const fs = require('fs');
 const zlib = require('zlib');
+const { execSync } = require('child_process');
 
 const LOG_FILE = 'telemetry_spine.jsonl';
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -35,6 +36,31 @@ function rotateAndCompressLogs() {
   }
 }
 
+function getBatteryStats() {
+  try {
+    const raw = execSync('termux-battery-status', { timeout: 1500 }).toString();
+    const b = JSON.parse(raw);
+    return {
+      percentage: b.percentage,
+      status: b.status,
+      tempC: b.temperature,
+      voltageMV: b.voltage
+    };
+  } catch {
+    return { percentage: 'N/A', status: 'UNAVAILABLE', tempC: 'N/A', voltageMV: 'N/A' };
+  }
+}
+
+function getNetworkStats() {
+  const nets = os.networkInterfaces();
+  const active = {};
+  for (const [name, addrs] of Object.entries(nets)) {
+    const ipv4 = addrs.find(a => a.family === 'IPv4' && !a.internal);
+    if (ipv4) active[name] = ipv4.address;
+  }
+  return active;
+}
+
 function collectTelemetry() {
   rotateAndCompressLogs();
   const totalMem = os.totalmem();
@@ -45,14 +71,15 @@ function collectTelemetry() {
     timestamp: new Date().toISOString(),
     uptimeSec: os.uptime(),
     loadAvg: os.loadavg(),
-    cpuCount: os.cpus().length,
     memory: {
       totalMB: Math.round(totalMem / 1024 / 1024),
       usedMB: Math.round((totalMem - freeMem) / 1024 / 1024),
       freeMB: Math.round(freeMem / 1024 / 1024)
-    }
+    },
+    battery: getBatteryStats(),
+    network: getNetworkStats()
   };
   fs.appendFileSync(LOG_FILE, JSON.stringify(snapshot) + '\n');
 }
 
-setInterval(collectTelemetry, 1000);
+setInterval(collectTelemetry, 2000);
