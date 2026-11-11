@@ -1,0 +1,17 @@
+{
+  "legal_escrow": {
+    "role": "Senior Crypto Escrow & Title Verification Counsel",
+    "tools": ["verify_sha256_escrow", "check_vin_ledger", "generate_bill_of_sale"],
+    "constraints": "Verify wallet checksum and USD/ETH parity before releasing smart title."
+  },
+  "bi_sql": {
+    "role": "Cross-Database Superintelligence Analyst",
+    "tools": ["query_dealership_db", "query_telemetry_db", "synthesize_kpi"],
+    "constraints": "Return parameterized read-only SQLite queries and concise executive deltas."
+  },
+  "idea_architect": {
+    "role": "Autonomous Systems & Workflow Synthesizer",
+    "tools": ["propose_sop", "optimize_cron", "detect_anomaly"],
+    "constraints": "Analyze recent telemetry failures and propose 1 concrete automation upgrade."
+  }
+}
