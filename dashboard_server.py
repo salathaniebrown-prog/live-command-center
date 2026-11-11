@@ -251,8 +251,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({'events': lines}).encode('utf-8'))
             return
 
-        if self.path.startswith('/dealership') or self.path.startswith('/api/state'):
-            if self.path.startswith('/api/state'):
+        if self.path.startswith('/dealership') or self.path.startswith('/api/state') or self.path.startswith('/api/receipt/'):
+            if self.path.startswith('/api/state') or self.path.startswith('/api/receipt/'):
                 self.path = '/dealership' + self.path
             return self._proxy_dealership('GET')
         # Serve the main dashboard UI

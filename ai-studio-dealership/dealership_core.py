@@ -153,6 +153,79 @@ class DealershipHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "text/html")
                 self.end_headers()
                 self.wfile.write(f.read())
+        elif self.path.startswith("/api/receipt/"):
+            order_id = self.path.split("/api/receipt/", 1)[1].strip()
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            order = conn.execute("SELECT * FROM orders WHERE order_id=?", (order_id,)).fetchone()
+            if not order:
+                conn.close()
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b"Order not found")
+                return
+            vids = order["vehicle_id"].split("+")
+            placeholders = ",".join("?" for _ in vids)
+            vehs = conn.execute(f"SELECT id, dealer, model, vin, price FROM inventory WHERE id IN ({placeholders})", vids).fetchall()
+            conn.close()
+
+            veh_rows = "".join(
+                f"<tr><td>{v['id']}</td><td>{v['dealer']}</td><td>{v['model']}</td><td>{v['vin']}</td><td>${v['price']:,.2f}</td></tr>"
+                for v in vehs
+            )
+            ts_str = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(order["updated_at"]))
+            html_doc = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bill of Sale & Crypto Certificate // {order['order_id']}</title>
+<style>
+  body {{ font-family: 'Courier New', monospace; background: #04090f; color: #e2f8ff; padding: 24px; }}
+  .cert {{ max-width: 820px; margin: 0 auto; border: 2px solid #00f0ff; background: #07131f; padding: 28px; box-shadow: 0 0 25px #00f0ff33; }}
+  .hdr {{ display: flex; justify-content: space-between; border-bottom: 1px solid #00f0ff55; padding-bottom: 12px; margin-bottom: 18px; }}
+  h1 {{ font-size: 18px; color: #39ff14; margin: 0; letter-spacing: 1.5px; }}
+  .stamp {{ border: 2px solid #39ff14; color: #39ff14; padding: 4px 10px; font-weight: bold; font-size: 12px; }}
+  table {{ width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }}
+  th, td {{ border: 1px solid #00f0ff44; padding: 8px; text-align: left; }}
+  th {{ background: #0b2033; color: #00f0ff; }}
+  .hash-box {{ background: #03080d; border: 1px solid #39ff1466; padding: 12px; word-break: break-all; font-size: 12px; color: #39ff14; margin-top: 12px; }}
+  .btn {{ margin-top: 18px; padding: 10px 18px; background: #00f0ff22; border: 1px solid #00f0ff; color: #00f0ff; font-family: inherit; font-weight: bold; cursor: pointer; }}
+  @media print {{ .btn {{ display: none; }} body {{ background: #fff; color: #000; }} .cert {{ border-color: #000; background: #fff; box-shadow: none; }} th, td {{ border-color: #000; }} .hash-box {{ border-color: #000; color: #000; background: #f4f4f4; }} }}
+</style>
+</head>
+<body>
+<div class="cert">
+  <div class="hdr">
+    <div>
+      <h1>OFFICIAL VEHICLE BILL OF SALE & CRYPTO RECEIPT</h1>
+      <div style="font-size:12px; color:#8ad8ff; margin-top:4px;">AI STUDIO COMMAND CENTER // DEALERSHIP SETTLEMENT NODE</div>
+    </div>
+    <div class="stamp">{order['stage']}</div>
+  </div>
+  <div style="font-size:13px; line-height:1.7;">
+    <strong>ORDER / BATCH ID:</strong> {order['order_id']}<br>
+    <strong>SETTLEMENT RAIL:</strong> {order['rail']}<br>
+    <strong>BUYER ACCOUNT / WALLET:</strong> {order['payment_ref']}<br>
+    <strong>TIMESTAMP:</strong> {ts_str}<br>
+    <strong>TOTAL SETTLED:</strong> ${order['amount']:,.2f} USD ({order['amount_eth']} ETH)
+  </div>
+  <table>
+    <thead><tr><th>UNIT ID</th><th>DEALERSHIP</th><th>VEHICLE MODEL</th><th>VIN</th><th>SETTLEMENT PRICE</th></tr></thead>
+    <tbody>{veh_rows}</tbody>
+  </table>
+  <div class="hash-box">
+    <strong>CRYPTOGRAPHIC SETTLEMENT HASH (SHA-256):</strong><br>{order['tx_hash']}
+  </div>
+  <button class="btn" onclick="window.print()">PRINT / SAVE AS PDF CERTIFICATE</button>
+</div>
+</body>
+</html>"""
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.end_headers()
+            self.wfile.write(html_doc.encode("utf-8"))
+            return
+
         elif self.path == "/api/state":
             eth_usd = get_live_eth_price()
             conn = sqlite3.connect(DB_PATH)

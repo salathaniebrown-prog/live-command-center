@@ -181,6 +181,9 @@ async function refresh() {
       <small style="margin-top:3px;">$${o.amount.toLocaleString()} (${o.amount_eth} ETH) | ${o.rail}</small>
       <small style="color:#39ff14;">TX: ${o.tx_hash.slice(0, 22)}...</small>
       ${nextBtn}
+      <div style="display:grid; grid-template-columns:1fr; gap:4px; margin-top:4px;">
+        <button onclick="window.open('/api/receipt/' + '${o.order_id}', '_blank')" style="border-color:#00f0ff; color:#00f0ff; font-size:10px; padding:4px;">VIEW BILL OF SALE / CRYPTO CERTIFICATE</button>
+      </div>
     </div>`;
   });
 }
