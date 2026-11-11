@@ -10,7 +10,7 @@ if [ $? != 0 ]; then
     tmux send-keys -t $SESSION:0.1 "ping -i 2 8.8.8.8" C-m
 
     tmux new-window -t $SESSION:1 -n "CLI"
-    tmux send-keys -t $SESSION:1 "python3 ~/astra-enterprise-core/astra_ai_assistant.py" C-m
+    tmux send-keys -t $SESSION:1 "python3 ~/nexus-brown/astra_core_backup/astra_ai_assistant.py" C-m
 fi
 
 tmux attach-session -t $SESSION

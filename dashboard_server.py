@@ -135,7 +135,7 @@ HTML_CONTENT = """
         const map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
         
         // Dark theme map tiles (CartoDB)
-        L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
             subdomains: 'abcd', maxZoom: 19
         }).addTo(map);
@@ -182,402 +182,104 @@ HTML_CONTENT = """
         }
     </script>
 
-
-
-
-
-<!-- BUSINESS SUPERINTELLIGENCE SQL & UNIVERSAL MODEL CONTEXT ENGINE -->
-<section id="astra-bi-superintelligence" style="margin:10px 0; border:1px solid #00f0ff88; background:#040d16; padding:12px; font-family:monospace; color:#e6ffff; box-shadow:0 0 20px #00f0ff22;">
-  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #00f0ff33; padding-bottom:6px; margin-bottom:8px;">
-    <strong style="color:#00f0ff;">📊 BUSINESS SUPERINTELLIGENCE SQL // UNIVERSAL AI MODEL CONTEXT</strong>
-    <div>
-      <button onclick="runBiRefine()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-size:10px; padding:3px 8px; cursor:pointer;">REFINE SQL NOW</button>
-      <button onclick="copyUniversalAiContext()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; font-family:monospace; font-size:10px; padding:3px 8px; cursor:pointer; margin-left:4px;">COPY UNIVERSAL AI CONTEXT</button>
-    </div>
+<!-- 177B 8-GPU MODEL BRAIN & IDEA CROSSOVER -->
+<section id="nexus-177b-crossover" style="margin:10px 0; border:1px solid #ff00ff88; background:#090514; padding:12px; font-family:monospace; color:#f2e6ff;">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ff00ff44; padding-bottom:6px; margin-bottom:8px;">
+    <strong style="color:#ff66ff;">177B MODEL BRAIN (8-GPU SPARSE STREAM) &amp; IDEA CROSSOVER</strong>
+    <span style="font-size:11px; color:#39ff14; border:1px solid #39ff14; padding:2px 6px;">PORT 8100 // ACTIVE</span>
   </div>
-  <div id="bi-kpi-strip" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:8px; font-size:11px;">
-    <div style="background:#071624; border:1px solid #00f0ff33; padding:6px;">SETTLED USD<br><strong id="kpi-usd" style="color:#39ff14;">$0</strong></div>
-    <div style="background:#071624; border:1px solid #00f0ff33; padding:6px;">SETTLED ETH<br><strong id="kpi-eth" style="color:#00f0ff;">0 ETH</strong></div>
-    <div style="background:#071624; border:1px solid #00f0ff33; padding:6px;">OODA CONFIDENCE<br><strong id="kpi-ooda" style="color:#39ff14;">99.0%</strong></div>
-    <div style="background:#071624; border:1px solid #00f0ff33; padding:6px;">GRAPH TOKENS<br><strong id="kpi-tok" style="color:#ffaa00;">45M CAP</strong></div>
+  <div id="gpu-shard-strip" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:4px; margin-bottom:8px; font-size:10px;"></div>
+  <div style="font-size:11px; color:#00f0ff; margin-bottom:4px;">DRAG OR TAP TWO IDEA CARDS TO SYNTHESIZE A NEW HYBRID CONCEPT:</div>
+  <div id="idea-cards-grid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:8px;"></div>
+  <div style="display:grid; grid-template-columns:1fr 115px 135px; gap:6px; margin-bottom:6px;">
+    <input id="nexus-goal-input" placeholder="Seed new idea OR goal to evolve Android Assistant skill..." style="background:#040812; border:1px solid #ff66ff; color:#fff; padding:6px; font-family:monospace; font-size:11px;" />
+    <button onclick="seedNewIdea()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">+ SEED IDEA</button>
+    <button onclick="evolveAssistantSkill()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">EVOLVE SKILL</button>
   </div>
-  <div style="display:grid; grid-template-columns:1fr 120px; gap:6px; margin-bottom:6px;">
-    <input id="bi-sql-input" value="SELECT domain, metric_key, metric_value, unit FROM unified_fact_ledger" style="background:#02060b; border:1px solid #00f0ff55; color:#39ff14; padding:5px; font-family:monospace; font-size:11px;" />
-    <button onclick="runCustomBiSql()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">RUN SQL</button>
-  </div>
-  <div id="bi-sql-output" style="background:#02060b; border:1px solid #00f0ff33; padding:6px; font-size:11px; color:#a8f9ff; max-height:95px; overflow:auto;">
-    [BI READY] Cross-database SQL warehouse attached across Dealership, Legal, OODA & 45M Brain.
+  <div id="nexus-proving-box" style="background:#03060c; border:1px solid #ff66ff44; padding:7px; font-size:11px; color:#39ff14;">
+    [177B NEXUS READY] 8 GPU Expert Shards mounted in Zero-Disk Sparse Mode.
   </div>
 </section>
-
 <script>
-let latestModelContextPack = "";
-
-async function runBiRefine() {
+let draggedIdeaId = null, selectedFirstIdea = null;
+async function refreshNexus177B() {
   try {
-    const r = await fetch('/api/bi/refine');
+    const r = await fetch('/api/nexus/state');
     const d = await r.json();
-    latestModelContextPack = d.model_context_pack || "";
-    const k = d.kpis || {};
-    document.getElementById('kpi-usd').innerText = '$' + (k.gross_fleet_volume_usd || 0).toLocaleString();
-    document.getElementById('kpi-eth').innerText = (k.gross_fleet_volume_eth || 0) + ' ETH';
-    document.getElementById('kpi-ooda').innerText = ((k.ooda_avg_confidence || 0.99) * 100).toFixed(1) + '%';
-    document.getElementById('kpi-tok').innerText = (k.brain_indexed_tokens || 0).toLocaleString();
+    document.getElementById('gpu-shard-strip').innerHTML = (d.gpu_topology || []).map(g =>
+      '<div style="background:#0a1122; border:1px solid #00f0ff33; padding:4px;"><strong style="color:#00f0ff;">' + g.gpu + '</strong> (' + g.params + ')<br><span style="color:#a8f9ff;">' + g.expert.slice(0, 20) + '</span></div>'
+    ).join('');
+    document.getElementById('idea-cards-grid').innerHTML = (d.ideas || []).slice(0, 6).map(idea =>
+      '<div draggable="true" ondragstart="draggedIdeaId=\'' + idea.idea_id + '\'" ondragover="event.preventDefault()" ondrop="event.preventDefault(); triggerCrossover(draggedIdeaId, \'' + idea.idea_id + '\')" onclick="handleTapSelect(\'' + idea.idea_id + '\', this)" style="background:#080f1e; border:1px dashed #ff66ff55; padding:7px; cursor:grab; font-size:11px;">' +
+      '<div style="display:flex; justify-content:space-between; color:#ff66ff;"><strong>' + idea.idea_id + ' [GEN-' + idea.generation + ']</strong><span>' + idea.domain + '</span></div>' +
+      '<div style="color:#fff; font-weight:bold; margin:2px 0;">' + idea.title + '</div>' +
+      '<div style="color:#a8f9ff; font-size:10px;">' + idea.payload.slice(0, 80) + '...</div></div>'
+    ).join('');
   } catch (e) {}
 }
-
-async function runCustomBiSql() {
-  const sql = document.getElementById('bi-sql-input').value.trim();
-  const r = await fetch('/api/bi/sql', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({sql})
-  });
-  const d = await r.json();
-  if (d.error) {
-    document.getElementById('bi-sql-output').innerText = '[SQL ERROR] ' + d.error;
-    return;
-  }
-  document.getElementById('bi-sql-output').innerText = JSON.stringify(d.rows);
-}
-
-function copyUniversalAiContext() {
-  if (latestModelContextPack && navigator.clipboard) {
-    navigator.clipboard.writeText(latestModelContextPack);
-    document.getElementById('bi-sql-output').innerText = '[COPIED] Universal AI Model Context Pack (KPIs + Knowledge Graph) copied — paste into any open-source or cloud AI chat!';
+function handleTapSelect(id, el) {
+  if (!selectedFirstIdea) {
+    selectedFirstIdea = id;
+    el.style.borderColor = '#39ff14';
+    document.getElementById('nexus-proving-box').innerText = '[SELECTED ' + id + '] Tap a second Idea Card to fuse!';
+  } else if (selectedFirstIdea !== id) {
+    const first = selectedFirstIdea; selectedFirstIdea = null;
+    triggerCrossover(first, id);
+  } else {
+    selectedFirstIdea = null; el.style.borderColor = '#ff66ff55';
   }
 }
-
-runBiRefine();
-</script>
-
-<!-- INFINITE BRAIN OS // OODA LOOP, SOP & AI JUDGMENT LAYER -->
-<section id="infinite-brain-ooda" style="margin:10px 0; border:1px solid #39ff1488; background:linear-gradient(135deg, #06141f 0%, #03070c 100%); padding:12px; font-family:monospace; color:#e6ffff; box-shadow:0 0 22px #39ff1422;">
-  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #39ff1444; padding-bottom:6px; margin-bottom:8px;">
-    <strong style="color:#39ff14;">⚡ INFINITE BRAIN OS // OODA LOOP, SOP ENGINE & AI JUDGMENT LAYER</strong>
-    <span id="ooda-health-badge" style="font-size:11px; color:#00f0ff; border:1px solid #00f0ff; padding:2px 6px;">PORT 8097 // EXPERT ACTIVE</span>
-  </div>
-  <div style="display:grid; grid-template-columns:1.5fr 0.6fr 130px; gap:6px; margin-bottom:8px;">
-    <input id="ooda-directive" placeholder="Issue business, crypto, legal, or fleet directive to OODA Judgment Engine..." onkeydown="if(event.key==='Enter') runOodaLoop()" style="background:#030910; border:1px solid #39ff14; color:#fff; padding:6px; font-family:monospace; font-size:12px;" />
-    <input id="ooda-amount" type="number" placeholder="USD Value (0)" style="background:#030910; border:1px solid #00f0ff; color:#00f0ff; padding:6px; font-family:monospace; font-size:12px;" />
-    <button onclick="runOodaLoop()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; font-family:monospace; font-weight:bold; cursor:pointer;">EXECUTE OODA</button>
-  </div>
-  <div id="ooda-verdict-box" style="background:#02060b; border:1px solid #39ff1444; padding:8px; font-size:11px; line-height:1.5; color:#a8f9ff;">
-    [OODA READY] Observe -> Orient (Operator Digital Twin) -> Decide (AI Judgment Layer) -> Act (SOPs 01-04).
-  </div>
-</section>
-
-<script>
-async function refreshOodaState() {
-  try {
-    const r = await fetch('/api/ooda/state');
-    const d = await r.json();
-    const online = Object.values(d.telemetry || {}).filter(v => v === 'ONLINE').length;
-    document.getElementById('ooda-health-badge').innerText = `NODES: ${online}/4 ONLINE // APPROVED VOL: $${(d.approved_volume_usd || 0).toLocaleString()}`;
-  } catch (e) {}
-}
-
-async function runOodaLoop() {
-  const directive = document.getElementById('ooda-directive').value.trim() || "Verify crypto escrow, legal ring-fence, and Wyler fleet readiness";
-  const amount_usd = parseFloat(document.getElementById('ooda-amount').value) || 0;
-  const r = await fetch('/api/ooda/execute', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({directive, amount_usd})
-  });
+async function triggerCrossover(idA, idB) {
+  if (!idA || !idB || idA === idB) return;
+  const r = await fetch('/api/nexus/crossover', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({idea_a:idA, idea_b:idB})});
   const out = await r.json();
-  document.getElementById('ooda-directive').value = '';
-  document.getElementById('ooda-verdict-box').innerHTML =
-    `<strong style="color:#39ff14;">[${out.cycle_id}] VERDICT: ${out.judgment.verdict} (${Math.round(out.judgment.confidence * 100)}% CONFIDENCE)</strong><br>` +
-    `<strong>OBSERVE:</strong> ${out.observe}<br>` +
-    `<strong>ORIENT & ACT:</strong> ${out.orient} -> <strong>${out.act.sop} (${out.act.name})</strong><br>` +
-    `<span style="color:#00f0ff;">PROOF: ${out.proof_hash}</span>`;
-  refreshOodaState();
-  if (typeof refreshBrainGraph === 'function') refreshBrainGraph();
-}
-
-setInterval(refreshOodaState, 15000);
-refreshOodaState();
-</script>
-
-<!-- ASTRA 45M-TOKEN KNOWLEDGE GRAPH & MULTI-AGENT ROUTER -->
-<section id="astra-knowledge-graph" style="margin:10px 0; border:1px solid #00f0ff77; background:radial-gradient(circle at center, #081826 0%, #03070d 100%); padding:12px; font-family:monospace; color:#00f0ff; box-shadow:0 0 22px #00f0ff22;">
-  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #00f0ff33; padding-bottom:6px; margin-bottom:8px;">
-    <strong>🧠 ASTRA OS // 45M-TOKEN KNOWLEDGE GRAPH & AUTONOMOUS TASK ROUTER</strong>
-    <div>
-      <span id="brain-stats" style="font-size:11px; color:#39ff14; border:1px solid #39ff14; padding:2px 6px;">CAPACITY: 45,000,000 TOKENS // SYNCED</span>
-    </div>
-  </div>
-  <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px; align-items:stretch;">
-    <div style="position:relative; border:1px solid #00f0ff33; background:#02060b; height:210px;">
-      <canvas id="kg-canvas" width="460" height="210" style="width:100%; height:100%; display:block;"></canvas>
-    </div>
-    <div style="display:flex; flex-direction:column; justify-content:space-between; gap:6px;">
-      <div>
-        <div style="font-size:11px; color:#39ff14; margin-bottom:4px;">AUTONOMOUS TASK ROUTER & PERMANENT MEMORY</div>
-        <input id="brain-prompt" placeholder="Enter task or knowledge to remember & route..." onkeydown="if(event.key==='Enter') dispatchAstraTask()" style="width:100%; background:#040c14; border:1px solid #00f0ff; color:#fff; padding:6px; font-family:monospace; font-size:11px;" />
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:5px;">
-          <button onclick="dispatchAstraTask()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; padding:5px; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">ROUTE TO AGENT</button>
-          <button onclick="storeAstraMemory()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; padding:5px; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">REMEMBER FOREVER</button>
-        </div>
-      </div>
-      <div id="brain-route-log" style="background:#03080e; border:1px solid #00f0ff33; padding:6px; font-size:11px; color:#a8f9ff; min-height:76px; overflow:hidden;">
-        [ASTRA BRAIN] All 5 core domain nodes linked. Auto-updating every 30s.
-      </div>
-    </div>
-  </div>
-</section>
-
-<script>
-let kgNodes = [];
-async function refreshBrainGraph() {
-  try {
-    const r = await fetch('/api/brain/graph');
-    const d = await r.json();
-    kgNodes = d.nodes || [];
-    document.getElementById('brain-stats').innerText =
-      `INDEXED: ${d.indexed_tokens.toLocaleString()} / 45,000,000 TOKENS (${d.node_count} NODES)`;
-    drawKnowledgeGraph();
-  } catch (e) {}
-}
-
-function drawKnowledgeGraph() {
-  const canvas = document.getElementById('kg-canvas');
-  if (!canvas || !kgNodes.length) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-
-  const cx = w / 2, cy = h / 2;
-  const positions = {};
-  const displayNodes = kgNodes.slice(0, 10);
-
-  displayNodes.forEach((n, idx) => {
-    if (n.node_id === 'NODE-CORE' || idx === 0) {
-      positions[n.node_id] = { x: cx, y: cy, node: n };
-    } else {
-      const angle = ((idx - 1) / Math.max(1, displayNodes.length - 1)) * Math.PI * 2;
-      const rx = w * 0.36, ry = h * 0.36;
-      positions[n.node_id] = { x: cx + Math.cos(angle) * rx, y: cy + Math.sin(angle) * ry, node: n };
-    }
-  });
-
-  // Draw synaptic edges
-  ctx.strokeStyle = 'rgba(0, 240, 255, 0.32)';
-  ctx.lineWidth = 1.2;
-  Object.values(positions).forEach(p => {
-    const links = (p.node.links || '').split(',');
-    links.forEach(targetId => {
-      const t = positions[targetId.trim()];
-      if (t) {
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(t.x, t.y);
-        ctx.stroke();
-      }
-    });
-  });
-
-  // Draw glowing nodes
-  Object.values(positions).forEach(p => {
-    const isCore = p.node.node_id === 'NODE-CORE';
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, isCore ? 11 : 7, 0, Math.PI * 2);
-    ctx.fillStyle = isCore ? '#39ff14' : '#00f0ff';
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.fillStyle = '#e6ffff';
-    ctx.font = '10px monospace';
-    ctx.fillText(p.node.domain.slice(0, 14), p.x - 32, p.y - 11);
-  });
-}
-
-async function dispatchAstraTask() {
-  const inp = document.getElementById('brain-prompt');
-  const prompt = inp.value.trim();
-  if (!prompt) return;
-  const r = await fetch('/api/brain/route', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({prompt})
-  });
-  const out = await r.json();
-  inp.value = '';
-  const topMem = (out.recalled_context && out.recalled_context) ? out.recalled_context.title : 'Core Index';
-  document.getElementById('brain-route-log').innerHTML =
-    `<strong style="color:#39ff14;">[${out.route_id}] -> ${out.target_node} (${out.agent_workflow})</strong><br>RECALLED: ${topMem} | Saved to 45M Brain.`;
-  refreshBrainGraph();
-}
-
-async function storeAstraMemory() {
-  const inp = document.getElementById('brain-prompt');
-  const content = inp.value.trim();
-  if (!content) return;
-  const r = await fetch('/api/brain/remember', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({domain: 'ASTRA_MEMORY', title: content.slice(0, 36), content})
-  });
-  const out = await r.json();
-  inp.value = '';
-  document.getElementById('brain-route-log').innerHTML =
-    `<strong style="color:#39ff14;">[PERSISTED: ${out.node.node_id}]</strong> Indexed ${out.node.token_est} tokens permanently.`;
-  refreshBrainGraph();
-}
-
-setInterval(refreshBrainGraph, 10000);
-refreshBrainGraph();
-</script>
-
-<!-- ALSTRA LEGAL MASTERY & CRYPTO ASSET PROTECTION BRAIN -->
-<section id="alstra-legal-brain" style="margin:12px 0; border:1px solid #ffaa0088; background:#050b12; padding:12px; font-family:monospace; color:#e6f9ff; box-shadow:0 0 18px #ffaa0022;">
-  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ffaa0044; padding-bottom:6px; margin-bottom:8px;">
-    <strong style="color:#ffaa00;">⚖️ ALSTRA LEGAL MASTERY BRAIN // HARVARD & DUKE DOCTRINE (CRYPTO & BUILD SHIELD)</strong>
-    <span style="font-size:11px; color:#39ff14; border:1px solid #39ff14; padding:2px 6px;">PORT 8095 // ACTIVE</span>
-  </div>
-  <div style="display:grid; grid-template-columns:1fr 140px 160px; gap:6px; margin-bottom:8px;">
-    <input id="legal-query" placeholder="Audit crypto escrow, Wyler VIN title, LLC ring-fence, or AI build contract..." onkeydown="if(event.key==='Enter') runLegalAudit()" style="background:#03080e; border:1px solid #ffaa00; color:#fff; padding:6px; font-family:monospace; font-size:12px;" />
-    <button onclick="runLegalAudit()" style="background:#ffaa0022; border:1px solid #ffaa00; color:#ffaa00; font-family:monospace; font-weight:bold; cursor:pointer;">RUN DOCTRINE AUDIT</button>
-    <button onclick="copyModelDoctrine()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-weight:bold; cursor:pointer;">COPY AI MODEL BRAIN</button>
-  </div>
-  <div id="legal-output" style="background:#03070c; border:1px solid #00f0ff33; padding:8px; font-size:11px; color:#39ff14; line-height:1.5;">
-    [DOCTRINE READY] Harvard & Duke Commercial, UCC Art. 12 Digital Asset & Corporate Veil Shield loaded.
-  </div>
-</section>
-
-<script>
-let cachedDoctrinePrompt = "";
-async function loadLegalState() {
-  try {
-    const r = await fetch('/api/legal/state');
-    const d = await r.json();
-    cachedDoctrinePrompt = d.system_prompt || "";
-  } catch (e) {}
-}
-
-async function runLegalAudit() {
-  const q = document.getElementById('legal-query').value.trim() || "Protect crypto escrow and Wyler vehicle title";
-  const r = await fetch('/api/legal/audit', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({query: q})
-  });
-  const out = await r.json();
-  document.getElementById('legal-output').innerHTML =
-    `<strong>[${out.audit_id}] RISK: ${out.risk_score}</strong><br>${out.analysis}<br><span style="color:#00f0ff;">PROOF HASH: ${out.audit_hash}</span>`;
-  if ('speechSynthesis' in window) {
-    const utter = new SpeechSynthesisUtterance("Alstra Legal Doctrine Audit complete. Risk status: " + out.risk_score);
-    window.speechSynthesis.speak(utter);
+  if (out.idea) {
+    document.getElementById('nexus-proving-box').innerHTML = '<strong style="color:#ff66ff;">[SYNTHESIZED: ' + out.idea.idea_id + '] ' + out.idea.title + '</strong><br>' + out.idea.payload + '<br><span style="color:#00f0ff;">PROOF: ' + out.proving.proof_hash + '</span>';
+    refreshNexus177B();
   }
 }
-
-function copyModelDoctrine() {
-  if (cachedDoctrinePrompt && navigator.clipboard) {
-    navigator.clipboard.writeText(cachedDoctrinePrompt);
-    document.getElementById('legal-output').innerText = "[COPIED] Master Harvard/Duke Legal & Crypto Protection Doctrine copied to clipboard for Ollama / Android Assistant.";
-  }
+async function seedNewIdea() {
+  const inp = document.getElementById('nexus-goal-input');
+  const title = inp.value.trim(); if (!title) return;
+  const r = await fetch('/api/nexus/add_idea', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title, domain:'OPERATOR_SEED', payload:title})});
+  const out = await r.json(); inp.value = '';
+  document.getElementById('nexus-proving-box').innerText = '[SEEDED ' + out.idea_id + '] ' + out.title;
+  refreshNexus177B();
 }
-
-// Activate Voice Link button for live Android/Browser Voice Assistant commands
-document.addEventListener('DOMContentLoaded', () => {
-  loadLegalState();
-  document.querySelectorAll('button').forEach(btn => {
-    if (btn.innerText.includes('VOICE LINK')) {
-      btn.onclick = () => {
-        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRec) {
-          runLegalAudit();
-          return;
-        }
-        const rec = new SpeechRec();
-        btn.innerText = 'LISTENING (ALSTRA LEGAL/CRYPTO)...';
-        rec.onresult = (e) => {
-          const transcript = e.results[0][0].transcript;
-          document.getElementById('legal-query').value = transcript;
-          btn.innerText = 'INITIATE VOICE LINK';
-          runLegalAudit();
-        };
-        rec.onerror = () => { btn.innerText = 'INITIATE VOICE LINK'; };
-        rec.start();
-      };
-    }
-  });
-});
+async function evolveAssistantSkill() {
+  const inp = document.getElementById('nexus-goal-input');
+  const goal = inp.value.trim() || 'Self-upgrade Android assistant telemetry & fleet execution';
+  const r = await fetch('/api/nexus/evolve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({goal})});
+  const out = await r.json(); inp.value = '';
+  document.getElementById('nexus-proving-box').innerHTML = '<strong style="color:#39ff14;">[SELF-UPGRADED: ' + out.skill_id + '] ' + out.name + '</strong><br>PROOF: ' + out.proving.proof_hash;
+  refreshNexus177B();
+}
+refreshNexus177B();
 </script>
 
-<!-- WYLER CRYPTO DEALERSHIP EMBED MODULE -->
-<section id="wyler-dealership-node" style="margin-top:12px; border:1px solid #00f0ff55; background:#03060a; box-shadow:0 0 15px #00f0ff22;">
-  <div style="padding:6px 12px; background:#061019; border-bottom:1px solid #00f0ff33; color:#39ff14; font-family:monospace; font-size:12px; display:flex; justify-content:space-between;">
-    <span>⚡ WYLER & CRYPTO VEHICLE ACQUISITION NODE (PORT 8099)</span>
-    <span>DEEPSPACE LEDGER: SYNCED</span>
-  </div>
-  <iframe src="/dealership" style="width:100%; height:560px; border:none; display:block;" title="Wyler Crypto Dealership"></iframe>
-</section>
-
-
-
-<!-- INTERACTIVE REAL-TIME TELEMETRY & COMMAND INJECTION BAR -->
-<div id="live-telemetry-bar" style="position:fixed; bottom:0; left:0; right:0; background:#03080ff5; border-top:1px solid #39ff1488; color:#39ff14; font-family:monospace; font-size:11px; padding:6px 10px; z-index:9999; display:flex; flex-direction:column; gap:5px; box-shadow:0 -4px 18px #00f0ff22;">
-  <div style="display:flex; justify-content:space-between; align-items:center; overflow:hidden; white-space:nowrap;">
-    <div><strong style="color:#00f0ff;">[ACTIVE SPINE // REAL.log]</strong> <span id="telemetry-stream-text">Streaming live...</span></div>
-    <span id="inject-ack" style="color:#ffaa00; font-size:10px; margin-left:8px;">READY</span>
-  </div>
-  <div style="display:grid; grid-template-columns:110px 1fr 95px 95px; gap:6px;">
-    <select id="inject-tag" style="background:#06121e; border:1px solid #00f0ff; color:#00f0ff; padding:5px; font-family:monospace; font-size:11px;">
-      <option value="ASTRA_CORE_01">ASTRA_CORE</option>
-      <option value="CRYPTO_NODE">CRYPTO_NODE</option>
-      <option value="WYLER_FLEET">WYLER_FLEET</option>
-      <option value="BCI_TELEMETRY">BCI_STREAM</option>
-    </select>
-    <input id="inject-input" placeholder="Enter live telemetry payload, node command, or JSON..." onkeydown="if(event.key==='Enter') sendLiveData()" style="background:#040c14; border:1px solid #39ff14; color:#e6ffff; padding:5px 8px; font-family:monospace; font-size:11px; width:100%;" />
-    <button onclick="sendLiveData()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">INJECT LIVE</button>
-    <button onclick="quickPulse()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">PULSE SYNC</button>
-  </div>
-</div>
-<script>
-async function pollTelemetry() {
-  try {
-    const r = await fetch('/api/telemetry');
-    const d = await r.json();
-    if (d.events && d.events.length) {
-      document.getElementById('telemetry-stream-text').innerText = d.events.slice(-2).join('   |   ');
-    }
-  } catch (e) {}
-}
-
-async function sendLiveData() {
-  const inp = document.getElementById('inject-input');
-  const tag = document.getElementById('inject-tag').value;
-  const payload = inp.value.trim();
-  if (!payload) return;
-  const r = await fetch('/api/inject', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({tag, payload})
-  });
-  const out = await r.json();
-  inp.value = '';
-  document.getElementById('inject-ack').innerText = '[PUSHED: ' + out.tag + ']';
-  pollTelemetry();
-}
-
-async function quickPulse() {
-  const tag = document.getElementById('inject-tag').value;
-  await fetch('/api/inject', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({tag, payload: 'LIVE_HEARTBEAT_SYNC_OK // PORT_8088_8099_ACTIVE'})
-  });
-  document.getElementById('inject-ack').innerText = '[PULSE SENT]';
-  pollTelemetry();
-}
-
-setInterval(pollTelemetry, 2000);
-pollTelemetry();
-</script>
 </body>
-
 </html>
+"""
+
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path.startswith('/api/nexus/'):
+            import urllib.request
+            with urllib.request.urlopen('http://127.0.0.1:8100' + self.path, timeout=4) as r:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(r.read())
+            return
+
+        # Serve the main dashboard UI
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(HTML_CONTENT.encode())
+
+if __name__ == "__main__":
+    PORT = 8888
+    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+        print(f"Serving Astra Command Center on http://localhost:{PORT}")
+        httpd.serve_forever()
