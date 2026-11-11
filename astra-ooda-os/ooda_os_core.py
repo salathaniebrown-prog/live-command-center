@@ -1,4 +1,15 @@
 import os
+
+# --- 177B SELF-IMPROVEMENT & REFLEXION HOOK ---
+import sys as _sys
+_sys.path.append(os.path.expanduser("~/astra-memory-brain"))
+try:
+    from self_improve import record_and_reflect, get_active_skill_context
+except ImportError:
+    def record_and_reflect(domain, directive, outcome, success): return "Hook pending"
+    def get_active_skill_context(domain): return ""
+
+import os
 import json
 import time
 import sqlite3

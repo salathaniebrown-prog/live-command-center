@@ -30,7 +30,7 @@ async function load177BIdeas() {
     feed.innerHTML = data.ideas.map(item => `
       <div style="background:#0b1926; border-left:3px solid #00ff9d; padding:10px; border-radius:3px;">
         <div style="display:flex; justify-content:space-between; font-size:11px; color:#00ff9d; margin-bottom:4px;">
-          <span>BLUEPRINT #${item.id} // ${item.status}</span>
+          <span>BLUEPRINT #${item.id} // ${item.status} <button onclick="approve177BIdea(${item.id})" style="margin-left:8px; background:#00ff9d22; color:#00ff9d; border:1px solid #00ff9d; padding:2px 6px; font-size:10px; cursor:pointer;">PROMOTE TO SKILL</button></span>
           <span>${item.ts.split('T')[0]} ${item.ts.split('T')[1].slice(0,8)} UTC</span>
         </div>
         <div style="font-size:13px; line-height:1.4; white-space:pre-wrap; color:#e0fbff;">${item.blueprint}</div>
@@ -39,6 +39,12 @@ async function load177BIdeas() {
   } catch (e) {
     console.error('Idea feed error:', e);
   }
+}
+
+
+async function approve177BIdea(id) {
+  await fetch('/api/ideas/approve?id=' + id);
+  await load177BIdeas();
 }
 
 async function trigger177BIdea() {

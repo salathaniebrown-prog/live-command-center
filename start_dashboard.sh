@@ -20,3 +20,7 @@ setsid nohup python3 ~/ai-studio-legal/legal_brain.py > ~/ai-studio-legal/legal.
 setsid nohup python3 ~/astra-memory-brain/astra_brain.py > ~/astra-memory-brain/brain.log 2>&1 < /dev/null &
 setsid nohup python3 ~/astra-ooda-os/ooda_os_core.py > ~/astra-ooda-os/ooda.log 2>&1 < /dev/null &
 setsid nohup python3 ~/astra-bi-engine/bi_superintelligence.py > ~/astra-bi-engine/bi.log 2>&1 < /dev/null &
+
+pgrep -f "dashboard_server.py" >/dev/null || setsid nohup python3 ~/dashboard_server.py > ~/dashboard.log 2>&1 < /dev/null &
+
+pgrep -f "android_sensors.py" >/dev/null || setsid nohup python3 ~/telemetry-spine/android_sensors.py >/dev/null 2>&1 < /dev/null &
