@@ -361,6 +361,14 @@ document.addEventListener('DOMContentLoaded', () => {
     <button onclick="triggerAgentWF('WF-03')" style="background:#ff66ff22;border:1px solid #ff66ff;color:#ff66ff;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">WF-03: FULL SYNC</button>
     <button onclick="triggerHotBackup()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">BACKUP NOW</button>
   </div>
+
+  <div style="display:grid;grid-template-columns:1.4fr 0.8fr 0.8fr;gap:6px;margin-bottom:6px">
+    <select id="wf-snap-select" style="background:#020805;border:1px solid #39ff1455;color:#39ff14;padding:5px;font-family:monospace;font-size:11px">
+      <option value="">Loading saved snapshots...</option>
+    </select>
+    <button onclick="restoreSelectedSnap()" style="background:#ff444422;border:1px solid #ff5555;color:#ff8888;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">RESTORE SNAPSHOT</button>
+    <button onclick="triggerGitSyncNow()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">GIT SYNC NOW</button>
+  </div>
   <div id="wf-output" style="background:#020805;border:1px solid #39ff1433;padding:6px;font-size:11px;color:#a8ffce;white-space:pre-wrap">[WORKFLOWS READY] 7 SQLite WAL ledgers scheduled for automatic 24-hour hot backup.</div>
 </section>
 <script>
@@ -375,6 +383,31 @@ async function triggerHotBackup(){
   const d = await r.json();
   document.getElementById('wf-output').innerText = '[' + d.status + '] ' + d.snapshot + ' (' + d.dbs_backed_up + ' SQLite DBs) | PROOF: ' + d.proof_hash;
 }
+
+async function loadSnapshots(){
+  try {
+    const r = await fetch('/api/wf/state');
+    const d = await r.json();
+    const sel = document.getElementById('wf-snap-select');
+    if (sel && d.snapshots && d.snapshots.length) {
+      sel.innerHTML = d.snapshots.map(sn => '<option value="' + sn + '">' + sn + '</option>').join('');
+    }
+  } catch (e) {}
+}
+async function restoreSelectedSnap(){
+  const snap = document.getElementById('wf-snap-select').value;
+  if (!snap) return;
+  const r = await fetch('/api/wf/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({snapshot:snap})});
+  const d = await r.json();
+  document.getElementById('wf-output').innerText = '[' + (d.status||'ERROR') + '] ' + (d.snapshot||d.error) + ' (' + (d.dbs_restored||0) + ' DBs restored)';
+}
+async function triggerGitSyncNow(){
+  document.getElementById('wf-output').innerText = '> Pushing code, CLAUDE.md & manifests to GitHub...';
+  const r = await fetch('/api/wf/git-sync',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const d = await r.json();
+  document.getElementById('wf-output').innerText = '[GITHUB SYNC] ' + d.status;
+}
+loadSnapshots();
 </script>
 
 </body>';
