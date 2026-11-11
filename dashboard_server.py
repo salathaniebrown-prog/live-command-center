@@ -272,6 +272,7 @@ refreshNexus177B();
     <button onclick="loadClaudeMemory()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:11px;cursor:pointer">READ CLAUDE.md</button>
   </div>
   <button onclick="runFableReasoning()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:11px;cursor:pointer;margin-top:6px;width:100%;padding:5px">RUN MULTI-STEP REASONING &amp; STATE AUDIT (FABLE 5.2)</button>
+  <button onclick="browseArtifacts()" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;font-weight:bold;font-size:11px;cursor:pointer;margin-top:4px;width:100%;padding:5px">BROWSE SAVED ARTIFACTS (~/astra-unified-brain/artifacts)</button>
   <div id="cc-trace" style="background:#0a0908;border:1px solid #d9775733;padding:8px;font-size:11px;color:#d6ccc2;white-space:pre-wrap">● Tool(Memory.Sync): Ready. Indexed CLAUDE.md into 45M-Token Brain (8096).</div>
 
   <div style="margin-top:8px;border:1px solid #d9775755;background:#0a0908;padding:6px">
@@ -306,6 +307,14 @@ async function runFableReasoning(){
   const d = await r.json();
   document.getElementById('cc-trace').innerText = '[' + d.step_id + ' | ' + d.latency_ms + 'ms]
 ' + d.trace;
+}
+
+
+async function browseArtifacts(){
+  const r = await fetch('/api/os/artifacts');
+  const d = await r.json();
+  const list = (d.artifacts || []).map(a => `[${a.id}] ${a.title} -> ${a.preview.slice(0,95)}...`).join('\n');
+  document.getElementById('cc-trace').innerText = '● Saved Artifacts:\n' + (list || 'No artifacts yet.');
 }
 
 function renderLivePreview(){
