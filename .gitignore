@@ -19,3 +19,7 @@ production.log
 nohup.out
 runtime/
 logs/network_stats.csv*
+*.jsonl
+*.gz
+*.log
+*.class
