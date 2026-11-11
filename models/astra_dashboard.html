@@ -1,1 +1,59 @@
 <!-- Paste HTML Above -->
+
+
+<!-- 177B IDEA ARCHITECT WIDGET -->
+<div id="idea-architect-panel" style="background:#07111a; border:1px solid #00f0ff; border-radius:6px; padding:16px; margin:16px 0; font-family:'Courier New', monospace; color:#c8f7ff;">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #00f0ff44; padding-bottom:10px; margin-bottom:12px;">
+    <div>
+      <span style="color:#00ff9d; font-weight:bold; letter-spacing:1px;">04 // 177B AUTONOMOUS IDEA ARCHITECT</span>
+      <div style="font-size:11px; color:#6ba4b8;">SELF-IMPROVING WORKFLOW &amp; TELEMETRY SYNTHESIZER</div>
+    </div>
+    <button onclick="trigger177BIdea()" id="btn-gen-idea" style="background:#00f0ff22; color:#00f0ff; border:1px solid #00f0ff; padding:8px 14px; font-family:inherit; font-weight:bold; cursor:pointer; border-radius:4px;">
+      + SYNTHESIZE NEW IDEA (177B)
+    </button>
+  </div>
+  <div id="idea-feed" style="max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+    <div style="color:#6ba4b8; font-size:12px;">Loading 177B neural blueprints...</div>
+  </div>
+</div>
+
+<script>
+async function load177BIdeas() {
+  try {
+    const res = await fetch('/api/ideas');
+    const data = await res.json();
+    const feed = document.getElementById('idea-feed');
+    if (!data.ideas || data.ideas.length === 0) {
+      feed.innerHTML = '<div style="color:#6ba4b8; font-size:12px;">No ideas synthesized yet. Click SYNTHESIZE NEW IDEA to analyze live telemetry.</div>';
+      return;
+    }
+    feed.innerHTML = data.ideas.map(item => `
+      <div style="background:#0b1926; border-left:3px solid #00ff9d; padding:10px; border-radius:3px;">
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:#00ff9d; margin-bottom:4px;">
+          <span>BLUEPRINT #${item.id} // ${item.status}</span>
+          <span>${item.ts.split('T')[0]} ${item.ts.split('T')[1].slice(0,8)} UTC</span>
+        </div>
+        <div style="font-size:13px; line-height:1.4; white-space:pre-wrap; color:#e0fbff;">${item.blueprint}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error('Idea feed error:', e);
+  }
+}
+
+async function trigger177BIdea() {
+  const btn = document.getElementById('btn-gen-idea');
+  btn.innerText = 'SYNTHESIZING VIA 177B...';
+  btn.disabled = true;
+  try {
+    await fetch('/api/ideas/generate');
+    await load177BIdeas();
+  } finally {
+    btn.innerText = '+ SYNTHESIZE NEW IDEA (177B)';
+    btn.disabled = false;
+  }
+}
+
+load177BIdeas();
+setInterval(load177BIdeas, 30000);
+</script>
