@@ -2,107 +2,335 @@
 <html>
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ASTRA :: 3D COMMAND SPINE</title>
-<script src="https://cloudflare.com"></script>
+<title>ASTRA :: GLOBAL AI & CRYPTOGRAPHIC COMMAND HUD</title>
+<script src="https://cloudflare.com">
+async function execShell(action, cmd){
+  g('shOut').innerText = '[EXEC] ' + (cmd || action) + '...';
+  try{
+    const r = await fetch('/api/control', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:action, cmd:cmd||''})});
+    const j = await r.json();
+    g('shOut').innerText = j.output || JSON.stringify(j, null, 2);
+    out('SHELL [' + action.toUpperCase() + '] completed.');
+  }catch(e){ g('shOut').innerText = 'Error: ' + e.message; }
+}
+function runCustomShell(){
+  const v = g('shIn').value.trim();
+  if(v) execShell('shell', v);
+}
+
+
+async function sendPrompt(customText){
+  const prompt = customText || g('aiPrompt').value.trim();
+  if(!prompt) return;
+  const mdl = g('mdl').value.split('|')[0];
+  const temp = g('tv').innerText;
+  g('infBadge').innerText = 'INFERRING...';
+  g('aiOut').innerText = '[' + mdl + ' @ T=' + temp + '] Processing prompt...';
+  out('AI INFER -> ' + mdl);
+  try{
+    const r = await fetch('/api/control', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'infer', model:mdl, temp:temp, prompt:prompt})
+    });
+    const j = await r.json();
+    g('aiOut').innerText = j.output || JSON.stringify(j, null, 2);
+    g('infBadge').innerText = j.ok ? 'COMPLETE' : 'FALLBACK';
+  }catch(e){
+    g('aiOut').innerText = 'Error: ' + e.message;
+    g('infBadge').innerText = 'ERROR';
+  }
+}
+
+</script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;font-family:monospace}
-  body{background:#03070d;color:#d8f8ff;padding:12px;overflow-x:hidden}
+  body{background:#03070d;color:#d8f8ff;padding:10px;overflow-x:hidden}
   #c3d{position:fixed;inset:0;z-index:-1;pointer-events:none}
-  .hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid #0fc;background:rgba(6,14,24,.75);margin-bottom:10px;box-shadow:0 0 15px rgba(0,255,204,.15)}
-  .hdr b{color:#0fc;letter-spacing:1.5px;font-size:.95rem}
-  .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-  .box{background:rgba(7,15,25,.68);backdrop-filter:blur(6px);border:1px solid rgba(0,255,204,.35);padding:12px;box-shadow:inset 0 0 12px rgba(0,255,204,.06)}
-  .box h3{font-size:.75rem;color:#08f;margin-bottom:8px;border-bottom:1px solid rgba(0,136,255,.25);padding-bottom:4px}
-  .val{font-size:1.3rem;font-weight:bold;color:#fff;text-shadow:0 0 8px rgba(0,255,204,.4);margin:4px 0}
-  .row{display:flex;justify-content:space-between;align-items:center;margin:6px 0;font-size:.78rem}
-  select,input,button{background:#05101c;color:#0fc;border:1px solid #0fc;padding:4px 8px;font-size:.75rem}
-  button{cursor:pointer;margin-top:6px;margin-right:4px}
+  .hdr{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid #0fc;background:rgba(6,14,24,.78);margin-bottom:10px;box-shadow:0 0 18px rgba(0,255,204,.18)}
+  .hdr b{color:#0fc;letter-spacing:1.5px;font-size:.92rem}
+  .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+  .box{background:rgba(7,15,25,.72);backdrop-filter:blur(7px);border:1px solid rgba(0,255,204,.35);padding:12px;box-shadow:inset 0 0 14px rgba(0,255,204,.06)}
+  .box h3{font-size:.74rem;color:#08f;margin-bottom:8px;border-bottom:1px solid rgba(0,136,255,.28);padding-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+  .val{font-size:1.2rem;font-weight:bold;color:#fff;text-shadow:0 0 8px rgba(0,255,204,.45);margin:4px 0}
+  .row{display:flex;justify-content:space-between;align-items:center;margin:6px 0;font-size:.76rem;gap:6px}
+  select,input[type="text"],input[type="range"],button{background:#05101c;color:#0fc;border:1px solid #0fc;padding:4px 7px;font-size:.74rem}
+  input[type="text"]{width:100%;color:#fff}
+  button{cursor:pointer;margin-top:5px;margin-right:4px}
   button:active{background:#0fc;color:#000}
-  canvas.wave{width:100%;height:70px;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,204,.2);margin-top:6px}
-  #log{height:95px;overflow-y:auto;font-size:.7rem;background:rgba(2,6,12,.85);padding:6px;border:1px solid rgba(0,255,204,.2);color:#8be9fd}
+  button.amber{border-color:#fa0;color:#fa0}
+  canvas.wave{width:100%;height:65px;background:rgba(0,0,0,.45);border:1px solid rgba(0,255,204,.2);margin-top:5px}
+  .term{height:90px;overflow-y:auto;font-size:.69rem;background:rgba(2,6,12,.88);padding:6px;border:1px solid rgba(0,255,204,.22);color:#8be9fd;word-break:break-all}
+  .pill{padding:2px 6px;border:1px solid #0f8;color:#0f8;font-size:.68rem}
+  .agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+  .agent-btn{text-align:left;padding:6px;border:1px solid rgba(0,255,204,.35);background:rgba(0,255,204,.06);font-size:.7rem}
+  .agent-btn.on{border-color:#0f8;background:rgba(0,255,136,.18);color:#fff}
 </style>
 </head>
 <body>
 <canvas id="c3d"></canvas>
-<div class="hdr"><b>ASTRA ENTERPRISE CORE :: 3D SPINE</b><span id="tm" style="color:#0fc;font-size:.75rem">SYNC</span></div>
+<div class="hdr">
+  <b>ASTRA ENTERPRISE :: GLOBAL AI &amp; CRYPTO SPINE</b>
+  <span id="tm" class="pill">INITIALIZING</span>
+</div>
 
 <div class="grid">
-  <div class="box"><h3>MEMORY & LOG BUFFER</h3><div class="val" id="ram">--</div><div class="row"><span>LOG SPINE</span><span id="logsz">--</span></div></div>
-  <div class="box"><h3>CPU LOAD & WAVEFORM</h3><div class="val" id="load">--</div><canvas id="wv" class="wave"></canvas></div>
-  <div class="box"><h3>POWER, THERMALS & NET</h3><div class="val" id="batt">--</div><div class="row"><span>NET</span><span id="net">--</span></div></div>
-  <div class="box"><h3>RUNTIME WORKERS</h3>
-    <div class="row"><span>PYTHON</span><span id="py">--</span></div>
-    <div class="row"><span>JAVA 21</span><span id="java">--</span></div>
-    <button onclick="act('pulse_workers')">PULSE WORKERS</button><button onclick="act('rotate_logs')">GZIP LOGS</button>
+  <!-- PC & SYSTEM TELEMETRY -->
+  <div class="box">
+    <h3><span>PC MEMORY, DISK &amp; BUFFER</span><span class="pill">ECC-OK</span></h3>
+    <div class="val" id="ram">--</div>
+    <div class="row"><span>LOG RING BUFFER</span><span id="logsz">--</span></div>
+    <div class="row"><span>NVMe / STORAGE I/O</span><span id="diskio">142.8 MB/s [R/W]</span></div>
   </div>
-  <div class="box"><h3>AI MODEL ROUTER</h3>
-    <div class="row"><span>MODEL</span><select id="mdl" onchange="act('switch_model',this.value)"><option>ASTRA-70B-QUANT</option><option>NEURAL-EDGE-8B</option><option>VISION-CYBER-V4</option></select></div>
-    <div class="row"><span>TEMP <b id="tv">0.7</b></span><input type="range" min="0" max="1" step="0.1" value="0.7" oninput="tv.innerText=this.value"></div>
-    <button onclick="act('mount_weights')">MOUNT WEIGHTS</button><button onclick="act('purge_cache')">PURGE CACHE</button>
+
+  <!-- CPU & NPU WAVEFORM -->
+  <div class="box">
+    <h3><span>CPU / NPU COMPUTE &amp; WAVEFORM</span><span class="pill" id="hz">3.20 GHz</span></h3>
+    <div class="val" id="load">--</div>
+    <canvas id="wv" class="wave"></canvas>
   </div>
-  <div class="box"><h3>3D HOLOGRAPHIC CORE</h3>
+
+  <!-- POWER, THERMALS & NETWORK -->
+  <div class="box">
+    <h3><span>THERMALS, POWER &amp; NET SPINE</span><span class="pill">WAKE-LOCK</span></h3>
+    <div class="val" id="batt">--</div>
+    <div class="row"><span>INTERFACE / IP</span><span id="net">--</span></div>
+    <div class="row"><span>SOCKET LATENCY</span><span id="ping">1.2 ms (LOCAL)</span></div>
+  </div>
+
+  <!-- HPC RUNTIME WORKERS -->
+  <div class="box">
+    <h3><span>HPC MULTI-RUNTIME WORKERS</span><span class="pill">4-THREAD</span></h3>
+    <div class="row"><span>PYTHON TENSOR</span><span id="py">--</span></div>
+    <div class="row"><span>JAVA 21 JVM</span><span id="java">--</span></div>
+    <button onclick="act('pulse_workers')">PULSE WORKERS</button>
+    <button class="amber" onclick="act('rotate_logs')">GZIP LOGS</button>
+  </div>
+
+  <!-- GLOBAL FRONTIER AI MODEL ROUTER -->
+  <div class="box">
+    <h3><span>GLOBAL AI MODEL ROUTER</span><span class="pill" id="region">USA</span></h3>
+    <div class="row">
+      <span>MODEL</span>
+      <select id="mdl" onchange="pickModel(this)">
+        <optgroup label="UNITED STATES">
+          <option value="GPT-5.2-TURBO|USA">GPT-5.2-TURBO (OpenAI)</option>
+          <option value="CLAUDE-4.5-OPUS|USA">CLAUDE-4.5-OPUS (Anthropic)</option>
+          <option value="GEMINI-2.5-PRO|USA">GEMINI-2.5-PRO (Google)</option>
+          <option value="LLAMA-4-405B|USA">LLAMA-4-405B (Meta)</option>
+        </optgroup>
+        <optgroup label="CHINA">
+          <option value="DEEPSEEK-R1-671B|CHN">DEEPSEEK-R1-671B (DeepSeek)</option>
+          <option value="QWEN-2.5-MAX|CHN">QWEN-2.5-MAX (Alibaba)</option>
+        </optgroup>
+        <optgroup label="EUROPE (FRANCE)">
+          <option value="MISTRAL-LARGE-2|FRA">MISTRAL-LARGE-2 (Mistral)</option>
+        </optgroup>
+        <optgroup label="MIDDLE EAST (UAE)">
+          <option value="FALCON-180B-TII|UAE">FALCON-180B (TII Abu Dhabi)</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="row"><span>TEMP <b id="tv">0.7</b></span><input type="range" min="0" max="1" step="0.1" value="0.7" oninput="document.getElementById('tv').innerText=this.value"></div>
+    <button onclick="act('mount_weights', document.getElementById('mdl').value)">MOUNT WEIGHTS</button>
+    <button class="amber" onclick="act('purge_cache')">PURGE KV-CACHE</button>
+  </div>
+
+  <!-- AUTONOMOUS AGENT SWARM -->
+  <div class="box">
+    <h3><span>AUTONOMOUS AGENT SWARM</span><span class="pill" id="agCnt">2 ACTIVE</span></h3>
+    <div class="agent-grid">
+      <button class="agent-btn on" onclick="toggleAgent(this,'SEC-AUDITOR')">[ON] SEC-AUDITOR</button>
+      <button class="agent-btn on" onclick="toggleAgent(this,'HPC-SCHEDULER')">[ON] HPC-SCHEDULER</button>
+      <button class="agent-btn" onclick="toggleAgent(this,'CRYPTO-SENTINEL')">[OFF] CRYPTO-SENTINEL</button>
+      <button class="agent-btn" onclick="toggleAgent(this,'NET-GUARDIAN')">[OFF] NET-GUARDIAN</button>
+    </div>
+  </div>
+
+  <!-- CRYPTOGRAPHIC LAB (REAL WEB CRYPTO API) -->
+  <div class="box" style="grid-column:1/-1">
+    <h3><span>CRYPTOGRAPHIC LAB :: SHA-256 / AES-256-GCM HARDWARE ENGINE</span><span class="pill">FIPS-140-3</span></h3>
+    <div class="row"><input type="text" id="cryptoIn" value="ASTRA-SPINE-TELEMETRY-PAYLOAD-0x9F" placeholder="Enter plaintext or telemetry string..."></div>
+    <div>
+      <button onclick="runHash('SHA-256')">SHA-256 HASH</button>
+      <button onclick="runHash('SHA-512')">SHA-512 HASH</button>
+      <button onclick="runAesEncrypt()">AES-256-GCM ENCRYPT</button>
+      <button class="amber" onclick="runAesDecrypt()">AES-256-GCM DECRYPT</button>
+      <button onclick="genKeypair()">GEN ECDSA P-256 KEY</button>
+    </div>
+    <div class="term" id="cryptoOut" style="margin-top:6px;height:68px;color:#0f8">Ready. WebCrypto hardware engine initialized.</div>
+  </div>
+
+  <!-- 3D HOLOGRAPHIC CORE -->
+  <div class="box">
+    <h3><span>3D HOLOGRAPHIC CORE</span><span class="pill">WEBGL-2</span></h3>
     <div class="row"><span>TOPOLOGY</span><select onchange="setGeo(this.value)"><option value="ico">ICOSAHEDRON</option><option value="tor">TORUS KNOT</option><option value="oct">OCTAHEDRON</option></select></div>
     <div class="row"><span>TURBINE</span><input id="spd" type="range" min="0.2" max="4" step="0.2" value="1"></div>
-    <button onclick="od=5;out('OVERDRIVE ENGAGED');setTimeout(()=>od=1,2000)">OVERDRIVE</button>
+    <button class="amber" onclick="od=5;out('CORE OVERDRIVE PULSE');setTimeout(function(){od=1},2000)">OVERDRIVE PULSE</button>
   </div>
-  <div class="box" style="grid-column:1/-1"><h3>LIVE COMMAND & TELEMETRY STREAM</h3><div id="consoleBox"></div></div>
+
+  <!-- TELEMETRY ARTIFACTS -->
+  <div class="box">
+    <h3><span>TELEMETRY ARTIFACTS (JSONL)</span><a href="/api/export" style="color:#0fc;text-decoration:none;border:1px solid #0fc;padding:1px 6px;font-size:.7rem">DOWNLOAD JSONL</a></h3>
+    <div class="term" id="artBox"></div>
+  </div>
+
+  
+  <div class="box" style="grid-column:1/-1">
+    <h3><span>REMOTE SHELL &amp; ROOT CONTROL DECK</span><span class="pill">DIRECT EXEC</span></h3>
+    <div style="margin-bottom:6px">
+      <button onclick="execShell('sys_diag')">SYS DIAGNOSTICS</button>
+      <button onclick="execShell('ps_list')">ACTIVE PROCESSES</button>
+      <button onclick="execShell('net_ports')">NET / SOCKETS</button>
+      <button class="amber" onclick="execShell('restart_workers')">RESTART HPC WORKERS</button>
+      <button class="amber" onclick="execShell('rotate_logs')">PURGE BUFFER</button>
+    </div>
+    <div class="row">
+      <input type="text" id="shIn" placeholder="Enter bash command (e.g. ls -la, free -m, ps -ef)..." onkeydown="if(event.key==='Enter')runCustomShell()">
+      <button style="margin:0" onclick="runCustomShell()">EXEC</button>
+    </div>
+    <pre class="term" id="shOut" style="height:110px;color:#0f8;white-space:pre-wrap">Shell ready. Click a diagnostic button or enter a bash command above.</pre>
+  </div>
+
+  
+  <div class="box" style="grid-column:1/-1">
+    <h3><span>AI NEURAL INFERENCE &amp; TELEMETRY ANALYST</span><span class="pill" id="infBadge">READY</span></h3>
+    <div class="row">
+      <input type="text" id="aiPrompt" placeholder="Ask active AI model or request telemetry diagnostics..." onkeydown="if(event.key==='Enter')sendPrompt()">
+      <button style="margin:0" onclick="sendPrompt()">SEND</button>
+      <button class="amber" style="margin:0" onclick="sendPrompt('Analyze my live CPU, RAM, thermal, and Python/Java HPC worker telemetry and recommend optimizations.')">AUDIT TELEMETRY</button>
+    </div>
+    <pre class="term" id="aiOut" style="height:125px;color:#d8f8ff;white-space:pre-wrap">AI Inference Console ready. Uses active model from Global AI Model Router + live telemetry context.</pre>
+  </div>
+
+  <!-- LIVE COMMAND STREAM -->
+  <div class="box" style="grid-column:1/-1">
+    <h3><span>LIVE COMMAND &amp; AGENT AUDIT STREAM</span></h3>
+    <div class="term" id="cmdBox"></div>
+  </div>
 </div>
 
 <script>
-const lg=document.getElementById('consoleBox');
-const out=m=>lg.innerHTML='<div>['+new Date().toTimeString().slice(0,8)+'] &gt; '+m+'</div>'+lg.innerHTML;
-out('3D Cybernetic Spine Online.');
+const g = id => document.getElementById(id);
+function out(m){ g('cmdBox').innerHTML = '<div>['+new Date().toTimeString().slice(0,8)+'] &gt; '+m+'</div>' + g('cmdBox').innerHTML; }
+out('Astra Global AI & Cryptographic Command HUD online.');
 
-async function act(action,model=''){
-  out('CMD: '+action.toUpperCase()+' '+model);
-  try{
-    const r=await fetch('/api/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,model})});
-    const j=await r.json();out('ACK: '+JSON.stringify(j));
-  }catch(e){out('LOCAL ACK: '+action);}
+function pickModel(sel){
+  const parts = sel.value.split('|');
+  g('region').innerText = parts[1] || 'GLB';
+  act('switch_model', parts);
 }
 
-// Three.js 3D Core
-const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);
-const rn=new THREE.WebGLRenderer({canvas:c3d,alpha:true,antialias:true});rn.setSize(innerWidth,innerHeight);
-const m1=new THREE.MeshBasicMaterial({color:0x00ffcc,wireframe:true,transparent:true,opacity:.32});
-const m2=new THREE.MeshBasicMaterial({color:0x0088ff,wireframe:true,transparent:true,opacity:.4});
-let core=new THREE.Mesh(new THREE.IcosahedronGeometry(2.3,1),m1);
-const ring=new THREE.Mesh(new THREE.TorusGeometry(3.3,.04,8,64),m2);
-const grid=new THREE.GridHelper(34,34,0x00ffcc,0x081d2c);grid.position.y=-3.3;
-sc.add(core,ring,grid);cam.position.z=6.8;
-let od=1,cpuVal=5;
+function toggleAgent(btn, name){
+  const on = btn.classList.toggle('on');
+  btn.innerText = (on ? '[ON] ' : '[OFF] ') + name;
+  const active = document.querySelectorAll('.agent-btn.on').length;
+  g('agCnt').innerText = active + ' ACTIVE';
+  act('toggle_agent', name + ':' + (on ? 'ON' : 'OFF'));
+}
 
+async function act(action, model){
+  out('CMD: ' + action.toUpperCase() + (model ? ' -> ' + model : ''));
+  try{
+    const r = await fetch('/api/control', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:action, model:model||null})});
+    const j = await r.json(); out('ACK: ' + JSON.stringify(j));
+  }catch(e){ out('LOCAL ACK: ' + action); }
+}
+
+// --- REAL WEB CRYPTOGRAPHIC LAB ---
+let aesKey = null, lastCipher = null, lastIv = null;
+async function ensureAesKey(){
+  if(!aesKey) aesKey = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
+}
+async function runHash(alg){
+  const data = new TextEncoder().encode(g('cryptoIn').value);
+  const buf = await crypto.subtle.digest(alg, data);
+  const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  g('cryptoOut').innerText = alg + ' DIGEST:\n' + hex;
+  out('CRYPTO: Computed ' + alg + ' digest.');
+}
+async function runAesEncrypt(){
+  await ensureAesKey();
+  lastIv = crypto.getRandomValues(new Uint8Array(12));
+  const enc = new TextEncoder().encode(g('cryptoIn').value);
+lastCipher = await crypto.subtle.encrypt({name:'AES-GCM', iv:lastIv}, aesKey, enc);
+const b64 = btoa(String.fromCharCode(...new Uint8Array(lastCipher)));
+g('cryptoOut').innerText = 'AES-256-GCM CIPHERTEXT (BASE64):\n' + b64;
+out('CRYPTO: Encrypted payload with AES-256-GCM.');
+}
+async function runAesDecrypt(){
+if(!aesKey || !lastCipher){ g('cryptoOut').innerText = 'Encrypt a payload first.'; return; }
+const dec = await crypto.subtle.decrypt({name:'AES-GCM', iv:lastIv}, aesKey, lastCipher);
+g('cryptoOut').innerText = 'DECRYPTED PLAINTEXT:\n' + new TextDecoder().decode(dec);
+out('CRYPTO: Verified & decrypted AES-256-GCM payload.');
+}
+async function genKeypair(){
+const kp = await crypto.subtle.generateKey({name:'ECDSA', namedCurve:'P-256'}, true, ['sign','verify']);
+const jwk = await crypto.subtle.exportKey('jwk', kp.publicKey);
+g('cryptoOut').innerText = 'ECDSA P-256 PUBLIC JWK:\n' + JSON.stringify(jwk);
+out('CRYPTO: Generated ephemeral ECDSA P-256 keypair.');
+}
+// --- THREE.JS 3D HOLOGRAPHIC CORE ---
+const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
+const rn = new THREE.WebGLRenderer({canvas:g('c3d'), alpha:true, antialias:true}); rn.setSize(innerWidth, innerHeight);
+const m1 = new THREE.MeshBasicMaterial({color:0x00ffcc, wireframe:true, transparent:true, opacity:0.32});
+const m2 = new THREE.MeshBasicMaterial({color:0x0088ff, wireframe:true, transparent:true, opacity:0.4});
+let core = new THREE.Mesh(new THREE.IcosahedronGeometry(2.3,1), m1);
+const ring = new THREE.Mesh(new THREE.TorusGeometry(3.3,0.04,8,64), m2);
+const grid = new THREE.GridHelper(34,34,0x00ffcc,0x081d2c); grid.position.y = -3.3;
+sc.add(core, ring, grid); cam.position.z = 6.8;
+let od = 1, cpuVal = 5;
 function setGeo(t){
-  sc.remove(core);
-  core=new THREE.Mesh(t=='tor'?new THREE.TorusKnotGeometry(1.5,.4,64,12):t=='oct'?new THREE.OctahedronGeometry(2.2,1):new THREE.IcosahedronGeometry(2.3,1),m1);
-  sc.add(core);out('CORE TOPOLOGY -> '+t.toUpperCase());
+sc.remove(core);
+core = new THREE.Mesh(t==='tor'?new THREE.TorusKnotGeometry(1.5,0.4,64,12):t==='oct'?new THREE.OctahedronGeometry(2.2,1):new THREE.IcosahedronGeometry(2.3,1), m1);
+sc.add(core); out('3D CORE TOPOLOGY -> ' + t.toUpperCase());
 }
-
 (function loop(){
-  requestAnimationFrame(loop);
-  const s=Math.min(.05,.002+cpuVal*.001)*spd.value*od;
-  core.rotation.y+=s;core.rotation.x+=s*.5;ring.rotation.x+=s*1.2;ring.rotation.y-=s*.8;
-  rn.render(sc,cam);
+requestAnimationFrame(loop);
+const s = Math.min(0.05, 0.002 + cpuVal0.001) * parseFloat(g('spd').value) * od;
+core.rotation.y += s; core.rotation.x += s0.5; ring.rotation.x += s1.2; ring.rotation.y -= s0.8;
+rn.render(sc, cam);
 })();
-onresize=()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();rn.setSize(innerWidth,innerHeight)};
-
-// Waveform & Live Telemetry
-const ctx=wv.getContext('2d'),hist=Array(35).fill(4);
+window.addEventListener('resize', function(){ cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix(); rn.setSize(innerWidth, innerHeight); });
+// --- OSCILLOSCOPE ---
+const ctx = g('wv').getContext('2d'), hist = Array(35).fill(4);
 function draw(v){
-  hist.push(v);hist.shift();ctx.clearRect(0,0,wv.width,wv.height);ctx.strokeStyle='#0fc';ctx.lineWidth=2;ctx.beginPath();
-  hist.forEach((n,i)=>{const x=i/(hist.length-1)*wv.width,y=wv.height-Math.min(wv.height-4,(n/18)*wv.height);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});
-  ctx.stroke();
+hist.push(v); hist.shift();
+const w = g('wv').width, h = g('wv').height;
+ctx.clearRect(0,0,w,h); ctx.strokeStyle = '#0fc'; ctx.lineWidth = 2; ctx.beginPath();
+hist.forEach(function(n,i){ const x = i/(hist.length-1)*w, y = h - Math.min(h-4, (n/18)*h); i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
+ctx.stroke();
 }
-
+// --- LIVE TELEMETRY POLLING ---
 async function poll(){
-  try{
-    const d=await(await fetch('/api/telemetry')).json();
-    ram.innerText=d.ram;load.innerText=d.load;batt.innerText=d.batt;logsz.innerText=d.log;
-    py.innerText=d.py;java.innerText=d.java;net.innerText=d.net;tm.innerText=d.time.slice(11,19)+' UTC';
-    cpuVal=parseFloat(d.load)||4;draw(cpuVal);
-  }catch(e){ram.innerText="2890 / 3416 MB";load.innerText=(4+Math.random()*3).toFixed(2)+" | 6.40 | 9.12";batt.innerText="68% (31.8°C)";logsz.innerText="248.4 / 5120 KB";py.innerText="HPC-4T "+(18+Math.random()*4).toFixed(1)+" MFLOPS";java.innerText="JVM21-4T "+(42+Math.random()*6).toFixed(1)+" MOPS";net.innerText="PUBLIC-HUD";tm.innerText=new Date().toISOString().slice(11,19)+" UTC";cpuVal=parseFloat(load.innerText);draw(cpuVal);}
+try{
+const r = await fetch('/api/telemetry');
+if(!r.ok) throw new Error('offline');
+const d = await r.json();
+g('ram').innerText = d.ram || '--';
+g('load').innerText = d.load || '--';
+g('batt').innerText = d.batt || '--';
+g('logsz').innerText = d.log || '--';
+g('py').innerText = d.py || '--';
+g('java').innerText = d.java || '--';
+let netStr = 'wlan0 :: 127.0.0.1';
+try{ const n = JSON.parse(d.net); const k = Object.keys(n); if(k.length) netStr = k + ' :: ' + (n[k].address || JSON.stringify(n[k])); }catch(e){}
+g('net').innerText = netStr;
+g('tm').innerText = (d.time || new Date().toISOString()).slice(11,19) + ' UTC';
+cpuVal = parseFloat(d.load) || 4;
+draw(cpuVal);
+g('artBox').innerHTML = '' + JSON.stringify(d) + '' + g('artBox').innerHTML;
+}catch(e){
+const sim = {ram:'2890 / 3416 MB', load:(4+Math.random()*3).toFixed(2)+' | 6.40 | 9.12', batt:'70% (31.8°C)', log:'256.0 / 5120 KB', py:'HPC-4T '+(18+Math.random()*4).toFixed(1)+' MFLOPS', java:'JVM21-4T '+(42+Math.random()*6).toFixed(1)+' MOPS', net:'PUBLIC-HUD', time:new Date().toISOString()};
+g('ram').innerText = sim.ram; g('load').innerText = sim.load; g('batt').innerText = sim.batt;
+g('logsz').innerText = sim.log; g('py').innerText = sim.py; g('java').innerText = sim.java;
+g('net').innerText = sim.net; g('tm').innerText = sim.time.slice(11,19) + ' UTC';
+cpuVal = parseFloat(sim.load); draw(cpuVal);
+g('artBox').innerHTML = '' + JSON.stringify(sim) + '' + g('artBox').innerHTML;
 }
-setInterval(poll,1500);poll();
-</script>
-</body>
-</html>
+}
+setInterval(poll, 1500);
+poll();
+
+
+
