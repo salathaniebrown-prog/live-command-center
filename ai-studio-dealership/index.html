@@ -93,7 +93,14 @@
       <label style="display:block; margin-top:6px; font-size:11px;">WALLET ADDRESS / CARD ALIAS</label>
       <input id="payment-ref" value="0x5f04EBB30d3BBf356263c3ef4823080d05bEDDf5" />
     </div>
-    <button onclick="executePurchase()">SIGN CRYPTO TX & ACQUIRE VEHICLE</button>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+      <button onclick="executePurchase()">SINGLE ACQUIRE</button>
+      <button onclick="executeBatch()" style="border-color:#39ff14; color:#39ff14;">BATCH CHECKOUT</button>
+    </div>
+    <div style="display:grid; grid-template-columns:1.5fr 0.5fr; gap:4px; margin-top:4px;">
+      <input id="webhook-url" placeholder="Langflow Webhook URL (optional)" style="margin:0; padding:4px; font-size:10px;" />
+      <button onclick="saveWebhook()" style="margin:0; padding:4px; font-size:10px;">SAVE HOOK</button>
+    </div>
   </div>
 
   <!-- COLUMN 3: SMART ESCROW & DELIVERY DISPATCH -->
@@ -138,11 +145,12 @@ async function refresh() {
 
   data.inventory.forEach(v => {
     const dealerClass = v.dealer.includes('WYLER') ? 'badge badge-wyler' : 'badge';
+    const chk = v.status === 'AVAILABLE' ? `<input type="checkbox" class="batch-chk" value="${v.id}" style="width:auto; margin-right:6px;">` : '';
     invList.innerHTML += `<div class="card-item">
-      <div>
+      <div style="display:flex; align-items:center;">${chk}<div>
         <span class="${dealerClass}">${v.dealer}</span> <strong>${v.model}</strong><br>
         <small>VIN: ${v.vin}</small>
-      </div>
+      </div></div>
       <div style="text-align:right;">
         <strong>$${v.price.toLocaleString()}</strong><br>
         <small style="color:#39ff14;">${v.price_eth} ETH</small> <span class="badge">${v.status}</span>

@@ -77,6 +77,11 @@ def sync_deepspace(order_id, vehicle_id, rail, payment_ref, tx_hash, amount_usd,
         print(f"[WARN] REAL.log stream deferred: {le}")
     try:
         wf_url = os.getenv("LANGFLOW_WEBHOOK_URL", "").strip()
+        if not wf_url:
+            sconn = sqlite3.connect(DB_PATH)
+            srow = sconn.execute("SELECT v FROM settings WHERE k='webhook_url'").fetchone()
+            sconn.close()
+            wf_url = srow[0].strip() if srow else ""
         if wf_url:
             wreq = urllib.request.Request(
                 wf_url,
@@ -129,6 +134,7 @@ def init_db():
             ("DLK-05", "DEALERSLINK", "Audi RS e-tron GT", "WA1AAAGE8NA008912", 104900.00, "AVAILABLE")
         ]
         c.executemany("INSERT INTO inventory VALUES (?, ?, ?, ?, ?, ?)", vehicles)
+    c.execute("CREATE TABLE IF NOT EXISTS settings (k TEXT PRIMARY KEY, v TEXT)")
     conn.commit()
     conn.close()
 
@@ -204,6 +210,53 @@ class DealershipHandler(BaseHTTPRequestHandler):
             conn.commit()
             conn.close()
             self._send_json({"status": "ADDED", "id": veh_id, "model": model})
+
+        elif self.path == "/api/acquire_batch":
+            veh_ids = payload.get("vehicle_ids", [])
+            rail = payload.get("rail", "CRYPTO_ESCROW")
+            payment_ref = payload.get("payment_ref", "0x5f04EBB30d3BBf356263c3ef4823080d05bEDDf5")
+            if not veh_ids:
+                return self._send_json({"error": "No vehicles selected"}, 400)
+
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            total_usd = 0.0
+            valid_ids = []
+            for vid in veh_ids:
+                row = c.execute("SELECT price, status FROM inventory WHERE id=?", (vid,)).fetchone()
+                if row and row[1] == "AVAILABLE":
+                    total_usd += float(row[0])
+                    valid_ids.append(vid)
+
+            if not valid_ids:
+                conn.close()
+                return self._send_json({"error": "Selected vehicles unavailable"}, 400)
+
+            eth_usd = get_live_eth_price()
+            total_eth = round(total_usd / eth_usd, 4)
+            batch_id = f"BATCH-{uuid.uuid4().hex[:5].upper()}"
+            joined_vids = "+".join(valid_ids)
+            raw_sig = f"{batch_id}:{joined_vids}:{payment_ref}:{total_usd}:{total_eth}:{time.time()}".encode()
+            tx_hash = "0x" + hashlib.sha256(raw_sig).hexdigest()
+            initial_stage = "CRYPTO_TX_CONFIRMED" if rail == "CRYPTO_ESCROW" else "VCARD_AUTHORIZED"
+
+            for vid in valid_ids:
+                c.execute("UPDATE inventory SET status='ACQUIRED' WHERE id=?", (vid,))
+            c.execute("INSERT INTO orders VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                      (batch_id, joined_vids, rail, payment_ref, tx_hash, total_usd, total_eth, initial_stage, time.time()))
+            conn.commit()
+            conn.close()
+
+            sync_deepspace(batch_id, joined_vids, rail, payment_ref, tx_hash, total_usd, total_eth, initial_stage)
+            self._send_json({"status": "SUCCESS", "order_id": batch_id, "vehicles": valid_ids, "amount_usd": total_usd, "amount_eth": total_eth, "tx_hash": tx_hash})
+
+        elif self.path == "/api/set_webhook":
+            url = payload.get("webhook_url", "").strip()
+            conn = sqlite3.connect(DB_PATH)
+            conn.execute("INSERT OR REPLACE INTO settings VALUES ('webhook_url', ?)", (url,))
+            conn.commit()
+            conn.close()
+            self._send_json({"status": "WEBHOOK_SAVED", "webhook_url": url})
 
         elif self.path == "/api/reset":
             conn = sqlite3.connect(DB_PATH)
