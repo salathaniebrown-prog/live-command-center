@@ -185,6 +185,72 @@ HTML_CONTENT = """
 
 
 
+
+<!-- BUSINESS SUPERINTELLIGENCE SQL & UNIVERSAL MODEL CONTEXT ENGINE -->
+<section id="astra-bi-superintelligence" style="margin:10px 0; border:1px solid #00f0ff88; background:#040d16; padding:12px; font-family:monospace; color:#e6ffff; box-shadow:0 0 20px #00f0ff22;">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #00f0ff33; padding-bottom:6px; margin-bottom:8px;">
+    <strong style="color:#00f0ff;">📊 BUSINESS SUPERINTELLIGENCE SQL // UNIVERSAL AI MODEL CONTEXT</strong>
+    <div>
+      <button onclick="runBiRefine()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-size:10px; padding:3px 8px; cursor:pointer;">REFINE SQL NOW</button>
+      <button onclick="copyUniversalAiContext()" style="background:#39ff1422; border:1px solid #39ff14; color:#39ff14; font-family:monospace; font-size:10px; padding:3px 8px; cursor:pointer; margin-left:4px;">COPY UNIVERSAL AI CONTEXT</button>
+    </div>
+  </div>
+  <div id="bi-kpi-strip" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:8px; font-size:11px;">
+    <div style="background:#071624; border:1px solid #00f0ff33; padding:6px;">SETTLED USD<br><strong id="kpi-usd" style="color:#39ff14;">$0</strong></div>
+    <div style="background:#071624; border:1px solid #00f0ff33; padding:6px;">SETTLED ETH<br><strong id="kpi-eth" style="color:#00f0ff;">0 ETH</strong></div>
+    <div style="background:#071624; border:1px solid #00f0ff33; padding:6px;">OODA CONFIDENCE<br><strong id="kpi-ooda" style="color:#39ff14;">99.0%</strong></div>
+    <div style="background:#071624; border:1px solid #00f0ff33; padding:6px;">GRAPH TOKENS<br><strong id="kpi-tok" style="color:#ffaa00;">45M CAP</strong></div>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 120px; gap:6px; margin-bottom:6px;">
+    <input id="bi-sql-input" value="SELECT domain, metric_key, metric_value, unit FROM unified_fact_ledger" style="background:#02060b; border:1px solid #00f0ff55; color:#39ff14; padding:5px; font-family:monospace; font-size:11px;" />
+    <button onclick="runCustomBiSql()" style="background:#00f0ff22; border:1px solid #00f0ff; color:#00f0ff; font-family:monospace; font-weight:bold; font-size:11px; cursor:pointer;">RUN SQL</button>
+  </div>
+  <div id="bi-sql-output" style="background:#02060b; border:1px solid #00f0ff33; padding:6px; font-size:11px; color:#a8f9ff; max-height:95px; overflow:auto;">
+    [BI READY] Cross-database SQL warehouse attached across Dealership, Legal, OODA & 45M Brain.
+  </div>
+</section>
+
+<script>
+let latestModelContextPack = "";
+
+async function runBiRefine() {
+  try {
+    const r = await fetch('/api/bi/refine');
+    const d = await r.json();
+    latestModelContextPack = d.model_context_pack || "";
+    const k = d.kpis || {};
+    document.getElementById('kpi-usd').innerText = '$' + (k.gross_fleet_volume_usd || 0).toLocaleString();
+    document.getElementById('kpi-eth').innerText = (k.gross_fleet_volume_eth || 0) + ' ETH';
+    document.getElementById('kpi-ooda').innerText = ((k.ooda_avg_confidence || 0.99) * 100).toFixed(1) + '%';
+    document.getElementById('kpi-tok').innerText = (k.brain_indexed_tokens || 0).toLocaleString();
+  } catch (e) {}
+}
+
+async function runCustomBiSql() {
+  const sql = document.getElementById('bi-sql-input').value.trim();
+  const r = await fetch('/api/bi/sql', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({sql})
+  });
+  const d = await r.json();
+  if (d.error) {
+    document.getElementById('bi-sql-output').innerText = '[SQL ERROR] ' + d.error;
+    return;
+  }
+  document.getElementById('bi-sql-output').innerText = JSON.stringify(d.rows);
+}
+
+function copyUniversalAiContext() {
+  if (latestModelContextPack && navigator.clipboard) {
+    navigator.clipboard.writeText(latestModelContextPack);
+    document.getElementById('bi-sql-output').innerText = '[COPIED] Universal AI Model Context Pack (KPIs + Knowledge Graph) copied — paste into any open-source or cloud AI chat!';
+  }
+}
+
+runBiRefine();
+</script>
+
 <!-- INFINITE BRAIN OS // OODA LOOP, SOP & AI JUDGMENT LAYER -->
 <section id="infinite-brain-ooda" style="margin:10px 0; border:1px solid #39ff1488; background:linear-gradient(135deg, #06141f 0%, #03070c 100%); padding:12px; font-family:monospace; color:#e6ffff; box-shadow:0 0 22px #39ff1422;">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #39ff1444; padding-bottom:6px; margin-bottom:8px;">
