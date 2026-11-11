@@ -233,7 +233,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(data)
 
     def do_POST(self):
-        if self.path.startswith('/api/acquire') or self.path.startswith('/api/advance') or self.path.startswith('/api/reset'):
+        if self.path.startswith('/api/acquire') or self.path.startswith('/api/advance') or self.path.startswith('/api/reset') or self.path.startswith('/api/add_vehicle'):
             self.path = '/dealership' + self.path
             return self._proxy_dealership('POST')
 

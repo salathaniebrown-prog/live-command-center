@@ -56,7 +56,19 @@
       <h2>01 // WYLER & DEALERSLINK LIVE FEED</h2>
       <div id="inventory-list"></div>
     </div>
-    <div class="log-box">ORACLE: COINBASE SPOT ETH/USDC CONVERSION ACTIVE</div>
+    
+    <div style="border-top:1px solid #00f0ff33; padding-top:6px; margin-top:6px;">
+      <div style="font-size:10px; color:#39ff14; margin-bottom:3px;">+ ADD CUSTOM WYLER / FLEET VEHICLE</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+        <input id="new-model" placeholder="Model (e.g. Tahoe RST)" style="margin:0; padding:4px; font-size:11px;" />
+        <input id="new-price" placeholder="Price USD (e.g. 78500)" style="margin:0; padding:4px; font-size:11px;" />
+      </div>
+      <div style="display:grid; grid-template-columns:1.4fr 0.6fr; gap:4px; margin-top:4px;">
+        <input id="new-vin" placeholder="17-Char VIN" style="margin:0; padding:4px; font-size:11px;" />
+        <button onclick="addVehicle()" style="margin:0; padding:4px; font-size:10px;">+ ADD</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- COLUMN 2: CRYPTO & VIRTUAL CARD SETTLEMENT -->
@@ -180,6 +192,40 @@ async function executePurchase() {
 async function resetDemo() {
   await fetch('/api/reset', { method: 'POST' });
   document.getElementById('telemetry-log').innerText = '[SYS] Demo inventory restored to AVAILABLE.';
+  
+async function addVehicle() {
+  const model = document.getElementById('new-model').value.trim();
+  const price = parseFloat(document.getElementById('new-price').value);
+  const vin = document.getElementById('new-vin').value.trim() || '1GTWYLER000000999';
+  if (!model || isNaN(price)) return;
+  await fetch('/api/add_vehicle', {
+    method: 'POST',
+    body: JSON.stringify({ dealer: 'WYLER AUTO', model, vin, price })
+  });
+  document.getElementById('new-model').value = '';
+  document.getElementById('new-price').value = '';
+  document.getElementById('new-vin').value = '';
+  document.getElementById('telemetry-log').innerText = `[INVENTORY] Added ${model} ($${price.toLocaleString()})`;
+  refresh();
+}
+
+refresh();
+}
+
+
+async function addVehicle() {
+  const model = document.getElementById('new-model').value.trim();
+  const price = parseFloat(document.getElementById('new-price').value);
+  const vin = document.getElementById('new-vin').value.trim() || '1GTWYLER000000999';
+  if (!model || isNaN(price)) return;
+  await fetch('/api/add_vehicle', {
+    method: 'POST',
+    body: JSON.stringify({ dealer: 'WYLER AUTO', model, vin, price })
+  });
+  document.getElementById('new-model').value = '';
+  document.getElementById('new-price').value = '';
+  document.getElementById('new-vin').value = '';
+  document.getElementById('telemetry-log').innerText = `[INVENTORY] Added ${model} ($${price.toLocaleString()})`;
   refresh();
 }
 
@@ -196,6 +242,40 @@ async function advance(order_id, stage) {
 async function resetDemo() {
   await fetch('/api/reset', { method: 'POST' });
   document.getElementById('telemetry-log').innerText = '[SYS] Demo inventory restored to AVAILABLE.';
+  
+async function addVehicle() {
+  const model = document.getElementById('new-model').value.trim();
+  const price = parseFloat(document.getElementById('new-price').value);
+  const vin = document.getElementById('new-vin').value.trim() || '1GTWYLER000000999';
+  if (!model || isNaN(price)) return;
+  await fetch('/api/add_vehicle', {
+    method: 'POST',
+    body: JSON.stringify({ dealer: 'WYLER AUTO', model, vin, price })
+  });
+  document.getElementById('new-model').value = '';
+  document.getElementById('new-price').value = '';
+  document.getElementById('new-vin').value = '';
+  document.getElementById('telemetry-log').innerText = `[INVENTORY] Added ${model} ($${price.toLocaleString()})`;
+  refresh();
+}
+
+refresh();
+}
+
+
+async function addVehicle() {
+  const model = document.getElementById('new-model').value.trim();
+  const price = parseFloat(document.getElementById('new-price').value);
+  const vin = document.getElementById('new-vin').value.trim() || '1GTWYLER000000999';
+  if (!model || isNaN(price)) return;
+  await fetch('/api/add_vehicle', {
+    method: 'POST',
+    body: JSON.stringify({ dealer: 'WYLER AUTO', model, vin, price })
+  });
+  document.getElementById('new-model').value = '';
+  document.getElementById('new-price').value = '';
+  document.getElementById('new-vin').value = '';
+  document.getElementById('telemetry-log').innerText = `[INVENTORY] Added ${model} ($${price.toLocaleString()})`;
   refresh();
 }
 
@@ -206,6 +286,40 @@ refresh();
 async function resetDemo() {
   await fetch('/api/reset', { method: 'POST' });
   document.getElementById('telemetry-log').innerText = '[SYS] Demo inventory restored to AVAILABLE.';
+  
+async function addVehicle() {
+  const model = document.getElementById('new-model').value.trim();
+  const price = parseFloat(document.getElementById('new-price').value);
+  const vin = document.getElementById('new-vin').value.trim() || '1GTWYLER000000999';
+  if (!model || isNaN(price)) return;
+  await fetch('/api/add_vehicle', {
+    method: 'POST',
+    body: JSON.stringify({ dealer: 'WYLER AUTO', model, vin, price })
+  });
+  document.getElementById('new-model').value = '';
+  document.getElementById('new-price').value = '';
+  document.getElementById('new-vin').value = '';
+  document.getElementById('telemetry-log').innerText = `[INVENTORY] Added ${model} ($${price.toLocaleString()})`;
+  refresh();
+}
+
+refresh();
+}
+
+
+async function addVehicle() {
+  const model = document.getElementById('new-model').value.trim();
+  const price = parseFloat(document.getElementById('new-price').value);
+  const vin = document.getElementById('new-vin').value.trim() || '1GTWYLER000000999';
+  if (!model || isNaN(price)) return;
+  await fetch('/api/add_vehicle', {
+    method: 'POST',
+    body: JSON.stringify({ dealer: 'WYLER AUTO', model, vin, price })
+  });
+  document.getElementById('new-model').value = '';
+  document.getElementById('new-price').value = '';
+  document.getElementById('new-vin').value = '';
+  document.getElementById('telemetry-log').innerText = `[INVENTORY] Added ${model} ($${price.toLocaleString()})`;
   refresh();
 }
 

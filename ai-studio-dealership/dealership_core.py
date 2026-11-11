@@ -75,6 +75,18 @@ def sync_deepspace(order_id, vehicle_id, rail, payment_ref, tx_hash, amount_usd,
             lf.write(json.dumps(event) + "\n")
     except Exception as le:
         print(f"[WARN] REAL.log stream deferred: {le}")
+    try:
+        wf_url = os.getenv("LANGFLOW_WEBHOOK_URL", "").strip()
+        if wf_url:
+            wreq = urllib.request.Request(
+                wf_url,
+                data=json.dumps({"event": "WYLER_DEALERSHIP_EVENT", "order_id": order_id, "vehicle_id": vehicle_id, "amount_usd": amount_usd, "amount_eth": amount_eth, "stage": stage, "tx_hash": tx_hash}).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            urllib.request.urlopen(wreq, timeout=3)
+    except Exception as we:
+        print(f"[WARN] Webhook forward deferred: {we}")
+
 
 
 def init_db():
@@ -179,6 +191,19 @@ class DealershipHandler(BaseHTTPRequestHandler):
 
             sync_deepspace(order_id, veh_id, rail, payment_ref, tx_hash, price_usd, price_eth, initial_stage)
             self._send_json({"status": "SUCCESS", "order_id": order_id, "tx_hash": tx_hash, "amount_eth": price_eth, "stage": initial_stage})
+
+        elif self.path == "/api/add_vehicle":
+            dealer = payload.get("dealer", "WYLER AUTO").upper()
+            model = payload.get("model", "Custom Fleet Unit")
+            vin = payload.get("vin", "1G1CUSTOM00000001").upper()
+            price = float(payload.get("price", 75000.00))
+            veh_id = f"{dealer[:3]}-{uuid.uuid4().hex[:3].upper()}"
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("INSERT INTO inventory VALUES (?, ?, ?, ?, ?, ?)", (veh_id, dealer, model, vin, price, "AVAILABLE"))
+            conn.commit()
+            conn.close()
+            self._send_json({"status": "ADDED", "id": veh_id, "model": model})
 
         elif self.path == "/api/reset":
             conn = sqlite3.connect(DB_PATH)
