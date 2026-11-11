@@ -62,6 +62,22 @@ async function pollLedger(){
 setInterval(pollLedger, 2500);
 pollLedger();
 
+
+<!-- LOCAL MEDIA & ASSET BROWSER HUB -->
+<div class="panel-box" style="margin-top:15px; border:1px solid #00ffcc44; background:#020b12; padding:12px; border-radius:4px;">
+  <div class="panel-header" style="color:#00ffcc; font-weight:bold; margin-bottom:8px;">LOCAL MEDIA BROWSER & ASSET HUB</div>
+  <div class="panel-body">
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+      <input type="file" id="mediaInput" accept="image/*,video/*" style="display:none;" onchange="uploadSelectedFile()">
+      <button class="btn" onclick="document.getElementById('mediaInput').click()" style="background:#00ffcc22; border:1px solid #00ffcc; color:#00ffcc; padding:6px 12px; cursor:pointer;">[+] UPLOAD ASSET</button>
+      <button class="btn" onclick="loadMediaGrid()" style="background:#00ffcc22; border:1px solid #00ffcc; color:#00ffcc; padding:6px 12px; cursor:pointer;">[R] REFRESH MEDIA</button>
+    </div>
+    <div id="mediaGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:10px; max-height:250px; overflow-y:auto; padding:5px; background:#01060a; border:1px solid #00ffcc22;">
+      <div style="color:#666; font-size:11px;">Scanning local media...</div>
+    </div>
+  </div>
+</div>
+
 </script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;font-family:monospace}
