@@ -362,6 +362,13 @@ document.addEventListener('DOMContentLoaded', () => {
     <button onclick="triggerHotBackup()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">BACKUP NOW</button>
   </div>
 
+
+  <div style="display:grid;grid-template-columns:1fr 1.2fr 0.7fr 0.7fr;gap:6px;margin-bottom:6px;align-items:center">
+    <div id="sys-hw-gauge" style="background:#020805;border:1px solid #00f0ff55;color:#00f0ff;padding:5px;font-size:10px">CPU LOAD: -- | RAM: --</div>
+    <input id="alert-hook-url" placeholder="Webhook URL for backup/escrow alerts..." style="background:#020805;border:1px solid #ffaa0055;color:#fff;padding:5px;font-family:monospace;font-size:10px">
+    <button onclick="saveAlertHook()" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">SAVE ALERT</button>
+    <button onclick="testAlertHook()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">TEST ALERT</button>
+  </div>
   <div style="display:grid;grid-template-columns:1.4fr 0.8fr 0.8fr;gap:6px;margin-bottom:6px">
     <select id="wf-snap-select" style="background:#020805;border:1px solid #39ff1455;color:#39ff14;padding:5px;font-family:monospace;font-size:11px">
       <option value="">Loading saved snapshots...</option>
@@ -407,6 +414,28 @@ async function triggerGitSyncNow(){
   const d = await r.json();
   document.getElementById('wf-output').innerText = '[GITHUB SYNC] ' + d.status;
 }
+
+async function pollHwMetrics(){
+  try {
+    const r = await fetch('/api/wf/metrics');
+    const m = await r.json();
+    const el = document.getElementById('sys-hw-gauge');
+    if (el) el.innerText = 'CPU LOAD: ' + m.cpu_load_1m + ' | RAM: ' + m.ram_used_mb + '/' + m.ram_total_mb + 'MB (' + m.ram_pct + '%)';
+  } catch (e) {}
+}
+async function saveAlertHook(){
+  const webhook_url = document.getElementById('alert-hook-url').value.trim();
+  const r = await fetch('/api/wf/set-alert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({webhook_url})});
+  const d = await r.json();
+  document.getElementById('wf-output').innerText = '[ALERT CONFIG] ' + d.status;
+}
+async function testAlertHook(){
+  const r = await fetch('/api/wf/test-alert',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const d = await r.json();
+  document.getElementById('wf-output').innerText = '[ALERT TEST] ' + d.status + ' (Webhook: ' + d.webhook_active + ')';
+}
+setInterval(pollHwMetrics, 4000);
+pollHwMetrics();
 loadSnapshots();
 </script>
 
