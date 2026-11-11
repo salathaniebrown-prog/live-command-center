@@ -47,6 +47,13 @@ async function pollLedger(){
   try{
     const rows = await (await fetch('/api/ledger')).json();
     if(Array.isArray(rows) && rows.length){
+
+    if(Array.isArray(rows)){
+      const u = rows.find(r => r[2] === 'usgs-seismic'); if(u) g('usgsVal').innerText = u[3];
+      const w = rows.find(r => r[2] === 'nws-weather'); if(w) g('nwsVal').innerText = w[3];
+      const n = rows.find(r => r[2] === 'nasa-eonet'); if(n) g('nasaVal').innerText = n[3];
+    }
+
       g('dbCnt').innerText = 'ROW #' + rows + ' :: PERSISTENT';
       g('dbBox').innerHTML = rows.map(r => '<div>[#' + r + ' | ' + r.slice(11,19) + '] <b>' + r + '</b> :: ' + r + '</div>').join('');
     }
@@ -220,6 +227,14 @@ pollLedger();
   <div class="box" style="grid-column:1/-1">
     <h3><span>PERSISTENT SQLITE &amp; ETHEREUM MEMPOOL LEDGER</span><span class="pill" id="dbCnt">SQLITE-WAL</span></h3>
     <div class="term" id="dbBox" style="height:95px;color:#0f8">Connecting to astra_ledger.db &amp; ETH Mainnet mempool...</div>
+  </div>
+
+  
+  <div class="box" style="grid-column:1/-1">
+    <h3><span>GLOBAL TELEMETRY FEEDS (USGS SEISMIC / NWS WEATHER / NASA EONET)</span><button style="margin:0;padding:1px 6px" onclick="execShell('backup_db')">BACKUP SQLITE NOW</button></h3>
+    <div class="row"><span>USGS SEISMIC</span><span id="usgsVal">Polling USGS...</span></div>
+    <div class="row"><span>NWS WEATHER</span><span id="nwsVal">Polling NWS...</span></div>
+    <div class="row"><span>NASA EONET</span><span id="nasaVal">Polling NASA...</span></div>
   </div>
 
   <!-- LIVE COMMAND STREAM -->
