@@ -1,4 +1,5 @@
 const { execSync } = require("child_process");
+const ADMIN_TOK = process.env.ASTRA_ADMIN_TOKEN || "";
 const fs = require("fs");
 
 const state = { model: "GPT-5.2-TURBO", agents: ["SEC-AUDITOR", "HPC-SCHEDULER"], temp: 0.7 };
@@ -9,6 +10,7 @@ function runCmd(cmd) {
 }
 
 module.exports = function handleControl(req, res) {
+  if (ADMIN_TOK && req.headers["x-astra-token"] !== ADMIN_TOK) { res.writeHead(401); return res.end(JSON.stringify({ok:false, output:"UNAUTHORIZED: Enter Admin Token"})); }
   let body = "";
   req.on("data", c => body += c);
   req.on("end", () => {
