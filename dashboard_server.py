@@ -33,6 +33,10 @@ iframe{width:100%;height:520px;border:1px solid #39ff1455;background:#03080f}
 
 <div class="card"><h3>1. AUTO-ASTRA AUTONOMOUS GOAL, MODEL &amp; SUPERCOMPUTER / PC ROUTER (PORT 8109)</h3>
 <div class="row"><input id="auto-goal" placeholder="Enter real goal (e.g. Buy evening Wyler car, audit contract, build app, optimize Greensboro route)..."><button class="g" onclick="runAutoAstra()">AUTO-SELECT &amp; EXECUTE</button></div>
+
+<div class="row"><select id="cl-tier" style="max-width:160px"><option value="PC">PC WORKSTATION</option><option value="SUPERCOMPUTER">8-GPU CLUSTER</option></select>
+<input id="cl-url" placeholder="External PC / 8-GPU URL (e.g. http://192.168.1)...">
+<button onclick="saveCluster()">SAVE COMPUTE NODE</button><button class="a" onclick="api('/api/reset',{}).then(()=>alert('Wyler Fleet Reset to AVAILABLE'))">RESET FLEET</button></div>
 <pre id="auto-out">[AUTO-ASTRA READY] Picks Compute (Android Edge / PC / 8-GPU Supercomputer), Model &amp; Agent automatically.</pre></div>
 
 <div class="card"><h3>2. ONE-PROMPT MULTI-MODEL STUDIO • CONTRACTOR LAWYER • 2-YR SPREADSHEET • REAL BENCHMARK (8108)</h3>
@@ -53,6 +57,13 @@ let lastApp = "";
 async function api(url, body){
   const r = await fetch(url, body ? {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)} : {});
   return await r.json();
+}
+
+async function saveCluster(){
+  const tier = document.getElementById('cl-tier').value;
+  const endpoint = document.getElementById('cl-url').value.trim();
+  const d = await api('/api/auto/set-cluster', {tier, endpoint});
+  document.getElementById('auto-out').innerText = '[COMPUTE CONFIGURED] ' + d.tier + ' -> ' + (endpoint || 'LOCAL_MESH');
 }
 async function runAutoAstra(){
   const goal = document.getElementById('auto-goal').value.trim() || 'Execute evening Wyler vehicle check & Greensboro route';
