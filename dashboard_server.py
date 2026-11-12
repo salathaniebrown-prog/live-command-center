@@ -369,6 +369,12 @@ document.addEventListener('DOMContentLoaded', () => {
     <button onclick="saveAlertHook()" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">SAVE ALERT</button>
     <button onclick="testAlertHook()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">TEST ALERT</button>
   </div>
+
+  <div style="display:grid;grid-template-columns:1.2fr 0.9fr 0.9fr;gap:6px;margin-bottom:6px">
+    <input id="tg-bot-token" placeholder="Telegram Bot Token (12345:ABC...)" style="background:#020805;border:1px solid #00f0ff55;color:#fff;padding:5px;font-family:monospace;font-size:10px">
+    <input id="tg-chat-id" placeholder="Telegram Chat ID" style="background:#020805;border:1px solid #00f0ff55;color:#00f0ff;padding:5px;font-family:monospace;font-size:10px">
+    <button onclick="saveTelegramCfg()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">SAVE TELEGRAM</button>
+  </div>
   <div style="display:grid;grid-template-columns:1.4fr 0.8fr 0.8fr;gap:6px;margin-bottom:6px">
     <select id="wf-snap-select" style="background:#020805;border:1px solid #39ff1455;color:#39ff14;padding:5px;font-family:monospace;font-size:11px">
       <option value="">Loading saved snapshots...</option>
@@ -428,6 +434,14 @@ async function saveAlertHook(){
   const r = await fetch('/api/wf/set-alert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({webhook_url})});
   const d = await r.json();
   document.getElementById('wf-output').innerText = '[ALERT CONFIG] ' + d.status;
+}
+
+async function saveTelegramCfg(){
+  const token = document.getElementById('tg-bot-token').value.trim();
+  const chat_id = document.getElementById('tg-chat-id').value.trim();
+  const r = await fetch('/api/wf/set-telegram',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token, chat_id})});
+  const d = await r.json();
+  document.getElementById('wf-output').innerText = '[TELEGRAM CONFIG] ' + d.status + ' (Tap TEST ALERT to verify)';
 }
 async function testAlertHook(){
   const r = await fetch('/api/wf/test-alert',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
