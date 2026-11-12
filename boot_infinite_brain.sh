@@ -16,3 +16,4 @@ sleep 2
 bash ~/check_all.sh
 setsid nohup python3 ~/astra-osint-harvester/osint_harvester.py > ~/astra-osint-harvester/osint.log 2>&1 < /dev/null &
 pgrep -x tor >/dev/null || setsid nohup tor --SocksPort 9050 > ~/astra-osint-harvester/tor.log 2>&1 < /dev/null &
+setsid nohup python3 ~/astra-reverse-supercomputer/re_supercomputer.py > ~/astra-reverse-supercomputer/re.log 2>&1 < /dev/null &
