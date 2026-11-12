@@ -218,7 +218,7 @@ self.send_header("Access-Control-Allow-Origin", "*")
 self.end_headers()
 self.wfile.write(json.dumps(data).encode("utf-8"))
 def do_GET(self):
-if self.path == "/api/nexus/state":
+        if self.path == "/api/nexus/state":
 conn = sqlite3.connect(DB_PATH)
 conn.row_factory = sqlite3.Row
 ideas = [dict(r) for r in conn.execute("SELECT * FROM ideas ORDER BY created_at DESC LIMIT 12").fetchall()]
