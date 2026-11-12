@@ -574,6 +574,7 @@ async function runQuickApi(url, body){
 }
 </script>
 
+<section id="world-osint-bar" style="margin:10px 0;border:1px solid #00f0ff;background:#040d18;padding:10px;font-family:monospace;color:#e6f9ff"><strong style="color:#00f0ff">WORLD DATA &amp; OSINT HARVESTER // WEB + ACADEMIC + TOR SOCKS5 (PORT 8104)</strong><div style="display:grid;grid-template-columns:1fr 130px;gap:6px;margin:6px 0"><input id="osint-q" placeholder="Enter topic, https:// URL, or .onion address..." style="background:#02060c;border:1px solid #00f0ff;color:#fff;padding:6px;font-size:11px"><button onclick="runWorldOsint()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:11px;cursor:pointer">HARVEST INTEL</button></div><pre id="osint-out" style="background:#02060c;border:1px solid #00f0ff33;padding:6px;font-size:11px;color:#39ff14;white-space:pre-wrap">[OSINT READY] Wikipedia + Tech Wisdom + Direct Web Scraper + Tor 9050 Bridge armed.</pre></section><script>async function runWorldOsint(){const q=document.getElementById('osint-q').value.trim()||'Gemma 4 architecture';document.getElementById('osint-out').innerText='> Harvesting & indexing into 45M Brain...';const r=await fetch('/api/osint/harvest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});const d=await r.json();document.getElementById('osint-out').innerText='['+d.id+'] '+d.summary;}</script>
 </body>';
 }
 </script>
@@ -595,6 +596,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             "/api/os/": 8101,
             "/api/wf/": 8102,
             "/api/geo/": 8103,
+            "/api/osint/": 8104,
             "/dealership": 8099,
             "/api/state": 8099,
             "/api/acquire": 8099,

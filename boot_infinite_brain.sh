@@ -14,3 +14,4 @@ setsid nohup python3 ~/astra-location-intel/location_intel_engine.py > ~/astra-l
 
 sleep 2
 bash ~/check_all.sh
+setsid nohup python3 ~/astra-osint-harvester/osint_harvester.py > ~/astra-osint-harvester/osint.log 2>&1 < /dev/null &
