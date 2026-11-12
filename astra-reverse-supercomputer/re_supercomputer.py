@@ -65,12 +65,19 @@ def reverse_engineer_target(target_path):
     c = sqlite3.connect(DB); c.execute("INSERT INTO audits VALUES(?,?,?,?,?)", (aid, p, "RE", report, time.time())); c.commit(); c.close()
     return {"id": aid, "target": p, "report": report}
 
+
+def mirror_to_docs(slug, html_code):
+    d_dir = os.path.join(HOME, "docs", "apps", slug)
+    os.makedirs(d_dir, exist_ok=True)
+    open(os.path.join(d_dir, "index.html"), "w", encoding="utf-8").write(html_code)
+
 def run_supercomputer_agents(directive):
     slug = re.sub(r"[^a-z0-9]+", "_", directive.lower())[:24].strip("_") or "ownable_app"
     app_dir = os.path.join(APPS_DIR, slug)
     os.makedirs(app_dir, exist_ok=True)
     html_code, engine_used = query_llm_code(directive)
     open(os.path.join(app_dir, "index.html"), "w", encoding="utf-8").write(html_code)
+    mirror_to_docs(slug, html_code)
     open(os.path.join(app_dir, "manifest.json"), "w").write(json.dumps({"name": directive, "short_name": slug, "start_url": f"/apps/{slug}/", "display": "standalone"}))
     aid = "APP-" + hashlib.sha256(f"{directive}{time.time()}".encode()).hexdigest()[:6].upper()
     url_path = f"/apps/{slug}/"
