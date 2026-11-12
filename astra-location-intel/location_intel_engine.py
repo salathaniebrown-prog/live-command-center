@@ -64,6 +64,10 @@ class GeoHandler(BaseHTTPRequestHandler):
         self.send_response(s); self.send_header("Content-Type", "application/json"); self.end_headers()
         self.wfile.write(json.dumps(d).encode())
     def do_GET(self):
+        if self.path == "/api/geo/manifest":
+            html = render_route_manifest_html().encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.end_headers()
+            self.wfile.write(html); return
         if self.path == "/api/geo/state":
             conn = sqlite3.connect(DB); conn.row_factory = sqlite3.Row
             nodes = [dict(r) for r in conn.execute("SELECT * FROM geo_nodes ORDER BY demand_idx DESC").fetchall()]
@@ -73,6 +77,8 @@ class GeoHandler(BaseHTTPRequestHandler):
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
         if self.path == "/api/geo/route":
             rt = optimize_triad_route(); dispatch_route_alert(rt); self._j(rt)
+        elif self.path == "/api/geo/reset-stops":
+            self._j(reset_custom_stops())
         elif self.path == "/api/geo/add-stop":
             self._j(geocode_triad_address(d.get("label", "Client Stop"), d.get("address", "Greensboro, NC")))
         elif self.path == "/api/geo/predict":
@@ -144,3 +150,36 @@ def dispatch_route_alert(route_data):
         urllib.request.urlopen(rq, timeout=2)
     except Exception:
         pass
+
+def reset_custom_stops():
+    conn = sqlite3.connect(DB)
+    conn.execute("DELETE FROM geo_nodes WHERE node_id NOT IN ('GEO-GSO-HQ','GEO-PTI-AIR','GEO-I85-EV','GEO-HPT-01','GEO-WSL-01')")
+    conn.commit(); conn.close()
+    return {"status": "RESET_COMPLETE", "message": "Custom client stops cleared; 5 core Triad hubs preserved."}
+
+def render_route_manifest_html():
+    rt = optimize_triad_route()
+    wx = rt.get("weather", {})
+    rows = "".join(
+        f"<tr><td>{i+1}</td><td>{s['id']}</td><td>{s['name']}</td><td>{s['lat']:.4f}, {s['lon']:.4f}</td></tr>"
+        for i, s in enumerate(rt.get("stops", []))
+    )
+    ts = time.strftime("%Y-%m-%d %H:%M EST")
+    return f"""<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Piedmont Triad Field Dispatch Manifest</title>
+<style>
+  body{{font-family:monospace;background:#040a10;color:#e6f9ff;padding:20px}}
+  .box{{max-width:780px;margin:auto;border:2px solid #00f0ff;background:#071420;padding:22px}}
+  h1{{color:#39ff14;font-size:17px;margin:0 0 8px}}
+  table{{width:100%;border-collapse:collapse;margin:14px 0;font-size:12px}}
+  th,td{{border:1px solid #00f0ff44;padding:8px;text-align:left}}
+  th{{background:#0b2236;color:#00f0ff}}
+  button{{padding:8px 16px;background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-family:monospace;font-weight:bold;cursor:pointer}}
+  @media print{{button{{display:none}}body{{background:#fff;color:#000}}.box{{border-color:#000;background:#fff}}th,td{{border-color:#000}}}}
+</style></head><body><div class="box">
+  <h1>PIEDMONT TRIAD FIELD DISPATCH &amp; ROUTE MANIFEST</h1>
+  <div>GENERATED: {ts} | TOTAL ROUTE DISTANCE: <strong>{rt.get('total_miles')} MILES</strong></div>
+  <div>GREENSBORO WEATHER: <strong>{wx.get('temp_f')}°F</strong> | WIND: {wx.get('wind_mph')} MPH | DEMAND MULT: {wx.get('demand_multiplier')}x</div>
+  <table><thead><tr><th>STOP #</th><th>NODE ID</th><th>LOCATION / CLIENT</th><th>COORDINATES</th></tr></thead><tbody>{rows}</tbody></table>
+  <button onclick="window.print()">PRINT / SAVE DISPATCH SHEET (PDF)</button>
+</div></body></html>"""

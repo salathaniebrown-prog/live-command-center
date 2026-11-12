@@ -459,6 +459,11 @@ loadSnapshots();
     <button onclick="addCustomDispatchStop()" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;font-weight:bold;font-size:10px;cursor:pointer">ADD DISPATCH STOP</button>
   </div>
   <button onclick="runTriadRoute()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:5px;margin-bottom:6px;width:100%;cursor:pointer">OPTIMIZE PIEDMONT TRIAD MULTI-STOP ROUTE + LIVE GREENSBORO WEATHER</button>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+    <button onclick="window.open('/api/geo/manifest','_blank')" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">PRINT ROUTE MANIFEST</button>
+    <button onclick="resetTriadStops()" style="background:#ff444422;border:1px solid #ff5555;color:#ff8888;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">RESET CUSTOM STOPS</button>
+  </div>
   <div id="geo-output" style="background:#02060b;border:1px solid #00f0ff33;padding:6px;font-size:11px;color:#39ff14;white-space:pre-wrap">[GEO READY] 5 Piedmont Triad nodes indexed around Greensboro, NC (36.0726, -79.7920).</div>
 </section>
 <script>
@@ -499,6 +504,13 @@ async function addCustomDispatchStop(){
   document.getElementById('geo-stop-label').value = '';
   document.getElementById('geo-stop-addr').value = '';
   document.getElementById('geo-output').innerText = '[STOP ADDED: ' + out.node_id + '] ' + out.name + ' (' + out.lat + ', ' + out.lon + ') | Demand: ' + Math.round(out.demand_score*100) + '%';
+  loadGeoNodes();
+}
+
+async function resetTriadStops(){
+  const r = await fetch('/api/geo/reset-stops',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const d = await r.json();
+  document.getElementById('geo-output').innerText = '[STOPS RESET] ' + d.message;
   loadGeoNodes();
 }
 async function runTriadRoute(){
