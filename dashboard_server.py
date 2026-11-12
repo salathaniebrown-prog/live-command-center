@@ -460,9 +460,10 @@ loadSnapshots();
   </div>
   <button onclick="runTriadRoute()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:5px;margin-bottom:6px;width:100%;cursor:pointer">OPTIMIZE PIEDMONT TRIAD MULTI-STOP ROUTE + LIVE GREENSBORO WEATHER</button>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
     <button onclick="window.open('/api/geo/manifest','_blank')" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">PRINT ROUTE MANIFEST</button>
     <button onclick="resetTriadStops()" style="background:#ff444422;border:1px solid #ff5555;color:#ff8888;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">RESET CUSTOM STOPS</button>
+    <button onclick="sendSmsDispatch()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">SEND MOBILE SMS DISPATCH</button>
   </div>
   <div id="geo-output" style="background:#02060b;border:1px solid #00f0ff33;padding:6px;font-size:11px;color:#39ff14;white-space:pre-wrap">[GEO READY] 5 Piedmont Triad nodes indexed around Greensboro, NC (36.0726, -79.7920).</div>
 </section>
@@ -513,10 +514,18 @@ async function resetTriadStops(){
   document.getElementById('geo-output').innerText = '[STOPS RESET] ' + d.message;
   loadGeoNodes();
 }
+
+let latestSmsBody = "";
+async function sendSmsDispatch(){
+  if (!latestSmsBody) { await runTriadRoute(); }
+  window.location.href = 'sms:?body=' + encodeURIComponent(latestSmsBody);
+}
+
 async function runTriadRoute(){
   const r = await fetch('/api/geo/route',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
   const d = await r.json();
   const wx = d.weather || {};
+  latestSmsBody = d.sms_dispatch_text || '';
   const pathNames = (d.stops || []).map((st, i) => (i+1) + '. ' + st.name).join(' -> ');
   document.getElementById('geo-output').innerText = `[GREENSBORO LIVE WEATHER: ${wx.temp_f}°F | Wind ${wx.wind_mph}mph | Demand Mult ${wx.demand_multiplier}x]\n[OPTIMIZED ${d.total_miles} MI ROUTE] ` + pathNames;
   if (window.L && window.map && d.stops) {

@@ -122,7 +122,17 @@ def optimize_triad_route():
         route.append(nxt)
         unvisited.remove(nxt)
     wx = get_live_weather()
-    return {"weather": wx, "total_miles": round(total_mi, 2), "stops": [{"id": n["node_id"], "name": n["name"], "lat": n["lat"], "lon": n["lon"]} for n in route]}
+    est_minutes = round((total_mi / 42.0) * 60 + (len(route) * 6))
+    fuel_cost_usd = round((total_mi / 24.0) * 3.15, 2)
+    ev_kwh_cost_usd = round((total_mi * 0.34) * 0.13, 2)
+    stop_list = " -> ".join(f"{i+1}.{n['name']}" for i, n in enumerate(route))
+    sms_text = f"TRIAD DISPATCH ({round(total_mi,1)} mi | ~{est_minutes} min | Gas ${fuel_cost_usd} / EV ${ev_kwh_cost_usd}): {stop_list}"
+    return {
+        "weather": wx, "total_miles": round(total_mi, 2),
+        "est_drive_minutes": est_minutes, "fuel_cost_usd": fuel_cost_usd, "ev_cost_usd": ev_kwh_cost_usd,
+        "sms_dispatch_text": sms_text,
+        "stops": [{"id": n["node_id"], "name": n["name"], "lat": n["lat"], "lon": n["lon"]} for n in route]
+    }
 
 def geocode_triad_address(label, address_query):
     lat, lon = 36.0726, -79.7920
@@ -178,8 +188,8 @@ def render_route_manifest_html():
   @media print{{button{{display:none}}body{{background:#fff;color:#000}}.box{{border-color:#000;background:#fff}}th,td{{border-color:#000}}}}
 </style></head><body><div class="box">
   <h1>PIEDMONT TRIAD FIELD DISPATCH &amp; ROUTE MANIFEST</h1>
-  <div>GENERATED: {ts} | TOTAL ROUTE DISTANCE: <strong>{rt.get('total_miles')} MILES</strong></div>
+  <div>GENERATED: {ts} | TOTAL ROUTE: <strong>{rt.get('total_miles')} MILES</strong> (~{rt.get('est_drive_minutes')} MIN) | EST COST: <strong>${rt.get('fuel_cost_usd')} GAS</strong> / <strong>${rt.get('ev_cost_usd')} EV</strong></div>
   <div>GREENSBORO WEATHER: <strong>{wx.get('temp_f')}°F</strong> | WIND: {wx.get('wind_mph')} MPH | DEMAND MULT: {wx.get('demand_multiplier')}x</div>
   <table><thead><tr><th>STOP #</th><th>NODE ID</th><th>LOCATION / CLIENT</th><th>COORDINATES</th></tr></thead><tbody>{rows}</tbody></table>
-  <button onclick="window.print()">PRINT / SAVE DISPATCH SHEET (PDF)</button>
+  <button onclick="window.print()">PRINT / SAVE DISPATCH SHEET (PDF)</button> <a href="sms:?body={urllib.parse.quote(rt.get('sms_dispatch_text',''))}" style="display:inline-block;padding:8px 14px;margin-left:8px;border:1px solid #00f0ff;color:#00f0ff;text-decoration:none;font-weight:bold">SEND VIA MOBILE SMS</a>
 </div></body></html>"""
