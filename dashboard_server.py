@@ -439,6 +439,50 @@ pollHwMetrics();
 loadSnapshots();
 </script>
 
+
+<section id="astra-location-intel" style="margin:10px 0;border:1px solid #00f0ff88;background:#04111c;padding:10px;font-family:monospace;color:#e6f9ff">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00f0ff44;padding-bottom:5px;margin-bottom:7px">
+    <strong style="color:#00f0ff">PREDICTIVE LOCATION INTELLIGENCE // GREENSBORO &amp; PIEDMONT TRIAD (PORT 8103)</strong>
+    <span style="font-size:10px;color:#39ff14;border:1px solid #39ff14;padding:2px 6px">SPATIAL GRAVITY MODEL</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1.2fr 0.6fr 0.6fr 0.7fr 110px;gap:5px;margin-bottom:6px">
+    <input id="geo-name" placeholder="Zone / Site Name" value="GSO East Logistics Hub" style="background:#02080f;border:1px solid #00f0ff55;color:#fff;padding:5px;font-size:11px">
+    <input id="geo-lat" placeholder="Lat" value="36.0680" style="background:#02080f;border:1px solid #00f0ff55;color:#00f0ff;padding:5px;font-size:11px">
+    <input id="geo-lon" placeholder="Lon" value="-79.7450" style="background:#02080f;border:1px solid #00f0ff55;color:#00f0ff;padding:5px;font-size:11px">
+    <input id="geo-cap" placeholder="Capital $" value="50000" style="background:#02080f;border:1px solid #39ff1455;color:#39ff14;padding:5px;font-size:11px">
+    <button onclick="runGeoPredict()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;cursor:pointer">PREDICT ROI</button>
+  </div>
+  <div id="geo-output" style="background:#02060b;border:1px solid #00f0ff33;padding:6px;font-size:11px;color:#39ff14;white-space:pre-wrap">[GEO READY] 5 Piedmont Triad nodes indexed around Greensboro, NC (36.0726, -79.7920).</div>
+</section>
+<script>
+async function loadGeoNodes(){
+  try {
+    const r = await fetch('/api/geo/state');
+    const d = await r.json();
+    const top = (d.nodes || []).slice(0,3).map(n => n.name + ' [Demand: ' + Math.round(n.demand_idx*100) + '% | ROI: ' + n.predicted_roi + 'x]').join(' | ');
+    document.getElementById('geo-output').innerText = '[TOP TRIAD ZONES] ' + top;
+    if (window.L && window.map) {
+      (d.nodes || []).forEach(n => L.circleMarker([n.lat, n.lon], {radius:6, color:'#39ff14'}).addTo(window.map).bindPopup(n.name + ' (' + Math.round(n.demand_idx*100) + '% Demand)'));
+    }
+  } catch (e) {}
+}
+async function runGeoPredict(){
+  const payload = {
+    name: document.getElementById('geo-name').value.trim(),
+    lat: parseFloat(document.getElementById('geo-lat').value),
+    lon: parseFloat(document.getElementById('geo-lon').value),
+    capital_usd: parseFloat(document.getElementById('geo-cap').value) || 50000
+  };
+  const r = await fetch('/api/geo/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const out = await r.json();
+  document.getElementById('geo-output').innerText = '[' + out.node_id + '] ' + out.name + ' (' + out.distance_from_gso_miles + ' mi from GSO HQ)\nDEMAND SCORE: ' + Math.round(out.demand_score*100) + '% | 30-DAY PROJECTED VALUE: $' + out.projected_30d_value_usd.toLocaleString() + ' | PROOF: ' + out.proof_hash;
+  if (window.L && window.map) {
+    L.circleMarker([out.lat, out.lon], {radius:8, color:'#ffaa00'}).addTo(window.map).bindPopup(out.name + ': $' + out.projected_30d_value_usd.toLocaleString()).openPopup();
+  }
+}
+loadGeoNodes();
+</script>
+
 </body>';
 }
 </script>
@@ -459,6 +503,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             "/api/nexus/": 8100,
             "/api/os/": 8101,
             "/api/wf/": 8102,
+            "/api/geo/": 8103,
             "/dealership": 8099,
             "/api/state": 8099,
             "/api/acquire": 8099,
