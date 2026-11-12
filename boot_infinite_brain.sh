@@ -19,3 +19,5 @@ pgrep -x tor >/dev/null || setsid nohup tor --SocksPort 9050 > ~/astra-osint-har
 setsid nohup python3 ~/astra-reverse-supercomputer/re_supercomputer.py > ~/astra-reverse-supercomputer/re.log 2>&1 < /dev/null &
 setsid nohup python3 ~/astra-enterprise-gov/enterprise_gov.py > ~/astra-enterprise-gov/ent.log 2>&1 < /dev/null &
 setsid nohup python3 ~/astra-seo-franchise/seo_geo_franchise.py > ~/astra-seo-franchise/seo.log 2>&1 < /dev/null &
+setsid nohup python3 ~/astra-studio-pro/studio_pro_engine.py > ~/astra-studio-pro/pro.log 2>&1 < /dev/null &
+setsid nohup python3 ~/astra-auto-router/auto_router.py > ~/astra-auto-router/auto.log 2>&1 < /dev/null &
