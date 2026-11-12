@@ -483,6 +483,29 @@ async function runGeoPredict(){
 loadGeoNodes();
 </script>
 
+
+<section id="master-sovereign-bar" style="margin:10px 0;border:1px solid #39ff1488;background:#041019;padding:10px;font-family:monospace;color:#e6ffff">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #39ff1444;padding-bottom:5px;margin-bottom:7px">
+    <strong style="color:#39ff14">⚡ SOVEREIGN OS MASTER BAR // OODA + LEGAL + BI SQL + 45M GRAPH</strong>
+    <span style="font-size:10px;color:#00f0ff;border:1px solid #00f0ff;padding:2px 6px">ALL 10 PORTS UNIFIED</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px">
+    <button onclick="runQuickApi('/api/ooda/execute',{directive:'Full OODA judgment & telemetry sweep',amount_usd:0})" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">OODA JUDGMENT</button>
+    <button onclick="runQuickApi('/api/legal/audit',{query:'Audit crypto escrow, LLC ring-fence & Wyler VIN title'})" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">LEGAL SHIELD (8095)</button>
+    <button onclick="runQuickApi('/api/bi/refine',null)" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">BI SQL REFINE (8098)</button>
+    <button onclick="runQuickApi('/api/brain/graph',null)" style="background:#ff66ff22;border:1px solid #ff66ff;color:#ff66ff;font-weight:bold;font-size:10px;padding:6px;cursor:pointer">45M BRAIN (8096)</button>
+  </div>
+  <pre id="master-bar-out" style="background:#02060b;border:1px solid #00f0ff33;padding:6px;font-size:11px;color:#a8f9ff;white-space:pre-wrap;max-height:110px;overflow:auto">[MASTER OS READY] Tap any core node above to execute live across Ports 8095-8103.</pre>
+</section>
+<script>
+async function runQuickApi(url, body){
+  const opts = body ? {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)} : {method:'GET'};
+  const r = await fetch(url, opts);
+  const d = await r.json();
+  document.getElementById('master-bar-out').innerText = JSON.stringify(d, null, 2).slice(0, 650);
+}
+</script>
+
 </body>';
 }
 </script>
