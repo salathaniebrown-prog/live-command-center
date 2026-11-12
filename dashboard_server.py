@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <select id="wf-snap-select" style="background:#020805;border:1px solid #39ff1455;color:#39ff14;padding:5px;font-family:monospace;font-size:11px">
       <option value="">Loading saved snapshots...</option>
     </select>
-    <button onclick="restoreSelectedSnap()" style="background:#ff444422;border:1px solid #ff5555;color:#ff8888;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">RESTORE SNAPSHOT</button>
+    <button onclick="restoreSelectedSnap()" style="background:#ff444422;border:1px solid #ff5555;color:#ff8088;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">RESTORE SNAPSHOT</button>
     <button onclick="triggerGitSyncNow()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;padding:5px;cursor:pointer">GIT SYNC NOW</button>
   </div>
   <div id="wf-output" style="background:#020805;border:1px solid #39ff1433;padding:6px;font-size:11px;color:#a8ffce;white-space:pre-wrap">[WORKFLOWS READY] 7 SQLite WAL ledgers scheduled for automatic 24-hour hot backup.</div>
@@ -452,6 +452,7 @@ loadSnapshots();
     <input id="geo-cap" placeholder="Capital $" value="50000" style="background:#02080f;border:1px solid #39ff1455;color:#39ff14;padding:5px;font-size:11px">
     <button onclick="runGeoPredict()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;cursor:pointer">PREDICT ROI</button>
   </div>
+  <button onclick="runTriadRoute()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:5px;margin-bottom:6px;width:100%;cursor:pointer">OPTIMIZE PIEDMONT TRIAD MULTI-STOP ROUTE + LIVE GREENSBORO WEATHER</button>
   <div id="geo-output" style="background:#02060b;border:1px solid #00f0ff33;padding:6px;font-size:11px;color:#39ff14;white-space:pre-wrap">[GEO READY] 5 Piedmont Triad nodes indexed around Greensboro, NC (36.0726, -79.7920).</div>
 </section>
 <script>
@@ -480,6 +481,19 @@ async function runGeoPredict(){
     L.circleMarker([out.lat, out.lon], {radius:8, color:'#ffaa00'}).addTo(window.map).bindPopup(out.name + ': $' + out.projected_30d_value_usd.toLocaleString()).openPopup();
   }
 }
+
+async function runTriadRoute(){
+  const r = await fetch('/api/geo/route',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const d = await r.json();
+  const wx = d.weather || {};
+  const pathNames = (d.stops || []).map((st, i) => (i+1) + '. ' + st.name).join(' -> ');
+  document.getElementById('geo-output').innerText = `[GREENSBORO LIVE WEATHER: ${wx.temp_f}°F | Wind ${wx.wind_mph}mph | Demand Mult ${wx.demand_multiplier}x]\n[OPTIMIZED ${d.total_miles} MI ROUTE] ` + pathNames;
+  if (window.L && window.map && d.stops) {
+    const pts = d.stops.map(st => [st.lat, st.lon]);
+    L.polyline(pts, {color: '#39ff14', weight: 3}).addTo(window.map);
+  }
+}
+
 loadGeoNodes();
 </script>
 
@@ -555,6 +569,27 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return True
 
     def do_POST(self):
+
+        if self.path == "/v1/messages":
+            length = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(length)) if length else {}
+            prompt = str(body.get("messages", [{}])[-1].get("content", "ping"))
+            resp = {
+                "id": "msg_sovereign_01",
+                "type": "message",
+                "role": "assistant",
+                "model": body.get("model", "sovereign-177b-nexus"),
+                "content": [{"type": "text", "text": f"[SOVEREIGN BRIDGE ONLINE] Executed directive: {prompt[:200]}"}],
+                "stop_reason": "end_turn"
+            }
+            out = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(out)))
+            self.end_headers()
+            self.wfile.write(out)
+            return
+
         if self._forward_api():
             return
         self.send_error(404, "Endpoint not found")

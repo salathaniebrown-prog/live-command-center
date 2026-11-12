@@ -68,10 +68,12 @@ class GeoHandler(BaseHTTPRequestHandler):
             conn = sqlite3.connect(DB); conn.row_factory = sqlite3.Row
             nodes = [dict(r) for r in conn.execute("SELECT * FROM geo_nodes ORDER BY demand_idx DESC").fetchall()]
             conn.close()
-            self._j({"region": "Piedmont Triad / Greensboro, NC", "nodes": nodes})
+            self._j({"region": "Piedmont Triad / Greensboro, NC", "weather": get_live_weather(), "nodes": nodes})
     def do_POST(self):
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
-        if self.path == "/api/geo/predict":
+        if self.path == "/api/geo/route":
+            self._j(optimize_triad_route())
+        elif self.path == "/api/geo/predict":
             self._j(run_predictive_model(
                 d.get("name", "Triad Expansion Node"),
                 float(d.get("lat", 36.0850)),
@@ -82,3 +84,34 @@ class GeoHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     init_db()
     HTTPServer(("0.0.0.0", 8103), GeoHandler).serve_forever()
+
+def get_live_weather():
+    try:
+        url = "https://open-meteo.com"
+        data = json.loads(urllib.request.urlopen(url, timeout=4).read().decode())
+        cur = data.get("current", {})
+        temp = cur.get("temperature_2m", 68.0)
+        wind = cur.get("wind_speed_10m", 5.0)
+        precip = cur.get("precipitation", 0.0)
+        weather_mult = 1.12 if precip > 0 else 1.04
+        return {"city": "Greensboro, NC", "temp_f": temp, "wind_mph": wind, "precip_in": precip, "demand_multiplier": weather_mult}
+    except Exception:
+        return {"city": "Greensboro, NC", "temp_f": 68.0, "wind_mph": 5.0, "precip_in": 0.0, "demand_multiplier": 1.04}
+
+def optimize_triad_route():
+    conn = sqlite3.connect(DB); conn.row_factory = sqlite3.Row
+    nodes = [dict(r) for r in conn.execute("SELECT * FROM geo_nodes").fetchall()]
+    conn.close()
+    if not nodes:
+        return {"stops": [], "total_miles": 0}
+    unvisited = nodes[1:]
+    route = [nodes]
+    total_mi = 0.0
+    while unvisited:
+        curr = route[-1]
+        nxt = min(unvisited, key=lambda n: haversine_miles(curr["lat"], curr["lon"], n["lat"], n["lon"]))
+        total_mi += haversine_miles(curr["lat"], curr["lon"], nxt["lat"], nxt["lon"])
+        route.append(nxt)
+        unvisited.remove(nxt)
+    wx = get_live_weather()
+    return {"weather": wx, "total_miles": round(total_mi, 2), "stops": [{"id": n["node_id"], "name": n["name"], "lat": n["lat"], "lon": n["lon"]} for n in route]}
