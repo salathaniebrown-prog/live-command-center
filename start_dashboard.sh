@@ -27,3 +27,4 @@ pgrep -f "android_sensors.py" >/dev/null || setsid nohup python3 ~/telemetry-spi
 setsid nohup python3 ~/astra-workflows/autonomous_workflows_backup.py > ~/astra-workflows/wf.log 2>&1 < /dev/null &
 setsid nohup python3 ~/astra-location-intel/location_intel_engine.py > ~/astra-location-intel/geo.log 2>&1 < /dev/null &
 bash ~/boot_infinite_brain.sh
+setsid nohup python3 ~/astra-workflows/self_heal_watchdog.py > ~/astra-workflows/watchdog.log 2>&1 < /dev/null &
