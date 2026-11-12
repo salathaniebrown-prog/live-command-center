@@ -452,6 +452,12 @@ loadSnapshots();
     <input id="geo-cap" placeholder="Capital $" value="50000" style="background:#02080f;border:1px solid #39ff1455;color:#39ff14;padding:5px;font-size:11px">
     <button onclick="runGeoPredict()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-weight:bold;font-size:10px;cursor:pointer">PREDICT ROI</button>
   </div>
+
+  <div style="display:grid;grid-template-columns:0.9fr 1.4fr 125px;gap:5px;margin-bottom:6px">
+    <input id="geo-stop-label" placeholder="Client / Stop Name" style="background:#02080f;border:1px solid #39ff1455;color:#fff;padding:5px;font-size:11px">
+    <input id="geo-stop-addr" placeholder="Street Address (e.g. 100 S Elm St, Greensboro)" style="background:#02080f;border:1px solid #39ff1455;color:#a8f9ff;padding:5px;font-size:11px">
+    <button onclick="addCustomDispatchStop()" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;font-weight:bold;font-size:10px;cursor:pointer">ADD DISPATCH STOP</button>
+  </div>
   <button onclick="runTriadRoute()" style="background:#39ff1422;border:1px solid #39ff14;color:#39ff14;font-weight:bold;font-size:10px;padding:5px;margin-bottom:6px;width:100%;cursor:pointer">OPTIMIZE PIEDMONT TRIAD MULTI-STOP ROUTE + LIVE GREENSBORO WEATHER</button>
   <div id="geo-output" style="background:#02060b;border:1px solid #00f0ff33;padding:6px;font-size:11px;color:#39ff14;white-space:pre-wrap">[GEO READY] 5 Piedmont Triad nodes indexed around Greensboro, NC (36.0726, -79.7920).</div>
 </section>
@@ -482,6 +488,19 @@ async function runGeoPredict(){
   }
 }
 
+
+async function addCustomDispatchStop(){
+  const label = document.getElementById('geo-stop-label').value.trim() || 'Triad Client';
+  const address = document.getElementById('geo-stop-addr').value.trim();
+  if (!address) return;
+  document.getElementById('geo-output').innerText = '> Geocoding & scoring ' + address + '...';
+  const r = await fetch('/api/geo/add-stop',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label, address})});
+  const out = await r.json();
+  document.getElementById('geo-stop-label').value = '';
+  document.getElementById('geo-stop-addr').value = '';
+  document.getElementById('geo-output').innerText = '[STOP ADDED: ' + out.node_id + '] ' + out.name + ' (' + out.lat + ', ' + out.lon + ') | Demand: ' + Math.round(out.demand_score*100) + '%';
+  loadGeoNodes();
+}
 async function runTriadRoute(){
   const r = await fetch('/api/geo/route',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
   const d = await r.json();

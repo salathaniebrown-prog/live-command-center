@@ -72,7 +72,9 @@ class GeoHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
         if self.path == "/api/geo/route":
-            self._j(optimize_triad_route())
+            rt = optimize_triad_route(); dispatch_route_alert(rt); self._j(rt)
+        elif self.path == "/api/geo/add-stop":
+            self._j(geocode_triad_address(d.get("label", "Client Stop"), d.get("address", "Greensboro, NC")))
         elif self.path == "/api/geo/predict":
             self._j(run_predictive_model(
                 d.get("name", "Triad Expansion Node"),
@@ -115,3 +117,30 @@ def optimize_triad_route():
         unvisited.remove(nxt)
     wx = get_live_weather()
     return {"weather": wx, "total_miles": round(total_mi, 2), "stops": [{"id": n["node_id"], "name": n["name"], "lat": n["lat"], "lon": n["lon"]} for n in route]}
+
+def geocode_triad_address(label, address_query):
+    lat, lon = 36.0726, -79.7920
+    try:
+        q = urllib.parse.quote(f"{address_query}, North Carolina")
+        req = urllib.request.Request(f"https://openstreetmap.org{q}&format=json&limit=1", headers={"User-Agent": "Astra-Location-Intel/1.0"})
+        res = json.loads(urllib.request.urlopen(req, timeout=5).read().decode())
+        if res:
+            lat, lon = float(res["lat"]), float(res["lon"])
+    except Exception:
+        pass
+    return run_predictive_model(label or address_query, lat, lon, 35000.0)
+
+def dispatch_route_alert(route_data):
+    wx = route_data.get("weather", {})
+    msg = f"Triad Route ({route_data.get('total_miles')} mi) | GSO {wx.get('temp_f')}F | Stops: {len(route_data.get('stops', []))}"
+    try:
+        os.makedirs(os.path.dirname(REAL_LOG), exist_ok=True)
+        with open(REAL_LOG, "a", encoding="utf-8") as lf:
+            lf.write(json.dumps({"ts": time.time(), "source": "GEO_DISPATCH_8103", "alert": msg, "stops": route_data.get("stops", [])}) + "\n")
+    except Exception:
+        pass
+    try:
+        rq = urllib.request.Request("http://127.0.0", data=b"{}", headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(rq, timeout=2)
+    except Exception:
+        pass
