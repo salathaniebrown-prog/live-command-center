@@ -130,6 +130,10 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path == "/api/system-manifest":
+            self.send_response(200); self.send_header("Content-Type","text/plain; charset=utf-8"); self.end_headers()
+            self.wfile.write(open(os.path.expanduser("~/SYSTEM_MANIFEST.md"),"rb").read()); return
+
         if self.path.startswith("/apps/"):
             rel = self.path[6:].split("?").strip("/")
             fp = os.path.join(APPS_DIR, rel)
