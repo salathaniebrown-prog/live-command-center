@@ -1,3 +1,21 @@
+
+def build_ledger_export_payload():
+    import os, sqlite3
+    wh_rows, inv_rows = [], []
+    wh_db = os.path.expanduser("~/astra_webhook_ledger.db")
+    inv_db = os.path.expanduser("~/astra_invoice_ledger.db")
+    if os.path.exists(wh_db):
+        c = sqlite3.connect(wh_db)
+        c.row_factory = sqlite3.Row
+        wh_rows = [dict(r) for r in c.execute("SELECT * FROM webhook_events ORDER BY timestamp DESC").fetchall()]
+        c.close()
+    if os.path.exists(inv_db):
+        c = sqlite3.connect(inv_db)
+        c.row_factory = sqlite3.Row
+        inv_rows = [dict(r) for r in c.execute("SELECT * FROM invoices ORDER BY timestamp DESC").fetchall()]
+        c.close()
+    return {"webhook_events": wh_rows, "jev_invoices": inv_rows}
+
 import os
 
 def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None):
@@ -313,6 +331,34 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path.startswith("/api/export-ledger"):
+            import csv, io, json
+            data = build_ledger_export_payload()
+            if "format=csv" in self.path:
+                buf = io.StringIO()
+                writer = csv.writer(buf)
+                writer.writerow(["source", "id", "order_ref", "vin", "amount_usd", "rail", "status_or_sig"])
+                for e in data.get("webhook_events", []):
+                    writer.writerow(["WEBHOOK_8115", e.get("event_id"), e.get("order_ref"), e.get("vin"), e.get("amount_usd"), e.get("source_rail"), e.get("signature_valid")])
+                for i in data.get("jev_invoices", []):
+                    writer.writerow(["JEV_INVOICE_8111", i.get("invoice_id"), i.get("order_ref"), i.get("vin"), i.get("amount_usd"), i.get("settlement_rail"), i.get("receipt_hash")])
+                body = buf.getvalue().encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/csv")
+                self.send_header("Content-Disposition", "attachment; filename=astra_dealership_ledger.csv")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            body = json.dumps(data, indent=2).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Disposition", "attachment; filename=astra_dealership_ledger.json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
         if self.path.startswith("/apps/"):
             rel = self.path[6:].split("?").strip("/")
             fp = os.path.join(APPS_DIR, rel)
