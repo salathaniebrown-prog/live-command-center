@@ -465,6 +465,7 @@ setInterval(function() {
   <span>CPU: <strong id="kpi-cpu" style="color:#00f0ff;">--%</strong></span>
   <span>RAM: <strong id="kpi-ram" style="color:#fff;">--MB</strong></span>
   <span>GPU: <strong id="kpi-gpu" style="color:#00ff88;">--</strong></span>
+  <span>WALLET: <a href="https://etherscan.io0x5f04EBB30d3BBf356263c3ef4823080d05bEDDf5" target="_blank" rel="noopener" style="color:#00f0ff;text-decoration:underline;font-weight:bold;">0x5f04...DDf5</a> <a href="https://basescan.org0x5f04EBB30d3BBf356263c3ef4823080d05bEDDf5" target="_blank" rel="noopener" style="color:#00ff88;text-decoration:underline;font-size:10px;">[BASE]</a></span>
 </div>
 <script>
 async function refreshTopKpiBar() {
