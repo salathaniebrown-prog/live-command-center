@@ -117,11 +117,7 @@ async function runMpInfer(indexMode) {
   const out = document.getElementById('mp-infer-out');
   out.style.display = 'block';
   out.textContent = '[RUNNING ON-DEVICE INFERENCE...]';
-  const res = await fetch('/api/mediapipe/infer', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({task_type: taskType, input: input, index: indexMode})
-  });
+  const res = await fetch("http://" + location.hostname + ":8113/execute", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({goal:input, index:indexMode})});
   out.textContent = JSON.stringify(await res.json(), null, 2);
 }
 </script>
@@ -134,7 +130,25 @@ async function buildMpTask(){
   const d = await api('/api/mp/build', {task_type, platform, delegate: 'GPU'});
   document.getElementById('mp-out').innerText = '[' + d.task_bundle_id + ' | ' + d.target_platform + ' | ' + d.accelerator_delegate + ']\\n' + d.sdk_code;
 }
-</script></body></html>"""
+</script>
+<script>
+async function dispatchToJev8111(orderRef, vin, amountUsd) {
+    try {
+        const target = "http://" + window.location.hostname + ":8111/invoice";
+        const res = await fetch(target, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({order_ref: orderRef, vin: vin, amount_usd: amountUsd})
+        });
+        const data = await res.json();
+        alert("JEV SYSTEM ONE RECEIPT PERSISTED:\n" + JSON.stringify(data, null, 2));
+    } catch (e) {
+        console.error("JEV 8111 Bridge Error:", e);
+    }
+}
+</script>
+</body>
+</html>"""
 
 class UnifiedHandler(BaseHTTPRequestHandler):
     def _proxy(self):

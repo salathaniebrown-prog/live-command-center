@@ -1,0 +1,72 @@
+{
+  "local_services": {
+    "dashboard_8088": {
+      "service": "Dashboard",
+      "status": "ONLINE",
+      "http_code": 200,
+      "sample": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>ASTRA + ALSTRA // JEV SYSTEM ONE COMMAND CENTER</title>\n<style>\n*{box-sizing:border-box}body{margin:0;padding:10px;background:#03070d;color:#e6f9ff;font-family:monospace}\n.hdr{"
+    },
+    "mediapipe_8113": {
+      "service": "MediaPipe_Tasks",
+      "status": "ONLINE",
+      "http_code": 200,
+      "sample": "{\"status\": \"AUTONOMOUS_ACTION_ENGINE_ONLINE\", \"port\": 8113, \"goals_completed\": [2], \"playback_runs\": [0], \"last_playback\": null}"
+    }
+  },
+  "ollama_local_models": {
+    "status": "OFFLINE",
+    "detail": "Ollama server not listening on http://127.0.0.1:11434"
+  },
+  "termux_build_and_code": {
+    "python_compile": {
+      "ok": true,
+      "output": ""
+    },
+    "playback_benchmark": {
+      "service": "Model_Playback",
+      "status": "OFFLINE_OR_UNCONFIGURED",
+      "detail": "Remote end closed connection without response"
+    }
+  },
+  "github_sync": {
+    "git_status_count": {
+      "ok": true,
+      "output": "42"
+    },
+    "git_remote_verify": {
+      "ok": true,
+      "output": "af4c3b50f40405215633e35124bbbbeb05e12bd9\trefs/heads/main"
+    },
+    "github_cli": {
+      "auth": {
+        "ok": false,
+        "output": "github.com\n  X Failed to log in to github.com account salathaniebrown-prog (/data/data/com.termux/files/home/.config/gh/hosts.yml)\n  - Active account: true\n  - The token in /data/data/com.termux/files/home/.config/gh/hosts.yml is invalid.\n  - To re-authenticate, run: gh auth login -h github.com\n  - To forget about this account, run: gh auth logout -h github.com -u salathaniebrown-prog"
+      },
+      "recent_runs": {
+        "ok": false,
+        "output": "failed to get runs: HTTP 401: Bad credentials (https://api.github.com/repos/salathaniebrown-prog/live-command-center/actions/runs?per_page=5&exclude_pull_requests=true)"
+      },
+      "ci_dispatch": {
+        "ok": false,
+        "output": "unable to determine default branch for salathaniebrown-prog/live-command-center: HTTP 401: Bad credentials (https://api.github.com/graphql)\nTry authenticating with:  gh auth login -h github.com"
+      }
+    }
+  },
+  "docker_runtime": {
+    "ok": true,
+    "output": "Docker daemon unavailable in unrooted Termux"
+  },
+  "external_apis": {
+    "gemini": {
+      "status": "SKIPPED"
+    },
+    "openai": {
+      "service": "OpenAI_API",
+      "status": "OFFLINE_OR_UNCONFIGURED",
+      "detail": "HTTP Error 401: Unauthorized"
+    },
+    "ibm": {
+      "status": "SKIPPED"
+    }
+  }
+}

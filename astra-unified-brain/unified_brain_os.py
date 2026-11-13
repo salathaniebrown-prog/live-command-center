@@ -100,8 +100,8 @@ def multi_step_reason(goal):
     t0 = time.time()
     c = sqlite3.connect(DB)
     c.execute("CREATE TABLE IF NOT EXISTS reasoning_state(step_id TEXT PRIMARY KEY, goal TEXT, trace TEXT, ts REAL)")
-    chunk_cnt = c.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
-    art_cnt = c.execute("SELECT COUNT(*) FROM arts").fetchone()[0]
+    chunk_cnt = c.execute("SELECT COUNT(*) FROM chunks").fetchone()[0][0][0]
+    art_cnt = c.execute("SELECT COUNT(*) FROM arts").fetchone()[0][0][0]
     qv = embed(goal)
     hits = sorted([(sim(qv, json.loads(r[4])), r[1], r[2], r[3][:140]) for r in c.execute("SELECT * FROM chunks")], reverse=True)[:3]
     mem_summary = " | ".join(f"{h[2]} (sim={h[0]})" for h in hits) or "Core Memory Active"
@@ -138,8 +138,8 @@ def multi_step_reason(goal):
     t0 = time.time()
     c = sqlite3.connect(DB)
     c.execute("CREATE TABLE IF NOT EXISTS reasoning_state(step_id TEXT PRIMARY KEY, goal TEXT, trace TEXT, ts REAL)")
-    chunk_cnt = c.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
-    art_cnt = c.execute("SELECT COUNT(*) FROM arts").fetchone()[0]
+    chunk_cnt = c.execute("SELECT COUNT(*) FROM chunks").fetchone()[0][0][0]
+    art_cnt = c.execute("SELECT COUNT(*) FROM arts").fetchone()[0][0][0]
     qv = embed(goal)
     hits = sorted([(sim(qv, json.loads(r[4])), r[1], r[2], r[3][:140]) for r in c.execute("SELECT * FROM chunks")], reverse=True)[:3]
     mem_summary = " | ".join(f"{h[2]} (sim={h[0]})" for h in hits) or "Core Memory Active"

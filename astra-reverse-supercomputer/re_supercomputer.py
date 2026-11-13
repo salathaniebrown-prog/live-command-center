@@ -111,6 +111,36 @@ class Handler(BaseHTTPRequestHandler):
             apps = sorted(os.listdir(APPS_DIR)) if os.path.exists(APPS_DIR) else []
             self._j({"status": "ONLINE", "apps": apps})
     def do_POST(self):
+
+        if self.path == "/api/3d/bundle":
+            import sys
+            sys.path.insert(0, os.path.expanduser("~/astra-reverse-supercomputer"))
+            import threejs_bundle_addon as t3b
+            ln = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(ln).decode("utf-8", errors="ignore") or "{}")
+            res = t3b.generate_3d_bundle(body.get("app_name", "astra_3d_app"), body.get("concept", "Sovereign 3D Experience"))
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(res, indent=2).encode())
+            return
+
+
+        if self.path in ("/api/re/anything", "/api/re/prompt-pack", "/api/re/build-notes"):
+            import sys; sys.path.insert(0, os.path.expanduser("~/astra-reverse-supercomputer"))
+            import re_anything_addon as rea
+            ln = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(ln).decode("utf-8", errors="ignore") or "{}")
+            if self.path == "/api/re/anything":
+                res = rea.analyze_target(body.get("target", ""), body.get("mode", "auto"))
+            elif self.path == "/api/re/prompt-pack":
+                ana = rea.analyze_target(body.get("target", ""))
+                res = rea.generate_prompt_pack(ana, body.get("objective", "Clean-room clone & harden"))
+            else:
+                res = rea.build_from_notes(body.get("notes", ""), body.get("app_name", "astra_note_build"))
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.end_headers()
+            self.wfile.write(json.dumps(res, indent=2).encode()); return
+
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
         if self.path == "/api/re/inspect": self._j(reverse_engineer_target(d.get("target", "~/package.json")))
         elif self.path == "/api/re/agents": self._j(run_supercomputer_agents(d.get("directive", "Sovereign Crypto Tracker")))

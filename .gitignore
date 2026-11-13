@@ -23,3 +23,7 @@ jeti_nexus_backups/
 *.env
 .env.*
 astra-mediapipe-tasks/models/*.tflite
+*.log
+*.db-wal
+*.db-shm
+*.bak
