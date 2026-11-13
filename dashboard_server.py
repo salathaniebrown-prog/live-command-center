@@ -270,12 +270,12 @@ def get_live_kpis(force_rpc=False):
     wh_cnt, inv_cnt = 0, 0
     if os.path.exists(os.path.expanduser("~/astra_webhook_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_webhook_ledger.db"))
-        r_wh = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()[0]
+        r_wh = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()[0][0]
         wh_cnt = int(next(iter(r_wh), 0)) if isinstance(r_wh, (tuple, list)) else int(r_wh or 0)[0]
         c.close()
     if os.path.exists(os.path.expanduser("~/astra_invoice_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_invoice_ledger.db"))
-        r_in = c.execute("SELECT COUNT(*) FROM invoices").fetchone()[0]
+        r_in = c.execute("SELECT COUNT(*) FROM invoices").fetchone()[0][0]
         inv_cnt = int(next(iter(r_in), 0)) if isinstance(r_in, (tuple, list)) else int(r_in or 0)[0]
         c.close()
     tlog = os.path.expanduser("~/tunnel.log")
@@ -343,7 +343,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
     inv_count = 0
     if os.path.exists(inv_db):
         c_inv = sqlite3.connect(inv_db)
-        inv_count = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()[0][0][0]
+        inv_count = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()[0][0][0][0]
         c_inv.close()
     jev_res = {"invoices_count": inv_count}
 
@@ -1064,6 +1064,17 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path == "/api/kpi-summary":
+            import json
+            b = json.dumps(get_live_kpis()).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
+
         if self.path.startswith("/api/kpi-summary"):
             import json
             b = json.dumps(get_live_kpis(force_rpc=("refresh=1" in self.path))).encode("utf-8")
@@ -1209,7 +1220,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
     rec_hash = "0x" + hashlib.sha256(f"{inv_id}|{order_ref}|{vin}|{amount_usd}|{ts_now}".encode()).hexdigest()
     c_inv.execute("INSERT OR REPLACE INTO invoices VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (inv_id, order_ref, vin, amount_usd, network, rec_hash, "VERIFIED_SETTLED", ts_now))
     c_inv.commit()
-    row_cnt = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()[0]
+    row_cnt = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()[0][0]
     inv_count = int(next(iter(row_cnt), 0)) if isinstance(row_cnt, (tuple, list)) else int(row_cnt or 0)
     c_inv.close()
 
@@ -1295,7 +1306,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
     rec_hash = "0x" + hashlib.sha256(f"{inv_id}|{order_ref}|{vin}|{amount_usd}|{ts_now}".encode()).hexdigest()
     c_inv.execute("INSERT OR REPLACE INTO invoices VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (inv_id, order_ref, vin, amount_usd, network, rec_hash, "VERIFIED_SETTLED", ts_now))
     c_inv.commit()
-    row_cnt = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()
+    row_cnt = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()[0]
     inv_count = int(next(iter(row_cnt), 0)) if isinstance(row_cnt, (tuple, list)) else int(row_cnt or 0)
     c_inv.close()
 
