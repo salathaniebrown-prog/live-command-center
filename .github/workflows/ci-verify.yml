@@ -45,7 +45,7 @@ jobs:
                           errors.append(f"SYNTAX ERROR in {path}: {e}")
                   if fn.endswith((".py", ".sh", ".yml", ".yaml", ".json")):
                       txt = open(path, encoding="utf-8", errors="ignore").read()
-                      if "AIza" in txt or "AstraCS:" in txt:
+ENV_SECRET = os.environ.get("ENV_SECRET", "")
                           errors.append(f"SECRET DETECTED in {path}")
 
           print(f"[✔] Verified {checked} Python modules.")

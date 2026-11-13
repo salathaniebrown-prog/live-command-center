@@ -10,7 +10,7 @@
       "service": "MediaPipe_Tasks",
       "status": "ONLINE",
       "http_code": 200,
-      "sample": "{\"status\": \"AUTONOMOUS_ACTION_ENGINE_ONLINE\", \"port\": 8113, \"goals_completed\": [2], \"playback_runs\": [0], \"last_playback\": null}"
+      "sample": "{\"status\": \"AUTONOMOUS_ACTION_ENGINE_ONLINE\", \"port\": 8113, \"goals_completed\": [3], \"playback_runs\": [0], \"last_playback\": null}"
     }
   },
   "ollama_local_models": {
@@ -31,11 +31,11 @@
   "github_sync": {
     "git_status_count": {
       "ok": true,
-      "output": "42"
+      "output": "23"
     },
     "git_remote_verify": {
       "ok": true,
-      "output": "af4c3b50f40405215633e35124bbbbeb05e12bd9\trefs/heads/main"
+      "output": "69a08bc63cd41efff832fd488ec023eafc2564f8\trefs/heads/main"
     },
     "github_cli": {
       "auth": {

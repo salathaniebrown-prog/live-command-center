@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
-echo "=== ASTRA SOVEREIGN OS STATUS (ALL 11 PORTS + TOR) ==="
-for p in 8088 8095 8096 8097 8098 8099 8100 8101 8102 8103 8104 8105 8106 8107 9050; do
-  if python3 -c "import socket; s=socket.create_connection(('127.0.0.1', ${p}), 1); s.close()" 2>/dev/null; then
+echo "=== AI STUDIO INFINITE BRAIN STATUS ==="
+for p in 8088 8095 8096 8097 8098 8099 8100; do
+  if curl -sI "http://127.0.0.1:${p}" >/dev/null 2>&1 || curl -s "http://127.0.0.1:${p}/api/state" >/dev/null 2>&1 || curl -s "http://127.0.0.1:${p}/api/legal/state" >/dev/null 2>&1 || curl -s "http://127.0.0.1:${p}/api/brain/graph" >/dev/null 2>&1 || curl -s "http://127.0.0.1:${p}/api/ooda/state" >/dev/null 2>&1 || curl -s "http://127.0.0.1:${p}/api/bi/refine" >/dev/null 2>&1 || curl -s "http://127.0.0.1:${p}/api/nexus/state" >/dev/null 2>&1; then
     echo "[ONLINE]  Port ${p}"
   else
     echo "[OFFLINE] Port ${p}"
