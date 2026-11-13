@@ -1014,7 +1014,7 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
 
 
 
-<div id="astra-ci-badge" style="position:fixed;top:46px;right:14px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(5,12,24,0.95);border:1px solid #00ff8888;padding:4px 8px;box-shadow:0 0 12px rgba(0,255,136,0.25);font-family:monospace;">
+<div id="astra-ci-badge" style="position:fixed;top:46px;right:14px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(5,12,24,0.95);border:1px solid #00ff8088;padding:4px 8px;box-shadow:0 0 12px rgba(0,255,136,0.25);font-family:monospace;">
   <button onclick="openCinemaMcpModal()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🎬 CINEMA MCP</button>
   <button onclick="openTrustPortalModal()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🛡️ TRUST PORTAL</button>
   <button id="btn-copy-handoff" onclick="copyLiveHandoffManifest()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">📋 COPY HANDOFF</button>
