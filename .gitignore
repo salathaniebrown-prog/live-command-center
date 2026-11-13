@@ -22,3 +22,4 @@ jeti_nexus_backups/
 .env
 *.env
 .env.*
+astra-mediapipe-tasks/models/*.tflite

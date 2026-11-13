@@ -101,7 +101,30 @@ api('/api/ent/visibility').then(d=>{if(d.online_count)document.getElementById('s
 <div class="card"><h3>4. MEDIAPIPE TASKS // LIVE ML ANYWHERE (WASM • WEBGPU • ANDROID • IOS • FLUTTER • PYTHON) (8113)</h3>
 <div class="row"><select id="mp-task"><option value="VISION_TEXT_AUDIO_RAG">VISION + TEXT + AUDIO + RAG</option><option value="DECISION_ROUTING_MODEL">DECISION &amp; ROUTING MODEL</option><option value="ON_DEVICE_GEMMA4_LLM">ON-DEVICE GEMMA 4 LLM</option></select>
 <select id="mp-plat"><option value="WEB_WASM_WEBGPU">WEB (WASM + WEBGPU)</option><option value="ANDROID_KOTLIN_JAVA">ANDROID (KOTLIN / JAVA)</option><option value="IOS_SWIFT_OBJC">IOS (SWIFT / OBJ-C)</option><option value="FLUTTER_DART">FLUTTER (DART)</option><option value="PYTHON_LINUX_MAC_WIN">PYTHON (LINUX/MAC/WIN)</option></select>
-<button class="g" onclick="buildMpTask()">BUILD .TASK BUNDLE (GPU)</button></div>
+<button class="g" onclick="buildMpTask()">BUILD .TASK BUNDLE (GPU)</button>
+<div style="display:flex;gap:8px;margin-top:8px;">
+  <input id="mp-infer-input" type="text" placeholder="Test on-device inference / RAG query / routing prompt..." style="flex:1;background:#071318;border:1px solid #184e59;color:#9efcff;padding:6px 10px;font-family:monospace;font-size:12px;">
+  <button onclick="runMpInfer(false)" style="background:#0d3b44;border:1px solid #25b8c9;color:#fff;padding:6px 12px;font-weight:bold;cursor:pointer;">RUN INFER</button>
+  <button onclick="runMpInfer(true)" style="background:#163826;border:1px solid #35d07f;color:#fff;padding:6px 12px;font-weight:bold;cursor:pointer;">INDEX RAG</button>
+</div>
+<pre id="mp-infer-out" style="margin-top:6px;padding:6px;background:#040b0e;border:1px solid #10323a;color:#6ef7c8;font-size:11px;white-space:pre-wrap;display:none;"></pre>
+<script>
+async function runMpInfer(indexMode) {
+  const input = document.getElementById('mp-infer-input').value || 'detect objects in live camera stream';
+  const taskSel = document.querySelector('[id*="mp"], select');
+  const taskType = indexMode ? 'RETRIEVAL' : (input.toLowerCase().includes('search') ? 'RETRIEVAL' : 'DECISION');
+  const out = document.getElementById('mp-infer-out');
+  out.style.display = 'block';
+  out.textContent = '[RUNNING ON-DEVICE INFERENCE...]';
+  const res = await fetch('/api/mediapipe/infer', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({task_type: taskType, input: input, index: indexMode})
+  });
+  out.textContent = JSON.stringify(await res.json(), null, 2);
+}
+</script>
+</div>
 <pre id="mp-out">[MEDIAPIPE TASKS READY] On-device CPU/GPU acceleration across Web, Android, iOS, Flutter &amp; Desktop.</pre></div>
 <script>
 async function buildMpTask(){
@@ -133,6 +156,20 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         return True
 
     def do_POST(self):
+
+        if self.path == "/api/mediapipe/infer":
+            import urllib.request
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length) if length else b"{}"
+            req = urllib.request.Request("http://127.0.0", data=body, headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                out = resp.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(out)
+            return
+
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
