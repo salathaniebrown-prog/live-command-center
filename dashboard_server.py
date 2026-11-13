@@ -1,6 +1,14 @@
 
 def process_voice_data_agent(prompt_text):
     import http.client, json, urllib.request
+    low = (prompt_text or "").lower()
+    if "test purchase" in low or "buy" in low or "dealership" in low:
+        res = trigger_1click_dealership_pipeline()
+        return {"status": "ACTION_EXECUTED", "engine": "VOICE_DEALERSHIP_EXEC", "reply": f"Executed test purchase {res.get('order_ref')} for ${res.get('amount_usd'):,.0f} and persisted JEV invoice."}
+    if "ci dispatch" in low or "workflow" in low or "build" in low:
+        res = dispatch_ci_with_highest_brain()
+        return {"status": "ACTION_EXECUTED", "engine": "VOICE_CI_DISPATCHER", "reply": f"Dispatched GitHub Actions CI via {res.get('brain_agent')}."}
+
     kpis = get_live_kpis() if "get_live_kpis" in globals() else {}
     sys_ctx = f"You are ASTRA VOICE CORE. Keep reply under 25 words. Live telemetry: {json.dumps(kpis)}"
 
@@ -36,7 +44,7 @@ def get_hardware_gpu_metrics():
     import os, subprocess
     cpu_pct, ram_mb, gpu_str = "0.0%", "0MB", "N/A"
     try:
-        load1 = os.getloadavg()
+        load1 = next(iter(os.getloadavg()), 0.0)
         cores = os.cpu_count() or 1
         cpu_pct = f"{min(100.0, round((load1 / cores) * 100, 1))}%"
     except Exception:
@@ -47,7 +55,9 @@ def get_hardware_gpu_metrics():
         for line in meminfo:
             k, sep, v = line.partition(":")
             if sep:
-                vals[k.strip()] = int(v.strip().split())
+                num_str = next(iter(v.strip().split()), "0")
+                if num_str.isdigit():
+                    vals[k.strip()] = int(num_str)
         used_kb = vals.get("MemTotal", 0) - vals.get("MemAvailable", vals.get("MemFree", 0))
         ram_mb = f"{round(used_kb / 1024)}MB"
     except Exception:
@@ -646,6 +656,19 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         return True
 
     def do_POST(self):
+        if self.path == "/api/test-dealership-pipeline":
+            import json
+            ln = int(self.headers.get("Content-Length", 0))
+            body_data = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
+            res_body = json.dumps(trigger_1click_dealership_pipeline(body_data.get("vin"), body_data.get("amount_usd"))).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(res_body)))
+            self.end_headers()
+            self.wfile.write(res_body)
+            return
+
         if self.path == "/api/voice-agent":
             import json
             ln = int(self.headers.get("Content-Length", 0))
