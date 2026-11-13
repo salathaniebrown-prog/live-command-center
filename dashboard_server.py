@@ -11,7 +11,7 @@ ROUTES = {
     "/api/reset": 8099, "/api/add_vehicle": 8099, "/api/set_webhook": 8099, "/api/receipt/": 8099,
     "/api/nexus/": 8100, "/api/os/": 8101, "/api/wf/": 8102, "/api/geo/": 8103,
     "/api/osint/": 8104, "/api/re/": 8105, "/api/ent/": 8106, "/api/seo/": 8107,
-    "/api/pro/": 8108, "/api/auto/": 8109, "/api/telemetry/": 8110, "/api/jev/": 8111
+    "/api/pro/": 8108, "/api/auto/": 8109, "/api/telemetry/": 8110, "/api/jev/": 8111, "/v1/chat/completions": 8111
 }
 
 HTML = """<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -34,6 +34,8 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 <div class="card"><h3>0. JEV "SYSTEM ONE" PRIMARY INTENT ROUTER &amp; WORLD LIBRARY (PORT 8111)</h3>
 <div class="row"><input id="jev-in" placeholder="Every prompt hits Jev first: Vault query, Email/Calendar tool, Invoice Agent, or Doctor/Lawyer/Inventor/Chronicles Library..."><button class="g" onclick="runJev()">ROUTE VIA JEV</button></div>
 <div class="row"><input id="tf-key" type="password" placeholder="Typeface API Key (connects external route model)..."><button class="a" onclick="saveTfKey()">SAVE TYPEFACE KEY</button><button onclick="runJevPreset('World library for doctors, lawyers, inventors and historical chronicles')">WORLD LIBRARY</button><button onclick="runJevPreset('Generate client invoice and verify crypto escrow')">INVOICE AGENT</button></div>
+
+<div class="row"><input id="jev-file" value="~/SYSTEM_MANIFEST.md" placeholder="Path to PDF, MD, JSON, or TXT guide for Jev to self-install..."><button class="g" onclick="ingestJevFile()">SELF-INSTALL FROM FILE/PDF</button><button onclick="window.location.href='/api/jev/template/medical'">MED TEMPLATE</button><button onclick="window.location.href='/api/jev/template/legal'">LEGAL TEMPLATE</button><button onclick="window.location.href='/api/jev/template/patent'">PATENT TEMPLATE</button></div>
 <pre id="jev-out">[JEV SYSTEM ONE READY] Lanes: VAULT_QUERY • TOOL_ACTION • AGENT_TASK • WORLD_LIBRARY.</pre></div>
 
 <div class="card"><h3>1. AUTO-ASTRA COMPUTE &amp; MODEL ROUTER (8109) • STUDIO PRO (8108)</h3>
@@ -49,6 +51,12 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 
 <script>
 async function api(u, b){const r=await fetch(u,b?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}:{});return await r.json();}
+
+async function ingestJevFile(){
+  const file_path = document.getElementById('jev-file').value.trim();
+  const d = await api('/api/jev/ingest-file', {file_path});
+  document.getElementById('jev-out').innerText = d.error || ('[' + d.status + '] ' + d.file + ' -> Learned Keywords: ' + (d.installed_keywords||[]).join(', '));
+}
 async function runJev(){const prompt=document.getElementById('jev-in').value.trim()||'Search world professional library';const d=await api('/api/jev/route',{prompt});document.getElementById('jev-out').innerText=d.output;}
 async function runJevPreset(p){document.getElementById('jev-in').value=p;runJev();}
 async function saveTfKey(){const api_key=document.getElementById('tf-key').value.trim();const d=await api('/api/jev/set-key',{api_key});document.getElementById('jev-out').innerText='['+d.status+'] Jev connected to Typeface route model.';}
