@@ -182,11 +182,13 @@ def get_live_kpis(force_rpc=False):
     wh_cnt, inv_cnt = 0, 0
     if os.path.exists(os.path.expanduser("~/astra_webhook_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_webhook_ledger.db"))
-        wh_cnt = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()[0]
+        r_wh = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()
+        wh_cnt = r_wh if isinstance(r_wh, (tuple, list)) else int(r_wh or 0)[0]
         c.close()
     if os.path.exists(os.path.expanduser("~/astra_invoice_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_invoice_ledger.db"))
-        inv_cnt = c.execute("SELECT COUNT(*) FROM invoices").fetchone()[0]
+        r_in = c.execute("SELECT COUNT(*) FROM invoices").fetchone()
+        inv_cnt = r_in if isinstance(r_in, (tuple, list)) else int(r_in or 0)[0]
         c.close()
     tlog = os.path.expanduser("~/tunnel.log")
     tunnel_up = os.path.exists(tlog) and ("Registered tunnel connection" in open(tlog, errors="ignore").read())
@@ -790,7 +792,75 @@ function initiateVoiceDataLink() {
 
 
 
-</html>"""
+
+<div id="astra-ci-badge" style="position:fixed;top:46px;right:14px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(5,12,24,0.95);border:1px solid #00ff8888;padding:4px 8px;box-shadow:0 0 12px rgba(0,255,136,0.25);font-family:monospace;">
+  <button onclick="openCiLogModal()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">CI LOGS</button>
+  <button id="btn-ci-dispatch" onclick="triggerBrainCiDispatch()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">⚡ AUTO-DISPATCH</button>
+  <a href="https://github.com" target="_blank" rel="noopener" style="display:flex;align-items:center;">
+    <img id="gh-ci-badge-img" src="https://github.com/badge.svg?branch=main" alt="CI" style="height:18px;" />
+  </a>
+</div>
+<div id="astra-ci-modal" style="display:none;position:fixed;inset:0;background:rgba(2,6,14,0.9);z-index:10002;align-items:center;justify-content:center;font-family:monospace;">
+  <div style="width:92%;max-width:740px;background:#07101f;border:1px solid #00f0ff;box-shadow:0 0 25px rgba(0,240,255,0.35);padding:16px;color:#00f0ff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00f0ff44;padding-bottom:8px;margin-bottom:10px;">
+      <strong style="color:#fff;">ASTRA LIVE CI RUN LOGS // HIGHEST BRAIN DISPATCHER</strong>
+      <div style="display:flex;gap:6px;">
+        <button onclick="refreshCiModalLogs()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;padding:3px 8px;font-size:11px;cursor:pointer;">REFRESH</button>
+        <button onclick="closeCiLogModal()" style="background:#ff336622;border:1px solid #ff3366;color:#ff3366;padding:3px 8px;font-size:11px;cursor:pointer;">CLOSE</button>
+      </div>
+    </div>
+    <div id="ci-dispatch-banner" style="font-size:11px;color:#00ff88;margin-bottom:8px;">BRAIN AGENT: ASTRA_UNIFIED_BRAIN_MAX (8109) READY</div>
+    <div id="ci-runs-container" style="max-height:320px;overflow-y:auto;background:#040914;border:1px solid #00f0ff33;padding:10px;font-size:11px;line-height:1.5;">Loading GitHub Actions telemetry...</div>
+  </div>
+</div>
+<script>
+function openCiLogModal() {
+  document.getElementById("astra-ci-modal").style.display = "flex";
+  refreshCiModalLogs();
+}
+function closeCiLogModal() {
+  document.getElementById("astra-ci-modal").style.display = "none";
+}
+async function refreshCiModalLogs() {
+  const box = document.getElementById("ci-runs-container");
+  box.innerHTML = "Fetching live workflow runs...";
+  try {
+    const res = await fetch("/api/ci-status");
+    const data = await res.json();
+    if (!data.runs || data.runs.length === 0) {
+      box.innerHTML = "No runs returned or GH_TOKEN not set. Detail: " + (data.error || "empty");
+      return;
+    }
+    let html = "";
+    data.runs.forEach(r => {
+      const col = r.conclusion === "success" ? "#00ff88" : (r.status === "in_progress" ? "#ffcc00" : "#ff4466");
+      html += `<div style="border-bottom:1px dashed #ffffff22;padding:4px 0;"><span style="color:${col};">[${(r.conclusion || r.status || "").toUpperCase()}]</span> <strong>${r.name}</strong> #${r.run_number} (${r.event}) — ${String(r.head_sha || "").slice(0,7)}</div>`;
+    });
+    box.innerHTML = html;
+  } catch (e) {
+    box.innerHTML = "CI Fetch Error: " + e;
+  }
+}
+async function triggerBrainCiDispatch() {
+  const btn = document.getElementById("btn-ci-dispatch");
+  const banner = document.getElementById("ci-dispatch-banner");
+  btn.disabled = true;
+  btn.innerText = "DISPATCHING...";
+  try {
+    const res = await fetch("/api/ci-dispatch", {method: "POST"});
+    const data = await res.json();
+    document.getElementById("astra-ci-modal").style.display = "flex";
+    banner.innerText = data.dispatched ? `[✔] DISPATCHED VIA ${data.brain_agent} (HTTP ${data.http_status})` : `[!] NOTICE: ${data.error || "Check gh auth"}`;
+    setTimeout(refreshCiModalLogs, 2000);
+  } catch (e) {
+    banner.innerText = "Error: " + e;
+  }
+  btn.disabled = false;
+  btn.innerText = "⚡ AUTO-DISPATCH";
+}
+</script>
+</html>
+"""
 
 class UnifiedHandler(BaseHTTPRequestHandler):
     def _proxy(self):
