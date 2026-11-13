@@ -20,7 +20,8 @@ def heal_tunnel():
     if not os.path.exists(log) or "Registered tunnel connection" not in open(log, errors="ignore").read():
         subprocess.Popen(["bash", f"{HOME}/start_tunnel.sh"])
 
-def post_push_ci():
+def post_push_ci()
+            subprocess.Popen(["python3", f"{HOME}/generate_chat_handoff.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL):
     state = f"{HOME}/.astra_last_ci_sha"
     try:
         sha = subprocess.check_output(["git", "-C", HOME, "rev-parse", "HEAD"]).decode().strip()
@@ -58,6 +59,7 @@ def run_watchdog_daemon():
             check_ports()
             heal_tunnel()
             post_push_ci()
+            subprocess.Popen(["python3", f"{HOME}/generate_chat_handoff.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception:
             pass
         time.sleep(30)
