@@ -1,10 +1,10 @@
 
 _ONCHAIN_CACHE = {"ts": 0.0, "eth": "0.0000", "usdc": "0.00", "eth_usdc": "0.00", "base_usdc": "0.00"}
 
-def fetch_onchain_balances():
+def fetch_onchain_balances(force=False):
     import json, time, urllib.request
     now = time.time()
-    if now - _ONCHAIN_CACHE.get("ts", 0.0) < 20:
+    if not force and (now - _ONCHAIN_CACHE.get("ts", 0.0) < 20):
         return {"eth_bal": _ONCHAIN_CACHE.get("eth"), "usdc_bal": _ONCHAIN_CACHE.get("usdc"), "eth_usdc_bal": _ONCHAIN_CACHE.get("eth_usdc", "0.00"), "base_usdc_bal": _ONCHAIN_CACHE.get("base_usdc", "0.00")}
 
     addr = "0x5f04EBB30d3BBf356263c3ef4823080d05bEDDf5"
@@ -166,7 +166,7 @@ def get_hardware_gpu_metrics():
     return {"cpu_pct": cpu_pct, "ram_mb": ram_mb, "gpu_stat": gpu_str}
 
 
-def get_live_kpis():
+def get_live_kpis(force_rpc=False):
     import http.client, os, sqlite3, time
     t0 = time.time()
     online = 0
@@ -198,7 +198,7 @@ def get_live_kpis():
         "webhooks_settled": wh_cnt,
         "invoices_persisted": inv_cnt,
         **get_hardware_gpu_metrics(),
-        **fetch_onchain_balances()
+        **fetch_onchain_balances(force=force_rpc)
     }
 
 
@@ -540,6 +540,25 @@ setInterval(function() {
 </div>
 <script>
 
+
+async function forceRefreshOnchainRpc(ev) {
+  if (ev) ev.stopPropagation();
+  const btn = document.getElementById("btn-rpc-refresh");
+  if (btn) { btn.disabled = true; btn.innerText = "SYNC..."; }
+  try {
+    const r = await fetch("/api/kpi-summary?refresh=1");
+    const d = await r.json();
+    const balEl = document.getElementById("kpi-onchain-bal");
+    if (balEl && d.eth_bal !== undefined) {
+      balEl.innerText = "(" + d.eth_bal + " ETH | $" + d.usdc_bal + " USDC)";
+      document.getElementById("tt-eth-usdc").innerText = "$" + (d.eth_usdc_bal || "0.00");
+      document.getElementById("tt-base-usdc").innerText = "$" + (d.base_usdc_bal || "0.00");
+      document.getElementById("tt-native-eth").innerText = (d.eth_bal || "0.0000") + " ETH";
+    }
+  } catch (e) {}
+  if (btn) { btn.disabled = false; btn.innerText = "↻ RPC"; }
+}
+
 function toggleNetTooltip(forceState) {
   const tip = document.getElementById("kpi-net-tooltip");
   if (!tip) return;
@@ -862,9 +881,9 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             return
 
-        if self.path == "/api/kpi-summary":
+        if self.path.startswith("/api/kpi-summary"):
             import json
-            b = json.dumps(get_live_kpis()).encode("utf-8")
+            b = json.dumps(get_live_kpis(force_rpc=("refresh=1" in self.path))).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
