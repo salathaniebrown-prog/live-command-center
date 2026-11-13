@@ -14,6 +14,8 @@ def check_ports():
                 subprocess.Popen(["python3", f"{HOME}/astra-mediapipe-tasks/mediapipe_edge_ml.py"], start_new_session=True)
             elif p == 8099:
                 subprocess.Popen(["python3", f"{HOME}/dealership_module.py"], start_new_session=True)
+            elif p == 8099:
+                subprocess.Popen(["python3", f"{HOME}/dealership_module.py"], start_new_session=True)
 
 def heal_tunnel():
     log = f"{HOME}/tunnel.log"
