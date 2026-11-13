@@ -962,7 +962,15 @@ function initiateVoiceDataLink() {
   try { rec.start(); } catch (e) {}
 }
 </script>
-</body>
+<div style="height:290px;width:100%;pointer-events:none;"></div>
+<div style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:9998;background:#050e1af0;border:1px solid #00ff88;padding:5px 10px;font:11px monospace;display:flex;gap:6px;align-items:center;">
+<button onclick="secRun('itdr')" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;cursor:pointer;">ITDR</button>
+<button onclick="secRun('ispm')" style="background:#00d4ff22;border:1px solid #00d4ff;color:#00d4ff;cursor:pointer;">ISPM</button>
+<button onclick="secRun('harden')" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;cursor:pointer;">HARDEN</button>
+<span id="sec-st" style="color:#aaddff;">LONGCAT-2.5 READY</span>
+</div><script>
+async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=d.mode+': '+(d.threat||d.grade||d.hardened.length+' OK');}
+</script></body>
 
 
 
@@ -1175,6 +1183,15 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             return
 
+                if self.path.startswith("/api/sec/"):
+            m = self.path.split("/api/sec/")[-1].split("?")[0]
+            out = json.dumps(run_sec_ops(m)).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(out)))
+            self.end_headers()
+            self.wfile.write(out)
+            return
         if self.path.startswith("/api/kpi-summary"):
             import json
             b = json.dumps(get_live_kpis(force_rpc=("refresh=1" in self.path))).encode("utf-8")
@@ -1519,3 +1536,122 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
         "jev_invoice_id": inv_id,
         "jev_8111_total_invoices": inv_count
     }
+
+
+# === INCREMENTAL UPGRADE: 15-NODE KPI BAR, SQLITE LEDGERS & LONGCAT 2.5 BRAIN ===
+_orig_get_live_kpis = globals().get("get_live_kpis")
+
+def get_live_kpis(force_rpc=False):
+    import os, socket, sqlite3, subprocess, time
+    t0 = time.time()
+    base = {}
+    if callable(_orig_get_live_kpis):
+        try:
+            base = _orig_get_live_kpis(force_rpc=force_rpc) or {}
+        except Exception:
+            base = {}
+
+    port_nodes = (
+        ("8088", 8088), ("8099", 8099), ("8105", 8105), ("8108", 8108),
+        ("8109", 8109), ("8111", 8111), ("8113", 8113), ("8115", 8115),
+    )
+    proc_nodes = (
+        "astra_production_perfection_engine.py",
+        "trading_engine.py",
+        "python_worker.py",
+        "auto_correct_brain.py",
+        "radium_mcp_server.py",
+        "ollama_router.py",
+        "studio_auto_engine.py",
+    )
+
+    online_count = 0
+    node_map = {}
+    for name, port in port_nodes:
+        ok = False
+        try:
+            with socket.create_connection(("127.0.0.1", port), timeout=0.15):
+                ok = True
+        except Exception:
+            ok = False
+        node_map[name] = ok
+        if ok:
+            online_count += 1
+
+    ps_out = ""
+    try:
+        ps_out = subprocess.check_output(("ps", "aux"), text=True, timeout=1.5)
+    except Exception:
+        ps_out = ""
+
+    for daemon in proc_nodes:
+        ok = daemon in ps_out
+        node_map[daemon] = ok
+        if ok:
+            online_count += 1
+
+    total_nodes = len(port_nodes) + len(proc_nodes)
+    uptime_pct = round((online_count / float(total_nodes)) * 100.0, 1)
+
+    wh_count = base.get("webhooks", 0)
+    inv_count = base.get("invoices", 0)
+    wh_db = os.path.expanduser("~/astra_webhook_ledger.db")
+    inv_db = os.path.expanduser("~/astra_invoice_ledger.db")
+    try:
+        if os.path.exists(wh_db):
+            c = sqlite3.connect(wh_db)
+            row = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()
+            wh_count = row if row else wh_count
+            c.close()
+    except Exception:
+        pass
+    try:
+        if os.path.exists(inv_db):
+            c = sqlite3.connect(inv_db)
+            row = c.execute("SELECT COUNT(*) FROM invoices").fetchone()
+            inv_count = row if row else inv_count
+            c.close()
+    except Exception:
+        pass
+
+    cpu_pct = base.get("cpu_pct", 0.0)
+    ram_mb = base.get("ram_mb", 0)
+    try:
+        load1 = os.getloadavg()
+        cores = os.cpu_count() or 1
+        cpu_pct = min(100.0, round((load1 / float(cores)) * 100.0, 1))
+    except Exception:
+        pass
+    try:
+        with open("/proc/meminfo", "r", encoding="utf-8") as mf:
+            mem = {}
+            for line in mf:
+                parts = line.split()
+                if len(parts) >= 2:
+                    mem[parts.rstrip(":")] = int(parts)
+            tot_kb = mem.get("MemTotal", 0)
+            avail_kb = mem.get("MemAvailable", mem.get("MemFree", 0))
+            if tot_kb > 0:
+                ram_mb = int((tot_kb - avail_kb) / 1024)
+    except Exception:
+        pass
+
+    tunnel_online = ("cloudflared" in ps_out) or bool(base.get("tunnel_online", False))
+    latency_ms = max(1, int((time.time() - t0) * 1000))
+
+    base.update({
+        "nodes_online": online_count,
+        "nodes_total": total_nodes,
+        "nodes_str": f"{online_count}/{total_nodes}",
+        "node_matrix": node_map,
+        "uptime_pct": uptime_pct,
+        "tunnel": "ONLINE" if tunnel_online else "OFFLINE",
+        "tunnel_online": tunnel_online,
+        "latency_ms": latency_ms,
+        "webhooks": wh_count,
+        "invoices": inv_count,
+        "cpu_pct": cpu_pct,
+        "ram_mb": ram_mb,
+        "brain_team": ("LongCat-2.5 (OpenCode)", "Auto-Astra-8109", "Studio-Pro-8108", "JEV-8111"),
+    })
+    return base
