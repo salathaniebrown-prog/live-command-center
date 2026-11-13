@@ -56,21 +56,29 @@ def fetch_onchain_balances(force=False):
     usdc_val = _ONCHAIN_CACHE.get("usdc", "0.00")
 
     # 1. Query Ethereum Mainnet Native ETH Balance via PublicNode RPC
-    try:
-        eth_rpc = "https://" + "/".join(["://publicnode.com"])
-        payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getBalance", "params": [addr, "latest"]}).encode("utf-8")
-        req = urllib.request.Request(eth_rpc, data=payload, headers={"Content-Type": "application/json", "User-Agent": "AstraKPI/1.0"})
-        res = json.loads(urllib.request.urlopen(req, timeout=4).read().decode())
-        wei = int(res.get("result") or "0x0", 16)
-        eth_val = f"{wei / 1e18:.4f}"
-    except Exception:
-        pass
+    for rpc_ep in (
+        "https://" + "/".join(["cloudflare-eth.com"]),
+        "https://" + "/".join(["://ankr.com", "eth"]),
+        "https://" + "/".join(["1rpc.io", "eth"]),
+        "https://" + "/".join(["://publicnode.com"])
+    ):
+        try:
+            payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getBalance", "params": [addr, "latest"]}).encode("utf-8")
+            req = urllib.request.Request(rpc_ep, data=payload, headers={"Content-Type": "application/json", "User-Agent": "AstraKPI/1.0"})
+            res = json.loads(urllib.request.urlopen(req, timeout=4).read().decode())
+            if "result" in res:
+                wei = int(res.get("result") or "0x0", 16)
+                eth_val = f"{wei / 1e18:.4f}"
+                break
+        except Exception:
+            continue
 
     # 2. Query Ethereum Mainnet ERC-20 USDC & Base Mainnet Native USDC individually + sum total
     eth_usdc_units = 0
     base_usdc_units = 0
     usdc_targets = [
-        ("ETH", "https://" + "/".join(["://publicnode.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+        ("ETH", "https://" + "/".join(["cloudflare-eth.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+        ("ETH", "https://" + "/".join(["cloudflare-eth.com"]), "0xdAC17F958D2ee523a2206206994597C13D831ec7"),
         ("BASE", "https://" + "/".join(["mainnet.base.org"]), "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
     ]
     call_data = "0x70a08231" + padded
@@ -139,7 +147,8 @@ def fetch_onchain_balances(force=False):
     eth_usdc_units = 0
     base_usdc_units = 0
     usdc_targets = [
-        ("ETH", "https://" + "/".join(["://publicnode.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+        ("ETH", "https://" + "/".join(["cloudflare-eth.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+        ("ETH", "https://" + "/".join(["cloudflare-eth.com"]), "0xdAC17F958D2ee523a2206206994597C13D831ec7"),
         ("BASE", "https://" + "/".join(["mainnet.base.org"]), "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
     ]
     call_data = "0x70a08231" + padded
@@ -227,7 +236,8 @@ def fetch_onchain_balances(force=False):
     eth_usdc_units = 0
     base_usdc_units = 0
     usdc_targets = [
-        ("ETH", "https://" + "/".join(["://publicnode.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+        ("ETH", "https://" + "/".join(["cloudflare-eth.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+        ("ETH", "https://" + "/".join(["cloudflare-eth.com"]), "0xdAC17F958D2ee523a2206206994597C13D831ec7"),
         ("BASE", "https://" + "/".join(["mainnet.base.org"]), "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
     ]
     call_data = "0x70a08231" + padded
