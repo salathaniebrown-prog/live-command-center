@@ -84,3 +84,53 @@ def check_and_heal_tunnel():
     txt = open(log_path, errors="ignore").read()
     if "Registered tunnel connection" not in txt:
         subprocess.Popen(["bash", os.path.join(HOME, "start_tunnel.sh")])
+
+def poll_ci_until_green(target_sha):
+    import http.client
+    log_file = os.path.join(HOME, "astra-unified-brain", "ci_poll.log")
+    for attempt in range(1, 16):
+        try:
+            conn = http.client.HTTPConnection("127.0.0.1", 8088, timeout=8)
+            conn.request("GET", "/api/ci-status")
+            data = json.loads(conn.getresponse().read().decode())
+            runs = data.get("runs") or []
+            for r in runs:
+                head_sha = str(r.get("head_sha") or "")
+                if head_sha.startswith(target_sha[:7]):
+                    status = str(r.get("status") or "")
+                    conclusion = str(r.get("conclusion") or "")
+                    entry = f"[{time.strftime('%H:%M:%S')}] SHA {target_sha[:7]} | status={status} | conclusion={conclusion}\n"
+                    open(log_file, "a").write(entry)
+                    if status == "completed":
+                        return conclusion == "success"
+        except Exception as e:
+            open(log_file, "a").write(f"[ERR] CI poll attempt {attempt}: {e}\n")
+        time.sleep(8)
+    return False
+
+def auto_post_push_ci_guard():
+    import http.client
+    state_file = os.path.join(HOME, ".astra_last_ci_sha")
+    try:
+        cur_sha = subprocess.check_output(["git", "-C", HOME, "rev-parse", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+        remote_sha = subprocess.check_output(["git", "-C", HOME, "rev-parse", "origin/main"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        return
+
+    # Only trigger once local HEAD matches pushed origin/main and hasn't been verified yet
+    if not cur_sha or cur_sha != remote_sha:
+        return
+
+    last_sha = open(state_file).read().strip() if os.path.exists(state_file) else ""
+    if cur_sha == last_sha:
+        return
+
+    open(state_file, "w").write(cur_sha)
+    try:
+        conn = http.client.HTTPConnection("127.0.0.1", 8088, timeout=8)
+        conn.request("POST", "/api/ci-dispatch")
+        conn.getresponse().read()
+    except Exception:
+        pass
+
+    poll_ci_until_green(cur_sha)
