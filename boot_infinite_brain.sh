@@ -42,3 +42,4 @@ if ! nc -z 127.0.0.1 8112 2>/dev/null; then
 fi
 setsid nohup python3 ~/astra-enterprise-core/telemetry_sentinel.py > ~/telemetry_sentinel.log 2>&1 < /dev/null &
 setsid nohup python3 ~/astra-jev-system1/jev_router.py > ~/astra-jev-system1/jev.log 2>&1 < /dev/null &
+setsid nohup python3 ~/astra-mediapipe-tasks/mediapipe_edge_ml.py > ~/astra-mediapipe-tasks/mp.log 2>&1 < /dev/null &
