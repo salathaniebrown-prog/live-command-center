@@ -1,4 +1,38 @@
 
+def get_live_kpis():
+    import http.client, os, sqlite3, time
+    t0 = time.time()
+    online = 0
+    for port in (8088, 8108, 8109, 8111, 8113, 8115):
+        try:
+            c = http.client.HTTPConnection("127.0.0.1", port, timeout=1)
+            c.request("GET", "/")
+            if c.getresponse().status == 200:
+                online += 1
+        except Exception:
+            pass
+    latency_ms = round((time.time() - t0) * 1000, 1)
+    wh_cnt, inv_cnt = 0, 0
+    if os.path.exists(os.path.expanduser("~/astra_webhook_ledger.db")):
+        c = sqlite3.connect(os.path.expanduser("~/astra_webhook_ledger.db"))
+        wh_cnt = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()
+        c.close()
+    if os.path.exists(os.path.expanduser("~/astra_invoice_ledger.db")):
+        c = sqlite3.connect(os.path.expanduser("~/astra_invoice_ledger.db"))
+        inv_cnt = c.execute("SELECT COUNT(*) FROM invoices").fetchone()
+        c.close()
+    tlog = os.path.expanduser("~/tunnel.log")
+    tunnel_up = os.path.exists(tlog) and ("Registered tunnel connection" in open(tlog, errors="ignore").read())
+    return {
+        "uptime_pct": round((online / 6.0) * 100, 1),
+        "nodes_online": f"{online}/6",
+        "tunnel_active": tunnel_up,
+        "probe_latency_ms": latency_ms,
+        "webhooks_settled": wh_cnt,
+        "invoices_persisted": inv_cnt
+    }
+
+
 def build_ledger_export_payload():
     import os, sqlite3
     wh_rows, inv_rows = [], []
@@ -290,7 +324,34 @@ setInterval(function() {
   }
 }, 60000);
 </script>
+
+<div id="astra-top-kpi-bar" style="position:fixed;top:10px;left:14px;z-index:9999;display:flex;align-items:center;gap:12px;background:rgba(5,12,24,0.94);border:1px solid #00f0ff66;padding:5px 12px;box-shadow:0 0 14px rgba(0,240,255,0.22);font-family:monospace;font-size:11px;color:#00f0ff;">
+  <span>UPTIME: <strong id="kpi-uptime" style="color:#00ff88;">--%</strong></span>
+  <span>NODES: <strong id="kpi-nodes" style="color:#fff;">--/6</strong></span>
+  <span>TUNNEL: <strong id="kpi-tunnel" style="color:#00ff88;">CHECKING</strong></span>
+  <span>LATENCY: <strong id="kpi-lat" style="color:#00f0ff;">--ms</strong></span>
+  <span>WEBHOOKS: <strong id="kpi-wh" style="color:#00ff88;">0</strong></span>
+  <span>INVOICES: <strong id="kpi-inv" style="color:#00ff88;">0</strong></span>
+</div>
+<script>
+async function refreshTopKpiBar() {
+  try {
+    const r = await fetch("/api/kpi-summary");
+    const d = await r.json();
+    document.getElementById("kpi-uptime").innerText = d.uptime_pct + "%";
+    document.getElementById("kpi-nodes").innerText = d.nodes_online;
+    document.getElementById("kpi-tunnel").innerText = d.tunnel_active ? "ONLINE" : "DOWN";
+    document.getElementById("kpi-tunnel").style.color = d.tunnel_active ? "#00ff88" : "#ff4466";
+    document.getElementById("kpi-lat").innerText = d.probe_latency_ms + "ms";
+    document.getElementById("kpi-wh").innerText = d.webhooks_settled;
+    document.getElementById("kpi-inv").innerText = d.invoices_persisted;
+  } catch (e) {}
+}
+setInterval(refreshTopKpiBar, 5000);
+refreshTopKpiBar();
+</script>
 </body>
+
 
 
 </html>"""
