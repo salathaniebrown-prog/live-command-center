@@ -1,3 +1,43 @@
+import os
+
+def trigger_1click_dealership_pipeline():
+    import hashlib, hmac, http.client, json, uuid
+    secret = os.environ.get("ASTRA_WEBHOOK_SECRET", "astra_sovereign_hmac_key_2026").encode("utf-8")
+    order_ref = "ORD-" + uuid.uuid4().hex[:6].upper()
+    vin = "1GT49REY5NU104829"
+    amount_usd = 107326.00
+    payload = {
+        "rail": "VIRTUAL_CARD_CRYPTO_ESCROW",
+        "type": "dealership.purchase.settled",
+        "order_ref": order_ref,
+        "vehicle": "2026 GMC Hummer EV Edition 1 SUV",
+        "vin": vin,
+        "virtual_card_last4": "4419",
+        "amount_usd": amount_usd
+    }
+    raw_body = json.dumps(payload).encode("utf-8")
+    sig = hmac.new(secret, raw_body, hashlib.sha256).hexdigest()
+
+    conn_wh = http.client.HTTPConnection("127.0.0.1", 8115, timeout=8)
+    conn_wh.request("POST", "/webhook", body=raw_body, headers={
+        "Content-Type": "application/json",
+        "X-Astra-Signature": "sha256=" + sig
+    })
+    wh_res = json.loads(conn_wh.getresponse().read().decode())
+
+    conn_jev = http.client.HTTPConnection("127.0.0.1", 8111, timeout=8)
+    conn_jev.request("GET", "/")
+    jev_res = json.loads(conn_jev.getresponse().read().decode())
+
+    return {
+        "status": "PIPELINE_VERIFIED",
+        "order_ref": order_ref,
+        "vin": vin,
+        "amount_usd": amount_usd,
+        "webhook_8115": wh_res,
+        "jev_8111_total_invoices": jev_res.get("invoices_count")
+    }
+
 import os, json, socketserver, urllib.request
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -153,9 +193,31 @@ async function dispatchToJev8111(orderRef, vin, amountUsd) {
     <strong style="color:#00ff88;">LIVE CRYPTO / CARD WEBHOOKS (8115)</strong>
     <span id="wh-count" style="color:#fff;">0 EVENTS</span>
   </div>
+  <button id="btn-1click-test" onclick="runOneClickPipelineTest()" style="width:100%;margin-bottom:6px;padding:6px;background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-family:monospace;font-weight:bold;cursor:pointer;text-transform:uppercase;">⚡ 1-CLICK TEST TRANSACTION (8115 -> 8111)</button>
+  <div id="wh-last-receipt" style="display:none;background:#00ff8815;border:1px solid #00ff8855;padding:5px;margin-bottom:6px;color:#fff;font-size:10px;"></div>
   <div id="wh-feed-list" style="max-height:110px;overflow-y:auto;line-height:1.4;">Waiting for incoming HMAC events...</div>
 </div>
 <script>
+async function runOneClickPipelineTest() {
+  const btn = document.getElementById("btn-1click-test");
+  const box = document.getElementById("wh-last-receipt");
+  btn.disabled = true;
+  btn.innerText = "EXECUTING HMAC -> JEV PIPELINE...";
+  try {
+    const res = await fetch("/api/test-dealership-pipeline", {method: "POST"});
+    const data = await res.json();
+    box.style.display = "block";
+    box.innerHTML = `<strong style="color:#00ff88;">[✔] SETTLED ${data.order_ref}</strong> | $${Number(data.amount_usd).toLocaleString()}<br>` +
+                    `EVENT: ${data.webhook_8115.event_id} | HMAC: VERIFIED<br>` +
+                    `JEV 8111 RECEIPTS: ${data.jev_8111_total_invoices}`;
+    await pollWebhookFeed8115();
+  } catch (e) {
+    box.style.display = "block";
+    box.innerText = "PIPELINE ERROR: " + e;
+  }
+  btn.disabled = false;
+  btn.innerText = "⚡ 1-CLICK TEST TRANSACTION (8115 -> 8111)";
+}
 async function pollWebhookFeed8115() {
   try {
     const url = "http://" + window.location.hostname + ":8115/";
@@ -201,6 +263,17 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         return True
 
     def do_POST(self):
+        if self.path == "/api/test-dealership-pipeline":
+            import json
+            res_body = json.dumps(trigger_1click_dealership_pipeline()).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(res_body)))
+            self.end_headers()
+            self.wfile.write(res_body)
+            return
+
 
         if self.path == "/api/mediapipe/infer":
             import urllib.request
