@@ -1,0 +1,87 @@
+
+<!-- MODULE 5: ALSTRA KICK + TWITCH DUAL-STREAM COMMAND -->
+<section id="alstra-dual-stream-panel" style="border:1px solid #00ff88;background:#04120e;padding:14px;margin:14px 0;font-family:monospace;color:#c8ffe6;">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #0c3b2b;padding-bottom:8px;margin-bottom:10px;">
+    <span style="color:#00ff88;font-weight:bold;">5. ALSTRA KICK + TWITCH DUAL-STREAM COMMAND (PORT 8112)</span>
+    <span id="stream-bridge-badge" style="color:#ffd166;font-size:12px;">CHECKING BRIDGE...</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+    <input id="kick-target-url" type="text" value="https://kick.com" placeholder="Kick Channel / Dashboard URL"
+      style="background:#020a08;border:1px solid #145c43;color:#00ff88;padding:8px;font-family:monospace;" />
+    <input id="twitch-target-url" type="text" value="https://twitch.tv" placeholder="Twitch Channel / Dashboard URL"
+      style="background:#020a08;border:1px solid #145c43;color:#00ff88;padding:8px;font-family:monospace;" />
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+    <button onclick="launchDualStream()" style="background:#00ff88;color:#02100b;font-weight:bold;border:none;padding:8px 12px;cursor:pointer;">
+      LAUNCH KICK + TWITCH INTENTS
+    </button>
+    <button onclick="pollStreamBridge()" style="background:#09261d;color:#00ff88;border:1px solid #00ff88;padding:8px 12px;cursor:pointer;">
+      SYNC SQLITE LEDGER
+    </button>
+    <button onclick="testChatIngest()" style="background:#1c1604;color:#ffd166;border:1px solid #ffd166;padding:8px 12px;cursor:pointer;">
+      TEST DUAL-CHAT INGEST
+    </button>
+  </div>
+  <pre id="stream-telemetry-log" style="background:#020907;border:1px solid #0c3b2b;padding:8px;margin:0;font-size:11px;max-height:130px;overflow-y:auto;color:#8ce9c0;">[ALSTRA STREAM] Ready for dual-intent dispatch & unified chat telemetry...</pre>
+</section>
+<script>
+async function pollStreamBridge() {
+  const badge = document.getElementById('stream-bridge-badge');
+  const logEl = document.getElementById('stream-telemetry-log');
+  try {
+    const r = await fetch('/api/stream/status');
+    const d = await r.json();
+    if (d.online) {
+      badge.textContent = `ONLINE // EVENTS: ${d.metrics.total_events} (TW:${d.metrics.twitch_events} | KK:${d.metrics.kick_events})`;
+      badge.style.color = '#00ff88';
+      const lines = (d.recent_feed || []).map(e => `[${e.platform.toUpperCase()}] ${e.type} (${e.user}): ${e.msg}`);
+      if (lines.length) logEl.textContent = lines.join('\n');
+    }
+  } catch (err) {
+    badge.textContent = 'BRIDGE OFFLINE (PORT 8112)';
+    badge.style.color = '#ff5c5c';
+  }
+}
+
+async function launchDualStream() {
+  const logEl = document.getElementById('stream-telemetry-log');
+  const kick_channel = document.getElementById('kick-target-url').value;
+  const twitch_channel = document.getElementById('twitch-target-url').value;
+  logEl.textContent = '[DISPATCH] Firing Android Intent launchers for Kick & Twitch...';
+  const r = await fetch('/api/stream/launch', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ kick_channel, twitch_channel })
+  });
+  const d = await r.json();
+  logEl.textContent = JSON.stringify(d, null, 2);
+  pollStreamBridge();
+}
+
+async function testChatIngest() {
+  await fetch('/api/stream/ingest', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ platform: 'kick', event_type: 'chat', username: 'AlstraOps', message: 'Dual-stream telemetry check OK' })
+  });
+  await fetch('/api/stream/ingest', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ platform: 'twitch', event_type: 'chat', username: 'AlstraOps', message: 'EventSub bridge synced' })
+  });
+  pollStreamBridge();
+}
+
+// Also patch LIVE NODES header if undefined/undefined is shown
+async function syncLiveNodesHeader() {
+  try {
+    const r = await fetch('/api/telemetry/status');
+    const d = await r.json();
+    if (d.online !== undefined && d.total !== undefined) {
+      document.body.innerHTML = document.body.innerHTML.replace('undefined/undefined', `${d.online}/${d.total}`);
+    }
+  } catch (_) {}
+}
+
+setTimeout(() => { pollStreamBridge(); syncLiveNodesHeader(); }, 600);
+</script>

@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "skills": {
+    "better-ui": {
+      "source": "janily/shipdesign",
+      "sourceType": "github",
+      "skillPath": "skills/better-ui/SKILL.md",
+      "computedHash": "36417d09a0d91fb8c8cbbbeeb14f0ac0c0d4399342d80bcec02c8c446ebadce3"
+    },
+    "gemini-api-dev": {
+      "source": "google-gemini/gemini-skills",
+      "sourceType": "github",
+      "skillPath": "skills/gemini-api-dev/SKILL.md",
+      "computedHash": "38a616b2d5e40a6d32dff294ce043404af08121503bd7a86ba0cf177af68ac5f"
+    }
+  }
+}
