@@ -1,4 +1,36 @@
 
+def get_hardware_gpu_metrics():
+    import os, subprocess
+    cpu_pct, ram_mb, gpu_str = "0.0%", "0MB", "N/A"
+    try:
+        load1 = os.getloadavg()
+        cores = os.cpu_count() or 1
+        cpu_pct = f"{min(100.0, round((load1 / cores) * 100, 1))}%"
+    except Exception:
+        pass
+    try:
+        meminfo = open("/proc/meminfo").read().splitlines()
+        vals = {}
+        for line in meminfo:
+            k, sep, v = line.partition(":")
+            if sep:
+                vals[k.strip()] = int(v.strip().split())
+        used_kb = vals.get("MemTotal", 0) - vals.get("MemAvailable", vals.get("MemFree", 0))
+        ram_mb = f"{round(used_kb / 1024)}MB"
+    except Exception:
+        pass
+    try:
+        out = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=utilization.gpu,temperature.gpu", "--format=csv,noheader,nounits"],
+            stderr=subprocess.DEVNULL, timeout=2
+        ).decode().strip().splitlines()
+        util, temp = [x.strip() for x in out.split(",")]
+        gpu_str = f"{util}%/{temp}C"
+    except Exception:
+        gpu_str = "EDGE-ACTIVE"
+    return {"cpu_pct": cpu_pct, "ram_mb": ram_mb, "gpu_stat": gpu_str}
+
+
 def get_live_kpis():
     import http.client, os, sqlite3, time
     t0 = time.time()
@@ -332,6 +364,9 @@ setInterval(function() {
   <span>LATENCY: <strong id="kpi-lat" style="color:#00f0ff;">--ms</strong></span>
   <span>WEBHOOKS: <strong id="kpi-wh" style="color:#00ff88;">0</strong></span>
   <span>INVOICES: <strong id="kpi-inv" style="color:#00ff88;">0</strong></span>
+  <span>CPU: <strong id="kpi-cpu" style="color:#00f0ff;">--%</strong></span>
+  <span>RAM: <strong id="kpi-ram" style="color:#fff;">--MB</strong></span>
+  <span>GPU: <strong id="kpi-gpu" style="color:#00ff88;">--</strong></span>
 </div>
 <script>
 async function refreshTopKpiBar() {
@@ -345,6 +380,9 @@ async function refreshTopKpiBar() {
     document.getElementById("kpi-lat").innerText = d.probe_latency_ms + "ms";
     document.getElementById("kpi-wh").innerText = d.webhooks_settled;
     document.getElementById("kpi-inv").innerText = d.invoices_persisted;
+    document.getElementById("kpi-cpu").innerText = d.cpu_pct || "--%";
+    document.getElementById("kpi-ram").innerText = d.ram_mb || "--MB";
+    document.getElementById("kpi-gpu").innerText = d.gpu_stat || "--";
   } catch (e) {}
 }
 setInterval(refreshTopKpiBar, 5000);
