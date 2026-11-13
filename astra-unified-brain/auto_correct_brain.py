@@ -58,4 +58,20 @@ def sync_brain_telemetry():
     print(json.dumps(summary, indent=2))
 
 if __name__ == "__main__":
-    sync_brain_telemetry()
+    run_watchdog_daemon()
+
+def run_watchdog_daemon():
+    while True:
+        try:
+            sync_brain_telemetry()
+        except Exception:
+            pass
+        time.sleep(30)
+
+def run_watchdog_daemon():
+    while True:
+        try:
+            sync_brain_telemetry()
+        except Exception:
+            pass
+        time.sleep(30)

@@ -1,8 +1,18 @@
 #!/data/data/com.termux/files/usr/bin/bash
 pkill -f "cloudflared tunnel" || true
-rm -f ~/cloudflared.log
-setsid nohup cloudflared tunnel --protocol http2 --url http://127.0.0.1:8088 > ~/cloudflared.log 2>&1 < /dev/null &
-sleep 5
-TUNNEL_URL=$(grep -oE 'https://[a-zA-Z0-9-]+\.trycloudflare\.com' ~/cloudflared.log | head -n 1)
-echo "$TUNNEL_URL" > ~/active_tunnel_url.txt
-echo "[LIVE HTTP2 TUNNEL]: ${TUNNEL_URL}"
+rm -f "$HOME/tunnel.log"
+setsid nohup cloudflared tunnel --url http://127.0.0.1:8088 > "$HOME/tunnel.log" 2>&1 < /dev/null &
+sleep 6
+
+python3 -c '
+import os
+log_path = os.path.expanduser("~/tunnel.log")
+if os.path.exists(log_path):
+    text = open(log_path, errors="ignore").read()
+    urls = [w.strip("| ") for w in text.split() if "trycloudflare.com" in w]
+    if urls:
+        print("[✔] LIVE EXTERNAL URL:", urls.pop())
+    else:
+        print("[!] Tunnel initializing. Log output:")
+        print(text)
+'
