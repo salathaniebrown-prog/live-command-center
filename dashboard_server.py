@@ -80,11 +80,11 @@ def get_live_kpis():
     wh_cnt, inv_cnt = 0, 0
     if os.path.exists(os.path.expanduser("~/astra_webhook_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_webhook_ledger.db"))
-        wh_cnt = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()
+        wh_cnt = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()[0]
         c.close()
     if os.path.exists(os.path.expanduser("~/astra_invoice_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_invoice_ledger.db"))
-        inv_cnt = c.execute("SELECT COUNT(*) FROM invoices").fetchone()
+        inv_cnt = c.execute("SELECT COUNT(*) FROM invoices").fetchone()[0]
         c.close()
     tlog = os.path.expanduser("~/tunnel.log")
     tunnel_up = os.path.exists(tlog) and ("Registered tunnel connection" in open(tlog, errors="ignore").read())
@@ -147,7 +147,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None):
     inv_count = 0
     if os.path.exists(inv_db):
         c_inv = sqlite3.connect(inv_db)
-        inv_count = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()[0]
+        inv_count = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()[0][0]
         c_inv.close()
     jev_res = {"invoices_count": inv_count}
 
@@ -602,6 +602,17 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path == "/api/kpi-summary":
+            import json
+            b = json.dumps(get_live_kpis()).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
+
         if self.path.startswith("/api/export-ledger"):
             import csv, io, json
             data = build_ledger_export_payload()
