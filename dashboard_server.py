@@ -1,4 +1,18 @@
 
+def call_cinema_mcp_8121(payload=None):
+    import http.client, json
+    try:
+        c = http.client.HTTPConnection("127.0.0.1", 8121, timeout=6)
+        if payload is not None:
+            b = json.dumps(payload).encode("utf-8")
+            c.request("POST", "/render", body=b, headers={"Content-Type": "application/json"})
+        else:
+            c.request("GET", "/")
+        return json.loads(c.getresponse().read().decode())
+    except Exception as e:
+        return {"status": "ERROR", "error": str(e)}
+
+
 def query_trust_center_8117(question_text=None):
     import http.client, json
     try:
@@ -991,6 +1005,7 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
 
 
 <div id="astra-ci-badge" style="position:fixed;top:46px;right:14px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(5,12,24,0.95);border:1px solid #00ff8888;padding:4px 8px;box-shadow:0 0 12px rgba(0,255,136,0.25);font-family:monospace;">
+  <button onclick="openCinemaMcpModal()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🎬 CINEMA MCP</button>
   <button onclick="openTrustPortalModal()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🛡️ TRUST PORTAL</button>
   <button id="btn-copy-handoff" onclick="copyLiveHandoffManifest()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">📋 COPY HANDOFF</button>
   <button onclick="openCiLogModal()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">CI LOGS</button>
@@ -1144,7 +1159,82 @@ async function askTrustQuestionnaireAi() {
   }
 }
 </script>
+
+<div id="astra-cinema-modal" style="display:none;position:fixed;inset:0;background:rgba(2,6,14,0.93);z-index:10004;align-items:center;justify-content:center;font-family:monospace;">
+  <div style="width:94%;max-width:840px;background:#050c1a;border:1px solid #00f0ff;box-shadow:0 0 30px rgba(0,240,255,0.32);padding:16px;color:#00f0ff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00f0ff44;padding-bottom:8px;margin-bottom:10px;">
+      <strong style="color:#fff;">CLAUDE AI CINEMATIC VIDEO & RENOISE MCP SYNC STUDIO (PORT 8121)</strong>
+      <button onclick="document.getElementById('astra-cinema-modal').style.display='none'" style="background:#ff336622;border:1px solid #ff3366;color:#ff3366;padding:3px 8px;font-size:11px;cursor:pointer;">CLOSE</button>
+    </div>
+    <canvas id="cinema-preview-canvas" width="800" height="130" style="width:100%;height:130px;background:#02050c;border:1px solid #00ff8855;margin-bottom:8px;"></canvas>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <input id="cin-prompt" type="text" value="Cybernetic supercomputer datacenter flythrough synced to 128 BPM industrial synth" style="flex:2;background:#030812;border:1px solid #00f0ff66;color:#fff;padding:6px;font-family:monospace;font-size:11px;" />
+      <input id="cin-bpm" type="number" value="128" style="width:72px;background:#030812;border:1px solid #00ff8866;color:#00ff88;padding:6px;font-family:monospace;font-size:11px;" />
+      <select id="cin-action" style="background:#030812;border:1px solid #00f0ff66;color:#00f0ff;padding:6px;font-family:monospace;font-size:11px;">
+        <option value="CREATE_AND_SYNC">CREATE + RENOISE SYNC</option>
+        <option value="EDIT_TIMELINE">EDIT CUTS + RE-SYNC</option>
+      </select>
+      <button onclick="renderCinemaRenoiseProject()" style="background:#00ff8833;border:1px solid #00ff88;color:#00ff88;padding:6px 12px;font-weight:bold;cursor:pointer;">⚡ RENDER & SYNC</button>
+    </div>
+    <div id="cin-output" style="background:#030812;border:1px solid #00f0ff44;padding:8px;font-size:11px;color:#fff;max-height:170px;overflow-y:auto;">Ready for Claude AI Director + Renoise OSC beat-grid synchronization.</div>
+  </div>
+</div>
+<script>
+let cinAnimFrame = null, cinBpm = 128;
+function openCinemaMcpModal() {
+  document.getElementById("astra-cinema-modal").style.display = "flex";
+  startCinemaPreviewLoop();
+}
+function startCinemaPreviewLoop() {
+  if (cinAnimFrame) cancelAnimationFrame(cinAnimFrame);
+  const cv = document.getElementById("cinema-preview-canvas");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  let t = 0;
+  function frame() {
+    t += (cinBpm / 60) * 0.05;
+    ctx.fillStyle = "rgba(2, 5, 12, 0.3)";
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    const pulse = Math.abs(Math.sin(t * Math.PI));
+    ctx.strokeStyle = pulse > 0.8 ? "#00ff88" : "#00f0ff";
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 16; i++) {
+      const x = (i / 16) * cv.width + 20;
+      const h = 18 + Math.abs(Math.sin(t + i * 0.6)) * (65 + pulse * 25);
+      ctx.strokeRect(x, (cv.height - h) / 2, 26, h);
+    }
+    ctx.fillStyle = "#fff";
+    ctx.font = "11px monospace";
+    ctx.fillText("2.39:1 ANAMORPHIC TIMELINE // RENOISE OSC BPM: " + cinBpm + " // MCP ACTIVE", 14, 18);
+    cinAnimFrame = requestAnimationFrame(frame);
+  }
+  frame();
+}
+async function renderCinemaRenoiseProject() {
+  const prompt = document.getElementById("cin-prompt").value;
+  cinBpm = parseFloat(document.getElementById("cin-bpm").value) || 128;
+  const action = document.getElementById("cin-action").value;
+  const out = document.getElementById("cin-output");
+  out.innerText = "Synthesizing Claude Director storyboard & firing Renoise OSC triggers...";
+  try {
+    const r = await fetch("/api/cinema-mcp/render", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({prompt: prompt, bpm: cinBpm, fps: 24, edit_action: action})
+    });
+    const d = await r.json();
+    const shotsHtml = (d.storyboard || []).map(st =>
+      `<div style="color:#00f0ff;margin-top:3px;">• Shot ${st.shot} [Bars ${st.bar_range} | ${st.start_sec}s-${st.end_sec}s]: ${st.camera} — Pattern #${st.renoise_pattern} (${st.fx})</div>`
+    ).join("");
+    out.innerHTML = `<strong style="color:#00ff88;">[${d.project_id} | ${d.claude_engine}]</strong> ${d.director_notes}${shotsHtml}` +
+                    `<div style="color:#8899aa;font-size:10px;margin-top:4px;">Renoise OSC Target: ${d.renoise_sync.renoise_osc.target} | Attestation: ${d.attestation_hash}</div>`;
+  } catch (e) {
+    out.innerText = "Error: " + e;
+  }
+}
+</script>
 </html>
+
 
 """
 
@@ -1178,6 +1268,19 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        if self.path == "/api/cinema-mcp/render":
+            import json
+            ln = int(self.headers.get("Content-Length", 0))
+            d = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
+            b = json.dumps(call_cinema_mcp_8121(d)).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
+
         if self.path == "/api/trust-center/ask":
             import json
             ln = int(self.headers.get("Content-Length", 0))
@@ -1253,6 +1356,17 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path == "/api/cinema-mcp":
+            import json
+            b = json.dumps(call_cinema_mcp_8121()).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
+
         if self.path == "/api/trust-center":
             import json
             b = json.dumps(query_trust_center_8117()).encode("utf-8")
