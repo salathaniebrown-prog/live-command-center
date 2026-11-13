@@ -23,23 +23,30 @@ def fetch_onchain_balances():
     except Exception:
         pass
 
-    # 2. Query Base Mainnet Native USDC (0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913) balanceOf
-    try:
-        base_rpc = "https://" + "/".join(["mainnet.base.org"])
-        call_data = "0x70a08231" + padded
-        usdc_contract = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-        payload = json.dumps({
-            "jsonrpc": "2.0",
-            "id": 2,
-            "method": "eth_call",
-            "params": [{"to": usdc_contract, "data": call_data}, "latest"]
-        }).encode("utf-8")
-        req = urllib.request.Request(base_rpc, data=payload, headers={"Content-Type": "application/json", "User-Agent": "AstraKPI/1.0"})
-        res = json.loads(urllib.request.urlopen(req, timeout=4).read().decode())
-        raw_units = int(res.get("result") or "0x0", 16)
-        usdc_val = f"{raw_units / 1e6:,.2f}"
-    except Exception:
-        pass
+    # 2. Query Ethereum Mainnet ERC-20 USDC + Base Mainnet Native USDC and sum total
+    total_usdc_units = 0
+    usdc_targets = [
+        ("https://" + "/".join(["://publicnode.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+        ("https://" + "/".join(["mainnet.base.org"]), "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+    ]
+    call_data = "0x70a08231" + padded
+    queried_ok = False
+    for rpc_url, contract_addr in usdc_targets:
+        try:
+            payload = json.dumps({
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "eth_call",
+                "params": [{"to": contract_addr, "data": call_data}, "latest"]
+            }).encode("utf-8")
+            req = urllib.request.Request(rpc_url, data=payload, headers={"Content-Type": "application/json", "User-Agent": "AstraKPI/1.0"})
+            res = json.loads(urllib.request.urlopen(req, timeout=4).read().decode())
+            total_usdc_units += int(res.get("result") or "0x0", 16)
+            queried_ok = True
+        except Exception:
+            pass
+    if queried_ok:
+        usdc_val = f"{total_usdc_units / 1e6:,.2f}"
 
     _ONCHAIN_CACHE["ts"] = now
     _ONCHAIN_CACHE["eth"] = eth_val
@@ -175,7 +182,9 @@ def get_live_kpis():
         "tunnel_active": tunnel_up,
         "probe_latency_ms": latency_ms,
         "webhooks_settled": wh_cnt,
-        "invoices_persisted": inv_cnt
+        "invoices_persisted": inv_cnt,
+        **get_hardware_gpu_metrics(),
+        **fetch_onchain_balances()
     }
 
 
