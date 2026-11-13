@@ -36,6 +36,8 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 <div class="row"><input id="tf-key" type="password" placeholder="Typeface API Key (connects external route model)..."><button class="a" onclick="saveTfKey()">SAVE TYPEFACE KEY</button><button onclick="runJevPreset('World library for doctors, lawyers, inventors and historical chronicles')">WORLD LIBRARY</button><button onclick="runJevPreset('Generate client invoice and verify crypto escrow')">INVOICE AGENT</button></div>
 
 <div class="row"><input id="jev-file" value="~/SYSTEM_MANIFEST.md" placeholder="Path to PDF, MD, JSON, or TXT guide for Jev to self-install..."><button class="g" onclick="ingestJevFile()">SELF-INSTALL FROM FILE/PDF</button><button onclick="window.location.href='/api/jev/template/medical'">MED TEMPLATE</button><button onclick="window.location.href='/api/jev/template/legal'">LEGAL TEMPLATE</button><button onclick="window.location.href='/api/jev/template/patent'">PATENT TEMPLATE</button></div>
+
+<div class="row"><input id="feed-name" placeholder="Feed Label (e.g. Tech RSS / Crypto API)" style="max-width:190px"><input id="feed-url" placeholder="Paste any RSS, XML, JSON API, or GitHub feed URL..."><button class="g" onclick="addLiveFeed()">CONNECT FEED</button><button class="a" onclick="syncAllFeeds()">SYNC ALL FEEDS</button></div>
 <pre id="jev-out">[JEV SYSTEM ONE READY] Lanes: VAULT_QUERY • TOOL_ACTION • AGENT_TASK • WORLD_LIBRARY.</pre></div>
 
 <div class="card"><h3>1. AUTO-ASTRA COMPUTE &amp; MODEL ROUTER (8109) • STUDIO PRO (8108)</h3>
@@ -52,6 +54,20 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 <script>
 async function api(u, b){const r=await fetch(u,b?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}:{});return await r.json();}
 
+
+async function addLiveFeed(){
+  const name = document.getElementById('feed-name').value.trim() || 'External Live Feed';
+  const url = document.getElementById('feed-url').value.trim();
+  if (!url) return;
+  document.getElementById('jev-out').innerText = '> Connecting & harvesting live external feed...';
+  const d = await api('/api/jev/add-feed', {name, url});
+  document.getElementById('jev-out').innerText = '[' + d.feed_id + '] ' + d.name + ' -> ' + (d.snapshot || d.error);
+}
+async function syncAllFeeds(){
+  document.getElementById('jev-out').innerText = '> Syncing all external feeds into Jev & 45M Brain...';
+  const d = await api('/api/jev/feeds');
+  document.getElementById('jev-out').innerText = (d.feeds || []).map(f => '[' + f.feed_id + '] ' + f.name + ': ' + (f.snapshot || f.error)).join('\n');
+}
 async function ingestJevFile(){
   const file_path = document.getElementById('jev-file').value.trim();
   const d = await api('/api/jev/ingest-file', {file_path});

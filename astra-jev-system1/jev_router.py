@@ -1,3 +1,5 @@
+import sys; sys.path.insert(0, os.path.expanduser('~/astra-jev-system1'))
+import jev_feeds
 import os, re, json, time, socket, sqlite3, hashlib, urllib.request
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -21,7 +23,7 @@ TEMPLATES = {
     "patent": "# PROVISIONAL PATENT & INVENTION DISCLOSURE\n- Title: Multi-Agent Reflex Decision Layer & Tiered Persistent Memory OS\n- Technical Field & Claims: Deterministic intent classification, zero-trust state routing, and self-installing knowledge ingestion\n"
 }
 
-def init():
+def init(); jev_feeds.init_feeds(); jev_feeds.start_feed_daemon():
     os.makedirs(BASE, exist_ok=True)
     c = sqlite3.connect(DB)
     c.execute("PRAGMA journal_mode=WAL")
@@ -99,6 +101,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(s); self.send_header("Content-Type","application/json"); self.end_headers()
         self.wfile.write(json.dumps(d).encode())
     def do_GET(self):
+        if self.path == "/api/jev/feeds":
+            self._j({"feeds": jev_feeds.sync_all_feeds()}); return
+
         if self.path.startswith("/api/jev/template/"):
             kind = self.path.split("/")[-1].lower()
             txt = TEMPLATES.get(kind, TEMPLATES["legal"]).encode("utf-8")
@@ -107,6 +112,12 @@ class Handler(BaseHTTPRequestHandler):
         health = {k: {"port": p, "solid": check_endpoint(p)} for k, (p, _) in UPSTREAM_ENDPOINTS.items()}
         self._j({"status": "JEV_REFLEX_ONLINE", "openai_compat_endpoint": "/v1/chat/completions", "endpoints": health})
     def do_POST(self):
+        if self.path == "/api/jev/add-feed":
+            nm = d.get("name", "Custom External Feed")
+            u = d.get("url", "https://algolia.com")
+            fid = "FEED-" + hashlib.sha256(f"{u}{time.time()}".encode()).hexdigest()[:5].upper()
+            self._j(jev_feeds.pull_single_feed(fid, nm, u)); return
+
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
         if self.path == "/api/jev/ingest-file":
             self._j(self_install_from_file(d.get("file_path", "~/SYSTEM_MANIFEST.md")))
