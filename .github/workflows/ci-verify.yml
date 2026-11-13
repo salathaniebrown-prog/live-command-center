@@ -5,6 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      brain_agent:
+        description: 'Triggering Brain Model Agent'
+        required: false
+        default: 'ASTRA_UNIFIED_BRAIN_MAX'
 
 jobs:
   syntax-and-security-verify:
