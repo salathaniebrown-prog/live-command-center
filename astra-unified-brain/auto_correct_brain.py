@@ -1,7 +1,7 @@
 import http.client, json, os, py_compile, subprocess, time
 
 HOME = os.path.expanduser("~")
-PORTS = (8088, 8099, 8108, 8109, 8111, 8113, 8115)
+PORTS = (8088, 8099, 8108, 8109, 8111, 8113, 8115, 8117, 8119)
 
 def check_ports():
     for p in PORTS:
@@ -14,12 +14,28 @@ def check_ports():
                 subprocess.Popen(["python3", f"{HOME}/astra-mediapipe-tasks/mediapipe_edge_ml.py"], start_new_session=True)
             elif p == 8099:
                 subprocess.Popen(["python3", f"{HOME}/dealership_module.py"], start_new_session=True)
+            elif p == 8117:
+                subprocess.Popen(["python3", f"{HOME}/trust_center_8117.py"], start_new_session=True)
+            elif p == 8119:
+                subprocess.Popen(["python3", f"{HOME}/agentic_mesh_8119.py"], start_new_session=True)
             elif p == 8099:
                 subprocess.Popen(["python3", f"{HOME}/dealership_module.py"], start_new_session=True)
+            elif p == 8117:
+                subprocess.Popen(["python3", f"{HOME}/trust_center_8117.py"], start_new_session=True)
+            elif p == 8119:
+                subprocess.Popen(["python3", f"{HOME}/agentic_mesh_8119.py"], start_new_session=True)
             elif p == 8099:
                 subprocess.Popen(["python3", f"{HOME}/dealership_module.py"], start_new_session=True)
+            elif p == 8117:
+                subprocess.Popen(["python3", f"{HOME}/trust_center_8117.py"], start_new_session=True)
+            elif p == 8119:
+                subprocess.Popen(["python3", f"{HOME}/agentic_mesh_8119.py"], start_new_session=True)
             elif p == 8099:
                 subprocess.Popen(["python3", f"{HOME}/dealership_module.py"], start_new_session=True)
+            elif p == 8117:
+                subprocess.Popen(["python3", f"{HOME}/trust_center_8117.py"], start_new_session=True)
+            elif p == 8119:
+                subprocess.Popen(["python3", f"{HOME}/agentic_mesh_8119.py"], start_new_session=True)
 
 def heal_tunnel():
     log = f"{HOME}/tunnel.log"
