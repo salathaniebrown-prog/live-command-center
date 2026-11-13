@@ -82,5 +82,5 @@ def check_and_heal_tunnel():
         subprocess.Popen(["bash", os.path.join(HOME, "start_tunnel.sh")])
         return
     txt = open(log_path, errors="ignore").read()
-    if "ERR" in txt and "failed to connect" in txt:
+    if "Registered tunnel connection" not in txt:
         subprocess.Popen(["bash", os.path.join(HOME, "start_tunnel.sh")])
