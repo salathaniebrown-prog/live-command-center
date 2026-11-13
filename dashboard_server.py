@@ -442,6 +442,21 @@ refreshTopKpiBar();
   let phase = 0, energy = 0.25;
   window.setVoiceCgiEnergy = function(val) { energy = val; };
 
+  let audioCtx = null, analyser = null, freqData = null;
+  window.startMicFftStream = async function() {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      src.connect(analyser);
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+    } catch (e) {}
+  };
+
+
   function drawDataCore() {
     ctx.fillStyle = "rgba(2, 6, 15, 0.28)";
     ctx.fillRect(0, 0, cv.width, cv.height);
@@ -471,6 +486,21 @@ refreshTopKpiBar();
       ctx.fillStyle = i % 2 === 0 ? "#00ff88" : "#00f0ff";
       ctx.fillRect(px, py, 2, 2);
     }
+    
+    if (analyser && freqData) {
+      analyser.getByteFrequencyData(freqData);
+      let sum = 0;
+      const barW = cv.width / freqData.length;
+      for (let b = 0; b < freqData.length; b++) {
+        const val = freqData[b];
+        sum += val;
+        const bh = (val / 255) * 32;
+        ctx.fillStyle = b % 2 === 0 ? "rgba(0, 240, 255, 0.45)" : "rgba(0, 255, 136, 0.45)";
+        ctx.fillRect(b * barW, cv.height - bh, barW - 1, bh);
+      }
+      energy = Math.max(0.25, (sum / (freqData.length * 255)) * 2.2);
+    }
+
     requestAnimationFrame(drawDataCore);
   }
   drawDataCore();
@@ -508,6 +538,7 @@ async function sendVoiceTextProbe(promptText) {
 }
 
 function initiateVoiceDataLink() {
+  if (window.startMicFftStream) window.startMicFftStream();
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
     sendVoiceTextProbe("Execute live data core telemetry status");
