@@ -106,6 +106,7 @@ api('/api/ent/visibility').then(d=>{if(d.online_count)document.getElementById('s
   <input id="mp-infer-input" type="text" placeholder="Test on-device inference / RAG query / routing prompt..." style="flex:1;background:#071318;border:1px solid #184e59;color:#9efcff;padding:6px 10px;font-family:monospace;font-size:12px;">
   <button onclick="runMpInfer(false)" style="background:#0d3b44;border:1px solid #25b8c9;color:#fff;padding:6px 12px;font-weight:bold;cursor:pointer;">RUN INFER</button>
   <button onclick="runMpInfer(true)" style="background:#163826;border:1px solid #35d07f;color:#fff;padding:6px 12px;font-weight:bold;cursor:pointer;">INDEX RAG</button>
+  <button onclick="window.open('http://'+location.hostname+':8113/ui','_blank')" style="background:#1b2c4d;border:1px solid #4ea1ff;color:#fff;padding:6px 12px;font-weight:bold;cursor:pointer;">OPEN WEBGPU RUNNER</button>
 </div>
 <pre id="mp-infer-out" style="margin-top:6px;padding:6px;background:#040b0e;border:1px solid #10323a;color:#6ef7c8;font-size:11px;white-space:pre-wrap;display:none;"></pre>
 <script>
