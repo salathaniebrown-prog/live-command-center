@@ -354,12 +354,12 @@ def get_live_kpis(force_rpc=False):
     wh_cnt, inv_cnt = 0, 0
     if os.path.exists(os.path.expanduser("~/astra_webhook_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_webhook_ledger.db"))
-        r_wh = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone().__getitem__(0)[0][0]
+        r_wh = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone().__getitem__(0).__getitem__(0).__getitem__(0)[0][0]
         wh_cnt = int(next(iter(r_wh), 0)) if isinstance(r_wh, (tuple, list)) else int(r_wh or 0)[0]
         c.close()
     if os.path.exists(os.path.expanduser("~/astra_invoice_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_invoice_ledger.db"))
-        inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0) or (0,)), 0))
+        inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0).__getitem__(0).__getitem__(0) or (0,)), 0))
         inv_cnt = int(next(iter(r_in), 0)) if isinstance(r_in, (tuple, list)) else int(r_in or 0)[0]
         c.close()
     tlog = os.path.expanduser("~/tunnel.log")
@@ -428,7 +428,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
     inv_count = 0
     if os.path.exists(inv_db):
         c_inv = sqlite3.connect(inv_db)
-        inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0) or (0,)), 0))
+        inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0).__getitem__(0).__getitem__(0) or (0,)), 0))
         c_inv.close()
     jev_res = {"invoices_count": inv_count}
 
@@ -1368,7 +1368,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
     rec_hash = "0x" + hashlib.sha256(f"{inv_id}|{order_ref}|{vin}|{amount_usd}|{ts_now}".encode()).hexdigest()
     c_inv.execute("INSERT OR REPLACE INTO invoices VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (inv_id, order_ref, vin, amount_usd, network, rec_hash, "VERIFIED_SETTLED", ts_now))
     c_inv.commit()
-    inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0) or (0,)), 0))
+    inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0).__getitem__(0).__getitem__(0) or (0,)), 0))
     inv_count = int(next(iter(row_cnt), 0)) if isinstance(row_cnt, (tuple, list)) else int(row_cnt or 0)
     c_inv.close()
 
@@ -1454,7 +1454,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
     rec_hash = "0x" + hashlib.sha256(f"{inv_id}|{order_ref}|{vin}|{amount_usd}|{ts_now}".encode()).hexdigest()
     c_inv.execute("INSERT OR REPLACE INTO invoices VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (inv_id, order_ref, vin, amount_usd, network, rec_hash, "VERIFIED_SETTLED", ts_now))
     c_inv.commit()
-    inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0) or (0,)), 0))
+    inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0).__getitem__(0).__getitem__(0) or (0,)), 0))
     inv_count = int(next(iter(row_cnt), 0)) if isinstance(row_cnt, (tuple, list)) else int(row_cnt or 0)
     c_inv.close()
 
@@ -1540,7 +1540,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
     rec_hash = "0x" + hashlib.sha256(f"{inv_id}|{order_ref}|{vin}|{amount_usd}|{ts_now}".encode()).hexdigest()
     c_inv.execute("INSERT OR REPLACE INTO invoices VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (inv_id, order_ref, vin, amount_usd, network, rec_hash, "VERIFIED_SETTLED", ts_now))
     c_inv.commit()
-    inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0) or (0,)), 0))
+    inv_count = int(next(iter(c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0).__getitem__(0).__getitem__(0) or (0,)), 0))
     inv_count = int(next(iter(row_cnt), 0)) if isinstance(row_cnt, (tuple, list)) else int(row_cnt or 0)
     c_inv.close()
 
@@ -1620,7 +1620,7 @@ def get_live_kpis(force_rpc=False):
     try:
         if os.path.exists(wh_db):
             c = sqlite3.connect(wh_db)
-            row = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone().__getitem__(0)
+            row = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone().__getitem__(0).__getitem__(0).__getitem__(0)
             wh_count = row if row else wh_count
             c.close()
     except Exception:
@@ -1628,7 +1628,7 @@ def get_live_kpis(force_rpc=False):
     try:
         if os.path.exists(inv_db):
             c = sqlite3.connect(inv_db)
-            row = c.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0)
+            row = c.execute("SELECT COUNT(*) FROM invoices").fetchone().__getitem__(0).__getitem__(0).__getitem__(0)
             inv_count = row if row else inv_count
             c.close()
     except Exception:
