@@ -38,6 +38,13 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 <div class="row"><input id="jev-file" value="~/SYSTEM_MANIFEST.md" placeholder="Path to PDF, MD, JSON, or TXT guide for Jev to self-install..."><button class="g" onclick="ingestJevFile()">SELF-INSTALL FROM FILE/PDF</button><button onclick="window.location.href='/api/jev/template/medical'">MED TEMPLATE</button><button onclick="window.location.href='/api/jev/template/legal'">LEGAL TEMPLATE</button><button onclick="window.location.href='/api/jev/template/patent'">PATENT TEMPLATE</button></div>
 
 <div class="row"><input id="feed-name" placeholder="Feed Label (e.g. Tech RSS / Crypto API)" style="max-width:190px"><input id="feed-url" placeholder="Paste any RSS, XML, JSON API, or GitHub feed URL..."><button class="g" onclick="addLiveFeed()">CONNECT FEED</button><button class="a" onclick="syncAllFeeds()">SYNC ALL FEEDS</button></div>
+
+<div class="row"><select id="jev-feed-preset" onchange="document.getElementById('jev-feed-url').value=this.value" style="max-width:170px">
+<option value="https://hnrss.org">TECH / AI LIVE FEED</option>
+<option value="https://coinbase.com">COINBASE ETH SPOT</option>
+<option value="https://reddit.com">GREENSBORO NC FEED</option>
+</select><input id="jev-feed-url" value="https://hnrss.org" placeholder="Paste any RSS, XML, JSON API, or Web Feed URL...">
+<button class="g" onclick="connectLiveFeed()">CONNECT LIVE FEED</button></div>
 <pre id="jev-out">[JEV SYSTEM ONE READY] Lanes: VAULT_QUERY • TOOL_ACTION • AGENT_TASK • WORLD_LIBRARY.</pre></div>
 
 <div class="card"><h3>1. AUTO-ASTRA COMPUTE &amp; MODEL ROUTER (8109) • STUDIO PRO (8108)</h3>
@@ -67,6 +74,13 @@ async function syncAllFeeds(){
   document.getElementById('jev-out').innerText = '> Syncing all external feeds into Jev & 45M Brain...';
   const d = await api('/api/jev/feeds');
   document.getElementById('jev-out').innerText = (d.feeds || []).map(f => '[' + f.feed_id + '] ' + f.name + ': ' + (f.snapshot || f.error)).join('\n');
+}
+
+async function connectLiveFeed(){
+  const url = document.getElementById('jev-feed-url').value.trim();
+  document.getElementById('jev-out').innerText = '> Connecting Jev Reflex Layer to live external feed...';
+  const d = await api('/api/jev/connect-feed', {url, label: 'LIVE_STREAM'});
+  document.getElementById('jev-out').innerText = '[' + d.status + '] ' + d.url + '\\n' + (d.items||[]).map((x,i)=>(i+1)+'. '+x).join('\\n');
 }
 async function ingestJevFile(){
   const file_path = document.getElementById('jev-file').value.trim();

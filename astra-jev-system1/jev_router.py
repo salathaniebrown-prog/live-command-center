@@ -134,3 +134,30 @@ class Handler(BaseHTTPRequestHandler):
 
 init()
 HTTPServer(("0.0.0.0", 8111), Handler).serve_forever()
+
+def pull_external_feed(feed_url, label="LIVE_FEED"):
+    url = feed_url.strip() or "https://hnrss.org"
+    c = sqlite3.connect(DB)
+    c.execute("CREATE TABLE IF NOT EXISTS live_feeds(url TEXT PRIMARY KEY, label TEXT, last_items TEXT, updated_at REAL)")
+    items = []
+    try:
+        rq = urllib.request.Request(url, headers={"User-Agent": "Jev-Reflex-Feed/1.0"})
+        raw = urllib.request.urlopen(rq, timeout=6).read().decode("utf-8", "ignore")
+        if raw.lstrip().startswith("{") or raw.lstrip().startswith("["):
+            data = json.loads(raw)
+            items = [json.dumps(data)[:320]]
+        else:
+            titles = re.findall(r"<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>", raw, re.S | re.I)
+            items = [re.sub(r"<[^>]+>", "", t).strip() for t in titles[1:6] if t.strip()]
+            if not items:
+                items = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", raw)).strip()[:320]]
+    except Exception as e:
+        items = [f"Feed connection note: {e}"]
+    joined = " | ".join(items)
+    c.execute("INSERT OR REPLACE INTO live_feeds VALUES(?,?,?,?)", (url, label, joined, time.time()))
+    c.commit(); c.close()
+    try:
+        rq = urllib.request.Request(f"http://{H}:8096/api/brain/remember", data=json.dumps({"domain":"LIVE_EXTERNAL_FEED","title":f"{label}: {url[:32]}","content":joined}).encode(), headers={"Content-Type":"application/json"})
+        urllib.request.urlopen(rq, timeout=2)
+    except Exception: pass
+    return {"status": "FEED_CONNECTED", "label": label, "url": url, "items": items}
