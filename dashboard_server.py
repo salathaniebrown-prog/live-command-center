@@ -127,15 +127,16 @@ def build_ledger_export_payload():
 
 import os
 
-def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None):
+def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, custom_network=None):
     import hashlib, hmac, http.client, json, uuid
     secret = os.environ.get("ASTRA_WEBHOOK_SECRET", "astra_sovereign_hmac_key_2026").encode("utf-8")
     order_ref = "ORD-" + uuid.uuid4().hex[:6].upper()
     vin = (custom_vin or "1GT49REY5NU104829").strip()
     amount_usd = float(custom_amount or 107326.00)
     payload = {
-        "rail": "VIRTUAL_CARD_CRYPTO_ESCROW",
-        "type": "dealership.purchase.settled",
+        "network": (custom_network or "BASE_USDC").strip().upper(),
+        "rail": (custom_network or "BASE_USDC").strip().upper(),
+        "type": "crypto.settlement.confirmed" if (custom_network and custom_network != "VIRTUAL_CARD") else "card.authorization.settled",
         "order_ref": order_ref,
         "vehicle": "2026 GMC Hummer EV Edition 1 SUV",
         "vin": vin,
@@ -331,7 +332,13 @@ async function dispatchToJev8111(orderRef, vin, amountUsd) {
       <option value="5YJSA1E28NF192761" data-price="88500">2025 Tesla Model S ($88,500)</option>
       <option value="WAUZZZF85PN009123" data-price="118900">2025 Audi S8 ($118,900)</option>
     </select>
-    <input id="test-amount-input" type="number" value="107326" style="flex:0.8;width:85px;background:#081220;color:#00ff88;border:1px solid #00ff8855;padding:4px;font-family:monospace;font-size:10px;" />
+    <select id="test-network-select" style="flex:0.9;background:#081220;color:#00ff88;border:1px solid #00ff8855;padding:4px;font-family:monospace;font-size:10px;">
+      <option value="ETH">ETH</option>
+      <option value="BASE_USDC" selected>BASE_USDC</option>
+      <option value="BTC">BTC</option>
+      <option value="VIRTUAL_CARD">VIRTUAL_CARD</option>
+    </select>
+    <input id="test-amount-input" type="number" value="107326" style="flex:0.7;width:72px;background:#081220;color:#00ff88;border:1px solid #00ff8855;padding:4px;font-family:monospace;font-size:10px;" />
   </div>
   <button id="btn-1click-test" onclick="runOneClickPipelineTest()" style="width:100%;margin-bottom:6px;padding:6px;background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-family:monospace;font-weight:bold;cursor:pointer;text-transform:uppercase;">⚡ 1-CLICK TEST TRANSACTION (8115 -> 8111)</button>
   <div id="wh-last-receipt" style="display:none;background:#00ff8815;border:1px solid #00ff8855;padding:5px;margin-bottom:6px;color:#fff;font-size:10px;"></div>
@@ -350,8 +357,9 @@ async function runOneClickPipelineTest() {
   btn.innerText = "EXECUTING HMAC -> JEV PIPELINE...";
   try {
     const vinVal = document.getElementById("test-vin-select").value;
+    const netVal = document.getElementById("test-network-select").value || "BASE_USDC";
     const amtVal = parseFloat(document.getElementById("test-amount-input").value) || 107326;
-    const res = await fetch("/api/test-dealership-pipeline", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({vin: vinVal, amount_usd: amtVal})});
+    const res = await fetch("/api/test-dealership-pipeline", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({vin: vinVal, amount_usd: amtVal, network: netVal})});
     const data = await res.json();
     box.style.display = "block";
     box.innerHTML = `<strong style="color:#00ff88;">[✔] SETTLED ${data.order_ref}</strong> | $${Number(data.amount_usd).toLocaleString()}<br>` +
@@ -660,7 +668,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             import json
             ln = int(self.headers.get("Content-Length", 0))
             body_data = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
-            res_body = json.dumps(trigger_1click_dealership_pipeline(body_data.get("vin"), body_data.get("amount_usd"))).encode("utf-8")
+            res_body = json.dumps(trigger_1click_dealership_pipeline(body_data.get("vin"), body_data.get("amount_usd"), body_data.get("network"))).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
