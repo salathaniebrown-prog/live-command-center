@@ -31,6 +31,8 @@ jobs:
 
           checked = 0
           errors = []
+          p1 = "AI" + "za"
+          p2 = "Astra" + "CS:"
 
           for root, _, files in os.walk("."):
               if ".git" in root:
@@ -45,7 +47,7 @@ jobs:
                           errors.append(f"SYNTAX ERROR in {path}: {e}")
                   if fn.endswith((".py", ".sh", ".yml", ".yaml", ".json")):
                       txt = open(path, encoding="utf-8", errors="ignore").read()
-ENV_SECRET = os.environ.get("ENV_SECRET", "")
+                      if p1 in txt or p2 in txt:
                           errors.append(f"SECRET DETECTED in {path}")
 
           print(f"[✔] Verified {checked} Python modules.")
