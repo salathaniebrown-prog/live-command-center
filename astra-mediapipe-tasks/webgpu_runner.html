@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><title>MediaPipe Tasks // WebGPU + WASM Edge Runner</title>
+<style>
+body{background:#040b0e;color:#9efcff;font-family:monospace;padding:16px;margin:0}
+.card{border:1px solid #184e59;background:#071318;padding:14px;margin-bottom:12px;border-radius:4px}
+button{background:#0d3b44;border:1px solid #25b8c9;color:#fff;padding:8px 12px;font-weight:bold;cursor:pointer;margin:4px 4px 0 0}
+input,select{background:#040b0e;border:1px solid #184e59;color:#9efcff;padding:8px;font-family:monospace}
+pre{background:#020709;border:1px solid #10323a;color:#6ef7c8;padding:10px;white-space:pre-wrap;font-size:12px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h3>MEDIAPIPE TASKS // WEBGPU + WASM + LITERT EDGE RUNNER</h3>
+  <div id="gpu-status">Checking WebGPU &amp; WASM SIMD support...</div>
+</div>
+<div class="card">
+  <select id="task">
+    <option value="DECISION">DECISION (Intent &amp; Tool Router)</option>
+    <option value="VISION">VISION (EfficientDet-Lite0)</option>
+    <option value="TEXT">TEXT (BERT Classifier)</option>
+    <option value="AUDIO">AUDIO (YAMNet Classifier)</option>
+    <option value="RETRIEVAL">RETRIEVAL (Universal Sentence Encoder RAG)</option>
+  </select>
+  <input id="prompt" style="width:55%" placeholder="Enter text, query, or sensor command...">
+  <button onclick="runTask(false)">RUN INFER</button>
+  <button onclick="runTask(true)">INDEX TO RAG</button>
+  <pre id="out">Ready.</pre>
+</div>
+<script>
+const API = "http://" + location.hostname + ":8113";
+(async () => {
+  const hasWasm = typeof WebAssembly === "object";
+  const hasWebGPU = !!navigator.gpu;
+  let adapterInfo = "WASM SIMD Fallback";
+  if (hasWebGPU) {
+    const ad = await navigator.gpu.requestAdapter();
+    if (ad) adapterInfo = "WebGPU Hardware Adapter Active";
+  }
+  document.getElementById("gpu-status").textContent =
+    `WASM: ${hasWasm ? "READY" : "NO"} | WebGPU: ${hasWebGPU ? "READY" : "UNAVAILABLE"} | Delegate: ${adapterInfo}`;
+})();
+async function runTask(idx) {
+  const task_type = idx ? "RETRIEVAL" : document.getElementById("task").value;
+  const input = document.getElementById("prompt").value || "detect objects in live camera stream";
+  const out = document.getElementById("out");
+  out.textContent = "Executing " + task_type + "...";
+  const r = await fetch(API + "/infer", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({task_type, input, index: idx})
+  });
+  out.textContent = JSON.stringify(await r.json(), null, 2);
+}
+</script>
+</body>
+</html>
