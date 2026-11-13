@@ -431,7 +431,8 @@ refreshTopKpiBar();
   <div id="voice-transcript" style="min-height:28px;max-height:46px;overflow-y:auto;color:#00ff88;font-size:10px;margin-bottom:6px;">> Tap INITIATE VOICE LINK or send command...</div>
   <div style="display:flex;gap:4px;">
     <button id="btn-voice-link" onclick="initiateVoiceDataLink()" style="flex:1;padding:6px;background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-family:monospace;font-weight:bold;cursor:pointer;">🎙 INITIATE VOICE LINK</button>
-    <button onclick="sendVoiceTextProbe('Full cluster and dealership telemetry report')" style="padding:6px 8px;background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-family:monospace;font-weight:bold;cursor:pointer;">⚡ PULSE</button>
+    <button id="btn-wake-loop" onclick="toggleHandsFreeWakeLoop()" style="padding:6px 7px;background:#081220;border:1px solid #00ff8866;color:#00ff88;font-family:monospace;font-weight:bold;cursor:pointer;">🔄 LOOP: OFF</button>
+    <button onclick="sendVoiceTextProbe('Full cluster and dealership telemetry report')" style="padding:6px 7px;background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-family:monospace;font-weight:bold;cursor:pointer;">⚡</button>
   </div>
 </div>
 <script>
@@ -506,14 +507,50 @@ refreshTopKpiBar();
   drawDataCore();
 })();
 
+
+let wakeLoopActive = false;
+let activeRecognizer = null;
+
+function toggleHandsFreeWakeLoop() {
+  wakeLoopActive = !wakeLoopActive;
+  const btn = document.getElementById("btn-wake-loop");
+  if (wakeLoopActive) {
+    btn.innerText = "🔄 LOOP: ON";
+    btn.style.background = "#00ff8833";
+    btn.style.borderColor = "#00ff88";
+    initiateVoiceDataLink();
+  } else {
+    btn.innerText = "🔄 LOOP: OFF";
+    btn.style.background = "#081220";
+    if (activeRecognizer) {
+      try { activeRecognizer.stop(); } catch (e) {}
+    }
+    document.getElementById("voice-state-tag").innerText = "READY";
+    window.setVoiceCgiEnergy(0.25);
+  }
+}
+
 function speakDataCore(text) {
-  if (!("speechSynthesis" in window)) return;
+  if (!("speechSynthesis" in window)) {
+    if (wakeLoopActive) setTimeout(initiateVoiceDataLink, 400);
+    return;
+  }
   window.speechSynthesis.cancel();
+  if (activeRecognizer) {
+    try { activeRecognizer.stop(); } catch (e) {}
+  }
   const u = new SpeechSynthesisUtterance(text);
   u.rate = 1.04;
   u.pitch = 0.88;
-  u.onstart = () => { window.setVoiceCgiEnergy(1.0); document.getElementById("voice-state-tag").innerText = "SPEAKING"; };
-  u.onend = () => { window.setVoiceCgiEnergy(0.25); document.getElementById("voice-state-tag").innerText = "READY"; };
+  u.onstart = () => {
+    window.setVoiceCgiEnergy(1.0);
+    document.getElementById("voice-state-tag").innerText = "SPEAKING";
+  };
+  u.onend = () => {
+    window.setVoiceCgiEnergy(0.25);
+    document.getElementById("voice-state-tag").innerText = wakeLoopActive ? "LOOPING" : "READY";
+    if (wakeLoopActive) setTimeout(initiateVoiceDataLink, 350);
+  };
   window.speechSynthesis.speak(u);
 }
 
@@ -544,22 +581,41 @@ function initiateVoiceDataLink() {
     sendVoiceTextProbe("Execute live data core telemetry status");
     return;
   }
+  if (activeRecognizer) {
+    try { activeRecognizer.stop(); } catch (e) {}
+  }
   const rec = new SR();
+  activeRecognizer = rec;
   rec.lang = "en-US";
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
   rec.onstart = () => {
     window.setVoiceCgiEnergy(0.9);
-    document.getElementById("voice-state-tag").innerText = "LISTENING";
-    document.getElementById("voice-transcript").innerText = "> Listening for voice command...";
+    document.getElementById("voice-state-tag").innerText = wakeLoopActive ? "WAKE-LOOP" : "LISTENING";
+    document.getElementById("voice-transcript").innerText = wakeLoopActive ? "> [WAKE-LOOP] Listening hands-free..." : "> Listening for voice command...";
   };
   rec.onresult = (ev) => {
-    const said = ev.results.transcript;
-    sendVoiceTextProbe(said);
+    const lastIdx = ev.results.length - 1;
+    const said = (ev.results[lastIdx] && ev.results[lastIdx].transcript) ? ev.results[lastIdx].transcript.trim() : "";
+    if (said) {
+      sendVoiceTextProbe(said);
+    } else if (wakeLoopActive) {
+      setTimeout(initiateVoiceDataLink, 400);
+    }
   };
   rec.onerror = () => {
     window.setVoiceCgiEnergy(0.25);
-    document.getElementById("voice-state-tag").innerText = "READY";
+    document.getElementById("voice-state-tag").innerText = wakeLoopActive ? "REARMING" : "READY";
+    if (wakeLoopActive && !window.speechSynthesis.speaking) {
+      setTimeout(initiateVoiceDataLink, 800);
+    }
   };
-  rec.start();
+  rec.onend = () => {
+    if (wakeLoopActive && !window.speechSynthesis.speaking) {
+      setTimeout(initiateVoiceDataLink, 400);
+    }
+  };
+  try { rec.start(); } catch (e) {}
 }
 </script>
 </body>
