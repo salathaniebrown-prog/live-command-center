@@ -147,7 +147,37 @@ async function dispatchToJev8111(orderRef, vin, amountUsd) {
     }
 }
 </script>
+
+<div id="astra-webhook-ticker" style="position:fixed;bottom:10px;right:12px;width:360px;background:rgba(5,12,24,0.95);border:1px solid #00ff88;box-shadow:0 0 15px rgba(0,255,136,0.25);padding:10px;font-family:monospace;font-size:11px;color:#00f0ff;z-index:9999;">
+  <div style="display:flex;justify-content:space-between;border-bottom:1px solid #00ff8844;padding-bottom:4px;margin-bottom:6px;">
+    <strong style="color:#00ff88;">LIVE CRYPTO / CARD WEBHOOKS (8115)</strong>
+    <span id="wh-count" style="color:#fff;">0 EVENTS</span>
+  </div>
+  <div id="wh-feed-list" style="max-height:110px;overflow-y:auto;line-height:1.4;">Waiting for incoming HMAC events...</div>
+</div>
+<script>
+async function pollWebhookFeed8115() {
+  try {
+    const url = "http://" + window.location.hostname + ":8115/";
+    const res = await fetch(url);
+    const data = await res.json();
+    document.getElementById("wh-count").innerText = (data.events_logged || 0) + " EVENTS";
+    const list = document.getElementById("wh-feed-list");
+    if (data.recent_events && data.recent_events.length > 0) {
+      list.innerHTML = data.recent_events.slice(0, 4).map(ev =>
+        `<div style="border-bottom:1px dashed #ffffff22;padding:3px 0;">` +
+        `<span style="color:#00ff88;">[✔] ${ev.event_id}</span> | $${Number(ev.amount_usd).toLocaleString()}<br>` +
+        `<span style="color:#8899aa;">VIN: ${ev.vin} | ${ev.event_type}</span>` +
+        `</div>`
+      ).join("");
+    }
+  } catch (e) {}
+}
+setInterval(pollWebhookFeed8115, 5000);
+pollWebhookFeed8115();
+</script>
 </body>
+
 </html>"""
 
 class UnifiedHandler(BaseHTTPRequestHandler):
