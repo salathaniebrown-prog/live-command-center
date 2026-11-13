@@ -1,4 +1,19 @@
 
+def get_live_handoff_manifest():
+    import os, subprocess
+    home = os.path.expanduser("~")
+    script = os.path.join(home, "generate_chat_handoff.py")
+    manifest = os.path.join(home, "ASTRA_STATE_MANIFEST.md")
+    if os.path.exists(script):
+        try:
+            return subprocess.check_output(["python3", script], timeout=8).decode("utf-8", errors="ignore")
+        except Exception:
+            pass
+    if os.path.exists(manifest):
+        return open(manifest, "r", encoding="utf-8", errors="ignore").read()
+    return "ASTRA_STATE_MANIFEST unavailable."
+
+
 _ONCHAIN_CACHE = {"ts": 0.0, "eth": "0.0000", "usdc": "0.00", "eth_usdc": "0.00", "base_usdc": "0.00"}
 
 def fetch_onchain_balances(force=False):
@@ -954,6 +969,7 @@ function initiateVoiceDataLink() {
 
 
 <div id="astra-ci-badge" style="position:fixed;top:46px;right:14px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(5,12,24,0.95);border:1px solid #00ff8888;padding:4px 8px;box-shadow:0 0 12px rgba(0,255,136,0.25);font-family:monospace;">
+  <button id="btn-copy-handoff" onclick="copyLiveHandoffManifest()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">📋 COPY HANDOFF</button>
   <button onclick="openCiLogModal()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">CI LOGS</button>
   <button id="btn-ci-dispatch" onclick="triggerBrainCiDispatch()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">⚡ AUTO-DISPATCH</button>
   <a href="https://github.com" target="_blank" rel="noopener" style="display:flex;align-items:center;">
@@ -974,6 +990,41 @@ function initiateVoiceDataLink() {
   </div>
 </div>
 <script>
+
+async function copyLiveHandoffManifest() {
+  const btn = document.getElementById("btn-copy-handoff");
+  if (btn) { btn.disabled = true; btn.innerText = "COPYING..."; }
+  try {
+    const r = await fetch("/api/handoff-manifest");
+    const txt = await r.text();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(txt);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    if (btn) {
+      btn.innerText = "✔ COPIED!";
+      btn.style.borderColor = "#00ff88";
+      btn.style.color = "#00ff88";
+    }
+  } catch (e) {
+    if (btn) btn.innerText = "ERR";
+  }
+  setTimeout(() => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "📋 COPY HANDOFF";
+      btn.style.borderColor = "#00f0ff";
+      btn.style.color = "#00f0ff";
+    }
+  }, 2500);
+}
+
 function openCiLogModal() {
   document.getElementById("astra-ci-modal").style.display = "flex";
   refreshCiModalLogs();
@@ -1114,6 +1165,16 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path == "/api/handoff-manifest":
+            body = get_live_handoff_manifest().encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
         if self.path.startswith("/api/kpi-summary"):
             import json
             b = json.dumps(get_live_kpis(force_rpc=("refresh=1" in self.path))).encode("utf-8")
