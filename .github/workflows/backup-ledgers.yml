@@ -1,0 +1,30 @@
+name: Astra Ledger & Node Audit
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'
+  workflow_dispatch:
+
+jobs:
+  audit-command-center:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Core Command Center & Dealership Modules
+        run: |
+          python3 - << 'PY'
+          import os, py_compile
+
+          required = [
+              "dashboard_server.py",
+              "invoice_agent_8111.py",
+              "start_tunnel.sh"
+          ]
+          for item in required:
+              assert os.path.exists(item), f"Missing core file: {item}"
+              if item.endswith(".py"):
+                  py_compile.compile(item, doraise=True)
+          print("[✔] All core Command Center & Dealership modules verified.")
+          PY

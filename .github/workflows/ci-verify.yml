@@ -1,0 +1,50 @@
+name: Astra Command Center CI Verify
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  syntax-and-security-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Command Center Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify Python Syntax & Secret Hygiene Across All Modules
+        run: |
+          python3 - << 'PY'
+          import os, py_compile, sys
+
+          checked = 0
+          errors = []
+
+          for root, _, files in os.walk("."):
+              if ".git" in root:
+                  continue
+              for fn in files:
+                  path = os.path.join(root, fn)
+                  if fn.endswith(".py"):
+                      try:
+                          py_compile.compile(path, doraise=True)
+                          checked += 1
+                      except py_compile.PyCompileError as e:
+                          errors.append(f"SYNTAX ERROR in {path}: {e}")
+                  if fn.endswith((".py", ".sh", ".yml", ".yaml", ".json")):
+                      txt = open(path, encoding="utf-8", errors="ignore").read()
+                      if "AIza" in txt or "AstraCS:" in txt:
+                          errors.append(f"SECRET DETECTED in {path}")
+
+          print(f"[✔] Verified {checked} Python modules.")
+          if errors:
+              for err in errors:
+                  print(err)
+              sys.exit(1)
+          PY
