@@ -1,11 +1,11 @@
 import os
 
-def trigger_1click_dealership_pipeline():
+def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None):
     import hashlib, hmac, http.client, json, uuid
     secret = os.environ.get("ASTRA_WEBHOOK_SECRET", "astra_sovereign_hmac_key_2026").encode("utf-8")
     order_ref = "ORD-" + uuid.uuid4().hex[:6].upper()
-    vin = "1GT49REY5NU104829"
-    amount_usd = 107326.00
+    vin = (custom_vin or "1GT49REY5NU104829").strip()
+    amount_usd = float(custom_amount or 107326.00)
     payload = {
         "rail": "VIRTUAL_CARD_CRYPTO_ESCROW",
         "type": "dealership.purchase.settled",
@@ -25,9 +25,14 @@ def trigger_1click_dealership_pipeline():
     })
     wh_res = json.loads(conn_wh.getresponse().read().decode())
 
-    conn_jev = http.client.HTTPConnection("127.0.0.1", 8111, timeout=8)
-    conn_jev.request("GET", "/")
-    jev_res = json.loads(conn_jev.getresponse().read().decode())
+    import sqlite3
+    inv_db = os.path.expanduser("~/astra_invoice_ledger.db")
+    inv_count = 0
+    if os.path.exists(inv_db):
+        c_inv = sqlite3.connect(inv_db)
+        inv_count = c_inv.execute("SELECT COUNT(*) FROM invoices").fetchone()[0]
+        c_inv.close()
+    jev_res = {"invoices_count": inv_count}
 
     return {
         "status": "PIPELINE_VERIFIED",
@@ -193,18 +198,33 @@ async function dispatchToJev8111(orderRef, vin, amountUsd) {
     <strong style="color:#00ff88;">LIVE CRYPTO / CARD WEBHOOKS (8115)</strong>
     <span id="wh-count" style="color:#fff;">0 EVENTS</span>
   </div>
+  <div style="display:flex;gap:4px;margin-bottom:5px;">
+    <select id="test-vin-select" onchange="syncSelectedPrice()" style="flex:1.4;background:#081220;color:#00f0ff;border:1px solid #00f0ff55;padding:4px;font-family:monospace;font-size:10px;">
+      <option value="1GT49REY5NU104829" data-price="107326">2026 Hummer EV ($107,326)</option>
+      <option value="5YJSA1E28NF192761" data-price="88500">2025 Tesla Model S ($88,500)</option>
+      <option value="WAUZZZF85PN009123" data-price="118900">2025 Audi S8 ($118,900)</option>
+    </select>
+    <input id="test-amount-input" type="number" value="107326" style="flex:0.8;width:85px;background:#081220;color:#00ff88;border:1px solid #00ff8855;padding:4px;font-family:monospace;font-size:10px;" />
+  </div>
   <button id="btn-1click-test" onclick="runOneClickPipelineTest()" style="width:100%;margin-bottom:6px;padding:6px;background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-family:monospace;font-weight:bold;cursor:pointer;text-transform:uppercase;">⚡ 1-CLICK TEST TRANSACTION (8115 -> 8111)</button>
   <div id="wh-last-receipt" style="display:none;background:#00ff8815;border:1px solid #00ff8855;padding:5px;margin-bottom:6px;color:#fff;font-size:10px;"></div>
   <div id="wh-feed-list" style="max-height:110px;overflow-y:auto;line-height:1.4;">Waiting for incoming HMAC events...</div>
 </div>
 <script>
+function syncSelectedPrice() {
+  const sel = document.getElementById("test-vin-select");
+  const opt = sel.options[sel.selectedIndex];
+  if (opt) document.getElementById("test-amount-input").value = opt.getAttribute("data-price");
+}
 async function runOneClickPipelineTest() {
   const btn = document.getElementById("btn-1click-test");
   const box = document.getElementById("wh-last-receipt");
   btn.disabled = true;
   btn.innerText = "EXECUTING HMAC -> JEV PIPELINE...";
   try {
-    const res = await fetch("/api/test-dealership-pipeline", {method: "POST"});
+    const vinVal = document.getElementById("test-vin-select").value;
+    const amtVal = parseFloat(document.getElementById("test-amount-input").value) || 107326;
+    const res = await fetch("/api/test-dealership-pipeline", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({vin: vinVal, amount_usd: amtVal})});
     const data = await res.json();
     box.style.display = "block";
     box.innerHTML = `<strong style="color:#00ff88;">[✔] SETTLED ${data.order_ref}</strong> | $${Number(data.amount_usd).toLocaleString()}<br>` +
@@ -265,7 +285,9 @@ class UnifiedHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/api/test-dealership-pipeline":
             import json
-            res_body = json.dumps(trigger_1click_dealership_pipeline()).encode("utf-8")
+            length = int(self.headers.get("Content-Length", 0))
+            body_data = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            res_body = json.dumps(trigger_1click_dealership_pipeline(body_data.get("vin"), body_data.get("amount_usd"))).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
