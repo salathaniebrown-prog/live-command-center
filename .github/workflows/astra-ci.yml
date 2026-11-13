@@ -14,7 +14,7 @@ jobs:
       - name: Verify Dashboard & MediaPipe Tasks
         run: |
           python3 -m py_compile dashboard_server.py
-          python3 -m py_compile astra-mediapipe-tasks/mediapipe_edge_ml.py
+          python3 -m py_compile astra-mediapipe-tasks/mediapipe_edge_ml.py astra-mediapipe-tasks/sdks/python/astra_desktop_ml.py
           [ -f python_worker.py ] && python3 -m py_compile python_worker.py || true
           [ -f web-dashboard.js ] && node --check web-dashboard.js || true
           [ -f SpineLogger.java ] && javac SpineLogger.java || true
