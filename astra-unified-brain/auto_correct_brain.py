@@ -36,7 +36,7 @@ def check_port_health(port):
 
 def sync_brain_telemetry():
     file_status = verify_and_heal_files()
-    ports = [check_port_health(p) for p in (8088, 8108, 8109, 8111, 8113)]
+    ports = [check_port_health(p) for p in (8088, 8108, 8109, 8111, 8113, 8115)]
 
     # Auto-restart 8113 or 8111 if offline
     for pinfo in ports:
