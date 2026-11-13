@@ -1,4 +1,27 @@
 
+def lookup_certificate_record(order_ref):
+    import json, os, sqlite3
+    ref = (order_ref or "").strip()
+    out = {"order_ref": ref, "webhook_record": None, "jev_invoice": None}
+    wh_db = os.path.expanduser("~/astra_webhook_ledger.db")
+    inv_db = os.path.expanduser("~/astra_invoice_ledger.db")
+    if os.path.exists(wh_db):
+        c = sqlite3.connect(wh_db)
+        c.row_factory = sqlite3.Row
+        row = c.execute("SELECT * FROM webhook_events WHERE order_ref = ? ORDER BY timestamp DESC LIMIT 1", (ref,)).fetchone()
+        if row:
+            out["webhook_record"] = dict(row)
+        c.close()
+    if os.path.exists(inv_db):
+        c = sqlite3.connect(inv_db)
+        c.row_factory = sqlite3.Row
+        row = c.execute("SELECT * FROM invoices WHERE order_ref = ? ORDER BY timestamp DESC LIMIT 1", (ref,)).fetchone()
+        if row:
+            out["jev_invoice"] = dict(row)
+        c.close()
+    return out
+
+
 def process_voice_data_agent(prompt_text):
     import http.client, json, urllib.request
     low = (prompt_text or "").lower()
@@ -350,6 +373,25 @@ function syncSelectedPrice() {
   const opt = sel.options[sel.selectedIndex];
   if (opt) document.getElementById("test-amount-input").value = opt.getAttribute("data-price");
 }
+
+function buildExplorerLink(railStr, orderRef, explicitTx) {
+  const r = String(railStr || "").toUpperCase();
+  let tx = String(explicitTx || "");
+  if (!tx && r.includes("TX:")) {
+    tx = r.split("TX:")[1].trim().split(" ");
+  }
+  if (r.startsWith("ETH") && tx) {
+    return { label: "ETHERSCAN TX", url: "https://etherscan.io" + tx };
+  }
+  if (r.startsWith("BASE") && tx) {
+    return { label: "BASESCAN TX", url: "https://basescan.org" + tx };
+  }
+  if (r.startsWith("BTC") && tx) {
+    return { label: "MEMPOOL TX", url: "https://mempool.space" + tx.replace(/^0x/, "") };
+  }
+  return { label: "JEV CERT RECORD", url: "/api/certificate/" + encodeURIComponent(orderRef || "") };
+}
+
 async function runOneClickPipelineTest() {
   const btn = document.getElementById("btn-1click-test");
   const box = document.getElementById("wh-last-receipt");
@@ -362,9 +404,12 @@ async function runOneClickPipelineTest() {
     const res = await fetch("/api/test-dealership-pipeline", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({vin: vinVal, amount_usd: amtVal, network: netVal})});
     const data = await res.json();
     box.style.display = "block";
+    const txHash = (data.webhook_8115 && data.webhook_8115.tx_hash) ? data.webhook_8115.tx_hash : "";
+    const netName = (data.webhook_8115 && data.webhook_8115.network) ? data.webhook_8115.network : "BASE_USDC";
+    const exp = buildExplorerLink(netName, data.order_ref, txHash);
     box.innerHTML = `<strong style="color:#00ff88;">[✔] SETTLED ${data.order_ref}</strong> | $${Number(data.amount_usd).toLocaleString()}<br>` +
-                    `EVENT: ${data.webhook_8115.event_id} | HMAC: VERIFIED<br>` +
-                    `JEV 8111 RECEIPTS: ${data.jev_8111_total_invoices}`;
+                    `NET: ${netName} | <a href="${exp.url}" target="_blank" rel="noopener" style="color:#00f0ff;text-decoration:underline;font-weight:bold;">🔗 ${exp.label}</a><br>` +
+                    `CERT: <a href="/api/certificate/${encodeURIComponent(data.order_ref)}" target="_blank" style="color:#00ff88;text-decoration:underline;">VIEW SIGNED RECORD</a>`;
     await pollWebhookFeed8115();
   } catch (e) {
     box.style.display = "block";
@@ -381,12 +426,14 @@ async function pollWebhookFeed8115() {
     document.getElementById("wh-count").innerText = (data.events_logged || 0) + " EVENTS";
     const list = document.getElementById("wh-feed-list");
     if (data.recent_events && data.recent_events.length > 0) {
-      list.innerHTML = data.recent_events.slice(0, 4).map(ev =>
-        `<div style="border-bottom:1px dashed #ffffff22;padding:3px 0;">` +
-        `<span style="color:#00ff88;">[✔] ${ev.event_id}</span> | $${Number(ev.amount_usd).toLocaleString()}<br>` +
-        `<span style="color:#8899aa;">VIN: ${ev.vin} | ${ev.event_type}</span>` +
-        `</div>`
-      ).join("");
+      list.innerHTML = data.recent_events.slice(0, 4).map(ev => {
+        const exp = buildExplorerLink(ev.source_rail, ev.order_ref, "");
+        return `<div style="border-bottom:1px dashed #ffffff22;padding:3px 0;">` +
+          `<span style="color:#00ff88;">[✔] ${ev.event_id}</span> | $${Number(ev.amount_usd).toLocaleString()} ` +
+          `<a href="${exp.url}" target="_blank" rel="noopener" style="color:#00f0ff;font-size:9px;text-decoration:underline;">[${exp.label}]</a><br>` +
+          `<span style="color:#8899aa;">VIN: ${ev.vin} | ${ev.source_rail || ev.event_type}</span>` +
+          `</div>`;
+      }).join("");
     }
   } catch (e) {}
 }
@@ -720,6 +767,18 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path.startswith("/api/certificate/"):
+            import json
+            ref = self.path.split("/api/certificate/").split("?")
+            body = json.dumps(lookup_certificate_record(ref), indent=2).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
         if self.path == "/api/kpi-summary":
             import json
             b = json.dumps(get_live_kpis()).encode("utf-8")
