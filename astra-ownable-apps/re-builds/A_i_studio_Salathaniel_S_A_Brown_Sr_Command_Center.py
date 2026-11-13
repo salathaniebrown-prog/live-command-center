@@ -5,7 +5,7 @@ import http.server, json
 
 NOTES_SPEC = [
   "cd ~/alstra-workspace",
-"export GEMINI_API_KEY = "REDACTED_ENV_KEY"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
   "" + os.environ.get("ASTRA_DB_TOKEN", "") + "",
   "" + os.environ.get("ASTRA_DB_TOKEN", "") + ""
 ]
