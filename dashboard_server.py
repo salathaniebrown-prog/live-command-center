@@ -963,7 +963,7 @@ function initiateVoiceDataLink() {
 }
 </script>
 <div style="height:290px;width:100%;pointer-events:none;"></div>
-<div style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:9998;background:#050e1af0;border:1px solid #00ff88;padding:5px 10px;font:11px monospace;display:flex;gap:6px;align-items:center;">
+<div style="position:fixed;bottom:260px;left:50%;transform:translateX(-50%);z-index:10002;background:#050e1af0;border:1px solid #00ff88;padding:5px 10px;font:11px monospace;display:flex;gap:6px;align-items:center;">
 <button onclick="secRun('itdr')" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;cursor:pointer;">ITDR</button>
 <button onclick="secRun('ispm')" style="background:#00d4ff22;border:1px solid #00d4ff;color:#00d4ff;cursor:pointer;">ISPM</button>
 <button onclick="secRun('harden')" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;cursor:pointer;">HARDEN</button>
