@@ -986,6 +986,19 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             import json
             ln = int(self.headers.get("Content-Length", 0))
             body_data = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
+            res_body = json.dumps(trigger_1click_dealership_pipeline(body_data.get("vin"), body_data.get("amount_usd"))).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(res_body)))
+            self.end_headers()
+            self.wfile.write(res_body)
+            return
+
+        if self.path == "/api/test-dealership-pipeline":
+            import json
+            ln = int(self.headers.get("Content-Length", 0))
+            body_data = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
             res_body = json.dumps(trigger_1click_dealership_pipeline(body_data.get("vin"), body_data.get("amount_usd"), body_data.get("network"))).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
