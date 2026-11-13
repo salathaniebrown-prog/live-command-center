@@ -1,11 +1,11 @@
 
-_ONCHAIN_CACHE = {"ts": 0.0, "eth": "0.0000", "usdc": "0.00"}
+_ONCHAIN_CACHE = {"ts": 0.0, "eth": "0.0000", "usdc": "0.00", "eth_usdc": "0.00", "base_usdc": "0.00"}
 
 def fetch_onchain_balances():
     import json, time, urllib.request
     now = time.time()
     if now - _ONCHAIN_CACHE.get("ts", 0.0) < 20:
-        return {"eth_bal": _ONCHAIN_CACHE.get("eth"), "usdc_bal": _ONCHAIN_CACHE.get("usdc")}
+        return {"eth_bal": _ONCHAIN_CACHE.get("eth"), "usdc_bal": _ONCHAIN_CACHE.get("usdc"), "eth_usdc_bal": _ONCHAIN_CACHE.get("eth_usdc", "0.00"), "base_usdc_bal": _ONCHAIN_CACHE.get("base_usdc", "0.00")}
 
     addr = "0x5f04EBB30d3BBf356263c3ef4823080d05bEDDf5"
     padded = addr.lower().replace("0x", "").rjust(64, "0")
@@ -23,15 +23,16 @@ def fetch_onchain_balances():
     except Exception:
         pass
 
-    # 2. Query Ethereum Mainnet ERC-20 USDC + Base Mainnet Native USDC and sum total
-    total_usdc_units = 0
+    # 2. Query Ethereum Mainnet ERC-20 USDC & Base Mainnet Native USDC individually + sum total
+    eth_usdc_units = 0
+    base_usdc_units = 0
     usdc_targets = [
-        ("https://" + "/".join(["://publicnode.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
-        ("https://" + "/".join(["mainnet.base.org"]), "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+        ("ETH", "https://" + "/".join(["://publicnode.com"]), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+        ("BASE", "https://" + "/".join(["mainnet.base.org"]), "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
     ]
     call_data = "0x70a08231" + padded
     queried_ok = False
-    for rpc_url, contract_addr in usdc_targets:
+    for net_tag, rpc_url, contract_addr in usdc_targets:
         try:
             payload = json.dumps({
                 "jsonrpc": "2.0",
@@ -41,17 +42,30 @@ def fetch_onchain_balances():
             }).encode("utf-8")
             req = urllib.request.Request(rpc_url, data=payload, headers={"Content-Type": "application/json", "User-Agent": "AstraKPI/1.0"})
             res = json.loads(urllib.request.urlopen(req, timeout=4).read().decode())
-            total_usdc_units += int(res.get("result") or "0x0", 16)
+            units = int(res.get("result") or "0x0", 16)
+            if net_tag == "ETH":
+                eth_usdc_units = units
+            else:
+                base_usdc_units = units
             queried_ok = True
         except Exception:
             pass
+    eth_usdc_str = f"{eth_usdc_units / 1e6:,.2f}"
+    base_usdc_str = f"{base_usdc_units / 1e6:,.2f}"
     if queried_ok:
-        usdc_val = f"{total_usdc_units / 1e6:,.2f}"
+        usdc_val = f"{(eth_usdc_units + base_usdc_units) / 1e6:,.2f}"
+    _ONCHAIN_CACHE["eth_usdc"] = eth_usdc_str
+    _ONCHAIN_CACHE["base_usdc"] = base_usdc_str
 
     _ONCHAIN_CACHE["ts"] = now
     _ONCHAIN_CACHE["eth"] = eth_val
     _ONCHAIN_CACHE["usdc"] = usdc_val
-    return {"eth_bal": eth_val, "usdc_bal": usdc_val}
+    return {
+        "eth_bal": eth_val,
+        "usdc_bal": usdc_val,
+        "eth_usdc_bal": _ONCHAIN_CACHE.get("eth_usdc", "0.00"),
+        "base_usdc_bal": _ONCHAIN_CACHE.get("base_usdc", "0.00")
+    }
 
 
 _ONCHAIN_CACHE = {"ts": 0.0, "eth": "0.0000", "usdc": "0.00", "eth_usdc": "0.00", "base_usdc": "0.00"}
