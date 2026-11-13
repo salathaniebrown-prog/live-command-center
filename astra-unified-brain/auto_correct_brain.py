@@ -75,3 +75,12 @@ def run_watchdog_daemon():
         except Exception:
             pass
         time.sleep(30)
+
+def check_and_heal_tunnel():
+    log_path = os.path.join(HOME, "tunnel.log")
+    if not os.path.exists(log_path):
+        subprocess.Popen(["bash", os.path.join(HOME, "start_tunnel.sh")])
+        return
+    txt = open(log_path, errors="ignore").read()
+    if "ERR" in txt and "failed to connect" in txt:
+        subprocess.Popen(["bash", os.path.join(HOME, "start_tunnel.sh")])
