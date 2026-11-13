@@ -1183,14 +1183,14 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             return
 
-                if self.path.startswith("/api/sec/"):
+        if self.path.startswith("/api/sec/"):
             m = self.path.split("/api/sec/")[-1].split("?")[0]
-            out = json.dumps(run_sec_ops(m)).encode("utf-8")
+            raw = json.dumps(run_sec_ops(m)).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(out)))
+            self.send_header("Content-Length", str(len(raw)))
             self.end_headers()
-            self.wfile.write(out)
+            self.wfile.write(raw)
             return
         if self.path.startswith("/api/kpi-summary"):
             import json
