@@ -44,6 +44,9 @@ class H(BaseHTTPRequestHandler):
     def _j(self, d):
         self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.end_headers(); self.wfile.write(json.dumps(d).encode())
     def do_GET(self):
+        if self.path.startswith("/ui"):
+            self.send_response(200); self.send_header("Content-Type","text/html"); self.end_headers()
+            self.wfile.write(open(os.path.join(BASE,"webgpu_runner.html"),"rb").read()); return
         c = sqlite3.connect(DB); b = c.execute("SELECT COUNT(*) FROM task_bundles").fetchone()[0]; v = c.execute("SELECT COUNT(*) FROM retrieval_vectors").fetchone()[0]; c.close()
         self._j({"status": "MEDIAPIPE_TASKS_ONLINE", "port": 8113, "engine": ENGINE, "models": load_models(), "bundles": b, "vectors": v})
     def do_POST(self):
