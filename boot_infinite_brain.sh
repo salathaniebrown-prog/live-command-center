@@ -15,12 +15,12 @@ setsid nohup python3 ~/astra-location-intel/location_intel_engine.py > ~/astra-l
 sleep 2
 bash ~/check_all.sh
 
-# --- ALSTRA TELEMETRY (8100) & DUAL-STREAM BRIDGE (8112) ---
+# --- ALSTRA TELEMETRY (8100) & DUAL-STREAM BRIDGE (8113) ---
 if ! nc -z 127.0.0.1 8100 2>/dev/null; then
   nohup python3 -c '
 import json, subprocess
 from http.server import BaseHTTPRequestHandler, HTTPServer
-PORTS = [8088, 8095, 8096, 8097, 8098, 8099, 8100, 8112]
+PORTS = [8088, 8095, 8096, 8097, 8098, 8099, 8100, 8113]
 class H(BaseHTTPRequestHandler):
     def do_GET(self):
         up = sum(1 for p in PORTS if subprocess.run(["nc","-z","127.0.0.1",str(p)], capture_output=True).returncode == 0)
@@ -36,9 +36,9 @@ HTTPServer(("127.0.0.1", 8100), H).serve_forever()
   echo "[BOOT] Started Telemetry Health Node on Port 8100"
 fi
 
-if ! nc -z 127.0.0.1 8112 2>/dev/null; then
-  nohup python3 ~/astra-enterprise-core/dual_stream_bridge.py > ~/dual_stream_8112.log 2>&1 < /dev/null &
-  echo "[BOOT] Started Alstra Dual-Stream Bridge on Port 8112"
+if ! nc -z 127.0.0.1 8113 2>/dev/null; then
+  nohup python3 ~/astra-enterprise-core/dual_stream_bridge.py > ~/dual_stream_8113.log 2>&1 < /dev/null &
+  echo "[BOOT] Started Alstra Dual-Stream Bridge on Port 8113"
 fi
 setsid nohup python3 ~/astra-enterprise-core/telemetry_sentinel.py > ~/telemetry_sentinel.log 2>&1 < /dev/null &
 setsid nohup python3 ~/astra-jev-system1/jev_router.py > ~/astra-jev-system1/jev.log 2>&1 < /dev/null &

@@ -42,10 +42,10 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(d).encode())
     def do_GET(self):
         c = sqlite3.connect(DB); n = c.execute("SELECT COUNT(*) FROM task_bundles").fetchone()[0]; c.close()
-        self._j({"status": "MEDIAPIPE_TASKS_ONLINE", "port": 8112, "bundles_built": n, "platforms": list(SDK_TEMPLATES.keys())})
+        self._j({"status": "MEDIAPIPE_TASKS_ONLINE", "port": 8113, "bundles_built": n, "platforms": list(SDK_TEMPLATES.keys())})
     def do_POST(self):
         d = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
         self._j(build_task_bundle(d.get("task_type", "VISION_TEXT_AUDIO_RAG"), d.get("platform", "WEB_WASM_WEBGPU"), d.get("delegate", "GPU")))
 
 init()
-HTTPServer(("0.0.0.0", 8112), Handler).serve_forever()
+HTTPServer(("0.0.0.0", 8113), Handler).serve_forever()

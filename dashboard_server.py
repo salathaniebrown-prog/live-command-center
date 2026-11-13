@@ -11,7 +11,7 @@ ROUTES = {
     "/api/reset": 8099, "/api/add_vehicle": 8099, "/api/set_webhook": 8099, "/api/receipt/": 8099,
     "/api/nexus/": 8100, "/api/os/": 8101, "/api/wf/": 8102, "/api/geo/": 8103,
     "/api/osint/": 8104, "/api/re/": 8105, "/api/ent/": 8106, "/api/seo/": 8107,
-    "/api/pro/": 8108, "/api/auto/": 8109, "/api/telemetry/": 8110, "/api/jev/": 8111, "/api/mp/": 8112, "/v1/chat/completions": 8111
+    "/api/pro/": 8108, "/api/auto/": 8109, "/api/telemetry/": 8110, "/api/jev/": 8111, "/api/mp/": 8113, "/v1/chat/completions": 8111
 }
 
 HTML = """<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -98,7 +98,7 @@ async function osintGo(){const query=document.getElementById('ops-in').value.tri
 async function backupGo(){const d=await api('/api/wf/backup',{});document.getElementById('ops-out').innerText='['+d.status+'] '+d.snapshot+' ('+d.dbs_backed_up+' DBs)';}
 api('/api/ent/visibility').then(d=>{if(d.online_count)document.getElementById('sys-stat').innerText='LIVE NODES: '+d.online_count+'/'+d.total_agents+' ONLINE';}).catch(()=>{});
 </script>
-<div class="card"><h3>4. MEDIAPIPE TASKS // LIVE ML ANYWHERE (WASM • WEBGPU • ANDROID • IOS • FLUTTER • PYTHON) (8112)</h3>
+<div class="card"><h3>4. MEDIAPIPE TASKS // LIVE ML ANYWHERE (WASM • WEBGPU • ANDROID • IOS • FLUTTER • PYTHON) (8113)</h3>
 <div class="row"><select id="mp-task"><option value="VISION_TEXT_AUDIO_RAG">VISION + TEXT + AUDIO + RAG</option><option value="DECISION_ROUTING_MODEL">DECISION &amp; ROUTING MODEL</option><option value="ON_DEVICE_GEMMA4_LLM">ON-DEVICE GEMMA 4 LLM</option></select>
 <select id="mp-plat"><option value="WEB_WASM_WEBGPU">WEB (WASM + WEBGPU)</option><option value="ANDROID_KOTLIN_JAVA">ANDROID (KOTLIN / JAVA)</option><option value="IOS_SWIFT_OBJC">IOS (SWIFT / OBJ-C)</option><option value="FLUTTER_DART">FLUTTER (DART)</option><option value="PYTHON_LINUX_MAC_WIN">PYTHON (LINUX/MAC/WIN)</option></select>
 <button class="g" onclick="buildMpTask()">BUILD .TASK BUNDLE (GPU)</button></div>
