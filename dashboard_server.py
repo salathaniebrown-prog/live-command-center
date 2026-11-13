@@ -276,7 +276,22 @@ async function pollWebhookFeed8115() {
 setInterval(pollWebhookFeed8115, 5000);
 pollWebhookFeed8115();
 </script>
+
+<div id="astra-ci-badge" style="position:fixed;top:10px;right:14px;z-index:9999;display:flex;align-items:center;gap:8px;background:rgba(5,12,24,0.92);border:1px solid #00ff8866;padding:4px 10px;box-shadow:0 0 12px rgba(0,255,136,0.2);">
+  <a href="https://github.com" target="_blank" rel="noopener" style="display:flex;align-items:center;text-decoration:none;">
+    <img id="gh-ci-badge-img" src="https://github.com/badge.svg?branch=main" alt="Astra Command Center CI Verify" style="height:20px;display:block;" />
+  </a>
+</div>
+<script>
+setInterval(function() {
+  const img = document.getElementById("gh-ci-badge-img");
+  if (img) {
+    img.src = "https://github.com/badge.svg?branch=main&t=" + Date.now();
+  }
+}, 60000);
+</script>
 </body>
+
 
 </html>"""
 
