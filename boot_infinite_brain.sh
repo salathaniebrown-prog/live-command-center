@@ -14,10 +14,31 @@ setsid nohup python3 ~/astra-location-intel/location_intel_engine.py > ~/astra-l
 
 sleep 2
 bash ~/check_all.sh
-setsid nohup python3 ~/astra-osint-harvester/osint_harvester.py > ~/astra-osint-harvester/osint.log 2>&1 < /dev/null &
-pgrep -x tor >/dev/null || setsid nohup tor --SocksPort 9050 > ~/astra-osint-harvester/tor.log 2>&1 < /dev/null &
-setsid nohup python3 ~/astra-reverse-supercomputer/re_supercomputer.py > ~/astra-reverse-supercomputer/re.log 2>&1 < /dev/null &
-setsid nohup python3 ~/astra-enterprise-gov/enterprise_gov.py > ~/astra-enterprise-gov/ent.log 2>&1 < /dev/null &
-setsid nohup python3 ~/astra-seo-franchise/seo_geo_franchise.py > ~/astra-seo-franchise/seo.log 2>&1 < /dev/null &
-setsid nohup python3 ~/astra-studio-pro/studio_pro_engine.py > ~/astra-studio-pro/pro.log 2>&1 < /dev/null &
-setsid nohup python3 ~/astra-auto-router/auto_router.py > ~/astra-auto-router/auto.log 2>&1 < /dev/null &
+
+# --- ALSTRA TELEMETRY (8100) & DUAL-STREAM BRIDGE (8112) ---
+if ! nc -z 127.0.0.1 8100 2>/dev/null; then
+  nohup python3 -c '
+import json, subprocess
+from http.server import BaseHTTPRequestHandler, HTTPServer
+PORTS = [8088, 8095, 8096, 8097, 8098, 8099, 8100, 8112]
+class H(BaseHTTPRequestHandler):
+    def do_GET(self):
+        up = sum(1 for p in PORTS if subprocess.run(["nc","-z","127.0.0.1",str(p)], capture_output=True).returncode == 0)
+        body = json.dumps({"online": up, "total": len(PORTS), "status": "NOMINAL"}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(body)
+    def log_message(self, *a): pass
+HTTPServer(("127.0.0.1", 8100), H).serve_forever()
+' > ~/telemetry_8100.log 2>&1 < /dev/null &
+  echo "[BOOT] Started Telemetry Health Node on Port 8100"
+fi
+
+if ! nc -z 127.0.0.1 8112 2>/dev/null; then
+  nohup python3 ~/astra-enterprise-core/dual_stream_bridge.py > ~/dual_stream_8112.log 2>&1 < /dev/null &
+  echo "[BOOT] Started Alstra Dual-Stream Bridge on Port 8112"
+fi
+setsid nohup python3 ~/astra-enterprise-core/telemetry_sentinel.py > ~/telemetry_sentinel.log 2>&1 < /dev/null &
+setsid nohup python3 ~/astra-jev-system1/jev_router.py > ~/astra-jev-system1/jev.log 2>&1 < /dev/null &
