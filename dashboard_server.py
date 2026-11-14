@@ -1722,6 +1722,17 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path in ("/", "/index.html"):
+            import os as _os, re as _re
+            _hp = _os.path.expanduser("~/command_center_full.html")
+            _raw = open(_hp, "r", encoding="utf-8").read()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(_raw.encode("utf-8"))))
+            self.end_headers()
+            self.wfile.write(_raw.encode("utf-8"))
+            return
         if self.path.startswith("/api/ci-"):
             import json as _js
             _b = _js.dumps(fetch_live_ci_telemetry()).encode("utf-8")
