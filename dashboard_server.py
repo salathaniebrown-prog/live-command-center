@@ -1,4 +1,15 @@
 
+def execute_supercomputer_mesh_8119(goal_text):
+    import http.client, json
+    try:
+        c = http.client.HTTPConnection("127.0.0.1", 8119, timeout=8)
+        body = json.dumps({"goal": goal_text or "Full 10-node Supercomputer Mesh + Cinema/Renoise MCP consensus run"}).encode("utf-8")
+        c.request("POST", "/execute", body=body, headers={"Content-Type": "application/json"})
+        return json.loads(c.getresponse().read().decode())
+    except Exception as e:
+        return {"status": "MESH_OFFLINE", "error": str(e)}
+
+
 def call_cinema_mcp_8121(payload=None):
     import http.client, json
     try:
@@ -1029,6 +1040,7 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
 
 
 <div id="astra-ci-badge" style="position:fixed;top:46px;right:14px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(5,12,24,0.95);border:1px solid #00ff8088;padding:4px 8px;box-shadow:0 0 12px rgba(0,255,136,0.25);font-family:monospace;">
+  <button id="btn-run-mesh" onclick="openAndRunSupercomputerMesh()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🧠 RUN 4-GATE MESH</button>
   <button onclick="openCinemaMcpModal()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🎬 CINEMA MCP</button>
   <button onclick="openTrustPortalModal()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🛡️ TRUST PORTAL</button>
   <button id="btn-copy-handoff" onclick="copyLiveHandoffManifest()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">📋 COPY HANDOFF</button>
@@ -1257,7 +1269,52 @@ async function renderCinemaRenoiseProject() {
   }
 }
 </script>
+
+<div id="astra-mesh-modal" style="display:none;position:fixed;inset:0;background:rgba(2,6,14,0.92);z-index:10005;align-items:center;justify-content:center;font-family:monospace;">
+  <div style="width:94%;max-width:780px;background:#050d1c;border:1px solid #00ff88;box-shadow:0 0 28px rgba(0,255,136,0.35);padding:16px;color:#00f0ff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00ff8844;padding-bottom:8px;margin-bottom:10px;">
+      <strong style="color:#fff;">ASTRA // ALSTRA 10-NODE SUPERCOMPUTER 4-GATE VALIDATOR (PORT 8119)</strong>
+      <div style="display:flex;gap:6px;">
+        <button onclick="triggerMeshConsensusRun()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;padding:3px 8px;font-size:11px;cursor:pointer;">⚡ RE-RUN</button>
+        <button onclick="document.getElementById('astra-mesh-modal').style.display='none'" style="background:#ff336622;border:1px solid #ff3366;color:#ff3366;padding:3px 8px;font-size:11px;cursor:pointer;">CLOSE</button>
+      </div>
+    </div>
+    <div id="mesh-modal-body" style="background:#030812;border:1px solid #00f0ff44;padding:10px;font-size:11px;color:#fff;line-height:1.55;max-height:340px;overflow-y:auto;">Initializing 4-Gate Supercomputer Consensus...</div>
+  </div>
+</div>
+<script>
+function openAndRunSupercomputerMesh() {
+  document.getElementById("astra-mesh-modal").style.display = "flex";
+  triggerMeshConsensusRun();
+}
+async function triggerMeshConsensusRun() {
+  const box = document.getElementById("mesh-modal-body");
+  box.innerHTML = "Executing 10-node cross-mesh probe (Brain 8109 + Edge ML 8113 + Webhooks 8115 + Trust 8117 + Cinema/Renoise MCP 8121)...";
+  try {
+    const r = await fetch("/api/mesh/execute", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({goal: "Verify live ETH spot, SOC 2 trust posture, settled webhooks, and 128 BPM Renoise Cinema MCP sync"})
+    });
+    const d = await r.json();
+    const gates = d.validation_gates || {};
+    const gateHtml = Object.keys(gates).map(k => {
+      const ok = gates[k];
+      return `<div style="color:${ok ? '#00ff88' : '#ff4466'};">[${ok ? '✔ PASS' : '✘ FAIL'}] ${k}</div>`;
+    }).join("");
+    box.innerHTML =
+      `<div style="color:#00ff88;font-size:12px;margin-bottom:6px;"><strong>${d.exec_id || 'MESH'} // ${d.status} (SCORE: ${d.validation_score_pct || 0}%)</strong></div>` +
+      `<div style="margin-bottom:8px;">${gateHtml}</div>` +
+      `<div style="color:#00f0ff;margin-bottom:6px;"><strong>NODES COORDINATED:</strong> ${(d.nodes_coordinated || []).join(" -> ")}</div>` +
+      `<div style="background:#071224;border:1px solid #00ff8833;padding:8px;margin-bottom:6px;">${d.synthesized_output || d.error || ''}</div>` +
+      `<div style="color:#8899aa;font-size:10px;">ATTESTATION HASH: ${d.attestation_hash || 'N/A'}</div>`;
+  } catch (e) {
+    box.innerHTML = "Mesh execution error: " + e;
+  }
+}
+</script>
 </html>
+
 
 
 """
@@ -1292,6 +1349,19 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        if self.path == "/api/mesh/execute":
+            import json
+            ln = int(self.headers.get("Content-Length", 0))
+            d = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
+            b = json.dumps(execute_supercomputer_mesh_8119(d.get("goal") or "")).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
+
         if self.path == "/api/cinema-mcp/render":
             import json
             ln = int(self.headers.get("Content-Length", 0))
