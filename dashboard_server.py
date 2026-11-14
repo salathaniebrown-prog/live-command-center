@@ -1574,20 +1574,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path in ("/", "/index.html"):
-            import glob
-            html_body = None
-            for var_name in ("DASHBOARD_HTML", "HTML_UI", "INDEX_HTML", "COMMAND_CENTER_HTML"):
-                if var_name in globals() and isinstance(globals()[var_name], str) and "<html" in globals()[var_name].lower():
-                    html_body = globals()[var_name]
-                    break
-            if html_body is None:
-                for cand in (os.path.expanduser("~/index.html"), os.path.expanduser("~/dashboard.html")):
-                    if os.path.exists(cand):
-                        html_body = open(cand, "r", encoding="utf-8", errors="ignore").read()
-                        break
-            if html_body is None:
-                html_body = "<!DOCTYPE html><html><head><title>ASTRA COMMAND CENTER</title></head><body style='background:#05080f;color:#00f0ff;font-family:monospace'><h1>ASTRA // ALSTRA COMMAND CENTER (PORT 8088 ONLINE)</h1></body></html>"
-            b = html_body.encode("utf-8")
+            b = HTML.encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Access-Control-Allow-Origin", "*")
