@@ -766,6 +766,64 @@ window.runFullAutopilot = async function(){
 
 setTimeout(() => { window.runFullAutopilot(); }, 500);
 
+
+window.wireSection4AndSecurity = function(){
+  // Dock any floating ITDR / ISPM / HARDEN / LONGCAT-2.5 pill cleanly so it never covers Sections 5-8
+  document.querySelectorAll('div,section,nav').forEach(el => {
+    const txt = (el.textContent || '').trim();
+    if(txt.includes('ITDR') && txt.includes('ISPM') && txt.includes('LONGCAT-2.5') && el.children.length <= 6){
+      el.style.position = 'static';
+      el.style.margin = '12px auto';
+      el.style.zIndex = '1';
+      el.style.width = 'fit-content';
+      if(!document.getElementById('itdr-ispm-out')){
+        const out = document.createElement('pre');
+        out.id = 'itdr-ispm-out';
+        out.style.cssText = 'background:#040811;border:1px solid #00f0ff;color:#00ff88;padding:8px;margin:8px 0;font-family:monospace;font-size:11px;white-space:pre-wrap;';
+        out.textContent = '[ITDR // ISPM // HARDEN // LONGCAT-2.5] Ready — tap any control above to execute.';
+        el.parentNode.insertBefore(out, el.nextSibling);
+      }
+      el.querySelectorAll('button,span,a,div').forEach(btn => {
+        const btxt = (btn.textContent || '').trim();
+        if(['ITDR','ISPM','HARDEN','LONGCAT-2.5 READY'].includes(btxt)){
+          btn.style.cursor = 'pointer';
+          btn.onclick = async function(ev){
+            ev.stopPropagation();
+            const r = await fetch('/api/security/' + btxt.toLowerCase().replace(/[^a-z0-9]/g,''), {
+              method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:btxt})
+            });
+            const d = await r.json();
+            const box = document.getElementById('itdr-ispm-out');
+            if(box) box.textContent = d.output || JSON.stringify(d);
+          };
+        }
+      });
+    }
+  });
+
+  // Ensure all Section 4 MediaPipe buttons update the Section 4 output line deterministically
+  document.querySelectorAll('button').forEach(btn => {
+    const t = (btn.textContent || '').trim().toUpperCase();
+    if(['RUN INFER','INDEX RAG','OPEN WEBGPU RUNNER','BUILD .TASK BUNDLE (GPU)'].includes(t)){
+      btn.onclick = async function(){
+        const r = await fetch('/api/mediapipe/infer', {
+          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:t, query:t})
+        });
+        const d = await r.json();
+        document.querySelectorAll('div,p,span,pre').forEach(node => {
+          if((node.textContent || '').includes('[MEDIAPIPE TASKS READY]') || (node.textContent || '').includes('[MEDIAPIPE EDGE ML 8113]')){
+            if(node.children.length === 0){
+              node.textContent = d.output + ' // Action: ' + t;
+              node.style.color = '#00ff88';
+            }
+          }
+        });
+      };
+    }
+  });
+};
+setTimeout(window.wireSection4AndSecurity, 450);
+
 setTimeout(() => { window.refreshSagaState(); window.loadLegalTemplate(); window.loadAutoPlugins(); }, 400);
 </script>
 
