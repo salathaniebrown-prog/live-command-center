@@ -824,6 +824,78 @@ window.wireSection4AndSecurity = function(){
 };
 setTimeout(window.wireSection4AndSecurity, 450);
 
+
+window.upgradeCinemaModalAndLayout = function(){
+  // 1. Enhance the top CINEMA MCP modal (Port 8121) with Elite Lens, LUT & Live Animated Canvas
+  document.querySelectorAll('div').forEach(div => {
+    const t = (div.textContent || '');
+    if(t.includes('CLAUDE AI CINEMATIC VIDEO & RENOISE MCP SYNC STUDIO (PORT 8121)') && !div.dataset.eliteUpgraded){
+      div.dataset.eliteUpgraded = '1';
+      const bar = document.createElement('div');
+      bar.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;padding:6px;background:#040a14;border:1px solid #00f0ff;border-radius:4px;';
+      bar.innerHTML = `
+        <select id="modal-cinema-lens" style="background:#02060d;color:#ffb703;border:1px solid #ffb703;padding:4px;font-family:monospace;font-size:11px;">
+          <option value="35mm Anamorphic">LENS: 35mm Anamorphic</option>
+          <option value="65mm IMAX 15/70">LENS: 65mm IMAX 15/70</option>
+          <option value="14mm FPV Gimbal">LENS: 14mm FPV Gimbal</option>
+          <option value="85mm Prime f/1.2">LENS: 85mm Prime f/1.2</option>
+        </select>
+        <select id="modal-cinema-lut" style="background:#02060d;color:#00f0ff;border:1px solid #00f0ff;padding:4px;font-family:monospace;font-size:11px;">
+          <option value="Cyber-Teal & Gold">LUT: Cyber-Teal &amp; Gold</option>
+          <option value="Quantum Violet Neon">LUT: Quantum Violet Neon</option>
+          <option value="Blade Silver Noir">LUT: Blade Silver Noir</option>
+        </select>
+        <button type="button" onclick="window.triggerEliteModalRender()" style="background:#3d2600;color:#ffb703;border:1px solid #ffb703;padding:4px 10px;font-family:monospace;font-size:11px;cursor:pointer;">🎬 ELITE 4K ANAMORPHIC PASS</button>
+      `;
+      const inputs = div.querySelectorAll('input');
+      if(inputs.length > 0 && inputs[0].parentNode){
+        inputs[0].parentNode.parentNode.insertBefore(bar, inputs[0].parentNode);
+      }
+    }
+  });
+
+  // 2. Ensure Section 8 is appended at the bottom of #astra-upgrade-suite if not already visible
+  const suite = document.getElementById('astra-upgrade-suite');
+  if(suite && !document.getElementById('astra-section-8')){
+    const s8 = document.createElement('div');
+    s8.id = 'astra-section-8';
+    s8.style.cssText = 'margin-top:14px;padding:14px;border:1px solid #ff9e00;background:#090b16;border-radius:6px;';
+    s8.innerHTML = `
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #3d2c10;padding-bottom:6px;margin-bottom:10px;">
+        <span style="color:#ffb703;font-weight:bold;">8. ELITE CINEMA VISUAL STUDIO // LIVE ONLINE SEARCH ASSISTANT // TERMUX-LINUX-EDGE-IBM-GITHUB AUTOPILOT (8127)</span>
+        <span style="color:#00ff88;font-size:12px;">SHORTCUT &amp; AUTO-BOOT: ARMED</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <input id="elite-search-q" placeholder="Live Online Search + AI Personal Assistant (e.g. Python asyncio sqlite3 WAL, Qiskit OpenQASM 3.0)..." style="flex:1;background:#040811;color:#fff;border:1px solid #00f0ff;padding:7px;font-family:monospace;">
+        <button onclick="window.runLiveOnlineSearch()" style="background:#003b4d;color:#00f0ff;border:1px solid #00f0ff;padding:7px 12px;cursor:pointer;">🌐 SEARCH ONLINE + ASK ASSISTANT</button>
+      </div>
+      <pre id="elite-search-out" style="background:#040811;border:1px solid #102a42;padding:8px;max-height:140px;overflow:auto;font-size:11px;color:#9be7ff;white-space:pre-wrap;margin-bottom:10px;">Online Search + Mastered Python/Cluster Personal Assistant ready.</pre>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <button onclick="window.runFullAutopilot()" style="background:#0d3328;color:#00ff88;border:1px solid #00ff88;padding:6px 12px;cursor:pointer;">🚀 TRIGGER TERMUX / LINUX / EDGE / IBM / GITHUB AUTOPILOT</button>
+      </div>
+      <pre id="autopilot-out" style="background:#040811;border:1px solid #133b3a;padding:8px;max-height:140px;overflow:auto;font-size:11px;color:#a7f3d0;white-space:pre-wrap;">Loading Python Mastered Library &amp; Auto-Pilot telemetry...</pre>
+    `;
+    suite.appendChild(s8);
+    if(window.runFullAutopilot) window.runFullAutopilot();
+  }
+};
+
+window.triggerEliteModalRender = async function(){
+  const lens = (document.getElementById('modal-cinema-lens')||{}).value || '35mm Anamorphic';
+  const lut = (document.getElementById('modal-cinema-lut')||{}).value || 'Cyber-Teal & Gold';
+  const r = await fetch('/api/studio/cinema', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt:'Cybernetic supercomputer datacenter flythrough', lens:lens, lut:lut, bpm:128})});
+  const d = await r.json();
+  document.querySelectorAll('div,pre,p').forEach(el => {
+    if((el.textContent || '').includes('LOCAL_DETERMINISTIC_DIRECTOR') && el.children.length === 0){
+      el.textContent = '[' + d.scene_id + ' | ELITE VISUAL STUDIO | ' + d.lens + ' | LUT: ' + d.color_lut + ']\n' +
+        d.shots.map(s => '• Shot ' + s.shot + ' [' + s.timecode + ']: ' + s.camera + ' — ' + s.renoise_pattern).join('\n') +
+        '\nAttestation: ' + d.attestation_hash;
+    }
+  });
+};
+
+setInterval(window.upgradeCinemaModalAndLayout, 800);
+
 setTimeout(() => { window.refreshSagaState(); window.loadLegalTemplate(); window.loadAutoPlugins(); }, 400);
 </script>
 
