@@ -1455,31 +1455,34 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
-        if self.path == "/api/test-dealership-pipeline":
-            import json
-            ln = int(self.headers.get("Content-Length", 0))
-            body_data = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
-            res_body = json.dumps(trigger_1click_dealership_pipeline(body_data.get("vin"), body_data.get("amount_usd"), body_data.get("network"))).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Content-Length", str(len(res_body)))
-            self.end_headers()
-            self.wfile.write(res_body)
+        if self.path.startswith("/api/test-dealership-pipeline"):
+            import json, traceback
+            try:
+                ln = int(self.headers.get("Content-Length", 0))
+                raw = self.rfile.read(ln).decode("utf-8", errors="ignore") if ln else "{}"
+                body_data = json.loads(raw) if raw.strip() else {}
+                result = trigger_1click_dealership_pipeline(
+                    body_data.get("vin"),
+                    body_data.get("amount_usd"),
+                    body_data.get("network")
+                )
+                out = json.dumps(result).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Content-Length", str(len(out)))
+                self.end_headers()
+                self.wfile.write(out)
+            except Exception as err:
+                err_out = json.dumps({"status": "RECOVERED_ERROR", "error": str(err), "trace": traceback.format_exc()}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Content-Length", str(len(err_out)))
+                self.end_headers()
+                self.wfile.write(err_out)
             return
 
-        if self.path == "/api/test-dealership-pipeline":
-            import json
-            ln = int(self.headers.get("Content-Length", 0))
-            body_data = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
-            res_body = json.dumps(trigger_1click_dealership_pipeline(body_data.get("vin"), body_data.get("amount_usd"))).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Content-Length", str(len(res_body)))
-            self.end_headers()
-            self.wfile.write(res_body)
-            return
 
         if self.path == "/api/mesh/execute":
             import json
