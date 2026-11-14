@@ -3,7 +3,8 @@ import http.client, json, os, py_compile, subprocess, time
 HOME = os.path.expanduser("~")
 PORTS = (8088, 8099, 8108, 8109, 8111, 8113, 8115)
 
-def check_ports():
+def subprocess.run(["python3", f"{HOME}/astra_ai_memory_healer.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            check_ports():
     for p in PORTS:
         try:
             c = http.client.HTTPConnection("127.0.0.1", p, timeout=2)
