@@ -17,7 +17,9 @@ SERVICES = [
 ]
 
 def init_validation_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=30000;")
     conn.execute("""CREATE TABLE IF NOT EXISTS e2e_validation_runs (
         run_id TEXT PRIMARY KEY,
         static_passed INTEGER,
@@ -122,7 +124,9 @@ def execute_meta_validation_cycle():
         "offline_or_failing": [n for n in s2["nodes"] if not n["online"]] + [t for t in s3["tests"] if not t["passed"]]
     }
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=30000;")
     conn.execute(
         "INSERT INTO e2e_validation_runs VALUES (?, ?, ?, ?, ?, ?, ?)",
         (run_id, 1 if s1["passed"] else 0, report["stage_2_cluster_nodes"], s3["passed_count"], score, json.dumps(report), time.time())
