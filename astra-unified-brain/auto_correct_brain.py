@@ -1,17 +1,7 @@
 import http.client, json, os, py_compile, subprocess, time
 
 HOME = os.path.expanduser("~")
-PORTS = (8088, 8099, 8108, 8109, 8111, 8113, 8115, 8117, 8119, 8121)
-
-SCRIPT_MAP = {
-    8088: ("python3", os.path.join(HOME, "dashboard_server.py")),
-    8099: ("python3", os.path.join(HOME, "dealership_module.py")),
-    8113: ("python3", os.path.join(HOME, "astra-mediapipe-tasks", "mediapipe_edge_ml.py")),
-    8115: ("python3", os.path.join(HOME, "webhook_listener_8115.py")),
-    8117: ("python3", os.path.join(HOME, "trust_center_8117.py")),
-    8119: ("python3", os.path.join(HOME, "agentic_mesh_8119.py")),
-    8121: ("python3", os.path.join(HOME, "studio_cinema_mcp_8121.py")),
-}
+PORTS = (8088, 8108, 8109, 8111, 8113, 8115)
 
 def check_ports():
     for p in PORTS:
@@ -20,22 +10,19 @@ def check_ports():
             c.request("GET", "/")
             c.getresponse().read()
         except Exception:
-            cmd = SCRIPT_MAP.get(p)
-            if cmd and os.path.exists(cmd[1]):
-                subprocess.Popen(list(cmd), start_new_session=True)
+            if p == 8113:
+                subprocess.Popen(["python3", f"{HOME}/astra-mediapipe-tasks/mediapipe_edge_ml.py"], start_new_session=True)
 
 def heal_tunnel():
-    log = os.path.join(HOME, "tunnel.log")
+    log = f"{HOME}/tunnel.log"
     if not os.path.exists(log) or "Registered tunnel connection" not in open(log, errors="ignore").read():
-        sh = os.path.join(HOME, "start_tunnel.sh")
-        if os.path.exists(sh):
-            subprocess.Popen(["bash", sh])
+        subprocess.Popen(["bash", f"{HOME}/start_tunnel.sh"])
 
 def post_push_ci():
-    state = os.path.join(HOME, ".astra_last_ci_sha")
+    state = f"{HOME}/.astra_last_ci_sha"
     try:
-        sha = subprocess.check_output(["git", "-C", HOME, "rev-parse", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
-        rem = subprocess.check_output(["git", "-C", HOME, "rev-parse", "origin/main"], stderr=subprocess.DEVNULL).decode().strip()
+        sha = subprocess.check_output(["git", "-C", HOME, "rev-parse", "HEAD"]).decode().strip()
+        rem = subprocess.check_output(["git", "-C", HOME, "rev-parse", "origin/main"]).decode().strip()
     except Exception:
         return
     if not sha or sha != rem or (os.path.exists(state) and open(state).read().strip() == sha):
@@ -47,9 +34,21 @@ def post_push_ci():
         c.getresponse().read()
     except Exception:
         pass
-    handoff = os.path.join(HOME, "generate_chat_handoff.py")
-    if os.path.exists(handoff):
-        subprocess.Popen(["python3", handoff], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    log = f"{HOME}/astra-unified-brain/ci_poll.log"
+    for _ in range(12):
+        try:
+            c = http.client.HTTPConnection("127.0.0.1", 8088, timeout=5)
+            c.request("GET", "/api/ci-status")
+            runs = json.loads(c.getresponse().read().decode()).get("runs") or []
+            for r in runs:
+                if str(r.get("head_sha") or "").startswith(sha[:7]):
+                    st, conc = r.get("status"), r.get("conclusion")
+                    open(log, "a").write(f"{sha[:7]} status={st} conclusion={conc}\n")
+                    if st == "completed":
+                        return
+        except Exception:
+            pass
+        time.sleep(8)
 
 def run_watchdog_daemon():
     while True:
