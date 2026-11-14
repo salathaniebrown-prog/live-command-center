@@ -57,6 +57,7 @@ def validate_and_execute_mission(goal_text):
     n_edge = probe_node(8113, "/")
     n_trust = probe_node(8117, "/ask", {"question": goal})
     n_wh = probe_node(8115, "/")
+    n_cinema = probe_node(8121, "/render", {"title": "MESH_SYNC_CINEMA", "prompt": goal, "bpm": 128, "fps": 24})
 
     # 2. 3-Gate Deterministic AI Output Validation
     eth_price = 0.0
@@ -74,13 +75,16 @@ def validate_and_execute_mission(goal_text):
     if isinstance(n_wh.get("data"), dict):
         wh_events = int(n_wh.get("data").get("events_logged") or 0)
 
+    cinema_ok = isinstance(n_cinema.get("data"), dict) and (n_cinema.get("data").get("status") == "CINEMA_RENOISE_SYNCED")
+    cinema_id = n_cinema.get("data").get("project_id", "N/A") if isinstance(n_cinema.get("data"), dict) else "N/A"
     gates = {
         "gate_1_schema_and_non_empty": bool(trust_ans or n_brain.get("online")),
         "gate_2_live_telemetry_grounded": (eth_price > 0.0 and n_trust.get("online")),
-        "gate_3_cryptographic_attestation": bool(trust_proof.startswith("0x"))
+        "gate_3_cryptographic_attestation": bool(trust_proof.startswith("0x")),
+        "gate_4_cinema_renoise_mcp_synced": cinema_ok
     }
     passed = sum(1 for v in gates.values() if v)
-    score_pct = round((passed / 3.0) * 100.0, 1)
+    score_pct = round((passed / 4.0) * 100.0, 1)
 
     synthesis = (
         f"[SUPERCOMPUTER MESH {exec_id}] Live ETH/USD spot verified at ${eth_price:,.2f} | "
@@ -89,7 +93,7 @@ def validate_and_execute_mission(goal_text):
     ).strip()
 
     attestation = "0x" + hashlib.sha256(f"{exec_id}|{goal}|{synthesis}|{score_pct}|{ts}".encode("utf-8")).hexdigest()
-    invoked_list = ["8109:BRAIN", "8113:EDGE_ML", "8115:WEBHOOKS", "8117:TRUST"]
+    invoked_list = ["8109:BRAIN", "8113:EDGE_ML", "8115:WEBHOOKS", "8117:TRUST", f"8121:CINEMA_MCP({cinema_id})"]
 
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
