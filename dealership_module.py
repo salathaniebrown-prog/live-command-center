@@ -85,7 +85,7 @@ HTML_UI = """<!DOCTYPE html>
   </div>
 <script>
 async function refreshDealership() {
-  const r = await fetch("/api/state");
+  const r = await fetch("./api/state");
   const d = await r.json();
   const inv = document.getElementById("inv");
   inv.innerHTML = "";
@@ -107,7 +107,7 @@ async function refreshDealership() {
   });
 }
 async function acquire(vin) {
-  const r = await fetch("/api/execute", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({vin})});
+  const r = await fetch("./api/execute", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({vin})});
   const res = await r.json();
   if (res.status === "SUCCESS") {
     document.getElementById("vc-num").innerText = res.virtual_card;
