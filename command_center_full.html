@@ -512,7 +512,7 @@ function initiateVoiceDataLink() {
 async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=d.mode+': '+(d.threat||d.grade||d.hardened.length+' OK');}
 </script>
 <!-- ASTRA UPGRADE SUITE: SECTIONS 5, 6 & 7 -->
-<div id="astra-upgrade-suite" style="margin:16px 0 90px 0;font-family:monospace;color:#d6f8ff;">
+<div id="astra-upgrade-suite" style="margin:16px 0 260px 0;font-family:monospace;color:#d6f8ff;">
   <div style="margin-bottom:14px;padding:14px;border:1px solid #00f0ff;background:#070d19;border-radius:6px;">
     <div style="display:flex;justify-content:space-between;border-bottom:1px solid #13304a;padding-bottom:6px;margin-bottom:10px;">
       <span style="color:#00f0ff;font-weight:bold;">5. DURABLE SAGA ENGINE // STRIPE &amp; DATADOG MEMORY // POLYGLOT STUDIO (8123)</span>
@@ -585,56 +585,66 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
   </div>
 </div>
 <script>
-async function refreshSagaState(){
+window.refreshSagaState = async function(){
+  const el = document.getElementById('saga-visibility-out');
   try{
-    const r = await fetch('/api/saga/state'); const d = await r.json();
+    const r = await fetch('/api/saga/state');
+    const d = await r.json();
     const wf = (d.workflows||[])[0] || {};
-    const dd = (d.datadog_memory||[]).slice(0,2).map(m=>m.metric+'='+m.value).join(' | ');
-    const st = (d.stripe_usage||[]).slice(0,2).map(s=>s.event_id+'($'+s.amount_usd+')').join(' | ');
-    document.getElementById('saga-visibility-out').textContent =
-      'LATEST SAGA: ' + (wf.workflow_id||'N/A') + ' [' + (wf.status||'READY') + '] Retries Absorbed: ' + (wf.retries||0) + '
-' +
-      'LINEAR KNOWLEDGE:
-  ' + ((wf.linear_knowledge||[]).join('
-  ') || 'Ready') + '
-' +
-      'DATADOG MEMORY: ' + (dd||'Monitoring') + '
-STRIPE METERS : ' + (st||'Active');
-  }catch(e){ document.getElementById('saga-visibility-out').textContent = 'Saga state: ' + e; }
-}
-async function runDurableSaga(){
+    const dd = (d.datadog_memory||[]).slice(0,2).map(m => m.metric + '=' + m.value).join(' | ');
+    const st = (d.stripe_usage||[]).slice(0,2).map(s => s.event_id + '($' + s.amount_usd + ')').join(' | ');
+    const lk = (wf.linear_knowledge||[]).join('\n  ') || 'Ready';
+    el.textContent =
+      'LATEST SAGA: ' + (wf.workflow_id||'N/A') + ' [' + (wf.status||'READY') + '] Retries Absorbed: ' + (wf.retries||0) + '\n' +
+      'LINEAR KNOWLEDGE:\n  ' + lk + '\n' +
+      'DATADOG MEMORY: ' + (dd||'Monitoring') + '\n' +
+      'STRIPE METERS : ' + (st||'Active');
+  }catch(e){ el.textContent = 'Saga state error: ' + e; }
+};
+
+window.runDurableSaga = async function(){
+  document.getElementById('saga-visibility-out').textContent = 'Running self-healing Saga with auto-retry...';
   await fetch('/api/saga/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:'WebUI Autonomous Recovery Saga'})});
-  await refreshSagaState();
-}
-async function recordStripeMeter(){
+  await window.refreshSagaState();
+};
+
+window.recordStripeMeter = async function(){
   await fetch('/api/stripe/meter', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({meter:'webui_external_interaction', units:50, amount_usd:9.99})});
-  await refreshSagaState();
-}
-async function runPolyglot(){
+  await window.refreshSagaState();
+};
+
+window.runPolyglot = async function(){
   const lang = document.getElementById('poly-lang').value;
   const code = document.getElementById('poly-code').value;
-  const r = await fetch('/api/polyglot/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({language:lang, code:code})});
-  const d = await r.json();
-  document.getElementById('poly-out').textContent = '[' + d.language.toUpperCase() + ' | exit=' + d.exit_code + ' | ' + d.latency_ms + 'ms]
-' + (d.stdout || d.stderr || 'OK');
-}
-async function loadLegalTemplate(){
+  const out = document.getElementById('poly-out');
+  out.textContent = 'Executing ' + lang.toUpperCase() + ' in sandbox...';
+  try{
+    const r = await fetch('/api/polyglot/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({language:lang, code:code})});
+    const d = await r.json();
+    out.textContent = '[' + (d.language||lang).toUpperCase() + ' | exit=' + d.exit_code + ' | ' + d.latency_ms + 'ms]\n' + (d.stdout || d.stderr || 'OK');
+  }catch(e){ out.textContent = 'Polyglot error: ' + e; }
+};
+
+window.loadLegalTemplate = async function(){
   const idx = parseInt(document.getElementById('gov-tpl-idx').value || '1', 10);
   const brand = document.getElementById('gov-brand-input').value;
-  const r = await fetch('/api/gov/templates', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({index:idx, brand:brand})});
-  const d = await r.json();
-  document.getElementById('gov-editor-out').value = d.legal_text + '
+  const out = document.getElementById('gov-editor-out');
+  try{
+    const r = await fetch('/api/gov/templates', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({index:idx, brand:brand})});
+    const d = await r.json();
+    out.value = (d.legal_text||'') + '\n\n--- EMBEDDABLE PRIVACY WIDGET SNIPPET ---\n' + (d.embed_code||'');
+  }catch(e){ out.value = 'Template load error: ' + e; }
+};
 
---- EMBEDDABLE PRIVACY WIDGET SNIPPET ---
-' + d.embed_code;
-}
-async function runVendorSdkScan(){
+window.runVendorSdkScan = async function(){
+  const out = document.getElementById('gov-editor-out');
+  out.value = 'Scanning cluster for Vendors, SSPs & SDKs...';
   const r = await fetch('/api/gov/scan', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({target:'cluster'})});
   const d = await r.json();
-  document.getElementById('gov-editor-out').value = 'SCAN ID: ' + d.scan_id + ' | DETECTED VENDORS/SSPs/SDKs: ' + d.vendors_detected + '
-' + JSON.stringify(d.findings, null, 2);
-}
-async function simulateGeoBanner(){
+  out.value = 'SCAN ID: ' + d.scan_id + ' | DETECTED VENDORS/SSPs/SDKs: ' + d.vendors_detected + '\n' + JSON.stringify(d.findings, null, 2);
+};
+
+window.simulateGeoBanner = async function(){
   const reg = document.getElementById('gov-geo-select').value;
   const brand = document.getElementById('gov-brand-input').value;
   const col = document.getElementById('gov-color-input').value;
@@ -644,40 +654,45 @@ async function simulateGeoBanner(){
   document.getElementById('gov-preview-title').style.color = col;
   document.getElementById('gov-preview-title').textContent = '[LIVE BANNER SIMULATOR :: ' + d.region + ' | ' + d.enforcement_mode + '] ' + brand;
   document.getElementById('gov-preview-copy').textContent = d.banner_copy;
-}
-async function applyBulkWhiteLabel(){
+  localStorage.setItem('astra_offline_consent_cache', JSON.stringify(d));
+};
+
+window.applyBulkWhiteLabel = async function(){
   const brand = document.getElementById('gov-brand-input').value;
   const col = document.getElementById('gov-color-input').value;
   const r = await fetch('/api/gov/bulk-update', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({brand_name:brand, primary_color:col, sso_provider:'OIDC / SAML 2.0'})});
   const d = await r.json();
-  await simulateGeoBanner();
-  document.getElementById('gov-editor-out').value = 'BULK WHITE-LABEL & SSO UPDATED:
-' + JSON.stringify(d, null, 2);
-}
-async function issueVrConsentPassport(){
+  await window.simulateGeoBanner();
+  document.getElementById('gov-editor-out').value = 'BULK WHITE-LABEL & SSO UPDATED:\n' + JSON.stringify(d, null, 2);
+};
+
+window.issueVrConsentPassport = async function(){
   const r = await fetch('/api/gov/vr-share', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({devices:'android-termux-primary,xr-headset-01,command-center-web'})});
   const d = await r.json();
-  document.getElementById('gov-editor-out').value = 'CROSS-DEVICE VR/XR AI OWNER CONSENT PASSPORT SYNCED:
-' + JSON.stringify(d, null, 2);
-}
-async function askGovExpert(){
+  document.getElementById('gov-editor-out').value = 'CROSS-DEVICE VR/XR AI OWNER CONSENT PASSPORT SYNCED:\n' + JSON.stringify(d, null, 2);
+};
+
+window.askGovExpert = async function(){
   const q = document.getElementById('gov-expert-q').value;
   const r = await fetch('/api/gov/expert', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({question:q})});
   const d = await r.json();
   document.getElementById('gov-editor-out').value = d.answer;
-}
-async function loadAutoPlugins(){
-  const r = await fetch('/api/plugins'); const d = await r.json();
+};
+
+window.loadAutoPlugins = async function(){
+  const r = await fetch('/api/plugins');
+  const d = await r.json();
   document.getElementById('plug-count-badge').textContent = 'POLICY: ' + d.policy + ' (' + d.total_plugins + ' PLUGINS)';
-  document.getElementById('plug-out').textContent = (d.plugins||[]).map(p => '[AUTO-ALLOWED] ' + p.id + ' -> ' + p.name).join('
-');
-}
-async function testAutoPlugin(){
+  document.getElementById('plug-out').textContent = (d.plugins||[]).map(p => '[AUTO-ALLOWED] ' + p.id + ' -> ' + p.name).join('\n');
+};
+
+window.testAutoPlugin = async function(){
   const r = await fetch('/api/plugins/execute', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({plugin_id:'plugin.gov.scanner', args:{target:'cluster'}})});
   const d = await r.json();
   document.getElementById('plug-out').textContent = JSON.stringify(d, null, 2);
-}
-setTimeout(() => { refreshSagaState(); loadLegalTemplate(); loadAutoPlugins(); }, 600);
+};
+
+setTimeout(() => { window.refreshSagaState(); window.loadLegalTemplate(); window.loadAutoPlugins(); }, 400);
 </script>
 
 </body>
