@@ -1415,7 +1415,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(raw)
             return
-        if self.path.startswith("/api/jev/template/"):
+    if self.path.startswith("/api/jev/template/"):
             kind = self.path.split("/api/jev/template/")[-1].split("?").__getitem__(0).upper()
             tpl = {"MED": "SOAP Clinical Intake, ICD-10 Coding, HIPAA Consent & Rx Plan", "LEGAL": "Mutual NDA, Master Services Agreement & Jurisdiction Clause", "PATENT": "USPTO Provisional Specification, Claims Tree & Prior-Art Matrix"}.get(kind, "Standard JEV Document Template")
             raw = json.dumps({"ok": True, "template": kind, "scaffold": tpl, "engine": "JEV-8111 + LongCat-2.5"}).encode("utf-8")
@@ -1425,7 +1425,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(raw)
             return
-        if self.path.startswith("/api/sec/"):
+    if self.path.startswith("/api/sec/"):
             m = self.path.split("/api/sec/")[-1].split("?")[0]
             raw = json.dumps(run_sec_ops(m)).encode("utf-8")
             self.send_response(200)
@@ -1434,7 +1434,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(raw)
             return
-        if self.path.startswith("/api/kpi-summary"):
+    if self.path.startswith("/api/kpi-summary"):
             import json
             b = json.dumps(get_live_kpis(force_rpc=("refresh=1" in self.path))).encode("utf-8")
             self.send_response(200)
