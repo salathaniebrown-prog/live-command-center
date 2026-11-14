@@ -1649,8 +1649,8 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(b)
             return
 
-        if self.path.startswith("/api/kpi-summary"):
-            import json
+            if self.path.startswith("/api/kpi-summary"):
+                import json
             b = json.dumps(get_live_kpis(force_rpc=("refresh=1" in self.path))).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -1660,8 +1660,8 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(b)
             return
 
-        if self.path.startswith("/api/certificate/"):
-            import json
+            if self.path.startswith("/api/certificate/"):
+                import json
             ref = self.path.split("/api/certificate/").split("?")
             body = json.dumps(lookup_certificate_record(ref), indent=2).encode("utf-8")
             self.send_response(200)
@@ -1672,8 +1672,8 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             return
 
-        if self.path.startswith("/api/kpi-summary"):
-            import json
+            if self.path.startswith("/api/kpi-summary"):
+                import json
             b = json.dumps(get_live_kpis(force_rpc=("refresh=1" in self.path))).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -1683,8 +1683,8 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(b)
             return
 
-        if self.path.startswith("/api/export-ledger"):
-            import csv, io, json
+            if self.path.startswith("/api/export-ledger"):
+                import csv, io, json
             data = build_ledger_export_payload()
             if "format=csv" in self.path:
                 buf = io.StringIO()
@@ -1711,17 +1711,17 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             return
 
-        if self.path.startswith("/apps/"):
-            rel = self.path[6:].split("?").strip("/")
+            if self.path.startswith("/apps/"):
+                rel = self.path[6:].split("?").strip("/")
             fp = os.path.join(APPS_DIR, rel)
             if os.path.isdir(fp): fp = os.path.join(fp, "index.html")
             if os.path.isfile(fp):
                 self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.end_headers()
                 self.wfile.write(open(fp, "rb").read()); return
             self.send_error(404); return
-        if self._proxy(): return
-        self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.end_headers()
-        self.wfile.write(HTML.encode("utf-8"))
+            if self._proxy(): return
+            self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.end_headers()
+            self.wfile.write(HTML.encode("utf-8"))
 
 HTTPServer(("0.0.0.0", 8088), UnifiedHandler).serve_forever()
 
