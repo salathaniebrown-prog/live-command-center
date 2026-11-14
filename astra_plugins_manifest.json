@@ -1,0 +1,382 @@
+{
+  "policy": "AUTO_ALLOW_ALL_VERIFIED_PLUGINS",
+  "require_user_confirmation": false,
+  "total_plugins": 11,
+  "updated_at": 1794686413.4581604,
+  "openai_tools_schema": [
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_saga_execute",
+        "description": "Durable Self-Healing Saga Runner",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_polyglot_run",
+        "description": "Polyglot Raw Code Sandbox (Python/Java/PHP/Go/.NET)",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "language": {
+              "type": "string"
+            },
+            "code": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_stripe_meter",
+        "description": "Stripe External Usage & Payment Metering",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "meter": {
+              "type": "string"
+            },
+            "units": {
+              "type": "integer"
+            },
+            "amount_usd": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_datadog_memory",
+        "description": "Datadog APM & System Memory Telemetry",
+        "parameters": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_gov_templates",
+        "description": "3,600+ Legal & DPA Template Generator",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "integer"
+            },
+            "query": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_gov_scanner",
+        "description": "App Vendor, SSP & SDK Compliance Scanner",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_gov_vr_consent",
+        "description": "Cross-Device VR/XR AI Owner Consent Passport",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "devices": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_gov_bulk_whitelabel",
+        "description": "Multi-Config Bulk White-Label, Geo & SSO Manager",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "brand_name": {
+              "type": "string"
+            },
+            "primary_color": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_dealership_escrow",
+        "description": "Wyler & DealersLink Virtual Card Escrow",
+        "parameters": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_cinema_renoise",
+        "description": "Cinema 2.39:1 & Renoise OSC MCP Studio",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "type": "string"
+            },
+            "bpm": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "plugin_mesh_validator",
+        "description": "10-Node Supercomputer 4-Gate Validator",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "goal": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "plugins": [
+    {
+      "id": "plugin.saga.execute",
+      "name": "Durable Self-Healing Saga Runner",
+      "port": 8123,
+      "endpoint": "/saga/run",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "plugin.polyglot.run",
+      "name": "Polyglot Raw Code Sandbox (Python/Java/PHP/Go/.NET)",
+      "port": 8123,
+      "endpoint": "/polyglot/run",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "plugin.stripe.meter",
+      "name": "Stripe External Usage & Payment Metering",
+      "port": 8123,
+      "endpoint": "/stripe/meter",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "meter": {
+            "type": "string"
+          },
+          "units": {
+            "type": "integer"
+          },
+          "amount_usd": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "id": "plugin.datadog.memory",
+      "name": "Datadog APM & System Memory Telemetry",
+      "port": 8123,
+      "endpoint": "/state",
+      "method": "GET",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "id": "plugin.gov.templates",
+      "name": "3,600+ Legal & DPA Template Generator",
+      "port": 8125,
+      "endpoint": "/templates",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer"
+          },
+          "query": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "plugin.gov.scanner",
+      "name": "App Vendor, SSP & SDK Compliance Scanner",
+      "port": 8125,
+      "endpoint": "/scan",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "plugin.gov.vr_consent",
+      "name": "Cross-Device VR/XR AI Owner Consent Passport",
+      "port": 8125,
+      "endpoint": "/vr-share",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "devices": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "plugin.gov.bulk_whitelabel",
+      "name": "Multi-Config Bulk White-Label, Geo & SSO Manager",
+      "port": 8125,
+      "endpoint": "/bulk-update",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "brand_name": {
+            "type": "string"
+          },
+          "primary_color": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "id": "plugin.dealership.escrow",
+      "name": "Wyler & DealersLink Virtual Card Escrow",
+      "port": 8099,
+      "endpoint": "/api/state",
+      "method": "GET",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "id": "plugin.cinema.renoise",
+      "name": "Cinema 2.39:1 & Renoise OSC MCP Studio",
+      "port": 8121,
+      "endpoint": "/render",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string"
+          },
+          "bpm": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "id": "plugin.mesh.validator",
+      "name": "10-Node Supercomputer 4-Gate Validator",
+      "port": 8119,
+      "endpoint": "/execute",
+      "method": "POST",
+      "auto_allow": true,
+      "approval_required": false,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "goal": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

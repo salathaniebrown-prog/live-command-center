@@ -1586,6 +1586,12 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        if self.path.startswith("/api/plugins"):
+            import json as _js, astra_plugin_registry as _apr
+            _ln = int(self.headers.get("Content-Length", 0)); _d = _js.loads(self.rfile.read(_ln).decode("utf-8", "ignore")) if _ln else {}
+            _b = _js.dumps(_apr.execute_plugin(_d.get("plugin_id") or _d.get("plugin") or "", _d.get("args") or _d)).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
         if self.path.startswith("/api/gov"):
             import http.client as _hc
             _sub = self.path[len("/api/gov"):] or "/state"
@@ -1716,6 +1722,11 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path.startswith("/api/plugins"):
+            import json as _js, astra_plugin_registry as _apr
+            _b = _js.dumps(_apr.sync_plugins()).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
         if self.path.startswith("/api/gov"):
             import http.client as _hc
             _sub = self.path[len("/api/gov"):] or "/state"
