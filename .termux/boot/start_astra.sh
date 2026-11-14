@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 termux-wake-lock
 
-setsid nohup python3 "$HOME/dealership_module.py" > "$HOME/dealership_8099.log" 2>&1 < /dev/null &
-
 # 1. Start Core Command Center & Virtual Card Dealership UI (8088)
 setsid nohup python3 "$HOME/dashboard_server.py" > "$HOME/dashboard.log" 2>&1 < /dev/null &
 
