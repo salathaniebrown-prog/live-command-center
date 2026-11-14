@@ -692,6 +692,80 @@ window.testAutoPlugin = async function(){
   document.getElementById('plug-out').textContent = JSON.stringify(d, null, 2);
 };
 
+
+window.runLiveOnlineSearch = async function(){
+  const q = document.getElementById('elite-search-q').value;
+  const out = document.getElementById('elite-search-out');
+  out.textContent = 'Searching live web & synthesizing with Mastered Python/Cluster Knowledge...';
+  try{
+    const r = await fetch('/api/studio/search', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query:q})});
+    const d = await r.json();
+    out.textContent = d.assistant_response || JSON.stringify(d, null, 2);
+  }catch(e){ out.textContent = 'Search error: ' + e; }
+};
+
+window.renderEliteCinema = async function(){
+  const prompt = document.getElementById('cinema-prompt').value;
+  const lens = document.getElementById('cinema-lens').value;
+  const lut = document.getElementById('cinema-lut').value;
+  const bpm = document.getElementById('cinema-bpm').value;
+  const out = document.getElementById('cinema-out');
+  out.textContent = 'Rendering 2.39:1 Anamorphic sequence & syncing Renoise OSC...';
+  try{
+    const r = await fetch('/api/studio/cinema', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt:prompt, lens:lens, lut:lut, bpm:bpm})});
+    const d = await r.json();
+    document.getElementById('cinema-hud-meta').textContent = d.scene_id + ' | ' + d.lens + ' | ' + d.bpm + ' BPM';
+    out.textContent = JSON.stringify(d, null, 2);
+  }catch(e){ out.textContent = 'Cinema error: ' + e; }
+};
+
+window.runFullAutopilot = async function(){
+  const out = document.getElementById('autopilot-out');
+  out.textContent = 'Running Termux / Linux / Edge / IBM / GitHub Auto-Pilot & auto-installer...';
+  try{
+    const r = await fetch('/api/studio/autopilot', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({auto_install:true})});
+    const d = await r.json();
+    out.textContent = 'STATUS: ' + d.status + ' | PYTHON ' + d.python_version + ' | COMMIT ' + d.git_commit + '\n' +
+      'ACTIONS:\n  • ' + (d.actions_executed||[]).join('\n  • ') + '\n' +
+      'MASTERED PYTHON STDLIB:\n  • ' + ((d.mastered_knowledge||{}).stdlib_core||[]).join('\n  • ');
+  }catch(e){ out.textContent = 'Autopilot error: ' + e; }
+};
+
+(function startEliteCinemaCanvas(){
+  let t = 0;
+  function frame(){
+    const cv = document.getElementById('elite-cinema-canvas');
+    if(cv && cv.getContext){
+      const ctx = cv.getContext('2d');
+      const w = cv.width, h = cv.height;
+      ctx.fillStyle = 'rgba(2, 5, 12, 0.28)';
+      ctx.fillRect(0, 0, w, h);
+      const lut = (document.getElementById('cinema-lut')||{}).value || '';
+      const col = lut.includes('Neon') ? '#e0aaff' : (lut.includes('Noir') ? '#ffb703' : '#00f0ff');
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.4;
+      for(let i = 0; i < 14; i++){
+        const y = (h * 0.5) + Math.sin(t * 0.04 + i * 0.45) * (h * 0.34);
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        for(let x = 0; x <= w; x += 32){
+          const wy = y + Math.cos(x * 0.015 + t * 0.06 + i) * 14;
+          ctx.lineTo(x, wy);
+        }
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#00ff88';
+      ctx.font = '11px monospace';
+      ctx.fillText('2.39:1 ANAMORPHIC LIVE TELEMETRY // FRAME ' + t, 12, 18);
+    }
+    t++;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+setTimeout(() => { window.runFullAutopilot(); }, 500);
+
 setTimeout(() => { window.refreshSagaState(); window.loadLegalTemplate(); window.loadAutoPlugins(); }, 400);
 </script>
 

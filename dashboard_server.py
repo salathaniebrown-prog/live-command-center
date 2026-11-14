@@ -1586,6 +1586,16 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        if self.path.startswith("/api/studio"):
+            import http.client as _hc
+            _sub = self.path[len("/api/studio"):] or "/autopilot"
+            _ln = int(self.headers.get("Content-Length", 0)); _raw = self.rfile.read(_ln) if _ln else b"{}"
+            try:
+                _c = _hc.HTTPConnection("127.0.0.1", 8127, timeout=12); _c.request("POST", _sub, body=_raw, headers={"Content-Type": "application/json"}); _b = _c.getresponse().read()
+            except Exception as _ex:
+                _b = f'{{"status":"RECOVERED","note":"{_ex}"}}'.encode()
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
         if self.path.startswith("/api/plugins"):
             import json as _js, astra_plugin_registry as _apr
             _ln = int(self.headers.get("Content-Length", 0)); _d = _js.loads(self.rfile.read(_ln).decode("utf-8", "ignore")) if _ln else {}
@@ -1722,6 +1732,15 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path.startswith("/api/studio"):
+            import http.client as _hc
+            _sub = self.path[len("/api/studio"):] or "/health"
+            try:
+                _c = _hc.HTTPConnection("127.0.0.1", 8127, timeout=5); _c.request("GET", _sub); _b = _c.getresponse().read()
+            except Exception as _ex:
+                _b = f'{{"status":"RECOVERING","note":"{_ex}"}}'.encode()
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
         if self.path in ("/", "/index.html"):
             import os as _os, re as _re
             _hp = _os.path.expanduser("~/command_center_full.html")
