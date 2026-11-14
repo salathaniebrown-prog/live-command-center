@@ -1,5 +1,7 @@
+import http.server
+http.server.HTTPServer.allow_reuse_address = True
 import hashlib, http.client, json, os, sqlite3, time, uuid
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HOME = os.path.expanduser("~")
 DB_PATH = os.path.join(HOME, "astra_agentic_mesh.db")
@@ -35,7 +37,7 @@ init_mesh_db()
 
 def probe_node(port, path="/", payload=None):
     try:
-        c = http.client.HTTPConnection("127.0.0.1", port, timeout=3)
+        c = http.client.HTTPConnection("127.0.0.1", port, timeout=0.4)
         if payload is not None:
             body = json.dumps(payload).encode("utf-8")
             c.request("POST", path, body=body, headers={"Content-Type": "application/json"})
@@ -125,13 +127,16 @@ class AgenticMeshHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def do_OPTIONS(self):
         self._json(200, {"ok": True})
 
     def do_GET(self):
-        probes = [probe_node(p) for p in sorted(CLUSTER_NODES.keys())]
+        probes = [probe_node(p) for p in sorted(CLUSTER_NODES.keys()) if p != 8119]
         online_cnt = sum(1 for x in probes if x.get("online"))
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
@@ -153,4 +158,6 @@ class AgenticMeshHandler(BaseHTTPRequestHandler):
         self._json(200, validate_and_execute_mission(data.get("goal") or data.get("prompt") or ""))
 
 if __name__ == "__main__":
-    HTTPServer(("0.0.0.0", 8119), AgenticMeshHandler).serve_forever()
+    ThreadingHTTPServer.allow_reuse_address = True
+    http.server.ThreadingHTTPServer.allow_reuse_address = True
+    ThreadingHTTPServer(("0.0.0.0", 8119), AgenticMeshHandler).serve_forever()
