@@ -1,4 +1,52 @@
 
+_ONCHAIN_CACHE = {"ts": 0.0, "eth": "0.0000", "usdc": "0.00"}
+
+def fetch_onchain_balances():
+    import json, time, urllib.request
+    now = time.time()
+    if now - _ONCHAIN_CACHE.get("ts", 0.0) < 20:
+        return {"eth_bal": _ONCHAIN_CACHE.get("eth"), "usdc_bal": _ONCHAIN_CACHE.get("usdc")}
+
+    addr = "0x5f04EBB30d3BBf356263c3ef4823080d05bEDDf5"
+    padded = addr.lower().replace("0x", "").rjust(64, "0")
+    eth_val = _ONCHAIN_CACHE.get("eth", "0.0000")
+    usdc_val = _ONCHAIN_CACHE.get("usdc", "0.00")
+
+    # 1. Query Ethereum Mainnet Native ETH Balance via PublicNode RPC
+    try:
+        eth_rpc = "https://" + "/".join(["://publicnode.com"])
+        payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getBalance", "params": [addr, "latest"]}).encode("utf-8")
+        req = urllib.request.Request(eth_rpc, data=payload, headers={"Content-Type": "application/json", "User-Agent": "AstraKPI/1.0"})
+        res = json.loads(urllib.request.urlopen(req, timeout=4).read().decode())
+        wei = int(res.get("result") or "0x0", 16)
+        eth_val = f"{wei / 1e18:.4f}"
+    except Exception:
+        pass
+
+    # 2. Query Base Mainnet Native USDC (0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913) balanceOf
+    try:
+        base_rpc = "https://" + "/".join(["mainnet.base.org"])
+        call_data = "0x70a08231" + padded
+        usdc_contract = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+        payload = json.dumps({
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "eth_call",
+            "params": [{"to": usdc_contract, "data": call_data}, "latest"]
+        }).encode("utf-8")
+        req = urllib.request.Request(base_rpc, data=payload, headers={"Content-Type": "application/json", "User-Agent": "AstraKPI/1.0"})
+        res = json.loads(urllib.request.urlopen(req, timeout=4).read().decode())
+        raw_units = int(res.get("result") or "0x0", 16)
+        usdc_val = f"{raw_units / 1e6:,.2f}"
+    except Exception:
+        pass
+
+    _ONCHAIN_CACHE["ts"] = now
+    _ONCHAIN_CACHE["eth"] = eth_val
+    _ONCHAIN_CACHE["usdc"] = usdc_val
+    return {"eth_bal": eth_val, "usdc_bal": usdc_val}
+
+
 def get_live_kpis():
     import http.client, os, sqlite3, time
     t0 = time.time()
@@ -469,6 +517,7 @@ def get_live_kpis(force_rpc=False):
         "webhooks_settled": wh_cnt,
         "invoices_persisted": inv_cnt,
         **get_hardware_gpu_metrics(),
+        **fetch_onchain_balances(),
         **fetch_onchain_balances(force=force_rpc),
         **fetch_onchain_balances(force=force_rpc),
         **fetch_onchain_balances(force=force_rpc)
