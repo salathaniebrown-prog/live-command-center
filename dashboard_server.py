@@ -84,11 +84,13 @@ def get_live_kpis(force_rpc=False):
     wh_cnt, inv_cnt = 0, 0
     if os.path.exists(os.path.expanduser("~/astra_webhook_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_webhook_ledger.db"))
-        wh_cnt = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()[0]
+        r_wh = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()
+        wh_cnt = r_wh if isinstance(r_wh, (tuple, list)) else int(r_wh or 0)[0]
         c.close()
     if os.path.exists(os.path.expanduser("~/astra_invoice_ledger.db")):
         c = sqlite3.connect(os.path.expanduser("~/astra_invoice_ledger.db"))
-        inv_cnt = c.execute("SELECT COUNT(*) FROM invoices").fetchone()[0]
+        r_in = c.execute("SELECT COUNT(*) FROM invoices").fetchone()
+        inv_cnt = r_in if isinstance(r_in, (tuple, list)) else int(r_in or 0)[0]
         c.close()
     tlog = os.path.expanduser("~/tunnel.log")
     tunnel_up = os.path.exists(tlog) and ("Registered tunnel connection" in open(tlog, errors="ignore").read())
