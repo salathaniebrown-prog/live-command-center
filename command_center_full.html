@@ -106,7 +106,24 @@ async function runMpInfer(indexMode) {
 }
 </script>
 </div>
-<pre id="mp-out">[MEDIAPIPE TASKS READY] On-device CPU/GPU acceleration across Web, Android, iOS, Flutter &amp; Desktop.</pre></div>
+<pre id="mp-out">[MEDIAPIPE TASKS READY] On-device CPU/GPU acceleration across Web, Android, iOS, Flutter &amp; Desktop.</pre>
+  <!-- SECTION 9: CRYPTOGRAPHIC SPATIAL ASSISTANT (8129) & QISKIT QUANTUM LATTICE (8131) -->
+  <div id="astra-section-9" style="margin-top:14px;padding:14px;border:1px solid #00f0ff;background:#030814;border-radius:6px;">
+    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #0b2545;padding-bottom:6px;margin-bottom:10px;">
+      <span style="color:#00f0ff;font-weight:bold;">9. CRYPTOGRAPHIC SPATIAL ASSISTANT (8129) &amp; QISKIT QUANTUM LATTICE (8131)</span>
+      <span style="color:#00ff88;font-size:12px;">SHA-256 HANDSHAKE &amp; WAL LEDGER: ARMED</span>
+    </div>
+
+    <!-- Spatial & Gesture Handshake Controls -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+      <button onclick="runSpatialTest('WITH_HANDS', 'PINCH_SELECT')" style="background:#003b4d;color:#00f0ff;border:1px solid #00f0ff;padding:6px 12px;cursor:pointer;">✋ TEST SPATIAL HANDSHAKE (WITH HANDS)</button>
+      <button onclick="runSpatialTest('WITHOUT_HANDS', 'ZERO_TOUCH_AUTO')" style="background:#0d3328;color:#00ff88;border:1px solid #00ff88;padding:6px 12px;cursor:pointer;">🤖 TEST ZERO-TOUCH (WITHOUT HANDS)</button>
+      <button onclick="runQuantumSimulation()" style="background:#2b103d;color:#e0aaff;border:1px solid #e0aaff;padding:6px 12px;cursor:pointer;">⚛️ RUN QISKIT QASM 3.0 SIMULATION</button>
+    </div>
+    <pre id="spatial-quantum-out" style="background:#02050c;border:1px solid #102a42;padding:8px;max-height:160px;overflow:auto;font-size:11px;color:#9be7ff;white-space:pre-wrap;">Cryptographic Spatial Assistant &amp; QisKit Quantum Lattice ready.</pre>
+  </div>
+
+</div>
 <script>
 async function buildMpTask(){
   const task_type = document.getElementById('mp-task').value;
@@ -895,6 +912,27 @@ window.triggerEliteModalRender = async function(){
 };
 
 setInterval(window.upgradeCinemaModalAndLayout, 800);
+
+
+window.runSpatialTest = async function(mode, gesture){
+  const out = document.getElementById('spatial-quantum-out');
+  out.textContent = 'Executing cryptographic spatial handshake (' + mode + ' :: ' + gesture + ')...';
+  try{
+    const r = await fetch('/api/spatial', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({mode:mode, gesture:gesture, target_action:'EXECUTE_SECURE_NODE_SYNC'})});
+    const d = await r.json();
+    out.textContent = '[SPATIAL HANDSHAKE VERIFIED]\nEvent ID: ' + d.event_id + '\nMode: ' + d.mode + '\nSHA-256 Proof: ' + d.sha256_proof + '\nStatus: ' + d.status;
+  }catch(e){ out.textContent = 'Spatial error: ' + e; }
+};
+
+window.runQuantumSimulation = async function(){
+  const out = document.getElementById('spatial-quantum-out');
+  out.textContent = 'Running OpenQASM 3.0 QisKit lattice simulation on port 8131...';
+  try{
+    const r = await fetch('/api/quantum', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({qasm:'OPENQASM 3.0; qubit[3] q; h q[0];'})});
+    const d = await r.json();
+    out.textContent = '[QISKIT QUANTUM LATTICE SIMULATION]\nSim ID: ' + d.simulation_id + ' | Fidelity: ' + d.fidelity + '\nState Vector: ' + JSON.stringify(d.state_vector) + '\nAttestation: ' + d.attestation_hash;
+  }catch(e){ out.textContent = 'Quantum error: ' + e; }
+};
 
 setTimeout(() => { window.refreshSagaState(); window.loadLegalTemplate(); window.loadAutoPlugins(); }, 400);
 </script>

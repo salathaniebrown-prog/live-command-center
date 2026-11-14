@@ -31,3 +31,5 @@ if [ "$1" = "--open" ] && command -v termux-open-url >/dev/null 2>&1; then
   sleep 1
   termux-open-url "http://127.0.0.1:8088"
 fi
+start_if_down 8129 "astra_spatial_assistant.py" "spatial_8129.log"
+start_if_down 8131 "astra_quantum_lattice.py" "quantum_8131.log"
