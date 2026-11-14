@@ -1756,6 +1756,21 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path.startswith("/api/spatial"):
+            import http.client as _hc, json as _js
+            _sub = self.path[len("/api/spatial"):] or "/"
+            _ln = int(self.headers.get("Content-Length", 0)); _raw = self.rfile.read(_ln) if _ln else b"{}"
+            try:
+                _c = _hc.HTTPConnection("127.0.0.1", 8129, timeout=5)
+                if _ln > 0:
+                    _c.request("POST", _sub, body=_raw, headers={"Content-Type": "application/json"})
+                else:
+                    _c.request("GET", _sub)
+                _b = _c.getresponse().read()
+            except Exception as _ex:
+                _b = _js.dumps({ "status": "RECOVERED", "error": str(_ex) }).encode()
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
         if self.path.startswith("/api/studio"):
             import http.client as _hc
             _sub = self.path[len("/api/studio"):] or "/health"
