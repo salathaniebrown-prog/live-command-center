@@ -36,7 +36,7 @@ class BrowserAgentHandler(BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
-        self.wfile.write(b'browser_agent_active'))
+        self.wfile.write(b'browser_agent_active')
 
     def do_POST(self):
         content_length = int(self.headers.get('Content-Length', 0))
