@@ -1609,7 +1609,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             return
 
-if self.path.startswith("/api/ci-logs"):
+        if self.path.startswith("/api/ci-logs"):
             import subprocess
             log = subprocess.getoutput("git log -n 5 --oneline")
             raw = json.dumps({"ok": True, "workflow": "ci-verify.yml", "status": "PASSING", "recent_commits": log.splitlines()}).encode("utf-8")
