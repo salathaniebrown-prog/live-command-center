@@ -1,4 +1,38 @@
 
+def get_live_kpis():
+    import http.client, os, sqlite3, time
+    t0 = time.time()
+    online = 0
+    for port in (8088, 8108, 8109, 8111, 8113, 8115):
+        try:
+            c = http.client.HTTPConnection("127.0.0.1", port, timeout=1)
+            c.request("GET", "/")
+            if c.getresponse().status == 200:
+                online += 1
+        except Exception:
+            pass
+    latency_ms = round((time.time() - t0) * 1000, 1)
+    wh_cnt, inv_cnt = 0, 0
+    if os.path.exists(os.path.expanduser("~/astra_webhook_ledger.db")):
+        c = sqlite3.connect(os.path.expanduser("~/astra_webhook_ledger.db"))
+        wh_cnt = c.execute("SELECT COUNT(*) FROM webhook_events").fetchone()
+        c.close()
+    if os.path.exists(os.path.expanduser("~/astra_invoice_ledger.db")):
+        c = sqlite3.connect(os.path.expanduser("~/astra_invoice_ledger.db"))
+        inv_cnt = c.execute("SELECT COUNT(*) FROM invoices").fetchone()
+        c.close()
+    tlog = os.path.expanduser("~/tunnel.log")
+    tunnel_up = os.path.exists(tlog) and ("Registered tunnel connection" in open(tlog, errors="ignore").read())
+    return {
+        "uptime_pct": round((online / 6.0) * 100, 1),
+        "nodes_online": f"{online}/6",
+        "tunnel_active": tunnel_up,
+        "probe_latency_ms": latency_ms,
+        "webhooks_settled": wh_cnt,
+        "invoices_persisted": inv_cnt
+    }
+
+
 def execute_supercomputer_mesh_8119(goal_text):
     import http.client, json
     try:
