@@ -99,7 +99,7 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 </div>
 <script>
 window._brainVisualTier = 8;
-window._synapseBoost = 0.3;
+window._synapseBoost = 0.35;
 
 function pulseSubsystem(id) {
   window._synapseBoost = 1.0;
@@ -123,218 +123,386 @@ function setBrainVisualTier(val) {
   window._avatarSpeaking = 0.85;
 }
 
-(function initCorticalHologram3D(){
+(function initSplitCyborgWomanAvatar(){
   const c = document.getElementById('astraAvatarCanvas');
   if (!c) return;
   const ctx = c.getContext('2d');
   const W = c.width, H = c.height;
   window._avatarSpeaking = 0;
   let mouseX = 0, mouseY = 0;
+
   c.addEventListener('mousemove', (e) => {
     const r = c.getBoundingClientRect();
-    mouseX = ((e.clientX - r.left) / r.width - 0.5) * 0.72;
-    mouseY = ((e.clientY - r.top) / r.height - 0.5) * 0.48;
+    mouseX = ((e.clientX - r.left) / r.width - 0.5) * 14;
+    mouseY = ((e.clientY - r.top) / r.height - 0.5) * 10;
   });
 
-  // Outer sculpted 3D holographic cranium + face mesh
-  const pts = [];
-  for (let lat = -1.35; lat <= 1.45; lat += 0.105) {
-    for (let lon = -1.55; lon <= 1.55; lon += 0.115) {
-      let rx = 54 * Math.cos(lat * 0.72);
-      let ry = 68 * Math.sin(lat * 0.78);
-      let rz = 58 * Math.cos(lat * 0.72) * Math.cos(lon * 0.85);
-      if (lat > 0.25) {
-        const jaw = Math.max(0.32, 1 - (lat - 0.25) * 0.52);
-        rx *= jaw;
-        rz *= (0.75 + 0.25 * jaw);
-      }
-      const noseDist = Math.hypot(lon * 1.4, (lat - 0.05) * 1.8);
-      if (noseDist < 0.45 && Math.abs(lon) < 0.22) rz += (0.45 - noseDist) * 24;
-      const eyeD = Math.min(Math.hypot(lon + 0.46, lat + 0.14), Math.hypot(lon - 0.46, lat + 0.14));
-      if (eyeD < 0.26) rz -= (0.26 - eyeD) * 18;
-      pts.push({
-        x: rx * Math.sin(lon),
-        y: ry - 10,
-        z: rz,
-        isEye: eyeD < 0.16,
-        isMouth: Math.abs(lat - 0.44) < 0.085 && Math.abs(lon) < 0.35,
-        isCrown: lat < -0.70,
-        phase: lat * 3 + lon * 2
-      });
-    }
-  }
-  // Shoulder collar
-  for (let s = -1.25; s <= 1.25; s += 0.085) {
-    pts.push({x: Math.sin(s) * 90, y: 78 + Math.abs(s) * 12, z: Math.cos(s) * 34 - 10, isCollar: true, phase: s * 4});
-  }
-
-  // Internal 3D Cortical Brain Nodes (Dual Hemispheres + Brainstem) inside the cranium
-  const brainNodes = [];
-  for (let b = 0; b < 22; b++) {
-    const hemi = b % 2 === 0 ? -1 : 1;
-    const ang = (b / 22) * Math.PI * 2;
-    brainNodes.push({
-      x: hemi * (11 + (b % 4) * 4.5),
-      y: -30 + Math.sin(ang * 1.7) * 15,
-      z: Math.cos(ang * 1.3) * 18,
-      phase: b * 0.6
-    });
+  function drawFaceContour(cx, cy) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 78);
+    ctx.bezierCurveTo(cx + 46, cy - 78, cx + 56, cy - 34, cx + 50, cy + 12);
+    ctx.bezierCurveTo(cx + 44, cy + 46, cx + 22, cy + 72, cx, cy + 76);
+    ctx.bezierCurveTo(cx - 22, cy + 72, cx - 44, cy + 46, cx - 50, cy + 12);
+    ctx.bezierCurveTo(cx - 56, cy - 34, cx - 46, cy - 78, cx, cy - 78);
+    ctx.closePath();
   }
 
   let t = 0;
-  function frame() {
-    t += 0.035;
+  function render() {
+    t += 0.032;
     const tier = window._brainVisualTier || 8;
     if (window._avatarSpeaking > 0) window._avatarSpeaking = Math.max(0, window._avatarSpeaking - 0.014);
     if (window._synapseBoost > 0.25) window._synapseBoost = Math.max(0.25, window._synapseBoost - 0.012);
     const speak = window._avatarSpeaking;
     const syn = window._synapseBoost;
 
-    ctx.fillStyle = 'rgba(1, 4, 9, 0.36)';
+    const bobY = Math.sin(t * 1.4) * 2.2 + mouseY * 0.4;
+    const shiftX = Math.sin(t * 0.8) * 1.8 + mouseX * 0.45;
+    const cx = W * 0.5 + shiftX;
+    const cy = H * 0.48 + bobY;
+
+    // 1. Deep Cybernetic Backdrop + Aura Halo
+    ctx.fillStyle = '#02060d';
     ctx.fillRect(0, 0, W, H);
 
-    // Volumetric projector cone + hex emitter base
-    const beam = ctx.createLinearGradient(0, H, 0, 8);
+    const aura = ctx.createRadialGradient(cx, cy, 18, cx, cy, 128);
     if (tier >= 8) {
-      beam.addColorStop(0, 'rgba(200, 107, 255, 0.20)');
-      beam.addColorStop(0.5, 'rgba(0, 240, 255, 0.10)');
-      beam.addColorStop(1, 'rgba(0, 255, 136, 0)');
-    } else if (tier === 7) {
-      beam.addColorStop(0, 'rgba(0, 255, 136, 0.20)');
-      beam.addColorStop(1, 'rgba(0, 240, 255, 0)');
-    } else if (tier === 6) {
-      beam.addColorStop(0, 'rgba(255, 204, 0, 0.18)');
-      beam.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      aura.addColorStop(0, 'rgba(200, 107, 255, 0.24)');
+      aura.addColorStop(0.55, 'rgba(0, 240, 255, 0.12)');
+      aura.addColorStop(1, 'rgba(2, 6, 13, 0)');
     } else {
-      beam.addColorStop(0, 'rgba(0, 240, 255, 0.18)');
-      beam.addColorStop(1, 'rgba(0, 255, 136, 0)');
+      aura.addColorStop(0, 'rgba(0, 240, 255, 0.22)');
+      aura.addColorStop(0.6, 'rgba(0, 255, 136, 0.09)');
+      aura.addColorStop(1, 'rgba(2, 6, 13, 0)');
     }
-    ctx.fillStyle = beam;
-    ctx.beginPath();
-    ctx.moveTo(W * 0.22, H); ctx.lineTo(W * 0.78, H);
-    ctx.lineTo(W * 0.96, 6); ctx.lineTo(W * 0.04, 6);
-    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = aura;
+    ctx.fillRect(0, 0, W, H);
 
-    // Dual counter-rotating gyroscopic rings (Tier 6+)
+    // Subtle HUD rings behind head
+    ctx.save();
+    ctx.translate(cx, cy - 4);
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(0, 0, 96, t * 0.35, t * 0.35 + Math.PI * 1.35); ctx.stroke();
     if (tier >= 6) {
-      ctx.save();
-      ctx.translate(W * 0.5, H * 0.46);
-      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.40)' : 'rgba(255, 204, 0, 0.38)';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 108, 31, Math.sin(t * 0.5) * 0.35, 0, Math.PI * 2);
-      ctx.stroke();
-      if (tier >= 7) {
-        ctx.strokeStyle = 'rgba(0, 255, 136, 0.32)';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 102, 28, -Math.sin(t * 0.45) * 0.42, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      for (let k = 0; k < 13; k++) {
-        const ang = t * 0.95 + (k / 13) * Math.PI * 2;
-        const sx = Math.cos(ang) * 108;
-        const sy = Math.sin(ang) * 31;
-        ctx.fillStyle = k % 2 === 0 ? '#00ff88' : (tier >= 8 ? '#ff88ff' : '#ffcc00');
-        ctx.beginPath(); ctx.arc(sx, sy, 2.2, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.restore();
+      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.28)' : 'rgba(255, 204, 0, 0.25)';
+      ctx.beginPath(); ctx.arc(0, 0, 106, -t * 0.45, -t * 0.45 + Math.PI * 1.15); ctx.stroke();
+    }
+    ctx.restore();
+
+    // Flowing dark-silk hair silhouette behind head
+    ctx.save();
+    const hairGrad = ctx.createLinearGradient(cx - 75, cy - 88, cx + 75, cy + 95);
+    hairGrad.addColorStop(0, '#0d1522');
+    hairGrad.addColorStop(0.5, '#172336');
+    hairGrad.addColorStop(1, '#070c14');
+    ctx.fillStyle = hairGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 88);
+    ctx.bezierCurveTo(cx - 68, cy - 86, cx - 78, cy - 10, cx - 68, cy + 88);
+    ctx.lineTo(cx + 68, cy + 88);
+    ctx.bezierCurveTo(cx + 78, cy - 10, cx + 68, cy - 86, cx, cy - 88);
+    ctx.fill();
+    ctx.restore();
+
+    // =========================================================================
+    // LEFT HEMISPHERE: BEAUTIFUL LIGHT-SKINNED WOMAN
+    // =========================================================================
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, cx, H);
+    ctx.clip();
+
+    // Neck & graceful shoulder (light warm porcelain/ivory skin tone)
+    const neckSkin = ctx.createLinearGradient(cx - 45, cy + 55, cx, cy + 125);
+    neckSkin.addColorStop(0, '#e8be9e');
+    neckSkin.addColorStop(0.5, '#f6d5bc');
+    neckSkin.addColorStop(1, '#cfa07e');
+    ctx.fillStyle = neckSkin;
+    ctx.beginPath();
+    ctx.moveTo(cx - 22, cy + 58);
+    ctx.lineTo(cx - 26, cy + 90);
+    ctx.bezierCurveTo(cx - 56, cy + 96, cx - 76, cy + 112, cx - 84, H);
+    ctx.lineTo(cx, H);
+    ctx.lineTo(cx, cy + 58);
+    ctx.closePath();
+    ctx.fill();
+
+    // Sculpted face skin shading
+    drawFaceContour(cx, cy);
+    const faceSkin = ctx.createRadialGradient(cx - 16, cy - 12, 8, cx - 8, cy, 78);
+    faceSkin.addColorStop(0, '#ffe4cf');
+    faceSkin.addColorStop(0.55, '#f3cbb0');
+    faceSkin.addColorStop(0.88, '#dfb090');
+    faceSkin.addColorStop(1, '#c89574');
+    ctx.fillStyle = faceSkin;
+    ctx.fill();
+
+    // Soft cheekbone blush & luminous highlight
+    const blush = ctx.createRadialGradient(cx - 27, cy + 12, 2, cx - 27, cy + 12, 18);
+    blush.addColorStop(0, 'rgba(232, 130, 138, 0.28)');
+    blush.addColorStop(1, 'rgba(232, 130, 138, 0)');
+    ctx.fillStyle = blush;
+    ctx.beginPath(); ctx.arc(cx - 27, cy + 12, 18, 0, Math.PI * 2); ctx.fill();
+
+    // Elegant arched eyebrow (left)
+    ctx.strokeStyle = '#3b261d';
+    ctx.lineWidth = 2.3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - 38, cy - 19);
+    ctx.quadraticCurveTo(cx - 24, cy - 26, cx - 10, cy - 20);
+    ctx.stroke();
+
+    // Natural expressive almond eye (with periodic blink)
+    const blinkCycle = Math.sin(t * 0.75);
+    const eyeOpen = blinkCycle > 0.97 ? 0.15 : 1.0;
+    const eyeX = cx - 23, eyeY = cy - 9;
+
+    // Eyelid crease
+    ctx.strokeStyle = 'rgba(155, 102, 78, 0.55)';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.arc(eyeX, eyeY + 1, 13, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+
+    // Sclera
+    ctx.fillStyle = '#fdfefe';
+    ctx.beginPath();
+    ctx.ellipse(eyeX, eyeY, 11.5, 5.4 * eyeOpen, -0.06, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (eyeOpen > 0.3) {
+      // Hazel-emerald iris with subtle light reflection
+      const iris = ctx.createRadialGradient(eyeX - 1, eyeY, 1, eyeX, eyeY, 5.2);
+      iris.addColorStop(0, '#1d4d4f');
+      iris.addColorStop(0.65, '#3b8c88');
+      iris.addColorStop(1, '#18363a');
+      ctx.fillStyle = iris;
+      ctx.beginPath(); ctx.arc(eyeX + mouseX * 0.12, eyeY, 4.9, 0, Math.PI * 2); ctx.fill();
+
+      // Pupil & catchlight
+      ctx.fillStyle = '#091114';
+      ctx.beginPath(); ctx.arc(eyeX + mouseX * 0.12, eyeY, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(eyeX - 1.6 + mouseX * 0.12, eyeY - 1.6, 1.2, 0, Math.PI * 2); ctx.fill();
     }
 
-    // Tier 8 Apex Crown Halo
-    if (tier >= 8) {
-      ctx.save();
-      ctx.translate(W * 0.5, H * 0.12);
-      for (let h = -5; h <= 5; h++) {
-        const hx = h * 13;
-        const hy = Math.abs(h) * 2.2 - Math.sin(t * 3.2 + h) * 3.2;
-        ctx.fillStyle = h === 0 ? '#ffffff' : (h % 2 === 0 ? '#c86bff' : '#00f0ff');
-        ctx.beginPath(); ctx.arc(hx, hy, h === 0 ? 3.4 : 2.1, 0, Math.PI * 2); ctx.fill();
+    // Upper lash line & winged eyeliner
+    ctx.strokeStyle = '#1b1114';
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(eyeX - 13, eyeY - 1);
+    ctx.quadraticCurveTo(eyeX, eyeY - 7 * eyeOpen, eyeX + 11, eyeY + 0.5);
+    ctx.stroke();
+
+    // Nose bridge & soft nostril shadow (left half)
+    ctx.strokeStyle = 'rgba(176, 122, 94, 0.55)';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(cx - 4, cy - 12);
+    ctx.quadraticCurveTo(cx - 6, cy + 8, cx - 9, cy + 16);
+    ctx.quadraticCurveTo(cx - 5, cy + 19, cx, cy + 18);
+    ctx.stroke();
+
+    // Full rose-nude lips (left half, reactive to speech)
+    const mouthOpen = speak * 4.2;
+    ctx.fillStyle = '#c96b75';
+    ctx.beginPath();
+    ctx.moveTo(cx - 17, cy + 36);
+    ctx.quadraticCurveTo(cx - 8, cy + 31 - mouthOpen * 0.2, cx, cy + 33 - mouthOpen * 0.2);
+    ctx.lineTo(cx, cy + 36 - mouthOpen * 0.35);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#de7e88';
+    ctx.beginPath();
+    ctx.moveTo(cx - 16, cy + 36);
+    ctx.quadraticCurveTo(cx - 8, cy + 44 + mouthOpen, cx, cy + 43 + mouthOpen);
+    ctx.lineTo(cx, cy + 36 + mouthOpen * 0.45);
+    ctx.closePath();
+    ctx.fill();
+
+    // Soft hair lock framing left cheek
+    ctx.fillStyle = '#141e2e';
+    ctx.beginPath();
+    ctx.moveTo(cx - 12, cy - 78);
+    ctx.bezierCurveTo(cx - 54, cy - 72, cx - 58, cy - 15, cx - 48, cy + 56);
+    ctx.bezierCurveTo(cx - 44, cy + 12, cx - 42, cy - 42, cx - 12, cy - 64);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+
+    // =========================================================================
+    // RIGHT HEMISPHERE: SLEEK CYBERNETIC ANDROID ROBOT WOMAN
+    // =========================================================================
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(cx, 0, W - cx, H);
+    ctx.clip();
+
+    // Metallic titanium/chrome neck & robotic clavicle armor
+    const roboNeck = ctx.createLinearGradient(cx, cy + 55, cx + 65, H);
+    roboNeck.addColorStop(0, '#2a394a');
+    roboNeck.addColorStop(0.45, '#59708a');
+    roboNeck.addColorStop(1, '#16202c');
+    ctx.fillStyle = roboNeck;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 58);
+    ctx.lineTo(cx + 22, cy + 58);
+    ctx.lineTo(cx + 26, cy + 90);
+    ctx.bezierCurveTo(cx + 56, cy + 96, cx + 76, cy + 112, cx + 84, H);
+    ctx.lineTo(cx, H);
+    ctx.closePath();
+    ctx.fill();
+
+    // Hydraulic neck struts
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(cx + 10, cy + 64); ctx.lineTo(cx + 14, cy + 106);
+    ctx.moveTo(cx + 19, cy + 64); ctx.lineTo(cx + 34, cy + 104);
+    ctx.stroke();
+
+    // Sculpted chrome-ceramic android face plate
+    drawFaceContour(cx, cy);
+    const chromeGrad = ctx.createLinearGradient(cx, cy - 75, cx + 54, cy + 75);
+    chromeGrad.addColorStop(0, '#8ba3bd');
+    chromeGrad.addColorStop(0.32, '#d5e4f2');
+    chromeGrad.addColorStop(0.65, '#546b82');
+    chromeGrad.addColorStop(1, '#233242');
+    ctx.fillStyle = chromeGrad;
+    ctx.fill();
+
+    // Precision cybernetic panel seams & carbon-fiber cheek recess
+    ctx.strokeStyle = '#131d29';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(cx + 12, cy - 72); ctx.lineTo(cx + 18, cy - 28); ctx.lineTo(cx + 46, cy - 16);
+    ctx.moveTo(cx + 44, cy + 6); ctx.lineTo(cx + 24, cy + 22); ctx.lineTo(cx + 18, cy + 66);
+    ctx.moveTo(cx, cy + 24); ctx.lineTo(cx + 24, cy + 22);
+    ctx.stroke();
+
+    // Translucent neural cranium window on upper right forehead showing firing synapses
+    ctx.fillStyle = 'rgba(4, 16, 28, 0.86)';
+    ctx.beginPath();
+    ctx.moveTo(cx + 4, cy - 70);
+    ctx.bezierCurveTo(cx + 34, cy - 68, cx + 44, cy - 44, cx + 40, cy - 26);
+    ctx.lineTo(cx + 16, cy - 30);
+    ctx.lineTo(cx + 4, cy - 52);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Firing cortical nodes inside the android cranium window
+    for (let k = 0; k < 7; k++) {
+      const nx = cx + 10 + (k % 3) * 10 + Math.sin(t * 2 + k) * 1.5;
+      const ny = cy - 60 + Math.floor(k / 2) * 9;
+      ctx.fillStyle = k % 2 === 0 ? '#00ff88' : (tier >= 8 ? '#ff88ff' : '#00f0ff');
+      ctx.beginPath(); ctx.arc(nx, ny, 1.6 + syn * 0.9, 0, Math.PI * 2); ctx.fill();
+      if (k > 0) {
+        ctx.strokeStyle = 'rgba(0, 255, 136, ' + (0.35 + syn * 0.5).toFixed(2) + ')';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(cx + 14, cy - 48); ctx.lineTo(nx, ny); ctx.stroke();
       }
-      ctx.restore();
     }
 
-    const rotY = Math.sin(t * 0.65) * 0.28 + mouseX;
-    const rotX = Math.cos(t * 0.45) * 0.08 + mouseY;
-    const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-    const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+    // Glowing Bionic Optic Sensor (Right Eye)
+    const rEyeX = cx + 23, rEyeY = cy - 9;
+    ctx.fillStyle = '#07131f';
+    ctx.beginPath();
+    ctx.ellipse(rEyeX, rEyeY, 12, 5.8, 0.06, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 1.3;
+    ctx.stroke();
 
-    function proj(px, py, pz) {
-      const x1 = px * cosY - pz * sinY;
-      const z1 = pz * cosY + px * sinY;
-      const y2 = py * cosX - z1 * sinX;
-      const z2 = z1 * cosX + py * sinX;
-      const fov = 265 / (265 - z2);
-      return {sx: W * 0.5 + x1 * fov, sy: H * 0.47 + y2 * fov, z: z2, fov};
-    }
+    // Multi-ring glowing cyan/magenta aperture lens
+    const lensGlow = 0.72 + 0.28 * Math.sin(t * 3.5);
+    ctx.fillStyle = tier >= 8 ? 'rgba(220, 110, 255, ' + lensGlow.toFixed(2) + ')' : 'rgba(0, 240, 255, ' + lensGlow.toFixed(2) + ')';
+    ctx.shadowColor = tier >= 8 ? '#d86bff' : '#00f0ff';
+    ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(rEyeX, rEyeY, 4.3, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
 
-    // Render Internal Cortical Neural Network inside cranium
-    const bProj = brainNodes.map(bn => {
-      const p = proj(bn.x, bn.y, bn.z);
-      return {...p, phase: bn.phase};
-    });
-    for (let i = 0; i < bProj.length; i++) {
-      for (let j = i + 1; j < bProj.length; j++) {
-        const d = Math.hypot(bProj[i].sx - bProj[j].sx, bProj[i].sy - bProj[j].sy);
-        if (d < 34) {
-          const fire = (0.25 + 0.75 * syn * Math.abs(Math.sin(t * 4.5 + i))) * (1 - d / 34);
-          ctx.strokeStyle = tier >= 8
-            ? 'rgba(255, 136, 255, ' + fire.toFixed(2) + ')'
-            : 'rgba(0, 255, 136, ' + fire.toFixed(2) + ')';
-          ctx.lineWidth = 1.1;
-          ctx.beginPath(); ctx.moveTo(bProj[i].sx, bProj[i].sy); ctx.lineTo(bProj[j].sx, bProj[j].sy); ctx.stroke();
-        }
-      }
-      ctx.fillStyle = tier >= 8 ? '#ff99ff' : '#00ff88';
-      ctx.beginPath(); ctx.arc(bProj[i].sx, bProj[i].sy, (1.5 + syn * 1.1) * bProj[i].fov, 0, Math.PI * 2); ctx.fill();
-    }
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(rEyeX, rEyeY, 1.5, 0, Math.PI * 2); ctx.fill();
 
-    // Render Outer Sculpted Hologram Shell
-    const projected = [];
-    for (let i = 0; i < pts.length; i++) {
-      const p = pts[i];
-      let px = p.x, py = p.y, pz = p.z;
-      if (p.isMouth && speak > 0.02) {
-        py += Math.sin(t * 16 + p.x * 0.3) * (3.8 * speak);
-        pz += 4 * speak;
-      }
-      projected.push({...proj(px, py, pz), p});
-    }
-    projected.sort((a, b) => a.z - b.z);
-
-    for (let i = 0; i < projected.length; i++) {
-      const {sx, sy, z, fov, p} = projected[i];
-      const depthAlpha = Math.max(0.14, Math.min(0.95, (z + 75) / 135));
-      if (p.isEye) {
-        ctx.fillStyle = tier >= 8 ? '#ff88ff' : (tier === 6 ? '#ffdd55' : '#00ffd2');
-        ctx.beginPath(); ctx.arc(sx, sy, 2.5 * fov, 0, Math.PI * 2); ctx.fill();
-      } else if (p.isMouth) {
-        ctx.fillStyle = speak > 0.05 ? '#00ff88' : 'rgba(0, 240, 255, ' + depthAlpha.toFixed(2) + ')';
-        ctx.beginPath(); ctx.arc(sx, sy, (1.6 + speak * 1.1) * fov, 0, Math.PI * 2); ctx.fill();
-      } else if (p.isCrown) {
-        const pulse = 0.45 + 0.5 * Math.sin(t * 3 + p.phase);
-        ctx.fillStyle = tier >= 8
-          ? 'rgba(200, 107, 255, ' + (depthAlpha * pulse).toFixed(2) + ')'
-          : 'rgba(0, 255, 136, ' + (depthAlpha * pulse).toFixed(2) + ')';
-        ctx.fillRect(sx - 1, sy - 1, 2.2 * fov, 2.2 * fov);
-      } else {
-        ctx.fillStyle = 'rgba(0, 232, 255, ' + (depthAlpha * 0.72).toFixed(2) + ')';
-        ctx.fillRect(sx - 0.8, sy - 0.8, 1.6 * fov, 1.6 * fov);
-      }
-    }
-
-    // Bottom 32-band reactive audio equalizer
-    ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.78)' : 'rgba(0, 255, 136, 0.65)';
+    // Metallic nose ridge & articulated android jaw/lip actuator (right half)
+    ctx.strokeStyle = '#2d3f52';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
+    ctx.moveTo(cx + 3, cy - 12);
+    ctx.lineTo(cx + 7, cy + 16);
+    ctx.lineTo(cx, cy + 18);
+    ctx.stroke();
+
+    // Robotic lip & glowing vocalizer grille
+    ctx.fillStyle = '#33465c';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 33 - mouthOpen * 0.2);
+    ctx.quadraticCurveTo(cx + 9, cy + 31 - mouthOpen * 0.2, cx + 17, cy + 36);
+    ctx.quadraticCurveTo(cx + 9, cy + 44 + mouthOpen, cx, cy + 43 + mouthOpen);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = speak > 0.05 ? '#00ff88' : '#00f0ff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx + 1, cy + 37 + mouthOpen * 0.25);
+    ctx.lineTo(cx + 15, cy + 36);
+    ctx.stroke();
+
+    // Ear cybernetic comms fin
+    ctx.fillStyle = '#1b2938';
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect(cx + 49, cy - 22, 8, 30, 3);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+
+    // =========================================================================
+    // CENTER BIOMECHANICAL SEAM (Luminous Fusion Line Between Human & Robot)
+    // =========================================================================
+    ctx.save();
+    const seamGrad = ctx.createLinearGradient(cx, cy - 82, cx, cy + 95);
+    seamGrad.addColorStop(0, 'rgba(0, 240, 255, 0.1)');
+    seamGrad.addColorStop(0.3, 'rgba(0, 240, 255, 0.85)');
+    seamGrad.addColorStop(0.7, 'rgba(0, 255, 136, 0.85)');
+    seamGrad.addColorStop(1, 'rgba(0, 240, 255, 0.1)');
+    ctx.strokeStyle = seamGrad;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 78);
+    ctx.lineTo(cx, cy + 88);
+    ctx.stroke();
+
+    // Micro-pins along the human/robot fusion seam
+    for (let sy = cy - 66; sy <= cy + 68; sy += 16) {
+      ctx.fillStyle = '#00ff88';
+      ctx.beginPath(); ctx.arc(cx, sy, 1.4, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+
+    // Bottom reactive audio spectrum bar
+    ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.82)' : 'rgba(0, 255, 136, 0.72)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
     for (let x = 22; x <= W - 22; x += 4) {
-      const hBar = (2 + (speak + syn * 0.4) * 14) * Math.abs(Math.sin(t * 7.5 + x * 0.09));
+      const hBar = (2 + (speak + syn * 0.35) * 14) * Math.abs(Math.sin(t * 7.5 + x * 0.09));
       ctx.moveTo(x, H - 8); ctx.lineTo(x, H - 8 - hBar);
     }
     ctx.stroke();
 
-    requestAnimationFrame(frame);
+    requestAnimationFrame(render);
   }
-  frame();
+  render();
 })();
 
 async function sendAvatarPrompt(preset) {
