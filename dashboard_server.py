@@ -1619,15 +1619,24 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         except Exception:
             _data = {}
         if self.path.startswith("/api/avatar/upload"):
-            import os as _os2, base64 as _b64, shutil as _sh2
+            import os as _os2, base64 as _b64, shutil as _sh2, sqlite3 as _sq2
             _b64_str = (_data.get("image_base64") or "").split(",")[-1]
             if _b64_str:
+                _raw_bytes = _b64.b64decode(_b64_str)
                 _dst1 = _os2.path.join(_os2.path.expanduser("~"), "astra_avatar.jpg")
                 _dst2 = _os2.path.join(_os2.path.expanduser("~"), "astra-enterprise-core", "astra_avatar.jpg")
                 with open(_dst1, "wb") as _wf:
-                    _wf.write(_b64.b64decode(_b64_str))
+                    _wf.write(_raw_bytes)
                 if _os2.path.isdir(_os2.path.dirname(_dst2)):
                     _sh2.copy2(_dst1, _dst2)
+                try:
+                    _mdb = _os2.path.join(_os2.path.expanduser("~"), "astra_brain_memory.db")
+                    _mc2 = _sq2.connect(_mdb)
+                    _mc2.execute("CREATE TABLE IF NOT EXISTS avatar_store (id INTEGER PRIMARY KEY, img_b64 TEXT)")
+                    _mc2.execute("INSERT OR REPLACE INTO avatar_store (id, img_b64) VALUES (1, ?)", (_b64_str,))
+                    _mc2.commit(); _mc2.close()
+                except Exception:
+                    pass
             _b = _js.dumps({"status": "SAVED_PERMANENT"}).encode("utf-8")
             self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
             return
@@ -2297,7 +2306,20 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         # === AVATAR_IMAGE_ROUTE_V1 ===
         import os as _os
         if self.path.startswith("/api/avatar/image"):
+            import sqlite3 as _sq3, base64 as _b643
             _img_p = _os.path.join(_os.path.expanduser("~"), "astra_avatar.jpg")
+            if not _os.path.exists(_img_p):
+                try:
+                    _mdb = _os.path.join(_os.path.expanduser("~"), "astra_brain_memory.db")
+                    if _os.path.exists(_mdb):
+                        _mc3 = _sq3.connect(_mdb)
+                        _row = _mc3.execute("SELECT img_b64 FROM avatar_store WHERE id=1").fetchone()
+                        _mc3.close()
+                        if _row and _row[0]:
+                            with open(_img_p, "wb") as _wf3:
+                                _wf3.write(_b643.b64decode(_row[0]))
+                except Exception:
+                    pass
             if _os.path.exists(_img_p):
                 with open(_img_p, "rb") as _f:
                     _data = _f.read()
