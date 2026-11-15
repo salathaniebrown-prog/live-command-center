@@ -94,9 +94,12 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
         <button type="button" onclick="sendAvatarPrompt('Run full board master diagnostic across all 9 sections')" style="background:#05202b;border:1px solid #00f0ff66;color:#00f0ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">ALL-BOARD AUDIT</button>
         <button type="button" onclick="sendAvatarPrompt('Remember directive: Sovereign Apex Autonomous Mode')" style="background:#261a04;border:1px solid #ffcc0066;color:#ffdd66;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">SAVE MEMORY</button>
+        <button type="button" onclick="sendAvatarPrompt('Recall saved memories and directives')" style="background:#05222e;border:1px solid #00ff8866;color:#00ff88;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">RECALL MEMORY</button>
+        <button type="button" onclick="sendAvatarPrompt('Give me a full executive briefing')" style="background:#190a2b;border:1px solid #c86bff66;color:#ebbfff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">BRIEF ME</button>
       </div>
       <div style="display:flex;gap:6px;">
         <input id="avatar-input" type="text" placeholder="Command any internal model subsystem..." onkeydown="if(event.key==='Enter')sendAvatarPrompt()" style="flex:1;background:#020911;border:1px solid #00f0ff77;color:#fff;font-family:monospace;font-size:11px;padding:6px 8px;border-radius:4px;" />
+        <button type="button" id="btn-avatar-mic" onclick="toggleAvatarVoiceMic()" style="background:#072330;border:1px solid #00f0ff88;color:#00f0ff;font-weight:bold;font-family:monospace;font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;" title="Speak to Astra">&#127908; MIC</button>
         <button type="button" onclick="sendAvatarPrompt()" style="background:linear-gradient(90deg,#00f0ff,#00ff88,#c86bff);color:#02100c;font-weight:bold;border:none;font-family:monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;">EXECUTE</button>
       </div>
     </div>
@@ -117,6 +120,70 @@ function pulseSubsystem(id) {
     el.style.borderColor = '#00ff88';
     el.style.boxShadow = '0 0 12px rgba(0,255,136,0.45)';
   }
+}
+
+
+window._avatarRecog = null;
+window._avatarListening = false;
+
+function toggleAvatarVoiceMic() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById('btn-avatar-mic');
+  const badge = document.getElementById('avatar-state-badge');
+  if (!SpeechRec) {
+    sendAvatarPrompt('Give me a full executive briefing');
+    return;
+  }
+  if (window._avatarListening && window._avatarRecog) {
+    try { window._avatarRecog.stop(); } catch (e) {}
+    window._avatarListening = false;
+    if (micBtn) { micBtn.style.background = '#072330'; micBtn.style.color = '#00f0ff'; micBtn.textContent = '🎤 MIC'; }
+    if (badge) badge.textContent = 'SYNAPSES ARMED';
+    return;
+  }
+  const rec = new SpeechRec();
+  window._avatarRecog = rec;
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  rec.onstart = () => {
+    window._avatarListening = true;
+    window._synapseBoost = 1.0;
+    if (micBtn) { micBtn.style.background = '#00ff88'; micBtn.style.color = '#02100c'; micBtn.textContent = '● LISTENING'; }
+    if (badge) badge.textContent = 'LISTENING...';
+  };
+  rec.onresult = (ev) => {
+    const transcript = ev.results[0][0].transcript;
+    if (transcript) sendAvatarPrompt(transcript);
+  };
+  rec.onerror = () => {
+    window._avatarListening = false;
+    if (micBtn) { micBtn.style.background = '#072330'; micBtn.style.color = '#00f0ff'; micBtn.textContent = '🎤 MIC'; }
+    if (badge) badge.textContent = 'SYNAPSES ARMED';
+  };
+  rec.onend = () => {
+    window._avatarListening = false;
+    if (micBtn) { micBtn.style.background = '#072330'; micBtn.style.color = '#00f0ff'; micBtn.textContent = '🎤 MIC'; }
+  };
+  rec.start();
+}
+
+function speakAstraFemaleVoice(text, badge) {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices() || [];
+    const fem = voices.find(v => /female|samantha|victoria|karen|zira|aria|jenny|google us english/i.test(v.name));
+    if (fem) u.voice = fem;
+    u.pitch = 1.08;
+    u.rate = 1.03;
+    u.onend = () => {
+      if (badge) badge.textContent = 'SYNAPSES ARMED';
+      window._avatarSpeaking = 0.05;
+    };
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
 }
 
 function setBrainVisualTier(val) {
@@ -350,15 +417,7 @@ async function sendAvatarPrompt(preset) {
     }
     if (badge) badge.textContent = 'SPEAKING';
     window._avatarSpeaking = 1.0;
-    if ('speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(reply);
-        u.rate = 1.05;
-        u.onend = () => { if (badge) badge.textContent = 'SYNAPSES ARMED'; window._avatarSpeaking = 0.05; };
-        window.speechSynthesis.speak(u);
-      } catch (e) {}
-    }
+    speakAstraFemaleVoice(reply, badge);
   } catch (e) {
     if (log) log.innerHTML += '<div style="color:#ff6688;">[ERR]: ' + e + '</div>';
     if (badge) badge.textContent = 'SYNAPSES ARMED';
