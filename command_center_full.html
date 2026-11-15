@@ -867,7 +867,7 @@ async function runOneClickPipelineTest() {
     const txHash = (data.webhook_8115 && data.webhook_8115.tx_hash) ? data.webhook_8115.tx_hash : "";
     const netName = (data.webhook_8115 && data.webhook_8115.network) ? data.webhook_8115.network : "BASE_USDC";
     const exp = buildExplorerLink(netName, data.order_ref, txHash);
-    box.innerHTML = `<strong style="color:#00ff88;">[✔] SETTLED ${data.order_ref}</strong> | $${Number(data.amount_usd).toLocaleString()}<br>` +
+    box.innerHTML = `<strong style="color:#00ff88;">[✔] SETTLED ${d.network || d.asset || 'BASE_USDC'} ${data.order_ref}</strong> | $${Number(data.amount_usd).toLocaleString()}<br>` +
                     `NET: ${netName} | <a href="${exp.url}" target="_blank" rel="noopener" style="color:#00f0ff;text-decoration:underline;font-weight:bold;">🔗 ${exp.label}</a><br>` +
                     `CERT: <a href="/api/certificate/${encodeURIComponent(data.order_ref)}" target="_blank" style="color:#00ff88;text-decoration:underline;">VIEW SIGNED RECORD</a>`;
     await pollWebhookFeed8115();
