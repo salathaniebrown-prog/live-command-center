@@ -1756,6 +1756,11 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if not self._proxy(): self.send_error(404)
 
     def do_GET(self):
+        if self.path.startswith("/api/ci-"):
+            import json as _js
+            _b = _js.dumps(fetch_live_ci_telemetry()).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
 
         if self.path.startswith("/api/quantum"):
             import http.client as _hc, json as _js
