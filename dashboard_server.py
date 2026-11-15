@@ -1618,6 +1618,15 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
             _data = {}
+        if self.path.startswith("/api/avatar/upload"):
+            import base64 as _b64
+            _b64_str = (_data.get("image_base64") or "").split(",")[-1]
+            if _b64_str:
+                with open(_os.path.join(_os.path.expanduser("~"), "astra_avatar.jpg"), "wb") as _wf:
+                    _wf.write(_b64.b64decode(_b64_str))
+            _b = _js.dumps({"status": "SAVED"}).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
         if self.path.startswith("/api/assistant/chat"):
             _msg = (_data.get("message") or "").strip()
             _low = _msg.lower()
@@ -1702,6 +1711,15 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
             _data = {}
+        if self.path.startswith("/api/avatar/upload"):
+            import base64 as _b64
+            _b64_str = (_data.get("image_base64") or "").split(",")[-1]
+            if _b64_str:
+                with open(_os.path.join(_os.path.expanduser("~"), "astra_avatar.jpg"), "wb") as _wf:
+                    _wf.write(_b64.b64decode(_b64_str))
+            _b = _js.dumps({"status": "SAVED"}).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
         if self.path.startswith("/api/assistant/chat"):
             _msg = (_data.get("message") or "").strip()
             _low = _msg.lower()
@@ -1758,6 +1776,15 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
             _data = {}
+        if self.path.startswith("/api/avatar/upload"):
+            import base64 as _b64
+            _b64_str = (_data.get("image_base64") or "").split(",")[-1]
+            if _b64_str:
+                with open(_os.path.join(_os.path.expanduser("~"), "astra_avatar.jpg"), "wb") as _wf:
+                    _wf.write(_b64.b64decode(_b64_str))
+            _b = _js.dumps({"status": "SAVED"}).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
         if self.path.startswith("/api/assistant/chat"):
             _msg = (_data.get("message") or "").strip()
             _low = _msg.lower()
@@ -2208,6 +2235,10 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(_data)))
                 self.end_headers()
                 self.wfile.write(_data)
+                return
+            else:
+                self.send_response(404)
+                self.end_headers()
                 return
 
         # === SCHEMA_FIX_0_5_6_7_V3 ===
