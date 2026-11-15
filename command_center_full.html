@@ -104,8 +104,10 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
     </div>
     <div id="astraAvatarFrame" style="position:relative;width:270px;height:248px;border-radius:6px;overflow:hidden;border:1px solid #00f0ff66;background:#010409;">
       <img id="astraAvatarPhoto" src="/api/avatar/image?v=1794783454" alt="Astra Cyborg Avatar" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform 0.25s ease, filter 0.25s ease;" onerror="this.style.display='none'" />
+      <video id="astraAvatarVideo" autoplay playsinline style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 22%;z-index:1;"></video>
       <video id="astraHandVideo" autoplay playsinline muted style="display:none;position:absolute;right:6px;top:6px;width:82px;height:62px;border:1px solid #00ff88;border-radius:4px;object-fit:cover;z-index:4;transform:scaleX(-1);"></video>
-      <canvas id="astraAvatarCanvas" width="270" height="248" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;cursor:crosshair;"></canvas>
+      <img id="astraAvatarPhoto" src="/api/avatar/image?v=live" crossorigin="anonymous" onerror="this.style.display='none'" style="display:none;" />
+      <canvas id="astraAvatarCanvas" width="236" height="236" style="position:relative;z-index:2;width:100%;height:100%;display:block;"></canvas>
     </div>
     <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#7eeeff;margin-top:5px;">
       <input type="file" id="avatar-file-picker" accept="image/*" style="display:none;" onchange="uploadAvatarPhoto(this)" />
@@ -227,64 +229,104 @@ function toggleAvatarVoiceMic() {
 }
 
 function speakAstraFemaleVoice(text, badge) {
-  if (!('speechSynthesis' in window)) return;
+  triggerAvatarLipSyncSpeech(text, badge);
+}
+
+window._avatarAudioLevel = 0;
+window._avatarWebRTCActive = false;
+window._avatarPeerConn = null;
+
+async function initAvatarWebRTCBridge() {
+  const badge = document.getElementById('avatar-state-badge');
   try {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices() || [];
-    const fem = voices.find(v => /female|samantha|victoria|karen|zira|aria|jenny|google us english/i.test(v.name));
-    if (fem) u.voice = fem;
-    u.pitch = 1.08;
-    u.rate = 1.03;
-    u.onend = () => {
-      if (badge) badge.textContent = 'SYNAPSES ARMED';
-      window._avatarSpeaking = 0.05;
-    };
-    window.speechSynthesis.speak(u);
+    const r = await fetch('/api/avatar/rtc/session', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({mode: 'LIVE_TALKING_AVATAR'})
+    });
+    const d = await r.json();
+    if (d.webrtc_enabled && d.sdp_answer) {
+      const pc = new RTCPeerConnection({iceServers: d.ice_servers || []});
+      window._avatarPeerConn = pc;
+      pc.ontrack = (ev) => {
+        const vid = document.getElementById('astraAvatarVideo');
+        if (vid && ev.streams[0]) {
+          vid.srcObject = ev.streams[0];
+          vid.style.display = 'block';
+          window._avatarWebRTCActive = true;
+          if (badge) badge.textContent = 'WEBRTC LIVE';
+        }
+      };
+    }
   } catch (e) {}
 }
 
-function setBrainVisualTier(val) {
-  window._brainVisualTier = parseInt(val, 10) || 8;
+// Sync with Voice AI // CGI Data Core (INITIATE VOICE LINK & LOOP toggle) + SpeechSynthesis boundary events
+function triggerAvatarLipSyncSpeech(text, badgeEl) {
+  window._avatarSpeaking = 1.0;
   window._synapseBoost = 1.0;
-  const names = {5: 'TIER: v5.0 SOVEREIGN', 6: 'TIER: v6.0 OMNISCIENT', 7: 'TIER: v7.0 AUTONOMOUS', 8: 'TIER: v10.0 OMEGA'};
-  const lbl = document.getElementById('avatar-tier-label');
-  if (lbl) lbl.textContent = names[window._brainVisualTier] || 'TIER: v10.0 OMEGA';
-  window._avatarSpeaking = 0.85;
+  const cleanTxt = String(text || '').replace(/\s+/g, ' ').trim();
+  const estDurationMs = Math.min(18000, Math.max(1800, cleanTxt.length * 52));
+  const startTs = performance.now();
+
+  // Drive rhythmic syllable phoneme envelope even on mobile browsers where onboundary is throttled
+  if (window._phonemeTimer) clearInterval(window._phonemeTimer);
+  window._phonemeTimer = setInterval(() => {
+    const elapsed = performance.now() - startTs;
+    if (elapsed >= estDurationMs && (!window.speechSynthesis || !window.speechSynthesis.speaking)) {
+      clearInterval(window._phonemeTimer);
+      window._avatarAudioLevel = 0;
+      window._avatarSpeaking = 0.04;
+      if (badgeEl) badgeEl.textContent = 'IDLE BREATHING';
+      return;
+    }
+    const wordIdx = Math.floor(elapsed / 135);
+    const ch = cleanTxt.charCodeAt(wordIdx % Math.max(1, cleanTxt.length)) || 65;
+    const vowelBoost = /[aeiouAEIOU]/.test(String.fromCharCode(ch)) ? 0.95 : 0.45;
+    window._avatarAudioLevel = Math.min(1.0, vowelBoost * (0.55 + 0.45 * Math.abs(Math.sin(elapsed * 0.028))));
+    window._avatarSpeaking = Math.max(0.35, window._avatarAudioLevel);
+  }, 45);
+
+  if ('speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(cleanTxt);
+      const voices = window.speechSynthesis.getVoices() || [];
+      const fem = voices.find(v => /female|samantha|victoria|karen|zira|aria|jenny|google us english/i.test(v.name));
+      if (fem) u.voice = fem;
+      u.pitch = 1.08;
+      u.rate = 1.03;
+      u.onboundary = () => {
+        window._avatarAudioLevel = 0.92;
+        window._avatarSpeaking = 1.0;
+      };
+      u.onend = () => {
+        clearInterval(window._phonemeTimer);
+        window._avatarAudioLevel = 0;
+        window._avatarSpeaking = 0.04;
+        if (badgeEl) badgeEl.textContent = 'IDLE BREATHING';
+      };
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
 }
 
-function uploadAvatarPhoto(inp) {
-  if (!inp.files || !inp.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const tmpImg = new Image();
-    tmpImg.onload = async function() {
-      const maxDim = 768;
-      let w = tmpImg.width, h = tmpImg.height;
-      if (w > maxDim || h > maxDim) {
-        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-        else { w = Math.round(w * maxDim / h); h = maxDim; }
+(function hookVoiceCoreToAvatar(){
+  // Bridge clicks on INITIATE VOICE LINK, LOOP toggle, and Voice Core text/mic events directly into Astra's lip-sync engine
+  document.addEventListener('click', (e) => {
+    const btn = e.target && e.target.closest('button');
+    if (!btn) return;
+    const label = (btn.textContent || '').toUpperCase();
+    if (label.includes('INITIATE VOICE') || label.includes('LOOP:')) {
+      window._synapseBoost = 1.0;
+      const badge = document.getElementById('avatar-state-badge');
+      if (label.includes('INITIATE VOICE')) {
+        if (badge) badge.textContent = 'VOICE LINKED';
+        triggerAvatarLipSyncSpeech('Voice link active. Neural lip-sync and CGI waveform synchronized.', badge);
       }
-      const off = document.createElement('canvas');
-      off.width = w; off.height = h;
-      off.getContext('2d').drawImage(tmpImg, 0, 0, w, h);
-      const compactUrl = off.toDataURL('image/jpeg', 0.88);
-      const img = document.getElementById('astraAvatarPhoto');
-      if (img) { img.src = compactUrl; img.style.display = 'block'; }
-      try {
-        await fetch('/api/avatar/upload', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({image_base64: compactUrl})
-        });
-        const badge = document.getElementById('avatar-state-badge');
-        if (badge) badge.textContent = 'PORTRAIT SAVED';
-      } catch (err) {}
-    };
-    tmpImg.src = e.target.result;
-  };
-  reader.readAsDataURL(inp.files[0]);
-}
+    }
+  }, true);
+})();
 
 (function initAvatarLoop(){
   const c = document.getElementById('astraAvatarCanvas');
@@ -311,222 +353,150 @@ function uploadAvatarPhoto(inp) {
   }
 
   let t = 0;
+  let nextBlinkAt = 2.8;
+  let blinkPhase = 0;
+
   function render() {
     t += 0.032;
-    const tier = window._brainVisualTier || 8;
-    if (window._avatarSpeaking > 0) window._avatarSpeaking = Math.max(0, window._avatarSpeaking - 0.014);
+    const tier = window._brainVisualTier || 10;
+    if (window._avatarSpeaking > 0) window._avatarSpeaking = Math.max(0, window._avatarSpeaking - 0.012);
     if (window._synapseBoost > 0.25) window._synapseBoost = Math.max(0.25, window._synapseBoost - 0.012);
-    const speak = window._avatarSpeaking;
+    const audioEnv = Math.max(window._avatarAudioLevel || 0, window._avatarSpeaking * 0.85);
     const syn = window._synapseBoost;
 
+    // Natural organic blinking scheduler (every ~3.2 to 5.4 seconds)
+    if (t >= nextBlinkAt && blinkPhase === 0) {
+      blinkPhase = 0.01;
+      nextBlinkAt = t + 3.2 + (Math.sin(t * 1.7) + 1) * 1.1;
+    }
+    let eyelidClose = 0;
+    if (blinkPhase > 0) {
+      blinkPhase += 0.16;
+      eyelidClose = Math.sin(Math.min(Math.PI, blinkPhase));
+      if (blinkPhase >= Math.PI) blinkPhase = 0;
+    }
+
     const pEl = document.getElementById('astraAvatarPhoto');
-    const hasPhoto = pEl && pEl.style.display !== 'none' && pEl.complete && pEl.naturalWidth > 0;
+    const hasPhoto = pEl && pEl.complete && pEl.naturalWidth > 0;
 
-    if (hasPhoto) {
+    if (window._avatarWebRTCActive) {
       ctx.clearRect(0, 0, W, H);
-      const sc = 1.02 + speak * 0.03 + Math.sin(t * 1.4) * 0.01;
-      pEl.style.transform = 'scale(' + sc.toFixed(3) + ') translate(' + (mouseX * 0.25).toFixed(1) + 'px,' + (mouseY * 0.25).toFixed(1) + 'px)';
-      const scanY = (t * 44) % H;
-      ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
-      ctx.fillRect(0, scanY, W, 2);
-      const rx = W * 0.615, ry = H * 0.435;
-      ctx.strokeStyle = speak > 0.05 ? 'rgba(0, 255, 136, 0.9)' : 'rgba(0, 240, 255, 0.75)';
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.arc(rx, ry, 13 + Math.sin(t * 3) * 1.5, t * 0.8, t * 0.8 + Math.PI * 1.4);
-      ctx.stroke();
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
-      ctx.beginPath();
-      ctx.moveTo(W * 0.5, 8);
-      ctx.lineTo(W * 0.5, H - 22);
-      ctx.stroke();
-      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.9)' : 'rgba(0, 255, 136, 0.85)';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      for (let x = 18; x <= W - 18; x += 4) {
-        const hBar = (2 + (speak + syn * 0.35) * 16) * Math.abs(Math.sin(t * 8 + x * 0.1));
-        ctx.moveTo(x, H - 6);
-        ctx.lineTo(x, H - 6 - hBar);
+    } else if (hasPhoto) {
+      // Live 60FPS Neural Portrait Kinematics: continuous breathing, natural head micro-motion, eye blinks & real-time jaw/lip articulation
+      ctx.fillStyle = '#02060d';
+      ctx.fillRect(0, 0, W, H);
+
+      const breathScale = 1.035 + Math.sin(t * 1.55) * 0.013 + audioEnv * 0.012;
+      const headTilt = Math.sin(t * 0.72) * 0.022 + Math.sin(t * 2.1) * audioEnv * 0.016 + mouseX * 0.0018;
+      const headSwayX = Math.sin(t * 0.65) * 2.4 + mouseX * 0.35;
+      const headBobY = Math.sin(t * 1.55) * 2.6 - audioEnv * 1.4 + mouseY * 0.3;
+
+      // Center-crop square source image cleanly
+      const sw = pEl.naturalWidth, sh = pEl.naturalHeight;
+      const sMin = Math.min(sw, sh);
+      const sx = (sw - sMin) * 0.5;
+      const sy = Math.max(0, (sh - sMin) * 0.22);
+
+      ctx.save();
+      ctx.translate(W * 0.5 + headSwayX, H * 0.5 + headBobY);
+      ctx.rotate(headTilt);
+      ctx.scale(breathScale, breathScale);
+      ctx.drawImage(pEl, sx, sy, sMin, sMin, -W * 0.5, -H * 0.5, W, H);
+
+      // 1. Live Jaw & Lip-Sync Articulation Mesh on Lower Face (mouth region ~ y: +14 to +58)
+      if (audioEnv > 0.03) {
+        const jawDrop = audioEnv * 6.8;
+        // Articulated lower jaw displacement slice
+        const srcMouthY = sy + sMin * 0.56;
+        const srcMouthH = sMin * 0.24;
+        ctx.drawImage(
+          pEl,
+          sx + sMin * 0.28, srcMouthY, sMin * 0.44, srcMouthH,
+          -W * 0.22, H * 0.06 + jawDrop * 0.55, W * 0.44, H * 0.24 + jawDrop * 0.45
+        );
+        // Subtle acoustic oral cavity shadow between lips during open vowels
+        const mouthG = ctx.createRadialGradient(0, H * 0.115 + jawDrop * 0.3, 1, 0, H * 0.115 + jawDrop * 0.3, 16);
+        mouthG.addColorStop(0, 'rgba(18, 6, 12, ' + (0.68 * audioEnv).toFixed(2) + ')');
+        mouthG.addColorStop(1, 'rgba(18, 6, 12, 0)');
+        ctx.fillStyle = mouthG;
+        ctx.beginPath();
+        ctx.ellipse(0, H * 0.115 + jawDrop * 0.3, 13 + audioEnv * 3, 2.2 + jawDrop * 0.55, 0, 0, Math.PI * 2);
+        ctx.fill();
       }
-      ctx.stroke();
-      requestAnimationFrame(render);
-      return;
+
+      // 2. Natural Left-Eye Organic Eyelid Blink (left eye ~ x: -29, y: -22 relative to center)
+      if (eyelidClose > 0.04) {
+        ctx.fillStyle = 'rgba(188, 142, 118, ' + (0.92 * eyelidClose).toFixed(2) + ')';
+        ctx.beginPath();
+        ctx.ellipse(-W * 0.125, -H * 0.095, 15, 7.5 * eyelidClose, -0.05, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(28, 16, 14, ' + (0.85 * eyelidClose).toFixed(2) + ')';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-W * 0.185, -H * 0.092);
+        ctx.quadraticCurveTo(-W * 0.125, -H * 0.095 + 4 * eyelidClose, -W * 0.065, -H * 0.092);
+        ctx.stroke();
+      }
+
+      // 3. Right-Eye Bionic Iris Luminance & Cranial Neural Core Pulse
+      const bionicPulse = 0.45 + 0.35 * Math.sin(t * 4.2) + audioEnv * 0.4;
+      const bEyeG = ctx.createRadialGradient(W * 0.125, -H * 0.095, 1, W * 0.125, -H * 0.095, 16);
+      bEyeG.addColorStop(0, 'rgba(180, 245, 255, ' + (0.42 * bionicPulse).toFixed(2) + ')');
+      bEyeG.addColorStop(0.5, 'rgba(165, 95, 255, ' + (0.28 * bionicPulse).toFixed(2) + ')');
+      bEyeG.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      ctx.fillStyle = bEyeG;
+      ctx.beginPath(); ctx.arc(W * 0.125, -H * 0.095, 16, 0, Math.PI * 2); ctx.fill();
+
+      // Cranial neural core energy shimmer (top-right dome)
+      const brainG = ctx.createRadialGradient(W * 0.11, -H * 0.31, 2, W * 0.11, -H * 0.31, 34);
+      brainG.addColorStop(0, 'rgba(0, 255, 210, ' + (0.26 + audioEnv * 0.25).toFixed(2) + ')');
+      brainG.addColorStop(0.6, 'rgba(200, 107, 255, ' + (0.14 + syn * 0.15).toFixed(2) + ')');
+      brainG.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = brainG;
+      ctx.beginPath(); ctx.arc(W * 0.11, -H * 0.31, 34, 0, Math.PI * 2); ctx.fill();
+
+      ctx.restore();
+    } else {
+      // Vector fallback if image hasn't loaded yet
+      ctx.fillStyle = '#02060d';
+      ctx.fillRect(0, 0, W, H);
+      drawFaceContour(W * 0.5, H * 0.48);
+      ctx.strokeStyle = '#00f0ff'; ctx.stroke();
     }
 
-    const bobY = Math.sin(t * 1.4) * 2.2 + mouseY * 0.4;
-    const shiftX = Math.sin(t * 0.8) * 1.8 + mouseX * 0.45;
-    const cx = W * 0.5 + shiftX;
-    const cy = H * 0.48 + bobY;
+    // Holographic HUD Overlay (Radial Grid Arcs, Bionic Reticle, Hand Landmarks & Live Audio Frequency Equalizer)
+    const scanY = (t * 40) % H;
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.09)';
+    ctx.fillRect(0, scanY, W, 2);
 
-    ctx.fillStyle = '#02060d';
-    ctx.fillRect(0, 0, W, H);
-
-    const aura = ctx.createRadialGradient(cx, cy, 18, cx, cy, 128);
-    aura.addColorStop(0, tier >= 8 ? 'rgba(200, 107, 255, 0.24)' : 'rgba(0, 240, 255, 0.22)');
-    aura.addColorStop(0.55, 'rgba(0, 240, 255, 0.12)');
-    aura.addColorStop(1, 'rgba(2, 6, 13, 0)');
-    ctx.fillStyle = aura;
-    ctx.fillRect(0, 0, W, H);
-
-    // Outer Holographic Energy Rings & Hex Matrix
-    ctx.save();
-    ctx.translate(cx, cy - 4);
-    for (let rIdx = 0; rIdx < 3; rIdx++) {
-      ctx.strokeStyle = rIdx === 0 ? 'rgba(0, 240, 255, 0.28)' : (rIdx === 1 ? 'rgba(200, 107, 255, 0.24)' : 'rgba(0, 255, 136, 0.22)');
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      const rad = 88 + rIdx * 11;
-      const dir = rIdx % 2 === 0 ? 1 : -1;
-      ctx.arc(0, 0, rad, t * dir * (0.4 + rIdx * 0.15), t * dir * (0.4 + rIdx * 0.15) + Math.PI * 1.45);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // Flowing dark-silk hair silhouette with rim lighting
-    const hairGrad = ctx.createLinearGradient(cx - 75, cy - 90, cx + 75, cy + 95);
-    hairGrad.addColorStop(0, '#09111e');
-    hairGrad.addColorStop(0.5, '#182840');
-    hairGrad.addColorStop(1, '#060b14');
-    ctx.fillStyle = hairGrad;
+    ctx.strokeStyle = tier >= 10 ? 'rgba(216, 107, 255, 0.48)' : 'rgba(0, 240, 255, 0.42)';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.moveTo(cx, cy - 88);
-    ctx.bezierCurveTo(cx - 70, cy - 86, cx - 80, cy - 10, cx - 70, cy + 92);
-    ctx.lineTo(cx + 70, cy + 92);
-    ctx.bezierCurveTo(cx + 80, cy - 10, cx + 70, cy - 86, cx, cy - 88);
-    ctx.fill();
-
-    // Left Half: Sculpted Luminous Woman Portrait
-    ctx.save();
-    ctx.beginPath(); ctx.rect(0, 0, cx, H); ctx.clip();
-    const neckGrad = ctx.createLinearGradient(cx - 40, cy + 56, cx, H);
-    neckGrad.addColorStop(0, '#dba988'); neckGrad.addColorStop(0.5, '#f4cfb4'); neckGrad.addColorStop(1, '#b88364');
-    ctx.fillStyle = neckGrad;
-    ctx.beginPath();
-    ctx.moveTo(cx - 22, cy + 58); ctx.lineTo(cx - 26, cy + 90);
-    ctx.bezierCurveTo(cx - 56, cy + 96, cx - 78, cy + 112, cx - 86, H);
-    ctx.lineTo(cx, H); ctx.lineTo(cx, cy + 58); ctx.closePath(); ctx.fill();
-
-    drawFaceContour(cx, cy);
-    const faceSkin = ctx.createRadialGradient(cx - 18, cy - 14, 6, cx - 8, cy, 80);
-    faceSkin.addColorStop(0, '#ffe8d6');
-    faceSkin.addColorStop(0.48, '#f5cbb0');
-    faceSkin.addColorStop(0.82, '#d9a484');
-    faceSkin.addColorStop(1, '#b57e60');
-    ctx.fillStyle = faceSkin; ctx.fill();
-
-    // Cheekbone & nose-bridge specular highlight
-    const cheekHi = ctx.createRadialGradient(cx - 26, cy + 6, 1, cx - 26, cy + 6, 18);
-    cheekHi.addColorStop(0, 'rgba(255, 248, 240, 0.35)');
-    cheekHi.addColorStop(1, 'rgba(255, 248, 240, 0)');
-    ctx.fillStyle = cheekHi;
-    ctx.beginPath(); ctx.arc(cx - 26, cy + 6, 18, 0, Math.PI * 2); ctx.fill();
-
-    // Sculpted eyebrow & lashes
-    ctx.strokeStyle = '#2d1c16'; ctx.lineWidth = 2.3; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(cx - 39, cy - 19); ctx.quadraticCurveTo(cx - 24, cy - 27, cx - 10, cy - 20); ctx.stroke();
-
-    const eyeOpen = Math.sin(t * 0.75) > 0.97 ? 0.14 : 1.0;
-    const eyeX = cx - 23, eyeY = cy - 9;
-    ctx.fillStyle = '#fcfdfd';
-    ctx.beginPath(); ctx.ellipse(eyeX, eyeY, 11.5, 5.5 * eyeOpen, -0.06, 0, Math.PI * 2); ctx.fill();
-    if (eyeOpen > 0.3) {
-      const irisG = ctx.createRadialGradient(eyeX - 1, eyeY, 1, eyeX, eyeY, 5.2);
-      irisG.addColorStop(0, '#174447'); irisG.addColorStop(0.65, '#3b948e'); irisG.addColorStop(1, '#122c30');
-      ctx.fillStyle = irisG;
-      ctx.beginPath(); ctx.arc(eyeX + mouseX * 0.12, eyeY, 5.0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#070d10';
-      ctx.beginPath(); ctx.arc(eyeX + mouseX * 0.12, eyeY, 2.2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(eyeX - 1.6 + mouseX * 0.12, eyeY - 1.6, 1.3, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.strokeStyle = '#180f12'; ctx.lineWidth = 2.1;
-    ctx.beginPath(); ctx.moveTo(eyeX - 13, eyeY - 1); ctx.quadraticCurveTo(eyeX, eyeY - 7 * eyeOpen, eyeX + 11, eyeY + 0.5); ctx.stroke();
-
-    // Nose & lips
-    ctx.strokeStyle = 'rgba(165, 112, 86, 0.55)'; ctx.lineWidth = 1.3;
-    ctx.beginPath(); ctx.moveTo(cx - 4, cy - 12); ctx.quadraticCurveTo(cx - 6, cy + 8, cx - 9, cy + 16); ctx.quadraticCurveTo(cx - 5, cy + 19, cx, cy + 18); ctx.stroke();
-
-    const mouthOpen = speak * 4.4;
-    ctx.fillStyle = '#cc6b76';
-    ctx.beginPath();
-    ctx.moveTo(cx - 17, cy + 36); ctx.quadraticCurveTo(cx - 8, cy + 31 - mouthOpen * 0.2, cx, cy + 33 - mouthOpen * 0.2);
-    ctx.lineTo(cx, cy + 36 - mouthOpen * 0.35); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#e0828d';
-    ctx.beginPath();
-    ctx.moveTo(cx - 16, cy + 36); ctx.quadraticCurveTo(cx - 8, cy + 44 + mouthOpen, cx, cy + 43 + mouthOpen);
-    ctx.lineTo(cx, cy + 36 + mouthOpen * 0.45); ctx.closePath(); ctx.fill();
-    ctx.restore();
-
-    // Right Half: Brushed Titanium & Carbon-Fiber Android Woman
-    ctx.save();
-    ctx.beginPath(); ctx.rect(cx, 0, W - cx, H); ctx.clip();
-    const roboNeck = ctx.createLinearGradient(cx, cy + 56, cx + 65, H);
-    roboNeck.addColorStop(0, '#243344'); roboNeck.addColorStop(0.45, '#647d99'); roboNeck.addColorStop(1, '#121b26');
-    ctx.fillStyle = roboNeck;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy + 58); ctx.lineTo(cx + 22, cy + 58); ctx.lineTo(cx + 26, cy + 90);
-    ctx.bezierCurveTo(cx + 56, cy + 96, cx + 78, cy + 112, cx + 86, H);
-    ctx.lineTo(cx, H); ctx.closePath(); ctx.fill();
-
-    drawFaceContour(cx, cy);
-    const chromeGrad = ctx.createLinearGradient(cx, cy - 78, cx + 56, cy + 78);
-    chromeGrad.addColorStop(0, '#7c96b2'); chromeGrad.addColorStop(0.35, '#dceaf7'); chromeGrad.addColorStop(0.7, '#496078'); chromeGrad.addColorStop(1, '#1c2938');
-    ctx.fillStyle = chromeGrad; ctx.fill();
-
-    // Precision armor seams & exposed cortical circuit window
-    ctx.strokeStyle = '#0f1822'; ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx + 12, cy - 72); ctx.lineTo(cx + 18, cy - 28); ctx.lineTo(cx + 46, cy - 16);
-    ctx.moveTo(cx + 44, cy + 6); ctx.lineTo(cx + 24, cy + 22); ctx.lineTo(cx + 18, cy + 66);
-    ctx.moveTo(cx, cy + 24); ctx.lineTo(cx + 24, cy + 22);
+    ctx.arc(W * 0.5, H * 0.46, 94 + Math.sin(t * 2) * 2.5, -t * 0.6, -t * 0.6 + Math.PI * 1.25);
     ctx.stroke();
 
-    // Glowing neural window in right cranium
-    ctx.fillStyle = 'rgba(4, 15, 26, 0.88)';
-    ctx.beginPath();
-    ctx.moveTo(cx + 4, cy - 70); ctx.bezierCurveTo(cx + 34, cy - 68, cx + 44, cy - 44, cx + 40, cy - 26);
-    ctx.lineTo(cx + 16, cy - 30); ctx.lineTo(cx + 4, cy - 52); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 1; ctx.stroke();
-
-    for (let k = 0; k < 7; k++) {
-      const nx = cx + 10 + (k % 3) * 10 + Math.sin(t * 2 + k) * 1.5;
-      const ny = cy - 60 + Math.floor(k / 2) * 9;
-      ctx.fillStyle = k % 2 === 0 ? '#00ff88' : '#ff88ff';
-      ctx.beginPath(); ctx.arc(nx, ny, 1.7 + syn * 0.9, 0, Math.PI * 2); ctx.fill();
+    if (window._handLandmarks && window._handLandmarks.length === 21) {
+      ctx.fillStyle = '#00ff88';
+      window._handLandmarks.forEach(pt => {
+        ctx.beginPath(); ctx.arc((1 - pt.x) * W, pt.y * H, 2.2, 0, Math.PI * 2); ctx.fill();
+      });
     }
 
-    // Bionic multi-ring optic lens
-    const rEyeX = cx + 23, rEyeY = cy - 9;
-    ctx.fillStyle = '#06111c';
-    ctx.beginPath(); ctx.ellipse(rEyeX, rEyeY, 12, 5.8, 0.06, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 1.3; ctx.stroke();
-    ctx.fillStyle = tier >= 8 ? '#d86bff' : '#00f0ff';
-    ctx.shadowColor = tier >= 8 ? '#d86bff' : '#00f0ff'; ctx.shadowBlur = 12;
-    ctx.beginPath(); ctx.arc(rEyeX, rEyeY, 4.4, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(rEyeX, rEyeY, 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-
-    // Central luminous fusion seam
-    const seamG = ctx.createLinearGradient(cx, cy - 80, cx, cy + 90);
-    seamG.addColorStop(0, 'rgba(0,240,255,0.1)'); seamG.addColorStop(0.5, 'rgba(0,255,136,0.9)'); seamG.addColorStop(1, 'rgba(0,240,255,0.1)');
-    ctx.strokeStyle = seamG; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.moveTo(cx, cy - 78); ctx.lineTo(cx, cy + 88); ctx.stroke();
-
-    // Bottom reactive equalizer bars
-    ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.85)' : 'rgba(0, 255, 136, 0.75)';
-    ctx.lineWidth = 1.7;
+    // Live Voice Frequency Equalizer synced to audioEnv
+    ctx.strokeStyle = audioEnv > 0.05 ? 'rgba(0, 255, 136, 0.92)' : 'rgba(0, 240, 255, 0.45)';
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    for (let x = 20; x <= W - 20; x += 4) {
-      const hBar = (2 + (speak + syn * 0.35) * 15) * Math.abs(Math.sin(t * 8 + x * 0.1));
-      ctx.moveTo(x, H - 6); ctx.lineTo(x, H - 6 - hBar);
+    for (let x = 18; x <= W - 18; x += 4) {
+      const hBar = (2 + (audioEnv * 18 + syn * 3)) * Math.abs(Math.sin(t * 9 + x * 0.12));
+      ctx.moveTo(x, H - 6);
+      ctx.lineTo(x, H - 6 - hBar);
     }
     ctx.stroke();
 
     requestAnimationFrame(render);
   }
   render();
+  initAvatarWebRTCBridge();
 })();
 
 async function sendAvatarPrompt(preset) {
