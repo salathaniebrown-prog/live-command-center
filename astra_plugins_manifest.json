@@ -2,7 +2,7 @@
   "policy": "AUTO_ALLOW_ALL_VERIFIED_PLUGINS",
   "require_user_confirmation": false,
   "total_plugins": 11,
-  "updated_at": 1794710693.1905596,
+  "updated_at": 1794765772.9763613,
   "openai_tools_schema": [
     {
       "type": "function",
