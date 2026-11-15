@@ -1,35 +1,30 @@
-#!/data/data/com.termux/files/usr/bin/bash
-export HOME="/data/data/com.termux/files/home"
-cd "$HOME" || exit 1
+#!/usr/bin/env bash
+termux-wake-lock 2>/dev/null || true
+cd "$HOME"
 
-# Hold Android CPU wake lock so background supercomputer nodes never sleep
-command -v termux-wake-lock >/dev/null 2>&1 && termux-wake-lock
-
-# Start all core & upgrade nodes idempotently if not already listening
 start_if_down() {
-  local port="$1"
-  local script="$2"
-  local logf="$3"
-  if ! python3 -c "import socket; s=socket.create_connection(('127.0.0.1', $port), 0.3); s.close()" 2>/dev/null; then
-    [ -f "$HOME/$script" ] && setsid nohup python3 "$HOME/$script" > "$HOME/$logf" 2>&1 < /dev/null &
-  fi
+    local port="$1"
+    local script="$2"
+    local log="$3"
+    if ! nc -z 127.0.0.1 "$port" 2>/dev/null; then
+        setsid nohup python3 "$HOME/$script" > "$HOME/$log" 2>&1 < /dev/null &
+        sleep 0.5
+    fi
 }
 
-start_if_down 8088 "dashboard_server.py" "dashboard.log"
-start_if_down 8099 "dealership_module.py" "dealership_8099.log"
-start_if_down 8123 "astra_saga_engine.py" "saga_8123.log"
-start_if_down 8125 "astra_governance_engine.py" "gov_8125.log"
-start_if_down 8127 "astra_elite_cinema_autopilot.py" "studio_8127.log"
+start_if_down 8088 dashboard_server.py dashboard.log
+start_if_down 8099 astra_dealership.py dealership.log
+start_if_down 8109 astra_unified_brain.py brain.log
+start_if_down 8111 astra_invoice_agent.py invoice.log
+start_if_down 8113 astra_edge_ml.py edgeml.log
+start_if_down 8115 astra_webhook_listener.py webhook.log
+start_if_down 8117 astra_trust_center.py trust.log
+start_if_down 8119 astra_supercomputer_mesh.py mesh.log
+start_if_down 8121 astra_cinema_mcp.py cinema.log
+start_if_down 8123 astra_durable_saga.py saga.log
+start_if_down 8125 astra_enterprise_gov.py gov.log
+start_if_down 8127 astra_elite_cinema_autopilot.py studio.log
+start_if_down 8129 astra_spatial_assistant.py spatial.log
+start_if_down 8131 astra_quantum_lattice.py quantum.log
 
-# Run 30s watchdog & auto-upgrade daemon if not running
-if ! pgrep -f "auto_correct_brain.py" >/dev/null 2>&1; then
-  [ -f "$HOME/auto_correct_brain.py" ] && setsid nohup python3 "$HOME/auto_correct_brain.py" > "$HOME/watchdog.log" 2>&1 < /dev/null &
-fi
-
-# Launch Command Center UI automatically in Chrome if termux-open-url is available
-if [ "$1" = "--open" ] && command -v termux-open-url >/dev/null 2>&1; then
-  sleep 1
-  termux-open-url "http://127.0.0.1:8088"
-fi
-start_if_down 8129 "astra_spatial_assistant.py" "spatial_8129.log"
-start_if_down 8131 "astra_quantum_lattice.py" "quantum_8131.log"
+echo "[✔] All Astra cluster nodes and upgrade daemons initialized."

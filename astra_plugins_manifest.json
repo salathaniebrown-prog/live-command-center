@@ -348,35 +348,4 @@
       "endpoint": "/render",
       "method": "POST",
       "auto_allow": true,
-      "approval_required": false,
-      "schema": {
-        "type": "object",
-        "properties": {
-          "prompt": {
-            "type": "string"
-          },
-          "bpm": {
-            "type": "number"
-          }
-        }
-      }
-    },
-    {
-      "id": "plugin.mesh.validator",
-      "name": "10-Node Supercomputer 4-Gate Validator",
-      "port": 8119,
-      "endpoint": "/execute",
-      "method": "POST",
-      "auto_allow": true,
-      "approval_required": false,
-      "schema": {
-        "type": "object",
-        "properties": {
-          "goal": {
-            "type": "string"
-          }
-        }
-      }
-    }
-  ]
-}
+      "approval_require
