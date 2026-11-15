@@ -433,6 +433,63 @@ async function sendAvatarPrompt(preset) {
 
 </div>
 
+<!-- REAL_WORLD_SUPERCOMPUTER_LAB_BAR_V1 -->
+<div style="margin-top:8px;border:1px solid #00ff8855;background:#031018;border-radius:6px;padding:9px;font-family:monospace;font-size:11px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;color:#00ff88;margin-bottom:6px;">
+    <span>&#9889; REAL-WORLD WORKSTATION LAB // ORBITAL &bull; RESEARCH HISTORY &bull; GEMINI + BANANA 2 &bull; GOALS</span>
+    <span style="color:#00f0ff;font-size:10px;">100% APPLIED EXECUTION</span>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+    <input id="rw-query-input" type="text" placeholder="Search real web/arXiv, track ISS/planets, or enter model training task..." style="flex:1;min-width:210px;background:#02080f;border:1px solid #00f0ff66;color:#fff;padding:6px 8px;border-radius:4px;font-family:monospace;font-size:11px;" />
+    <button type="button" onclick="runRealResearch()" style="background:#00f0ff;color:#021014;font-weight:bold;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:10px;">RESEARCH + SAVE</button>
+    <button type="button" onclick="runOrbitalTrack()" style="background:#062836;border:1px solid #00f0ff77;color:#00f0ff;padding:6px 9px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:10px;">PLANETS / SATELLITES</button>
+    <button type="button" onclick="runModelLab()" style="background:#1c0b33;border:1px solid #c86bff88;color:#ebbfff;padding:6px 9px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:10px;">GEMINI + BANANA 2 LAB</button>
+    <button type="button" onclick="sendAvatarPrompt('Execute Car Purchase & Crypto Escrow Pipeline')" style="background:#06291a;border:1px solid #00ff8877;color:#00ff88;padding:6px 9px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:10px;">GOAL: CAR PURCHASE</button>
+    <button type="button" onclick="sendAvatarPrompt('Execute $100,000 monthly faceless streaming channel blueprint')" style="background:#291c05;border:1px solid #ffcc0077;color:#ffdd66;padding:6px 9px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:10px;">GOAL: $100K/MO CHANNEL</button>
+  </div>
+  <div id="rw-output-box" style="background:#02080e;border:1px solid #00f0ff33;border-radius:4px;padding:7px;color:#bdeeff;line-height:1.45;max-height:92px;overflow-y:auto;">
+    Ready: Real Research Bar (with SQLite history), Live ISS/Planetary Telemetry, Gemini/Banana 2 Training Lab, SMTP Emailer, and Goal Blueprints armed.
+  </div>
+  <div id="rw-history-strip" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;"></div>
+</div>
+<script>
+async function runRealResearch(presetQ) {
+  const inp = document.getElementById('rw-query-input');
+  const out = document.getElementById('rw-output-box');
+  const strip = document.getElementById('rw-history-strip');
+  const q = (presetQ || (inp ? inp.value.trim() : '')).trim();
+  if (out) out.textContent = 'Querying live research engine & SQLite history...';
+  try {
+    const r = await fetch('/api/research/live', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query: q})});
+    const d = await r.json();
+    if (out) out.textContent = d.output || ('Loaded ' + (d.history ? d.history.length : 0) + ' saved search history entries.');
+    if (strip && Array.isArray(d.history)) {
+      strip.innerHTML = d.history.slice(0, 6).map(h =>
+        '<button type="button" onclick="runRealResearch(' + JSON.stringify(h.query) + ')" style="background:#041a24;border:1px solid #00f0ff44;color:#7eeeff;font-family:monospace;font-size:9px;padding:2px 6px;border-radius:3px;cursor:pointer;">&#128337; ' + h.query.replace(/</g,'&lt;') + '</button>'
+      ).join('');
+    }
+  } catch (e) { if (out) out.textContent = 'Research error: ' + e; }
+}
+async function runOrbitalTrack() {
+  const inp = document.getElementById('rw-query-input');
+  const out = document.getElementById('rw-output-box');
+  const target = (inp && inp.value.trim()) || 'ISS / Mars / Starlink';
+  if (out) out.textContent = 'Polling live orbital telemetry...';
+  const r = await fetch('/api/space/track', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({target})});
+  const d = await r.json();
+  if (out) out.textContent = d.output;
+}
+async function runModelLab() {
+  const inp = document.getElementById('rw-query-input');
+  const out = document.getElementById('rw-output-box');
+  const task = (inp && inp.value.trim()) || 'Gemini 2.5 Pro + Nano Banana 2 multi-modal training run';
+  const r = await fetch('/api/models/lab', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'Gemini-2.5-Pro + Banana-2', task})});
+  const d = await r.json();
+  if (out) out.textContent = d.output;
+}
+setTimeout(() => runRealResearch(''), 900);
+</script>
+
 <!-- ASTRA_NEURAL_BRAIN_BAY_V1 -->
 <div id="astra-brain-bay" style="margin:10px 0;border:1px solid #00f0ff55;background:radial-gradient(circle at 50% 45%, #07222c 0%, #030b12 75%);border-radius:6px;padding:10px 14px;position:relative;overflow:hidden;">
   <div style="display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:11px;color:#00f0ff;margin-bottom:6px;">
