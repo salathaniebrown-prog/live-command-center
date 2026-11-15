@@ -2464,6 +2464,13 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
 
+    # === STRICT_NO_CACHE_HEADERS_V1 ===
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
     def do_GET(self):
         # === AVATAR_IMAGE_ROUTE_V1 ===
         import os as _os
