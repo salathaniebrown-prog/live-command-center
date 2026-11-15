@@ -119,6 +119,14 @@ function pulseSubsystem(id) {
   }
 }
 
+function setBrainVisualTier(val) {
+  window._brainVisualTier = parseInt(val, 10) || 8;
+  window._synapseBoost = 1.0;
+  const names = {5: 'TIER: v5.0 SOVEREIGN', 6: 'TIER: v6.0 OMNISCIENT', 7: 'TIER: v7.0 AUTONOMOUS', 8: 'TIER: v8.0 APEX'};
+  const lbl = document.getElementById('avatar-tier-label');
+  if (lbl) lbl.textContent = names[window._brainVisualTier] || 'TIER: v8.0 APEX';
+  window._avatarSpeaking = 0.85;
+}
 
 function uploadAvatarPhoto(inp) {
   if (!inp.files || !inp.files[0]) return;
@@ -126,7 +134,10 @@ function uploadAvatarPhoto(inp) {
   reader.onload = async function(e) {
     const dataUrl = e.target.result;
     const img = document.getElementById('astraAvatarPhoto');
-    if (img) { img.src = dataUrl; img.style.display = 'block'; }
+    if (img) {
+      img.src = dataUrl;
+      img.style.display = 'block';
+    }
     try {
       await fetch('/api/avatar/upload', {
         method: 'POST',
@@ -138,16 +149,7 @@ function uploadAvatarPhoto(inp) {
   reader.readAsDataURL(inp.files[0]);
 }
 
-function setBrainVisualTier(val) {
-  window._brainVisualTier = parseInt(val, 10) || 8;
-  window._synapseBoost = 1.0;
-  const names = {5: 'TIER: v5.0 SOVEREIGN', 6: 'TIER: v6.0 OMNISCIENT', 7: 'TIER: v7.0 AUTONOMOUS', 8: 'TIER: v8.0 APEX'};
-  const lbl = document.getElementById('avatar-tier-label');
-  if (lbl) lbl.textContent = names[window._brainVisualTier] || 'TIER: v8.0 APEX';
-  window._avatarSpeaking = 0.85;
-}
-
-(function initSplitCyborgWomanAvatar(){
+(function initAvatarLoop(){
   const c = document.getElementById('astraAvatarCanvas');
   if (!c) return;
   const ctx = c.getContext('2d');
@@ -180,409 +182,140 @@ function setBrainVisualTier(val) {
     const speak = window._avatarSpeaking;
     const syn = window._synapseBoost;
 
+    const pEl = document.getElementById('astraAvatarPhoto');
+    const hasPhoto = pEl && pEl.style.display !== 'none' && pEl.complete && pEl.naturalWidth > 0;
+
+    if (hasPhoto) {
+      ctx.clearRect(0, 0, W, H);
+      const sc = 1.02 + speak * 0.03 + Math.sin(t * 1.4) * 0.01;
+      pEl.style.transform = 'scale(' + sc.toFixed(3) + ') translate(' + (mouseX * 0.25).toFixed(1) + 'px,' + (mouseY * 0.25).toFixed(1) + 'px)';
+      const scanY = (t * 44) % H;
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
+      ctx.fillRect(0, scanY, W, 2);
+      const rx = W * 0.615, ry = H * 0.435;
+      ctx.strokeStyle = speak > 0.05 ? 'rgba(0, 255, 136, 0.9)' : 'rgba(0, 240, 255, 0.75)';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(rx, ry, 13 + Math.sin(t * 3) * 1.5, t * 0.8, t * 0.8 + Math.PI * 1.4);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+      ctx.beginPath();
+      ctx.moveTo(W * 0.5, 8);
+      ctx.lineTo(W * 0.5, H - 22);
+      ctx.stroke();
+      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.9)' : 'rgba(0, 255, 136, 0.85)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let x = 18; x <= W - 18; x += 4) {
+        const hBar = (2 + (speak + syn * 0.35) * 16) * Math.abs(Math.sin(t * 8 + x * 0.1));
+        ctx.moveTo(x, H - 6);
+        ctx.lineTo(x, H - 6 - hBar);
+      }
+      ctx.stroke();
+      requestAnimationFrame(render);
+      return;
+    }
+
     const bobY = Math.sin(t * 1.4) * 2.2 + mouseY * 0.4;
     const shiftX = Math.sin(t * 0.8) * 1.8 + mouseX * 0.45;
     const cx = W * 0.5 + shiftX;
     const cy = H * 0.48 + bobY;
 
-    // 1. Deep Cybernetic Backdrop + Aura Halo
-    const _pEl = document.getElementById('astraAvatarPhoto'); const _hasPhoto = _pEl && _pEl.style.display !== 'none' && _pEl.complete && _pEl.naturalWidth > 0;
-    if (_hasPhoto) {
-      ctx.clearRect(0, 0, W, H);
-      const _img = document.getElementById('astraAvatarPhoto');
-      const _sc = 1.02 + speak * 0.03 + Math.sin(t * 1.4) * 0.01;
-      _img.style.transform = `scale(${_sc.toFixed(3)}) translate(${(mouseX*0.25).toFixed(1)}px, ${(mouseY*0.25).toFixed(1)}px)`;
-      // Scanline + Bionic Eye Glow + Equalizer Overlay
-      const scanY = (t * 44) % H;
-      ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
-      ctx.fillRect(0, scanY, W, 2);
-      // Bionic right-eye reticle glow
-      const rx = W * 0.615, ry = H * 0.435;
-      ctx.strokeStyle = speak > 0.05 ? 'rgba(0, 255, 136, 0.85)' : 'rgba(0, 240, 255, 0.65)';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.arc(rx, ry, 13 + Math.sin(t * 3) * 1.5, t * 0.8, t * 0.8 + Math.PI * 1.4); ctx.stroke();
-      // Center seam micro-pulse
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
-      ctx.beginPath(); ctx.moveTo(W * 0.5, 8); ctx.lineTo(W * 0.5, H - 22); ctx.stroke();
-      // Bottom reactive speech equalizer
-      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.9)' : 'rgba(0, 255, 136, 0.85)';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      for (let x = 18; x <= W - 18; x += 4) {
-        const hBar = (2 + (speak + syn * 0.35) * 16) * Math.abs(Math.sin(t * 8 + x * 0.1));
-        ctx.moveTo(x, H - 6); ctx.lineTo(x, H - 6 - hBar);
-      }
-      ctx.stroke();
-      requestAnimationFrame(render);
-      return;
-    }
-    const _pEl = document.getElementById('astraAvatarPhoto'); const _hasPhoto = _pEl && _pEl.style.display !== 'none' && _pEl.complete && _pEl.naturalWidth > 0;
-    if (_hasPhoto) {
-      ctx.clearRect(0, 0, W, H);
-      const _img = document.getElementById('astraAvatarPhoto');
-      const _sc = 1.02 + speak * 0.03 + Math.sin(t * 1.4) * 0.01;
-      _img.style.transform = `scale(${_sc.toFixed(3)}) translate(${(mouseX*0.25).toFixed(1)}px, ${(mouseY*0.25).toFixed(1)}px)`;
-      // Scanline + Bionic Eye Glow + Equalizer Overlay
-      const scanY = (t * 44) % H;
-      ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
-      ctx.fillRect(0, scanY, W, 2);
-      // Bionic right-eye reticle glow
-      const rx = W * 0.615, ry = H * 0.435;
-      ctx.strokeStyle = speak > 0.05 ? 'rgba(0, 255, 136, 0.85)' : 'rgba(0, 240, 255, 0.65)';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.arc(rx, ry, 13 + Math.sin(t * 3) * 1.5, t * 0.8, t * 0.8 + Math.PI * 1.4); ctx.stroke();
-      // Center seam micro-pulse
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
-      ctx.beginPath(); ctx.moveTo(W * 0.5, 8); ctx.lineTo(W * 0.5, H - 22); ctx.stroke();
-      // Bottom reactive speech equalizer
-      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.9)' : 'rgba(0, 255, 136, 0.85)';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      for (let x = 18; x <= W - 18; x += 4) {
-        const hBar = (2 + (speak + syn * 0.35) * 16) * Math.abs(Math.sin(t * 8 + x * 0.1));
-        ctx.moveTo(x, H - 6); ctx.lineTo(x, H - 6 - hBar);
-      }
-      ctx.stroke();
-      requestAnimationFrame(render);
-      return;
-    }
     ctx.fillStyle = '#02060d';
     ctx.fillRect(0, 0, W, H);
 
     const aura = ctx.createRadialGradient(cx, cy, 18, cx, cy, 128);
-    if (tier >= 8) {
-      aura.addColorStop(0, 'rgba(200, 107, 255, 0.24)');
-      aura.addColorStop(0.55, 'rgba(0, 240, 255, 0.12)');
-      aura.addColorStop(1, 'rgba(2, 6, 13, 0)');
-    } else {
-      aura.addColorStop(0, 'rgba(0, 240, 255, 0.22)');
-      aura.addColorStop(0.6, 'rgba(0, 255, 136, 0.09)');
-      aura.addColorStop(1, 'rgba(2, 6, 13, 0)');
-    }
+    aura.addColorStop(0, tier >= 8 ? 'rgba(200, 107, 255, 0.24)' : 'rgba(0, 240, 255, 0.22)');
+    aura.addColorStop(0.55, 'rgba(0, 240, 255, 0.12)');
+    aura.addColorStop(1, 'rgba(2, 6, 13, 0)');
     ctx.fillStyle = aura;
     ctx.fillRect(0, 0, W, H);
 
-    // Subtle HUD rings behind head
-    ctx.save();
-    ctx.translate(cx, cy - 4);
-    ctx.strokeStyle = 'rgba(0, 240, 255, 0.18)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(0, 0, 96, t * 0.35, t * 0.35 + Math.PI * 1.35); ctx.stroke();
-    if (tier >= 6) {
-      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.28)' : 'rgba(255, 204, 0, 0.25)';
-      ctx.beginPath(); ctx.arc(0, 0, 106, -t * 0.45, -t * 0.45 + Math.PI * 1.15); ctx.stroke();
-    }
-    ctx.restore();
-
-    // Flowing dark-silk hair silhouette behind head
-    ctx.save();
-    const hairGrad = ctx.createLinearGradient(cx - 75, cy - 88, cx + 75, cy + 95);
-    hairGrad.addColorStop(0, '#0d1522');
-    hairGrad.addColorStop(0.5, '#172336');
-    hairGrad.addColorStop(1, '#070c14');
-    ctx.fillStyle = hairGrad;
+    // Hair silhouette
+    ctx.fillStyle = '#0d1522';
     ctx.beginPath();
     ctx.moveTo(cx, cy - 88);
     ctx.bezierCurveTo(cx - 68, cy - 86, cx - 78, cy - 10, cx - 68, cy + 88);
     ctx.lineTo(cx + 68, cy + 88);
     ctx.bezierCurveTo(cx + 78, cy - 10, cx + 68, cy - 86, cx, cy - 88);
     ctx.fill();
-    ctx.restore();
 
-    // =========================================================================
-    // LEFT HEMISPHERE: BEAUTIFUL LIGHT-SKINNED WOMAN
-    // =========================================================================
+    // Left Half: Woman
     ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, cx, H); ctx.clip();
+    ctx.fillStyle = '#e8be9e';
     ctx.beginPath();
-    ctx.rect(0, 0, cx, H);
-    ctx.clip();
-
-    // Neck & graceful shoulder (light warm porcelain/ivory skin tone)
-    const neckSkin = ctx.createLinearGradient(cx - 45, cy + 55, cx, cy + 125);
-    neckSkin.addColorStop(0, '#e8be9e');
-    neckSkin.addColorStop(0.5, '#f6d5bc');
-    neckSkin.addColorStop(1, '#cfa07e');
-    ctx.fillStyle = neckSkin;
-    ctx.beginPath();
-    ctx.moveTo(cx - 22, cy + 58);
-    ctx.lineTo(cx - 26, cy + 90);
+    ctx.moveTo(cx - 22, cy + 58); ctx.lineTo(cx - 26, cy + 90);
     ctx.bezierCurveTo(cx - 56, cy + 96, cx - 76, cy + 112, cx - 84, H);
-    ctx.lineTo(cx, H);
-    ctx.lineTo(cx, cy + 58);
-    ctx.closePath();
-    ctx.fill();
+    ctx.lineTo(cx, H); ctx.lineTo(cx, cy + 58); ctx.closePath(); ctx.fill();
 
-    // Sculpted face skin shading
     drawFaceContour(cx, cy);
     const faceSkin = ctx.createRadialGradient(cx - 16, cy - 12, 8, cx - 8, cy, 78);
     faceSkin.addColorStop(0, '#ffe4cf');
-    faceSkin.addColorStop(0.55, '#f3cbb0');
-    faceSkin.addColorStop(0.88, '#dfb090');
+    faceSkin.addColorStop(0.6, '#f3cbb0');
     faceSkin.addColorStop(1, '#c89574');
-    ctx.fillStyle = faceSkin;
-    ctx.fill();
+    ctx.fillStyle = faceSkin; ctx.fill();
 
-    // Soft cheekbone blush & luminous highlight
-    const blush = ctx.createRadialGradient(cx - 27, cy + 12, 2, cx - 27, cy + 12, 18);
-    blush.addColorStop(0, 'rgba(232, 130, 138, 0.28)');
-    blush.addColorStop(1, 'rgba(232, 130, 138, 0)');
-    ctx.fillStyle = blush;
-    ctx.beginPath(); ctx.arc(cx - 27, cy + 12, 18, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#3b261d'; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(cx - 38, cy - 19); ctx.quadraticCurveTo(cx - 24, cy - 26, cx - 10, cy - 20); ctx.stroke();
 
-    // Elegant arched eyebrow (left)
-    ctx.strokeStyle = '#3b261d';
-    ctx.lineWidth = 2.3;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(cx - 38, cy - 19);
-    ctx.quadraticCurveTo(cx - 24, cy - 26, cx - 10, cy - 20);
-    ctx.stroke();
-
-    // Natural expressive almond eye (with periodic blink)
-    const blinkCycle = Math.sin(t * 0.75);
-    const eyeOpen = blinkCycle > 0.97 ? 0.15 : 1.0;
+    const eyeOpen = Math.sin(t * 0.75) > 0.97 ? 0.15 : 1.0;
     const eyeX = cx - 23, eyeY = cy - 9;
-
-    // Eyelid crease
-    ctx.strokeStyle = 'rgba(155, 102, 78, 0.55)';
-    ctx.lineWidth = 1.1;
-    ctx.beginPath();
-    ctx.arc(eyeX, eyeY + 1, 13, Math.PI * 1.15, Math.PI * 1.85);
-    ctx.stroke();
-
-    // Sclera
     ctx.fillStyle = '#fdfefe';
-    ctx.beginPath();
-    ctx.ellipse(eyeX, eyeY, 11.5, 5.4 * eyeOpen, -0.06, 0, Math.PI * 2);
-    ctx.fill();
-
+    ctx.beginPath(); ctx.ellipse(eyeX, eyeY, 11.5, 5.4 * eyeOpen, -0.06, 0, Math.PI * 2); ctx.fill();
     if (eyeOpen > 0.3) {
-      // Hazel-emerald iris with subtle light reflection
-      const iris = ctx.createRadialGradient(eyeX - 1, eyeY, 1, eyeX, eyeY, 5.2);
-      iris.addColorStop(0, '#1d4d4f');
-      iris.addColorStop(0.65, '#3b8c88');
-      iris.addColorStop(1, '#18363a');
-      ctx.fillStyle = iris;
-      ctx.beginPath(); ctx.arc(eyeX + mouseX * 0.12, eyeY, 4.9, 0, Math.PI * 2); ctx.fill();
-
-      // Pupil & catchlight
+      ctx.fillStyle = '#2c6e6b';
+      ctx.beginPath(); ctx.arc(eyeX + mouseX * 0.12, eyeY, 4.8, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#091114';
       ctx.beginPath(); ctx.arc(eyeX + mouseX * 0.12, eyeY, 2.2, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(eyeX - 1.6 + mouseX * 0.12, eyeY - 1.6, 1.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeX - 1.5 + mouseX * 0.12, eyeY - 1.5, 1.2, 0, Math.PI * 2); ctx.fill();
     }
-
-    // Upper lash line & winged eyeliner
-    ctx.strokeStyle = '#1b1114';
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    ctx.moveTo(eyeX - 13, eyeY - 1);
-    ctx.quadraticCurveTo(eyeX, eyeY - 7 * eyeOpen, eyeX + 11, eyeY + 0.5);
-    ctx.stroke();
-
-    // Nose bridge & soft nostril shadow (left half)
-    ctx.strokeStyle = 'rgba(176, 122, 94, 0.55)';
-    ctx.lineWidth = 1.3;
-    ctx.beginPath();
-    ctx.moveTo(cx - 4, cy - 12);
-    ctx.quadraticCurveTo(cx - 6, cy + 8, cx - 9, cy + 16);
-    ctx.quadraticCurveTo(cx - 5, cy + 19, cx, cy + 18);
-    ctx.stroke();
-
-    // Full rose-nude lips (left half, reactive to speech)
     const mouthOpen = speak * 4.2;
-    ctx.fillStyle = '#c96b75';
-    ctx.beginPath();
-    ctx.moveTo(cx - 17, cy + 36);
-    ctx.quadraticCurveTo(cx - 8, cy + 31 - mouthOpen * 0.2, cx, cy + 33 - mouthOpen * 0.2);
-    ctx.lineTo(cx, cy + 36 - mouthOpen * 0.35);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillStyle = '#de7e88';
+    ctx.fillStyle = '#d4737e';
     ctx.beginPath();
     ctx.moveTo(cx - 16, cy + 36);
     ctx.quadraticCurveTo(cx - 8, cy + 44 + mouthOpen, cx, cy + 43 + mouthOpen);
-    ctx.lineTo(cx, cy + 36 + mouthOpen * 0.45);
-    ctx.closePath();
+    ctx.lineTo(cx, cy + 33 - mouthOpen * 0.2);
+    ctx.quadraticCurveTo(cx - 8, cy + 31 - mouthOpen * 0.2, cx - 17, cy + 36);
     ctx.fill();
-
-    // Soft hair lock framing left cheek
-    ctx.fillStyle = '#141e2e';
-    ctx.beginPath();
-    ctx.moveTo(cx - 12, cy - 78);
-    ctx.bezierCurveTo(cx - 54, cy - 72, cx - 58, cy - 15, cx - 48, cy + 56);
-    ctx.bezierCurveTo(cx - 44, cy + 12, cx - 42, cy - 42, cx - 12, cy - 64);
-    ctx.closePath();
-    ctx.fill();
-
     ctx.restore();
 
-    // =========================================================================
-    // RIGHT HEMISPHERE: SLEEK CYBERNETIC ANDROID ROBOT WOMAN
-    // =========================================================================
+    // Right Half: Robot Woman
     ctx.save();
+    ctx.beginPath(); ctx.rect(cx, 0, W - cx, H); ctx.clip();
+    ctx.fillStyle = '#384c61';
     ctx.beginPath();
-    ctx.rect(cx, 0, W - cx, H);
-    ctx.clip();
-
-    // Metallic titanium/chrome neck & robotic clavicle armor
-    const roboNeck = ctx.createLinearGradient(cx, cy + 55, cx + 65, H);
-    roboNeck.addColorStop(0, '#2a394a');
-    roboNeck.addColorStop(0.45, '#59708a');
-    roboNeck.addColorStop(1, '#16202c');
-    ctx.fillStyle = roboNeck;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy + 58);
-    ctx.lineTo(cx + 22, cy + 58);
-    ctx.lineTo(cx + 26, cy + 90);
+    ctx.moveTo(cx, cy + 58); ctx.lineTo(cx + 22, cy + 58); ctx.lineTo(cx + 26, cy + 90);
     ctx.bezierCurveTo(cx + 56, cy + 96, cx + 76, cy + 112, cx + 84, H);
-    ctx.lineTo(cx, H);
-    ctx.closePath();
-    ctx.fill();
+    ctx.lineTo(cx, H); ctx.closePath(); ctx.fill();
 
-    // Hydraulic neck struts
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(cx + 10, cy + 64); ctx.lineTo(cx + 14, cy + 106);
-    ctx.moveTo(cx + 19, cy + 64); ctx.lineTo(cx + 34, cy + 104);
-    ctx.stroke();
-
-    // Sculpted chrome-ceramic android face plate
     drawFaceContour(cx, cy);
     const chromeGrad = ctx.createLinearGradient(cx, cy - 75, cx + 54, cy + 75);
     chromeGrad.addColorStop(0, '#8ba3bd');
-    chromeGrad.addColorStop(0.32, '#d5e4f2');
-    chromeGrad.addColorStop(0.65, '#546b82');
+    chromeGrad.addColorStop(0.4, '#d5e4f2');
     chromeGrad.addColorStop(1, '#233242');
-    ctx.fillStyle = chromeGrad;
-    ctx.fill();
+    ctx.fillStyle = chromeGrad; ctx.fill();
 
-    // Precision cybernetic panel seams & carbon-fiber cheek recess
-    ctx.strokeStyle = '#131d29';
-    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = '#131d29'; ctx.lineWidth = 1.4;
     ctx.beginPath();
     ctx.moveTo(cx + 12, cy - 72); ctx.lineTo(cx + 18, cy - 28); ctx.lineTo(cx + 46, cy - 16);
     ctx.moveTo(cx + 44, cy + 6); ctx.lineTo(cx + 24, cy + 22); ctx.lineTo(cx + 18, cy + 66);
-    ctx.moveTo(cx, cy + 24); ctx.lineTo(cx + 24, cy + 22);
     ctx.stroke();
 
-    // Translucent neural cranium window on upper right forehead showing firing synapses
-    ctx.fillStyle = 'rgba(4, 16, 28, 0.86)';
-    ctx.beginPath();
-    ctx.moveTo(cx + 4, cy - 70);
-    ctx.bezierCurveTo(cx + 34, cy - 68, cx + 44, cy - 44, cx + 40, cy - 26);
-    ctx.lineTo(cx + 16, cy - 30);
-    ctx.lineTo(cx + 4, cy - 52);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Firing cortical nodes inside the android cranium window
-    for (let k = 0; k < 7; k++) {
-      const nx = cx + 10 + (k % 3) * 10 + Math.sin(t * 2 + k) * 1.5;
-      const ny = cy - 60 + Math.floor(k / 2) * 9;
-      ctx.fillStyle = k % 2 === 0 ? '#00ff88' : (tier >= 8 ? '#ff88ff' : '#00f0ff');
-      ctx.beginPath(); ctx.arc(nx, ny, 1.6 + syn * 0.9, 0, Math.PI * 2); ctx.fill();
-      if (k > 0) {
-        ctx.strokeStyle = 'rgba(0, 255, 136, ' + (0.35 + syn * 0.5).toFixed(2) + ')';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath(); ctx.moveTo(cx + 14, cy - 48); ctx.lineTo(nx, ny); ctx.stroke();
-      }
-    }
-
-    // Glowing Bionic Optic Sensor (Right Eye)
     const rEyeX = cx + 23, rEyeY = cy - 9;
     ctx.fillStyle = '#07131f';
-    ctx.beginPath();
-    ctx.ellipse(rEyeX, rEyeY, 12, 5.8, 0.06, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1.3;
-    ctx.stroke();
-
-    // Multi-ring glowing cyan/magenta aperture lens
-    const lensGlow = 0.72 + 0.28 * Math.sin(t * 3.5);
-    ctx.fillStyle = tier >= 8 ? 'rgba(220, 110, 255, ' + lensGlow.toFixed(2) + ')' : 'rgba(0, 240, 255, ' + lensGlow.toFixed(2) + ')';
-    ctx.shadowColor = tier >= 8 ? '#d86bff' : '#00f0ff';
-    ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.ellipse(rEyeX, rEyeY, 12, 5.8, 0.06, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = tier >= 8 ? '#d86bff' : '#00f0ff';
     ctx.beginPath(); ctx.arc(rEyeX, rEyeY, 4.3, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
     ctx.fillStyle = '#ffffff';
     ctx.beginPath(); ctx.arc(rEyeX, rEyeY, 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
 
-    // Metallic nose ridge & articulated android jaw/lip actuator (right half)
-    ctx.strokeStyle = '#2d3f52';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx + 3, cy - 12);
-    ctx.lineTo(cx + 7, cy + 16);
-    ctx.lineTo(cx, cy + 18);
-    ctx.stroke();
-
-    // Robotic lip & glowing vocalizer grille
-    ctx.fillStyle = '#33465c';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy + 33 - mouthOpen * 0.2);
-    ctx.quadraticCurveTo(cx + 9, cy + 31 - mouthOpen * 0.2, cx + 17, cy + 36);
-    ctx.quadraticCurveTo(cx + 9, cy + 44 + mouthOpen, cx, cy + 43 + mouthOpen);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.strokeStyle = speak > 0.05 ? '#00ff88' : '#00f0ff';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx + 1, cy + 37 + mouthOpen * 0.25);
-    ctx.lineTo(cx + 15, cy + 36);
-    ctx.stroke();
-
-    // Ear cybernetic comms fin
-    ctx.fillStyle = '#1b2938';
+    // Fusion Seam
     ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.roundRect(cx + 49, cy - 22, 8, 30, 3);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.restore();
-
-    // =========================================================================
-    // CENTER BIOMECHANICAL SEAM (Luminous Fusion Line Between Human & Robot)
-    // =========================================================================
-    ctx.save();
-    const seamGrad = ctx.createLinearGradient(cx, cy - 82, cx, cy + 95);
-    seamGrad.addColorStop(0, 'rgba(0, 240, 255, 0.1)');
-    seamGrad.addColorStop(0.3, 'rgba(0, 240, 255, 0.85)');
-    seamGrad.addColorStop(0.7, 'rgba(0, 255, 136, 0.85)');
-    seamGrad.addColorStop(1, 'rgba(0, 240, 255, 0.1)');
-    ctx.strokeStyle = seamGrad;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - 78);
-    ctx.lineTo(cx, cy + 88);
-    ctx.stroke();
-
-    // Micro-pins along the human/robot fusion seam
-    for (let sy = cy - 66; sy <= cy + 68; sy += 16) {
-      ctx.fillStyle = '#00ff88';
-      ctx.beginPath(); ctx.arc(cx, sy, 1.4, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.restore();
-
-    // Bottom reactive audio spectrum bar
-    ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.82)' : 'rgba(0, 255, 136, 0.72)';
-    ctx.lineWidth = 1.6;
-    ctx.beginPath();
-    for (let x = 22; x <= W - 22; x += 4) {
-      const hBar = (2 + (speak + syn * 0.35) * 14) * Math.abs(Math.sin(t * 7.5 + x * 0.09));
-      ctx.moveTo(x, H - 8); ctx.lineTo(x, H - 8 - hBar);
-    }
-    ctx.stroke();
+    ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(cx, cy - 78); ctx.lineTo(cx, cy + 88); ctx.stroke();
 
     requestAnimationFrame(render);
   }
