@@ -1831,7 +1831,7 @@ async function renderCinemaRenoiseProject() {
       `<div style="color:#00f0ff;margin-top:3px;">• Shot ${st.shot} [Bars ${st.bar_range} | ${st.start_sec}s-${st.end_sec}s]: ${st.camera} — Pattern #${st.renoise_pattern} (${st.fx})</div>`
     ).join("");
     out.innerHTML = `<strong style="color:#00ff88;">[${d.project_id} | ${d.claude_engine}]</strong> ${d.director_notes}${shotsHtml}` +
-                    `<div style="color:#8899aa;font-size:10px;margin-top:4px;">Renoise OSC Target: ${d.renoise_sync.renoise_osc.target} | Attestation: ${d.attestation_hash}</div>`;
+                    `<div style="color:#8899aa;font-size:10px;margin-top:4px;">Renoise OSC Target: ${(d.renoise_sync && d.renoise_sync.renoise_osc ? d.renoise_sync.renoise_osc : "udp://127.0.0.1:8000/renoise/transport/bpm/128 [LOCKED]").target} | Attestation: ${d.attestation_hash}</div>`;
   } catch (e) {
     out.innerText = "Error: " + e;
   }
