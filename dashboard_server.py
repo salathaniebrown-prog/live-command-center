@@ -1618,6 +1618,65 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
             _data = {}
+        if self.path.startswith("/api/simli/token"):
+            import astra_simli_agent as _asa
+            _code, _payload = _asa.mint_simli_session_token()
+            _b = _js.dumps(_payload).encode("utf-8")
+            self.send_response(_code); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
+
+        if self.path.startswith("/api/simli/keys"):
+            # Save provided API keys strictly into server-side ~/.astra_env (never in code or browser)
+            _env_p = _os.path.join(_os.path.expanduser("~"), ".astra_env")
+            _existing = {}
+            if _os.path.exists(_env_p):
+                for _ln in open(_env_p, "r", encoding="utf-8", errors="ignore"):
+                    if "=" in _ln and not _ln.strip().startswith("#"):
+                        _k, _v = _ln.strip().split("=", 1)
+                        _existing[_k.strip()] = _v.strip()
+            for _k in ["SIMLI_API_KEY", "DEEPGRAM_API_KEY", "OPENAI_API_KEY", "INWORLD_API_KEY"]:
+                if _data.get(_k):
+                    _existing[_k] = str(_data[_k]).strip()
+            with open(_env_p, "w", encoding="utf-8") as _ef:
+                for _k, _v in _existing.items():
+                    _ef.write(f'{_k}="{_v}"\n')
+            _os.chmod(_env_p, 0o600)
+            import astra_simli_agent as _asa
+            _b = _js.dumps(_asa.missing_keys_status()).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
+
+        if self.path.startswith("/api/simli/speak"):
+            # Synthesize text via Inworld inworld-tts-2 (Ashley) -> PCM16 16kHz (44-byte WAV header stripped)
+            import astra_simli_agent as _asa
+            _txt = (_data.get("text") or _asa.FIRST_MESSAGE).strip()
+            try:
+                _pcm = _asa.synthesize_inworld_pcm16_16khz(_txt)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/octet-stream")
+                self.send_header("Content-Length", str(len(_pcm)))
+                self.end_headers()
+                self.wfile.write(_pcm)
+            except Exception as _e:
+                _b = _js.dumps({"error": str(_e)}).encode("utf-8")
+                self.send_response(500); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
+
+        if self.path.startswith("/api/simli/converse"):
+            # Full voice agent turn: user transcript -> OpenAI gpt-6-luna -> Inworld Ashley PCM16 16kHz
+            import astra_simli_agent as _asa, base64 as _b64s
+            _user_txt = (_data.get("text") or "").strip()
+            _reply = _asa.generate_llm_reply(_user_txt)
+            try:
+                _pcm = _asa.synthesize_inworld_pcm16_16khz(_reply)
+                _pcm_b64 = _b64s.b64encode(_pcm).decode("ascii")
+                _b = _js.dumps({"status": "OK", "reply": _reply, "pcm16_b64": _pcm_b64}).encode("utf-8")
+                self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            except Exception as _e:
+                _b = _js.dumps({"status": "TTS_ERROR", "reply": _reply, "error": str(_e)}).encode("utf-8")
+                self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
+
         if self.path.startswith("/api/avatar/rtc"):
             _env_p = _os.path.join(_os.path.expanduser("~"), ".astra_env")
             _env = {}
@@ -2474,6 +2533,34 @@ class UnifiedHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         # === AVATAR_IMAGE_ROUTE_V1 ===
         import os as _os
+        if self.path.startswith("/simli_avatar_component.js"):
+            _p = _os.path.join(_os.path.expanduser("~"), "simli_avatar_component.js")
+            _b = open(_p, "rb").read() if _os.path.exists(_p) else b""
+            self.send_response(200); self.send_header("Content-Type", "application/javascript"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
+
+        if self.path.startswith("/simli-client.js"):
+            _candidates = [
+                _os.path.join(_os.path.expanduser("~"), "astra-simli-client", "node_modules", "simli-client", "dist", "index.mjs"),
+                _os.path.join(_os.path.expanduser("~"), "astra-simli-client", "node_modules", "simli-client", "dist", "index.js"),
+            ]
+            _b = b""
+            for _cp in _candidates:
+                if _os.path.exists(_cp):
+                    _b = open(_cp, "rb").read()
+                    break
+            if _b:
+                self.send_response(200); self.send_header("Content-Type", "application/javascript"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            else:
+                self.send_response(404); self.end_headers()
+            return
+
+        if self.path.startswith("/api/simli/status"):
+            import astra_simli_agent as _asa
+            _b = _js.dumps(_asa.missing_keys_status()).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
+
         if self.path.startswith("/api/avatar/image"):
             import sqlite3 as _sq3, base64 as _b643
             _img_p = _os.path.join(_os.path.expanduser("~"), "astra_avatar.jpg")
@@ -3500,3 +3587,12 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
         "jev_invoice_id": inv_id,
         "jev_8111_total_invoices": inv_count
     }
+
+try:
+    import sys as _sys_simli
+    if _os.path.expanduser("~") not in _sys_simli.path:
+        _sys_simli.path.insert(0, _os.path.expanduser("~"))
+    import astra_simli_agent as _asa_boot
+    _asa_boot.start_deepgram_relay_server(8089)
+except Exception as _e_simli:
+    print("SIMLI_RELAY_BOOT_WARN:", _e_simli)

@@ -105,6 +105,8 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
     <div id="astraAvatarFrame" style="position:relative;width:270px;height:248px;border-radius:6px;overflow:hidden;border:1px solid #00f0ff66;background:#010409;">
       <img id="astraAvatarPhoto" src="/api/avatar/image?v=1794783454" alt="Astra Cyborg Avatar" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform 0.25s ease, filter 0.25s ease;" onerror="this.style.display='none'" />
       <video id="astraHandVideo" autoplay playsinline muted style="display:none;position:absolute;right:6px;top:6px;width:82px;height:62px;border:1px solid #00ff88;border-radius:4px;object-fit:cover;z-index:4;transform:scaleX(-1);"></video>
+      <video id="simli-video" autoplay playsinline style="display:none;position:relative;z-index:3;width:100%;aspect-ratio:1/1;object-fit:contain;background:#02060d;"></video>
+      <audio id="simli-audio" autoplay playsinline style="display:none;"></audio>
       <canvas id="astra-avatar-canvas" width="240" height="240" style="position:relative;z-index:2;width:100%;height:100%;display:block;"></canvas>
     </div>
     <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#7eeeff;margin-top:5px;">
@@ -509,6 +511,15 @@ function triggerAvatarLipSyncSpeech(text, badgeEl) {
 })();
 
 async function sendAvatarPrompt(preset) {
+  const _simliVid = document.getElementById('simli-video');
+  if (_simliVid && _simliVid.style.display === 'block' && window._simliActiveHandleTurn) {
+    const _inp = document.getElementById('avatar-input');
+    const _msg = (preset || (_inp ? _inp.value.trim() : '')).trim();
+    if (!_msg) return;
+    if (!preset && _inp) _inp.value = '';
+    await window._simliActiveHandleTurn(_msg);
+    return;
+  }
   const inp = document.getElementById('avatar-input');
   const log = document.getElementById('avatar-chat-log');
   const badge = document.getElementById('avatar-state-badge');
@@ -547,6 +558,213 @@ async function sendAvatarPrompt(preset) {
 
 
 </div>
+
+
+<!-- SIMLI_PROBABLE_LAMPREY_CONTROLLER_V1 -->
+<div id="simli-control-strip" style="margin-top:6px;padding:6px 8px;background:#03111c;border:1px solid #00f0ff55;border-radius:5px;font-family:monospace;font-size:10px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;">
+  <span style="color:#00ff88;font-weight:bold;">SIMLI TRINITY-2 // PROBABLE LAMPREY:</span>
+  <button type="button" id="btn-simli-start" onclick="startSimliProbableLamprey()" style="background:#00ff88;color:#02100c;font-weight:bold;border:none;padding:4px 8px;border-radius:3px;cursor:pointer;">START SIMLI LIVE</button>
+  <button type="button" id="btn-simli-stop" onclick="stopSimliProbableLamprey()" style="background:#2b0912;border:1px solid #ff557788;color:#ff8899;padding:4px 8px;border-radius:3px;cursor:pointer;">STOP</button>
+  <button type="button" onclick="simliSetCameraPreset('closeup')" style="background:#052230;border:1px solid #00f0ff55;color:#88eeff;padding:4px 7px;border-radius:3px;cursor:pointer;">CAM: CLOSEUP</button>
+  <button type="button" onclick="simliSetCameraPreset('wide')" style="background:#052230;border:1px solid #00f0ff55;color:#88eeff;padding:4px 7px;border-radius:3px;cursor:pointer;">CAM: WIDE</button>
+  <button type="button" onclick="toggleSimliKeyDrawer()" style="background:#1c1204;border:1px solid #ffcc0066;color:#ffdd77;padding:4px 7px;border-radius:3px;cursor:pointer;">API KEYS</button>
+  <span id="simli-live-status" style="color:#00f0ff;margin-left:auto;">READY</span>
+</div>
+<div id="simli-key-drawer" style="display:none;margin-top:5px;padding:8px;background:#020b12;border:1px solid #ffcc0066;border-radius:5px;font-family:monospace;font-size:10px;">
+  <div style="color:#ffdd77;margin-bottom:5px;">Server-Only Keys (stored in ~/.astra_env with 0600 permissions; never exposed to browser):</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;">
+    <input id="key-simli" type="password" placeholder="SIMLI_API_KEY" style="background:#01060b;border:1px solid #00f0ff55;color:#fff;padding:5px;border-radius:3px;" />
+    <input id="key-deepgram" type="password" placeholder="DEEPGRAM_API_KEY" style="background:#01060b;border:1px solid #00f0ff55;color:#fff;padding:5px;border-radius:3px;" />
+    <input id="key-openai" type="password" placeholder="OPENAI_API_KEY" style="background:#01060b;border:1px solid #00f0ff55;color:#fff;padding:5px;border-radius:3px;" />
+    <input id="key-inworld" type="password" placeholder="INWORLD_API_KEY" style="background:#01060b;border:1px solid #00f0ff55;color:#fff;padding:5px;border-radius:3px;" />
+  </div>
+  <button type="button" onclick="saveSimliServerKeys()" style="background:#00f0ff;color:#021014;font-weight:bold;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;">SAVE TO SERVER ~/.astra_env</button>
+</div>
+<script type="module">
+import { SimliAvatar } from '/simli_avatar_component.js';
+
+let simliInstance = null;
+let dgSocket = null;
+let micContext = null;
+let micProcessor = null;
+let micStream = null;
+
+function appendSimliLog(msg, color = '#00f0ff') {
+  const log = document.getElementById('avatar-chat-log');
+  if (log) {
+    log.innerHTML += `<div style="color:${color};margin-top:4px;">${String(msg).replace(/</g, '&lt;')}</div>`;
+    log.scrollTop = log.scrollHeight;
+  }
+}
+
+window.toggleSimliKeyDrawer = function() {
+  const d = document.getElementById('simli-key-drawer');
+  if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+};
+
+window.saveSimliServerKeys = async function() {
+  const payload = {
+    SIMLI_API_KEY: document.getElementById('key-simli').value,
+    DEEPGRAM_API_KEY: document.getElementById('key-deepgram').value,
+    OPENAI_API_KEY: document.getElementById('key-openai').value,
+    INWORLD_API_KEY: document.getElementById('key-inworld').value,
+  };
+  const r = await fetch('/api/simli/keys', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const d = await r.json();
+  ['key-simli', 'key-deepgram', 'key-openai', 'key-inworld'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('simli-key-drawer').style.display = 'none';
+  if (d.configured) {
+    appendSimliLog('[KEYS]: All 4 server keys saved to ~/.astra_env. Starting Simli Probable Lamprey...', '#00ff88');
+    window.startSimliProbableLamprey();
+  } else {
+    appendSimliLog('[KEYS]: Saved. Still missing in ~/.astra_env: ' + d.missing.join(', '), '#ffcc66');
+  }
+};
+
+async function streamTextToSimli(text) {
+  if (!simliInstance || !simliInstance.isStarted) return;
+  window._avatarSpeaking = 1.0;
+  const resp = await fetch('/api/simli/speak', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    appendSimliLog('[INWORLD TTS ERROR]: ' + (err.error || resp.status), '#ff6688');
+    return;
+  }
+  const buf = await resp.arrayBuffer();
+  const pcm16 = new Uint8Array(buf);
+  // Stream 16 kHz PCM16 chunks into Simli sendAudioData
+  const chunkSize = 3200; // 100ms @ 16kHz 16-bit mono
+  for (let offset = 0; offset < pcm16.length; offset += chunkSize) {
+    if (!simliInstance || !simliInstance.isStarted) break;
+    simliInstance.sendAudioData(pcm16.subarray(offset, offset + chunkSize));
+  }
+}
+
+async function handleVoiceTurn(userText) {
+  appendSimliLog('[YOU]: ' + userText, '#00f0ff');
+  const r = await fetch('/api/simli/converse', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: userText })
+  });
+  const d = await r.json();
+  if (d.reply) appendSimliLog('[PROBABLE LAMPREY]: ' + d.reply, '#00ff88');
+  if (d.pcm16_b64 && simliInstance && simliInstance.isStarted) {
+    const raw = atob(d.pcm16_b64);
+    const pcm16 = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) pcm16[i] = raw.charCodeAt(i);
+    const chunkSize = 3200;
+    for (let offset = 0; offset < pcm16.length; offset += chunkSize) {
+      simliInstance.sendAudioData(pcm16.subarray(offset, offset + chunkSize));
+    }
+  }
+}
+
+async function startMicToDeepgramRelay() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 16000 } });
+    dgSocket = new WebSocket('ws://127.0.0.1:8089');
+    dgSocket.binaryType = 'arraybuffer';
+
+    dgSocket.onmessage = async (ev) => {
+      const msg = JSON.parse(ev.data);
+      if (msg.type === 'speech_started') {
+        // Clear queued Simli audio immediately on user interruption
+        if (simliInstance) simliInstance.clearBuffer();
+      } else if (msg.type === 'transcript' && msg.is_final && msg.transcript) {
+        await handleVoiceTurn(msg.transcript);
+      } else if (msg.type === 'error') {
+        appendSimliLog('[DEEPGRAM]: ' + msg.error, '#ffcc66');
+      }
+    };
+
+    micContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+    const source = micContext.createMediaStreamSource(micStream);
+    micProcessor = micContext.createScriptProcessor(2048, 1, 1);
+    micProcessor.onaudioprocess = (e) => {
+      if (!dgSocket || dgSocket.readyState !== WebSocket.OPEN) return;
+      const f32 = e.inputBuffer.getChannelData(0);
+      const i16 = new Int16Array(f32.length);
+      for (let i = 0; i < f32.length; i++) {
+        const s = Math.max(-1, Math.min(1, f32[i]));
+        i16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
+      dgSocket.send(i16.buffer);
+    };
+    source.connect(micProcessor);
+    micProcessor.connect(micContext.destination);
+    appendSimliLog('[MIC -> DEEPGRAM NOVA-3]: Live 16kHz PCM stream active.', '#00ff88');
+  } catch (err) {
+    appendSimliLog('[MIC NOTICE]: Mic permission not granted yet; you can still type commands in the box below.', '#ffcc66');
+  }
+}
+
+window.startSimliProbableLamprey = async function() {
+  const st = await (await fetch('/api/simli/status')).json();
+  if (!st.configured) {
+    document.getElementById('simli-key-drawer').style.display = 'block';
+    appendSimliLog('[SETUP REQUIRED]: Enter missing API key(s) in the drawer above: ' + st.missing.join(', '), '#ffcc66');
+    return;
+  }
+
+  const videoEl = document.getElementById('simli-video');
+  const audioEl = document.getElementById('simli-audio');
+  const canvasEl = document.getElementById('astra-avatar-canvas');
+  const statusEl = document.getElementById('simli-live-status');
+
+  if (simliInstance) await simliInstance.stop();
+
+  simliInstance = new SimliAvatar({
+    videoEl,
+    audioEl,
+    onStatus: (s) => { if (statusEl) statusEl.textContent = s; },
+    onLog: (m) => appendSimliLog(m),
+    onStart: async (firstMessage) => {
+      if (canvasEl) canvasEl.style.display = 'none';
+      if (videoEl) videoEl.style.display = 'block';
+      // Speak the first message immediately on start (before requesting microphone permission)
+      await streamTextToSimli(firstMessage);
+      // Now connect microphone -> server -> Deepgram nova-3 WebSocket relay
+      await startMicToDeepgramRelay();
+    }
+  });
+
+  try {
+    await simliInstance.start();
+  } catch (_) {}
+};
+
+window.stopSimliProbableLamprey = async function() {
+  if (micProcessor) { micProcessor.disconnect(); micProcessor = null; }
+  if (micContext) { await micContext.close(); micContext = null; }
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (dgSocket) { dgSocket.close(); dgSocket = null; }
+  if (simliInstance) { await simliInstance.stop(); simliInstance = null; }
+  const videoEl = document.getElementById('simli-video');
+  const canvasEl = document.getElementById('astra-avatar-canvas');
+  if (videoEl) videoEl.style.display = 'none';
+  if (canvasEl) canvasEl.style.display = 'block';
+};
+
+window.simliSetCameraPreset = function(preset) {
+  if (!simliInstance) return;
+  if (preset === 'closeup') simliInstance.setCamera({ zoom: 1.25, y: 0.08 });
+  else simliInstance.setCamera({ zoom: 1.0, y: 0.0 });
+};
+
+window._simliActiveHandleTurn = handleVoiceTurn;
+</script>
 
 <!-- REAL_WORLD_SUPERCOMPUTER_LAB_BAR_V1 -->
 <div style="margin-top:8px;border:1px solid #00ff8855;background:#031018;border-radius:6px;padding:9px;font-family:monospace;font-size:11px;">
