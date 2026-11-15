@@ -767,7 +767,7 @@ def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, cust
     }
 
 import os, json, socketserver, urllib.request
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer as HTTPServer, BaseHTTPRequestHandler
 
 socketserver.TCPServer.allow_reuse_address = True
 HOME = os.path.expanduser("~")
@@ -1677,7 +1677,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         # === SCHEMA_FIX_0_5_6_7_V3 ===
         import json as _js, time as _tm, hashlib as _hl
         _cl = int(self.headers.get("Content-Length", 0))
-        _raw = self.rfile.read(_cl).decode("utf-8", errors="ignore") if _cl > 0 else "{}"
+        _raw = _raw if '_raw' in locals() else '{}'
         try:
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
@@ -1761,7 +1761,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         # === INCREMENTAL_ENDPOINTS_V2 ===
         import json as _js, time as _tm, hashlib as _hl, subprocess as _sp
         _cl = int(self.headers.get("Content-Length", 0))
-        _raw = self.rfile.read(_cl).decode("utf-8", errors="ignore") if _cl > 0 else "{}"
+        _raw = _raw if '_raw' in locals() else '{}'
         try:
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
@@ -1832,7 +1832,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/studio"):
             import http.client as _hc
             _sub = self.path[len("/api/studio"):] or "/autopilot"
-            _ln = int(self.headers.get("Content-Length", 0)); _raw = self.rfile.read(_ln) if _ln else b"{}"
+            _raw = _raw if '_raw' in locals() else '{}'
             try:
                 _c = _hc.HTTPConnection("127.0.0.1", 8127, timeout=12); _c.request("POST", _sub, body=_raw, headers={"Content-Type": "application/json"}); _b = _c.getresponse().read()
             except Exception as _ex:
@@ -1841,14 +1841,14 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             return
         if self.path.startswith("/api/plugins"):
             import json as _js, astra_plugin_registry as _apr
-            _ln = int(self.headers.get("Content-Length", 0)); _d = _js.loads(self.rfile.read(_ln).decode("utf-8", "ignore")) if _ln else {}
+            pass  # rfile already read
             _b = _js.dumps(_apr.execute_plugin(_d.get("plugin_id") or _d.get("plugin") or "", _d.get("args") or _d)).encode("utf-8")
             self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
             return
         if self.path.startswith("/api/gov"):
             import http.client as _hc
             _sub = self.path[len("/api/gov"):] or "/state"
-            _ln = int(self.headers.get("Content-Length", 0)); _raw = self.rfile.read(_ln) if _ln else b"{}"
+            _raw = _raw if '_raw' in locals() else '{}'
             try:
                 _c = _hc.HTTPConnection("127.0.0.1", 8125, timeout=8); _c.request("POST", _sub, body=_raw, headers={"Content-Type": "application/json"}); _b = _c.getresponse().read()
             except Exception as _ex:
@@ -1857,7 +1857,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             return
         if self.path.startswith(("/api/saga", "/api/polyglot", "/api/stripe", "/api/datadog")):
             import http.client as _hc
-            _ln = int(self.headers.get("Content-Length", 0)); _raw = self.rfile.read(_ln) if _ln else b"{}"
+            _raw = _raw if '_raw' in locals() else '{}'
             _sub = "/polyglot/run" if "polyglot" in self.path else ("/stripe/meter" if "stripe" in self.path else "/saga/run")
             try:
                 _c = _hc.HTTPConnection("127.0.0.1", 8123, timeout=15); _c.request("POST", _sub, body=_raw, headers={"Content-Type": "application/json"}); _b = _c.getresponse().read()
@@ -1868,7 +1868,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/") and self.path not in ("/api/mesh/execute", "/api/cinema-mcp/render", "/api/trust-center/ask"):
             import json as _js
             _ln = int(self.headers.get("Content-Length", 0))
-            _raw = self.rfile.read(_ln) if _ln else b""
+            _raw = _raw if '_raw' in locals() else '{}'
             _b = _js.dumps(universal_command_router(self.path, "POST", _raw)).encode("utf-8")
             self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Access-Control-Allow-Origin", "*"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
             return
@@ -1876,7 +1876,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             import json, traceback
             try:
                 ln = int(self.headers.get("Content-Length", 0))
-                raw = self.rfile.read(ln).decode("utf-8", errors="ignore") if ln else "{}"
+                pass  # rfile already read
                 body_data = json.loads(raw) if raw.strip() else {}
                 result = trigger_1click_dealership_pipeline(
                     body_data.get("vin"),
@@ -1904,7 +1904,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path == "/api/mesh/execute":
             import json
             ln = int(self.headers.get("Content-Length", 0))
-            d = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
+            pass  # rfile already read
             b = json.dumps(execute_supercomputer_mesh_8119(d.get("goal") or "")).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -1917,7 +1917,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path == "/api/cinema-mcp/render":
             import json
             ln = int(self.headers.get("Content-Length", 0))
-            d = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
+            pass  # rfile already read
             b = json.dumps(call_cinema_mcp_8121(d)).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -1930,7 +1930,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path == "/api/trust-center/ask":
             import json
             ln = int(self.headers.get("Content-Length", 0))
-            d = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
+            pass  # rfile already read
             b = json.dumps(query_trust_center_8117(d.get("question") or "")).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -1947,7 +1947,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path == "/api/voice-agent":
             import json
             ln = int(self.headers.get("Content-Length", 0))
-            data = json.loads(self.rfile.read(ln).decode("utf-8")) if ln else {}
+            pass  # rfile already read
             out = json.dumps(process_voice_data_agent(data.get("prompt") or "Status report")).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -1962,7 +1962,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path == "/api/mediapipe/infer":
             import urllib.request
             length = int(self.headers.get("Content-Length", 0))
-            body = self.rfile.read(length) if length else b"{}"
+            pass  # rfile already read
             req = urllib.request.Request("http://127.0.0", data=body, headers={"Content-Type": "application/json"}, method="POST")
             with urllib.request.urlopen(req, timeout=5) as resp:
                 out = resp.read()
