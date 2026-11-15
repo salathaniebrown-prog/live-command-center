@@ -15,7 +15,8 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 </style></head><body>
 <div class="hdr"><strong style="color:#00f0ff">JEV SYSTEM ONE // ASTRA + ALSTRA UNIFIED BRAIN</strong><span id="sys-stat" style="color:#39ff14;font-size:11px">ONLINE</span></div>
 
-<div class="card"><h3>0. JEV "SYSTEM ONE" PRIMARY INTENT ROUTER &amp; WORLD LIBRARY (PORT 8111)</h3>
+<div class="card"><div id="astra-section-0"></div>
+  <div class="card" "SYSTEM ONE" PRIMARY INTENT ROUTER &amp; WORLD LIBRARY (PORT 8111)</h3>
 <div class="row"><input id="jev-in" placeholder="Every prompt hits Jev first: Vault query, Email/Calendar tool, Invoice Agent, or Doctor/Lawyer/Inventor/Chronicles Library..."><button class="g" onclick="runJev()">ROUTE VIA JEV</button></div>
 <div class="row"><input id="tf-key" type="password" placeholder="Typeface API Key (connects external route model)..."><button class="a" onclick="saveTfKey()">SAVE TYPEFACE KEY</button><button onclick="runJevPreset('World library for doctors, lawyers, inventors and historical chronicles')">WORLD LIBRARY</button><button onclick="runJevPreset('Generate client invoice and verify crypto escrow')">INVOICE AGENT</button></div>
 
@@ -31,14 +32,17 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 <button class="g" onclick="connectLiveFeed()">CONNECT LIVE FEED</button></div>
 <pre id="jev-out">[JEV SYSTEM ONE READY] Lanes: VAULT_QUERY • TOOL_ACTION • AGENT_TASK • WORLD_LIBRARY.</pre></div>
 
-<div class="card"><h3>1. AUTO-ASTRA COMPUTE &amp; MODEL ROUTER (8109) • STUDIO PRO (8108)</h3>
+<div class="card"><div id="astra-section-1"></div>
+  <div class="card" COMPUTE &amp; MODEL ROUTER (8109) • STUDIO PRO (8108)</h3>
 <div class="row"><input id="auto-goal" placeholder="Real-time goal or app/contract prompt..."><button class="g" onclick="runAuto()">AUTO-ASTRA</button><button onclick="buildApp()">1-PROMPT APP</button><button class="a" onclick="auditLaw()">CONTRACT LAWYER</button><button onclick="window.location.href='/api/pro/csv'">2-YR CSV</button></div>
 <pre id="auto-out">[READY] Auto-selects Android Edge / PC / 8-GPU Supercomputer.</pre></div>
 
-<div class="card"><h3>2. WYLER &amp; DEALERSLINK CRYPTO DEALERSHIP (SAME-ORIGIN HTTPS)</h3>
+<div class="card"><div id="astra-section-2"></div>
+  <div class="card" &amp; DEALERSLINK CRYPTO DEALERSHIP (SAME-ORIGIN HTTPS)</h3>
 <iframe src="/dealership/"></iframe></div>
 
-<div class="card"><h3>3. GREENSBORO TRIAD GEO • OSINT • SOC 2 / GDPR • BACKUPS</h3>
+<div class="card"><div id="astra-section-3"></div>
+  <div class="card" TRIAD GEO • OSINT • SOC 2 / GDPR • BACKUPS</h3>
 <div class="row"><input id="ops-in" placeholder="Greensboro address or OSINT topic..."><button class="g" onclick="triadGo()">TRIAD ROUTE</button><button onclick="osintGo()">OSINT HARVEST</button><button class="a" onclick="window.open('/api/ent/audit-report','_blank')">SOC 2 REPORT</button><button onclick="backupGo()">BACKUP DBS</button></div>
 <pre id="ops-out">[ALL NODES LINKED]</pre></div>
 
@@ -82,7 +86,8 @@ async function osintGo(){const query=document.getElementById('ops-in').value.tri
 async function backupGo(){const d=await api('/api/wf/backup',{});document.getElementById('ops-out').innerText='['+d.status+'] '+d.snapshot+' ('+d.dbs_backed_up+' DBs)';}
 api('/api/ent/visibility').then(d=>{if(d.online_count)document.getElementById('sys-stat').innerText='LIVE NODES: '+d.online_count+'/'+d.total_agents+' ONLINE';}).catch(()=>{});
 </script>
-<div class="card"><h3>4. MEDIAPIPE TASKS // LIVE ML ANYWHERE (WASM • WEBGPU • ANDROID • IOS • FLUTTER • PYTHON) (8113)</h3>
+<div class="card"><div id="astra-section-4"></div>
+  <div class="card" TASKS // LIVE ML ANYWHERE (WASM • WEBGPU • ANDROID • IOS • FLUTTER • PYTHON) (8113)</h3>
 <div class="row"><select id="mp-task"><option value="VISION_TEXT_AUDIO_RAG">VISION + TEXT + AUDIO + RAG</option><option value="DECISION_ROUTING_MODEL">DECISION &amp; ROUTING MODEL</option><option value="ON_DEVICE_GEMMA4_LLM">ON-DEVICE GEMMA 4 LLM</option></select>
 <select id="mp-plat"><option value="WEB_WASM_WEBGPU">WEB (WASM + WEBGPU)</option><option value="ANDROID_KOTLIN_JAVA">ANDROID (KOTLIN / JAVA)</option><option value="IOS_SWIFT_OBJC">IOS (SWIFT / OBJ-C)</option><option value="FLUTTER_DART">FLUTTER (DART)</option><option value="PYTHON_LINUX_MAC_WIN">PYTHON (LINUX/MAC/WIN)</option></select>
 <button class="g" onclick="buildMpTask()">BUILD .TASK BUNDLE (GPU)</button>
@@ -106,7 +111,24 @@ async function runMpInfer(indexMode) {
 }
 </script>
 </div>
-<pre id="mp-out">[MEDIAPIPE TASKS READY] On-device CPU/GPU acceleration across Web, Android, iOS, Flutter &amp; Desktop.</pre></div>
+<pre id="mp-out">[MEDIAPIPE TASKS READY] On-device CPU/GPU acceleration across Web, Android, iOS, Flutter &amp; Desktop.</pre>
+  <!-- SECTION 9: CRYPTOGRAPHIC SPATIAL ASSISTANT (8129) & QISKIT QUANTUM LATTICE (8131) -->
+  <div id="astra-section-9" style="margin-top:14px;padding:14px;border:1px solid #00f0ff;background:#030814;border-radius:6px;">
+    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #0b2545;padding-bottom:6px;margin-bottom:10px;">
+      <span style="color:#00f0ff;font-weight:bold;">9. CRYPTOGRAPHIC SPATIAL ASSISTANT (8129) &amp; QISKIT QUANTUM LATTICE (8131)</span>
+      <span style="color:#00ff88;font-size:12px;">SHA-256 HANDSHAKE &amp; WAL LEDGER: ARMED</span>
+    </div>
+
+    <!-- Spatial & Gesture Handshake Controls -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+      <button onclick="runSpatialTest('WITH_HANDS', 'PINCH_SELECT')" style="background:#003b4d;color:#00f0ff;border:1px solid #00f0ff;padding:6px 12px;cursor:pointer;">✋ TEST SPATIAL HANDSHAKE (WITH HANDS)</button>
+      <button onclick="runSpatialTest('WITHOUT_HANDS', 'ZERO_TOUCH_AUTO')" style="background:#0d3328;color:#00ff88;border:1px solid #00ff88;padding:6px 12px;cursor:pointer;">🤖 TEST ZERO-TOUCH (WITHOUT HANDS)</button>
+      <button onclick="runQuantumSimulation()" style="background:#2b103d;color:#e0aaff;border:1px solid #e0aaff;padding:6px 12px;cursor:pointer;">⚛️ RUN QISKIT QASM 3.0 SIMULATION</button>
+    </div>
+    <pre id="spatial-quantum-out" style="background:#02050c;border:1px solid #102a42;padding:8px;max-height:160px;overflow:auto;font-size:11px;color:#9be7ff;white-space:pre-wrap;">Cryptographic Spatial Assistant &amp; QisKit Quantum Lattice ready.</pre>
+  </div>
+
+</div>
 <script>
 async function buildMpTask(){
   const task_type = document.getElementById('mp-task').value;
@@ -511,8 +533,101 @@ function initiateVoiceDataLink() {
 </div><script>
 async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=d.mode+': '+(d.threat||d.grade||d.hardened.length+' OK');}
 </script>
+
+
+
+<div id="astra-enterprise-gov-panel" style="margin:14px 0;padding:14px;border:1px solid #00ff88;background:#061118;border-radius:6px;font-family:monospace;color:#d6f8ff;">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #133b3a;padding-bottom:8px;margin-bottom:10px;">
+    <span style="color:#00ff88;font-weight:bold;">5. ENTERPRISE PRIVACY, 3,600+ LEGAL TEMPLATES, SDK/SSP SCANNER &amp; VR CONSENT (PORT 8125)</span>
+    <span style="color:#00f0ff;font-size:12px;">3,600 TEMPLATES // OFFLINE &amp; SSO READY</span>
+  </div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+    <input id="gov-tpl-idx" type="number" min="1" max="3600" value="1" style="width:80px;background:#040811;color:#00ff88;border:1px solid #00ff88;padding:6px;" title="Template # (1-3600)">
+    <button onclick="loadLegalTemplate()" style="background:#0d3328;color:#00ff88;border:1px solid #00ff88;padding:6px 10px;cursor:pointer;">📜 LOAD TEMPLATE (1-3600) &amp; EMBED</button>
+    <button onclick="runVendorSdkScan()" style="background:#003344;color:#00f0ff;border:1px solid #00f0ff;padding:6px 10px;cursor:pointer;">🔎 SCAN VENDORS / SSPs / SDKs</button>
+    <button onclick="issueVrConsentPassport()" style="background:#2b1947;color:#e0aaff;border:1px solid #c77dff;padding:6px 10px;cursor:pointer;">🥽 SYNC CROSS-DEVICE VR CONSENT</button>
+    <a href="/api/gov/export?format=csv" target="_blank" style="background:#1e293b;color:#fde047;border:1px solid #fde047;padding:6px 10px;text-decoration:none;font-size:12px;">📥 EXPORT CSV</a>
+  </div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+    <select id="gov-geo-select" onchange="simulateGeoBanner()" style="background:#040811;color:#00f0ff;border:1px solid #00f0ff;padding:6px;">
+      <option value="US-NC">GEO: US-NC (North Carolina)</option>
+      <option value="EU-DE">GEO: EU-DE (GDPR Strict Opt-In)</option>
+      <option value="US-CA">GEO: US-CA (California CPRA / GPC)</option>
+      <option value="VR-HEADSET">GEO: VR/XR Spatial Headset</option>
+    </select>
+    <input id="gov-brand-input" value="ASTRA // ALSTRA ENTERPRISE" placeholder="White-Label Brand Name" style="background:#040811;color:#fff;border:1px solid #334155;padding:6px;flex:1;">
+    <input id="gov-color-input" value="#00f0ff" style="width:76px;background:#040811;color:#00f0ff;border:1px solid #334155;padding:6px;">
+    <button onclick="applyBulkWhiteLabel()" style="background:#1e3a5f;color:#93c5fd;border:1px solid #60a5fa;padding:6px 10px;cursor:pointer;">🎨 BULK WHITE-LABEL &amp; SSO</button>
+  </div>
+
+  <div id="gov-banner-preview" style="padding:10px;margin-bottom:10px;border:1px dashed #00f0ff;background:#040a14;border-radius:4px;">
+    <div id="gov-preview-title" style="color:#00f0ff;font-weight:bold;margin-bottom:4px;">[LIVE BANNER SIMULATOR :: US-NC] ASTRA // ALSTRA ENTERPRISE</div>
+    <div id="gov-preview-copy" style="font-size:11px;color:#cbd5e1;">Granular real-time controls active for AI agents, Stripe metering, and SDK telemetry. Offline LocalStorage queue: ARMED.</div>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:8px;">
+    <input id="gov-expert-q" placeholder="Ask AI Telemetry & Compliance Expert (e.g. How do SSPs, SDKs, VR consent & offline sync work?)..." style="flex:1;background:#040811;color:#e0f7fa;border:1px solid #184e77;padding:6px;">
+    <button onclick="askGovExpert()" style="background:#004d40;color:#64ffda;border:1px solid #64ffda;padding:6px 12px;cursor:pointer;">💡 GET DEFINITIVE ANSWER</button>
+  </div>
+
+  <textarea id="gov-editor-out" rows="6" style="width:100%;box-sizing:border-box;background:#03070e;color:#a7f3d0;border:1px solid #133b3a;padding:8px;font-family:monospace;font-size:11px;">Loading 3,600 legal templates, SDK/SSP scanner results &amp; VR consent passport...</textarea>
+</div>
+<script>
+async function loadLegalTemplate(){
+  const idx = parseInt(document.getElementById('gov-tpl-idx').value || '1', 10);
+  const brand = document.getElementById('gov-brand-input').value;
+  const r = await fetch('/api/gov/templates', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({index:idx, brand:brand})});
+  const d = await r.json();
+  document.getElementById('gov-editor-out').value = d.legal_text + '\n\n--- EMBEDDABLE PRIVACY WIDGET SNIPPET ---\n' + d.embed_code;
+}
+async function runVendorSdkScan(){
+  document.getElementById('gov-editor-out').value = 'Scanning cluster codebase & endpoints for Vendors, SSPs, and SDKs...';
+  const r = await fetch('/api/gov/scan', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({target:'cluster'})});
+  const d = await r.json();
+  document.getElementById('gov-editor-out').value = 'SCAN ID: ' + d.scan_id + ' | DETECTED VENDORS/SSPs/SDKs: ' + d.vendors_detected + '\n' + JSON.stringify(d.findings, null, 2);
+}
+async function simulateGeoBanner(){
+  const reg = document.getElementById('gov-geo-select').value;
+  const brand = document.getElementById('gov-brand-input').value;
+  const col = document.getElementById('gov-color-input').value;
+  const r = await fetch('/api/gov/geo', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({region:reg})});
+  const d = await r.json();
+  const box = document.getElementById('gov-banner-preview');
+  box.style.borderColor = col;
+  document.getElementById('gov-preview-title').style.color = col;
+  document.getElementById('gov-preview-title').textContent = '[LIVE BANNER SIMULATOR :: ' + d.region + ' | ' + d.enforcement_mode + '] ' + brand;
+  document.getElementById('gov-preview-copy').textContent = d.banner_copy;
+  localStorage.setItem('astra_offline_consent_cache', JSON.stringify(d));
+}
+async function applyBulkWhiteLabel(){
+  const brand = document.getElementById('gov-brand-input').value;
+  const col = document.getElementById('gov-color-input').value;
+  const r = await fetch('/api/gov/bulk-update', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({brand_name:brand, primary_color:col, sso_provider:'OIDC / SAML 2.0'})});
+  const d = await r.json();
+  await simulateGeoBanner();
+  document.getElementById('gov-editor-out').value = 'BULK WHITE-LABEL & SSO UPDATED:\n' + JSON.stringify(d, null, 2);
+}
+async function issueVrConsentPassport(){
+  const r = await fetch('/api/gov/vr-share', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({devices:'android-termux-primary,xr-headset-01,command-center-web'})});
+  const d = await r.json();
+  document.getElementById('gov-editor-out').value = 'CROSS-DEVICE VR/XR AI OWNER CONSENT PASSPORT SYNCED:\n' + JSON.stringify(d, null, 2);
+}
+async function askGovExpert(){
+  const q = document.getElementById('gov-expert-q').value;
+  const r = await fetch('/api/gov/expert', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({question:q})});
+  const d = await r.json();
+  document.getElementById('gov-editor-out').value = d.answer;
+}
+setTimeout(loadLegalTemplate, 1000);
+</script>
+
+
 <!-- ASTRA UPGRADE SUITE: SECTIONS 5, 6 & 7 -->
 <div id="astra-upgrade-suite" style="margin:16px 0 90px 0;font-family:monospace;color:#d6f8ff;">
+
+  <!-- SECTION 5: DURABLE SAGA, STRIPE/DATADOG & POLYGLOT -->
   <div style="margin-bottom:14px;padding:14px;border:1px solid #00f0ff;background:#070d19;border-radius:6px;">
     <div style="display:flex;justify-content:space-between;border-bottom:1px solid #13304a;padding-bottom:6px;margin-bottom:10px;">
       <span style="color:#00f0ff;font-weight:bold;">5. DURABLE SAGA ENGINE // STRIPE &amp; DATADOG MEMORY // POLYGLOT STUDIO (8123)</span>
@@ -538,6 +653,7 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
     <pre id="poly-out" style="background:#040811;border:1px solid #102a42;padding:8px;margin-top:6px;font-size:11px;color:#ffe082;white-space:pre-wrap;">Polyglot sandbox ready (Python, Java, PHP, Go, .NET).</pre>
   </div>
 
+  <!-- SECTION 6: 3,600+ LEGAL TEMPLATES, SDK/SSP SCANNER, WHITE-LABEL/SSO & VR CONSENT -->
   <div style="margin-bottom:14px;padding:14px;border:1px solid #00ff88;background:#061118;border-radius:6px;">
     <div style="display:flex;justify-content:space-between;border-bottom:1px solid #133b3a;padding-bottom:6px;margin-bottom:10px;">
       <span style="color:#00ff88;font-weight:bold;">6. ENTERPRISE PRIVACY, 3,600+ LEGAL TEMPLATES, SDK/SSP SCANNER &amp; VR CONSENT (8125)</span>
@@ -572,6 +688,7 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
     <textarea id="gov-editor-out" rows="5" style="width:100%;box-sizing:border-box;background:#03070e;color:#a7f3d0;border:1px solid #133b3a;padding:8px;font-family:monospace;font-size:11px;">Loading 3,600 legal templates &amp; SDK scanner...</textarea>
   </div>
 
+  <!-- SECTION 7: AUTO-ALLOWED MODEL PLUGINS REGISTRY -->
   <div style="padding:14px;border:1px solid #c77dff;background:#0c0718;border-radius:6px;">
     <div style="display:flex;justify-content:space-between;border-bottom:1px solid #2e1a47;padding-bottom:6px;margin-bottom:10px;">
       <span style="color:#e0aaff;font-weight:bold;">7. AUTO-ALLOWED MODEL PLUGINS &amp; MCP TOOL REGISTRY (ZERO-PROMPT EXECUTION)</span>
@@ -584,6 +701,7 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
     <pre id="plug-out" style="background:#040811;border:1px solid #2e1a47;padding:8px;max-height:140px;overflow:auto;font-size:11px;color:#e9d5ff;">Syncing auto-allowed plugins...</pre>
   </div>
 </div>
+
 <script>
 async function refreshSagaState(){
   try{
