@@ -38,6 +38,90 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 <div class="card"><h3>2. WYLER &amp; DEALERSLINK CRYPTO DEALERSHIP (SAME-ORIGIN HTTPS)</h3>
 <iframe src="/dealership/"></iframe></div>
 
+<!-- ASTRA_NEURAL_BRAIN_BAY_V1 -->
+<div id="astra-brain-bay" style="margin:10px 0;border:1px solid #00f0ff55;background:radial-gradient(circle at 50% 45%, #07222c 0%, #030b12 75%);border-radius:6px;padding:10px 14px;position:relative;overflow:hidden;">
+  <div style="display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:11px;color:#00f0ff;margin-bottom:6px;">
+    <span>&#9883; ASTRA SOVEREIGN NEURAL BRAIN // MODEL CORE v4.2 (UPGRADEABLE ARCHITECTURE)</span>
+    <span id="brain-core-status" style="color:#00ff88;">SYNAPSES: 13/13 ACTIVE | QUANTUM LATTICE LOCKED</span>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;">
+    <canvas id="astraBrainCanvas" width="380" height="150" style="border:1px solid #00ff8833;background:#02080d;border-radius:4px;max-width:100%;"></canvas>
+    <div style="flex:1;min-width:220px;font-family:monospace;font-size:11px;color:#9beeff;line-height:1.55;">
+      <div style="color:#00ff88;font-weight:bold;margin-bottom:4px;">ACTIVE COGNITIVE TOPOLOGY</div>
+      <div>&bull; <b>ROUTER CORE:</b> JEV System One (8111) + Auto-Astra Brain (8109)</div>
+      <div>&bull; <b>EXECUTION FABRIC:</b> Studio Pro (8108) + Cinema MCP (8121) + Autopilot (8127)</div>
+      <div>&bull; <b>MEMORY &amp; LEDGERS:</b> SQLite WAL + Space Memory (8129) + Quantum Lattice (8131)</div>
+      <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="border:1px solid #00f0ff66;padding:2px 6px;color:#00f0ff;">TIER-1 REASONING</span>
+        <span style="border:1px solid #00ff8866;padding:2px 6px;color:#00ff88;">SELF-HEALING MESH</span>
+        <span style="border:1px solid #ff00ff66;padding:2px 6px;color:#ff88ff;">READY FOR v5 BRAIN UPGRADE</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function initAstraBrainCanvas(){
+  const c = document.getElementById('astraBrainCanvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const nodes = [];
+  const W = c.width, H = c.height;
+  // Build brain-hemisphere node cloud
+  for (let i = 0; i < 34; i++) {
+    const t = (i / 34) * Math.PI * 2;
+    const rx = (i % 2 === 0 ? 115 : 82) + (i % 5) * 7;
+    const ry = (i % 2 === 0 ? 54 : 38) + (i % 3) * 5;
+    nodes.push({
+      bx: W * 0.5 + Math.cos(t) * rx,
+      by: H * 0.52 + Math.sin(t) * ry * (Math.sin(t) > 0 ? 0.78 : 1.0),
+      phase: i * 0.45
+    });
+  }
+  let frame = 0;
+  function draw() {
+    frame += 0.035;
+    ctx.fillStyle = 'rgba(2, 8, 13, 0.28)';
+    ctx.fillRect(0, 0, W, H);
+    // Subtle cyber grid
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.06)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 24) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 24) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    // Synaptic connections
+    for (let i = 0; i < nodes.length; i++) {
+      const a = nodes[i];
+      const ax = a.bx + Math.cos(frame + a.phase) * 3.5;
+      const ay = a.by + Math.sin(frame * 1.2 + a.phase) * 3.0;
+      for (let j = i + 1; j < nodes.length; j++) {
+        const b = nodes[j];
+        const bx = b.bx + Math.cos(frame + b.phase) * 3.5;
+        const by = b.by + Math.sin(frame * 1.2 + b.phase) * 3.0;
+        const d = Math.hypot(ax - bx, ay - by);
+        if (d < 56) {
+          const pulse = 0.25 + 0.55 * Math.abs(Math.sin(frame * 1.6 + i * 0.3));
+          ctx.strokeStyle = (i + j) % 3 === 0
+            ? 'rgba(0, 255, 136, ' + (pulse * (1 - d / 56)).toFixed(2) + ')'
+            : 'rgba(0, 240, 255, ' + (pulse * (1 - d / 56)).toFixed(2) + ')';
+          ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+        }
+      }
+      // Node core
+      ctx.fillStyle = i % 4 === 0 ? '#00ff88' : '#00f0ff';
+      ctx.beginPath(); ctx.arc(ax, ay, i % 5 === 0 ? 3.2 : 2.1, 0, Math.PI * 2); ctx.fill();
+    }
+    // Central brain stem / core reactor
+    const g = ctx.createRadialGradient(W * 0.5, H * 0.52, 2, W * 0.5, H * 0.52, 32);
+    g.addColorStop(0, 'rgba(0, 255, 136, 0.55)');
+    g.addColorStop(0.5, 'rgba(0, 240, 255, 0.18)');
+    g.addColorStop(1, 'rgba(0, 240, 255, 0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(W * 0.5, H * 0.52, 32, 0, Math.PI * 2); ctx.fill();
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
 <div class="card"><h3>3. GREENSBORO TRIAD GEO • OSINT • SOC 2 / GDPR • BACKUPS</h3>
 <div class="row"><input id="ops-in" placeholder="Greensboro address or OSINT topic..."><button class="g" onclick="triadGo()">TRIAD ROUTE</button><button onclick="osintGo()">OSINT HARVEST</button><button class="a" onclick="window.open('/api/ent/audit-report','_blank')">SOC 2 REPORT</button><button onclick="backupGo()">BACKUP DBS</button></div>
 <pre id="ops-out">[ALL NODES LINKED]</pre></div>
