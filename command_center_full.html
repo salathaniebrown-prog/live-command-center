@@ -195,6 +195,36 @@ function setBrainVisualTier(val) {
       requestAnimationFrame(render);
       return;
     }
+    const _hasPhoto = document.getElementById('astraAvatarPhoto') && document.getElementById('astraAvatarPhoto').complete && document.getElementById('astraAvatarPhoto').naturalWidth > 0;
+    if (_hasPhoto) {
+      ctx.clearRect(0, 0, W, H);
+      const _img = document.getElementById('astraAvatarPhoto');
+      const _sc = 1.02 + speak * 0.03 + Math.sin(t * 1.4) * 0.01;
+      _img.style.transform = `scale(${_sc.toFixed(3)}) translate(${(mouseX*0.25).toFixed(1)}px, ${(mouseY*0.25).toFixed(1)}px)`;
+      // Scanline + Bionic Eye Glow + Equalizer Overlay
+      const scanY = (t * 44) % H;
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
+      ctx.fillRect(0, scanY, W, 2);
+      // Bionic right-eye reticle glow
+      const rx = W * 0.615, ry = H * 0.435;
+      ctx.strokeStyle = speak > 0.05 ? 'rgba(0, 255, 136, 0.85)' : 'rgba(0, 240, 255, 0.65)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(rx, ry, 13 + Math.sin(t * 3) * 1.5, t * 0.8, t * 0.8 + Math.PI * 1.4); ctx.stroke();
+      // Center seam micro-pulse
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+      ctx.beginPath(); ctx.moveTo(W * 0.5, 8); ctx.lineTo(W * 0.5, H - 22); ctx.stroke();
+      // Bottom reactive speech equalizer
+      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.9)' : 'rgba(0, 255, 136, 0.85)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let x = 18; x <= W - 18; x += 4) {
+        const hBar = (2 + (speak + syn * 0.35) * 16) * Math.abs(Math.sin(t * 8 + x * 0.1));
+        ctx.moveTo(x, H - 6); ctx.lineTo(x, H - 6 - hBar);
+      }
+      ctx.stroke();
+      requestAnimationFrame(render);
+      return;
+    }
     ctx.fillStyle = '#02060d';
     ctx.fillRect(0, 0, W, H);
 
