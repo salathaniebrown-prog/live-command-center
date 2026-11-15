@@ -2195,6 +2195,21 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        # === AVATAR_IMAGE_ROUTE_V1 ===
+        import os as _os
+        if self.path.startswith("/api/avatar/image"):
+            _img_p = _os.path.join(_os.path.expanduser("~"), "astra_avatar.jpg")
+            if _os.path.exists(_img_p):
+                with open(_img_p, "rb") as _f:
+                    _data = _f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/jpeg")
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Content-Length", str(len(_data)))
+                self.end_headers()
+                self.wfile.write(_data)
+                return
+
         # === SCHEMA_FIX_0_5_6_7_V3 ===
         import json as _js, time as _tm, hashlib as _hl
         if self.path.startswith("/api/plugins"):

@@ -48,7 +48,10 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
         <option value="8" selected>v8.0 APEX SINGULARITY</option>
       </select>
     </div>
-    <canvas id="astraAvatarCanvas" width="270" height="248" style="border-radius:5px;background:#010409;cursor:crosshair;"></canvas>
+    <div id="astraAvatarFrame" style="position:relative;width:270px;height:248px;border-radius:6px;overflow:hidden;border:1px solid #00f0ff66;background:#010409;">
+      <img id="astraAvatarPhoto" src="/api/avatar/image" alt="Astra Cyborg Avatar" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform 0.25s ease, filter 0.25s ease;" onerror="this.style.display='none'" />
+      <canvas id="astraAvatarCanvas" width="270" height="248" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;cursor:crosshair;"></canvas>
+    </div>
     <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#7eeeff;margin-top:5px;">
       <span id="avatar-tier-label">TIER: v8.0 APEX</span>
       <span id="avatar-state-badge" style="color:#00ff88;">SYNAPSES ARMED</span>
@@ -162,6 +165,36 @@ function setBrainVisualTier(val) {
     const cy = H * 0.48 + bobY;
 
     // 1. Deep Cybernetic Backdrop + Aura Halo
+    const _hasPhoto = document.getElementById('astraAvatarPhoto') && document.getElementById('astraAvatarPhoto').complete && document.getElementById('astraAvatarPhoto').naturalWidth > 0;
+    if (_hasPhoto) {
+      ctx.clearRect(0, 0, W, H);
+      const _img = document.getElementById('astraAvatarPhoto');
+      const _sc = 1.02 + speak * 0.03 + Math.sin(t * 1.4) * 0.01;
+      _img.style.transform = `scale(${_sc.toFixed(3)}) translate(${(mouseX*0.25).toFixed(1)}px, ${(mouseY*0.25).toFixed(1)}px)`;
+      // Scanline + Bionic Eye Glow + Equalizer Overlay
+      const scanY = (t * 44) % H;
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
+      ctx.fillRect(0, scanY, W, 2);
+      // Bionic right-eye reticle glow
+      const rx = W * 0.615, ry = H * 0.435;
+      ctx.strokeStyle = speak > 0.05 ? 'rgba(0, 255, 136, 0.85)' : 'rgba(0, 240, 255, 0.65)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(rx, ry, 13 + Math.sin(t * 3) * 1.5, t * 0.8, t * 0.8 + Math.PI * 1.4); ctx.stroke();
+      // Center seam micro-pulse
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+      ctx.beginPath(); ctx.moveTo(W * 0.5, 8); ctx.lineTo(W * 0.5, H - 22); ctx.stroke();
+      // Bottom reactive speech equalizer
+      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.9)' : 'rgba(0, 255, 136, 0.85)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let x = 18; x <= W - 18; x += 4) {
+        const hBar = (2 + (speak + syn * 0.35) * 16) * Math.abs(Math.sin(t * 8 + x * 0.1));
+        ctx.moveTo(x, H - 6); ctx.lineTo(x, H - 6 - hBar);
+      }
+      ctx.stroke();
+      requestAnimationFrame(render);
+      return;
+    }
     ctx.fillStyle = '#02060d';
     ctx.fillRect(0, 0, W, H);
 
