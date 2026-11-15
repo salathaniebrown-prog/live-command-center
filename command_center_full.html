@@ -195,7 +195,7 @@ async function runOneClickPipelineTest() {
     const txHash = (data.webhook_8115 && data.webhook_8115.tx_hash) ? data.webhook_8115.tx_hash : "";
     const netName = (data.webhook_8115 && data.webhook_8115.network) ? data.webhook_8115.network : "BASE_USDC";
     const exp = buildExplorerLink(netName, data.order_ref, txHash);
-    box.innerHTML = `<strong style="color:#00ff88;">[✔] SETTLED ${(d.tx_id || d.event_id || d.id || 'TX-VERIFIED') || d.event_id || d.id || 'TX-' + Date.now().toString(16).toUpperCase()} | ${data.order_ref}</strong> | $${Number(data.amount_usd).toLocaleString()}<br>` +
+    box.innerHTML = `<strong style="color:#00ff88;">[✔] SETTLED ${data.order_ref}</strong> | $${Number(data.amount_usd).toLocaleString()}<br>` +
                     `NET: ${netName} | <a href="${exp.url}" target="_blank" rel="noopener" style="color:#00f0ff;text-decoration:underline;font-weight:bold;">🔗 ${exp.label}</a><br>` +
                     `CERT: <a href="/api/certificate/${encodeURIComponent(data.order_ref)}" target="_blank" style="color:#00ff88;text-decoration:underline;">VIEW SIGNED RECORD</a>`;
     await pollWebhookFeed8115();
@@ -509,7 +509,7 @@ function initiateVoiceDataLink() {
 <button onclick="secRun('harden')" style="background:#ffaa0022;border:1px solid #ffaa00;color:#ffaa00;cursor:pointer;">HARDEN</button>
 <span id="sec-st" style="color:#aaddff;">LONGCAT-2.5 READY</span>
 </div><script>
-async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=(d.mode || 'US_TRANSPARENCY_GRANULAR')+': '+(d.threat||d.grade||d.hardened.length+' OK');}
+async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=d.mode+': '+(d.threat||d.grade||d.hardened.length+' OK');}
 </script>
 <!-- ASTRA UPGRADE SUITE: SECTIONS 5, 6 & 7 -->
 <div id="astra-upgrade-suite" style="margin:16px 0 260px 0;font-family:monospace;color:#d6f8ff;">
@@ -621,7 +621,7 @@ window.runPolyglot = async function(){
   try{
     const r = await fetch('/api/polyglot/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({language:lang, code:code})});
     const d = await r.json();
-    out.textContent = '[' + (d.language||lang).toUpperCase() + ' | exit=' + (d.exit_code !== undefined ? d.exit_code : 0) + ' | ' + d.latency_ms + 'ms]\n' + (d.stdout || d.stderr || 'OK');
+    out.textContent = '[' + (d.language||lang).toUpperCase() + ' | exit=' + d.exit_code + ' | ' + d.latency_ms + 'ms]\n' + (d.stdout || d.stderr || 'OK');
   }catch(e){ out.textContent = 'Polyglot error: ' + e; }
 };
 
@@ -907,7 +907,7 @@ async function refreshTelemetrySpine() {
     const d = await r.json();
     const el = document.getElementById('telemetrySpinePill');
     if (el && d) {
-      el.textContent = 'SPINE: ' + (d.online_count || 0) + '/' + (d.total_ports || 13) + ' PORTS | CPU ' + (d.load_avg || '0.42') + ' | ' + (d.cache_state || 'WARM');
+      el.textContent = 'SPINE: ' + (d.online_count || 0) + '/' + (d.total_ports || 13) + ' PORTS | CPU ' + (d.load_avg || '0.42') + ' | ' + (d.cache_state || 'CLEAN');
     }
   } catch (e) {}
 }
@@ -938,7 +938,7 @@ window.addEventListener('load', refreshTelemetrySpine);
   <button id="btn-copy-handoff" onclick="copyLiveHandoffManifest()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">📋 COPY HANDOFF</button>
   <button onclick="openCiLogModal()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">CI LOGS</button>
   <button id="btn-ci-dispatch" onclick="triggerBrainCiDispatch()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">⚡ AUTO-DISPATCH</button>
-<!-- TELEMETRY_SPINE_CACHE_V1 -->
+<!-- TELEMETRY_SPINE_CACHE_V2 -->
 <button id="btnPurgeCache" onclick="purgeSystemCache()" style="background:#1a0b2e;border:1px solid #ff00ff;color:#ff88ff;padding:4px 8px;font-family:monospace;cursor:pointer;font-size:11px;">PURGE CACHE</button>
 <span id="telemetrySpinePill" style="border:1px solid #00ff88;background:#041f14;color:#00ff88;padding:4px 8px;font-family:monospace;font-size:11px;">SPINE: SYNCING...</span>
 
