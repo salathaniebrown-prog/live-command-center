@@ -1619,12 +1619,16 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         except Exception:
             _data = {}
         if self.path.startswith("/api/avatar/upload"):
-            import base64 as _b64
+            import os as _os2, base64 as _b64, shutil as _sh2
             _b64_str = (_data.get("image_base64") or "").split(",")[-1]
             if _b64_str:
-                with open(_os.path.join(_os.path.expanduser("~"), "astra_avatar.jpg"), "wb") as _wf:
+                _dst1 = _os2.path.join(_os2.path.expanduser("~"), "astra_avatar.jpg")
+                _dst2 = _os2.path.join(_os2.path.expanduser("~"), "astra-enterprise-core", "astra_avatar.jpg")
+                with open(_dst1, "wb") as _wf:
                     _wf.write(_b64.b64decode(_b64_str))
-            _b = _js.dumps({"status": "SAVED"}).encode("utf-8")
+                if _os2.path.isdir(_os2.path.dirname(_dst2)):
+                    _sh2.copy2(_dst1, _dst2)
+            _b = _js.dumps({"status": "SAVED_PERMANENT"}).encode("utf-8")
             self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
             return
         if self.path.startswith("/api/auto/run") or self.path.startswith("/api/pro/"):
