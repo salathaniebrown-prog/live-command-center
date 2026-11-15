@@ -45,17 +45,19 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
         <option value="5">v5.0 SOVEREIGN</option>
         <option value="6">v6.0 OMNISCIENT</option>
         <option value="7">v7.0 AUTONOMOUS</option>
-        <option value="8" selected>v8.0 APEX SINGULARITY</option>
+        <option value="8">v8.0 APEX SINGULARITY</option>
+        <option value="9" selected>v9.0 GENIUS SOVEREIGN</option>
       </select>
     </div>
     <div id="astraAvatarFrame" style="position:relative;width:270px;height:248px;border-radius:6px;overflow:hidden;border:1px solid #00f0ff66;background:#010409;">
       <img id="astraAvatarPhoto" src="/api/avatar/image" alt="Astra Cyborg Avatar" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform 0.25s ease, filter 0.25s ease;" onerror="this.style.display='none'" />
+      <video id="astraHandVideo" autoplay playsinline muted style="display:none;position:absolute;right:6px;top:6px;width:82px;height:62px;border:1px solid #00ff88;border-radius:4px;object-fit:cover;z-index:4;transform:scaleX(-1);"></video>
       <canvas id="astraAvatarCanvas" width="270" height="248" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;cursor:crosshair;"></canvas>
     </div>
     <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#7eeeff;margin-top:5px;">
       <input type="file" id="avatar-file-picker" accept="image/*" style="display:none;" onchange="uploadAvatarPhoto(this)" />
       <button type="button" onclick="document.getElementById('avatar-file-picker').click()" style="background:#05222e;border:1px solid #00f0ff77;color:#00f0ff;font-family:monospace;font-size:9px;padding:1px 5px;border-radius:3px;cursor:pointer;">LOAD PORTRAIT</button>
-      <span id="avatar-tier-label">TIER: v8.0 APEX</span>
+      <span id="avatar-tier-label">TIER: v9.0 GENIUS</span>
       <span id="avatar-state-badge" style="color:#00ff88;">SYNAPSES ARMED</span>
     </div>
   </div>
@@ -96,6 +98,8 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
         <button type="button" onclick="sendAvatarPrompt('Remember directive: Sovereign Apex Autonomous Mode')" style="background:#261a04;border:1px solid #ffcc0066;color:#ffdd66;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">SAVE MEMORY</button>
         <button type="button" onclick="sendAvatarPrompt('Recall saved memories and directives')" style="background:#05222e;border:1px solid #00ff8866;color:#00ff88;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">RECALL MEMORY</button>
         <button type="button" onclick="sendAvatarPrompt('Give me a full executive briefing')" style="background:#190a2b;border:1px solid #c86bff66;color:#ebbfff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">BRIEF ME</button>
+        <button type="button" id="btn-hand-sensor" onclick="toggleHandGestureSensor()" style="background:#04242b;border:1px solid #00f0ff88;color:#00f0ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">&#9995; HAND SENSOR: OFF</button>
+        <button type="button" onclick="sendAvatarPrompt('Run Genius v9 deep multi-step diagnostic and skill inventory')" style="background:#1e0b36;border:1px solid #ff66ff88;color:#ff99ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">GENIUS BENCHMARK</button>
       </div>
       <div style="display:flex;gap:6px;">
         <input id="avatar-input" type="text" placeholder="Command any internal model subsystem..." onkeydown="if(event.key==='Enter')sendAvatarPrompt()" style="flex:1;background:#020911;border:1px solid #00f0ff77;color:#fff;font-family:monospace;font-size:11px;padding:6px 8px;border-radius:4px;" />
@@ -106,7 +110,7 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
   </div>
 </div>
 <script>
-window._brainVisualTier = 8;
+window._brainVisualTier = 9;
 window._synapseBoost = 0.35;
 
 function pulseSubsystem(id) {
@@ -189,9 +193,9 @@ function speakAstraFemaleVoice(text, badge) {
 function setBrainVisualTier(val) {
   window._brainVisualTier = parseInt(val, 10) || 8;
   window._synapseBoost = 1.0;
-  const names = {5: 'TIER: v5.0 SOVEREIGN', 6: 'TIER: v6.0 OMNISCIENT', 7: 'TIER: v7.0 AUTONOMOUS', 8: 'TIER: v8.0 APEX'};
+  const names = {5: 'TIER: v5.0 SOVEREIGN', 6: 'TIER: v6.0 OMNISCIENT', 7: 'TIER: v7.0 AUTONOMOUS', 8: 'TIER: v9.0 GENIUS'};
   const lbl = document.getElementById('avatar-tier-label');
-  if (lbl) lbl.textContent = names[window._brainVisualTier] || 'TIER: v8.0 APEX';
+  if (lbl) lbl.textContent = names[window._brainVisualTier] || 'TIER: v9.0 GENIUS';
   window._avatarSpeaking = 0.85;
 }
 
