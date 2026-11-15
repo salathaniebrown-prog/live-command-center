@@ -36,7 +36,146 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 <pre id="auto-out">[READY] Auto-selects Android Edge / PC / 8-GPU Supercomputer.</pre></div>
 
 <div class="card"><h3>2. WYLER &amp; DEALERSLINK CRYPTO DEALERSHIP (SAME-ORIGIN HTTPS)</h3>
-<iframe src="/dealership/"></iframe></div>
+<!-- PERSONAL_ASSISTANT_AVATAR_STAGE_V2 -->
+<div id="astra-avatar-stage" style="margin-top:8px;border:1px solid #00f0ff66;background:radial-gradient(circle at 50% 42%, #082330 0%, #02080e 80%);border-radius:6px;padding:12px;display:flex;flex-wrap:wrap;gap:14px;align-items:stretch;">
+  <div style="flex:0 0 250px;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #00ff8844;background:#020911;border-radius:6px;padding:8px;position:relative;">
+    <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#00ff88;margin-bottom:4px;">
+      <span>&#9673; ASTRA PERSONAL AI</span>
+      <span id="avatar-state-badge">STANDBY</span>
+    </div>
+    <canvas id="astraAvatarCanvas" width="230" height="210" style="border-radius:4px;background:#01060b;"></canvas>
+    <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#00f0ff;margin-top:5px;">
+      <span>BRAIN: v4.2 CORE</span>
+      <span>VOICE: LINKED</span>
+    </div>
+  </div>
+  <div style="flex:1;min-width:250px;display:flex;flex-direction:column;justify-content:space-between;font-family:monospace;">
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00f0ff33;padding-bottom:6px;margin-bottom:8px;">
+        <span style="color:#00f0ff;font-size:12px;font-weight:bold;">PERSONAL EXECUTIVE ASSISTANT // DIRECT NEURAL LINK</span>
+        <span style="color:#00ff88;font-size:10px;">PORT 8088 &harr; 8109 &harr; 8111</span>
+      </div>
+      <div id="avatar-chat-log" style="height:132px;overflow-y:auto;background:#030c14;border:1px solid #00f0ff33;border-radius:4px;padding:8px;font-size:11px;color:#c9f7ff;line-height:1.5;">
+        <div style="color:#00ff88;">[ASTRA]: Avatar online. Ready to execute cluster tasks, dealership escrow, code deploys, or live briefings.</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+        <button type="button" onclick="sendAvatarPrompt('Run full 13-port cluster diagnostic')" style="background:#06212c;border:1px solid #00f0ff55;color:#00f0ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;">CLUSTER BRIEF</button>
+        <button type="button" onclick="sendAvatarPrompt('Verify Wyler & DealersLink crypto escrow status')" style="background:#06212c;border:1px solid #00ff8855;color:#00ff88;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;">DEALERSHIP ESCROW</button>
+        <button type="button" onclick="sendAvatarPrompt('Prepare next Brain v5 upgrade checklist')" style="background:#1b0b2e;border:1px solid #ff00ff55;color:#ff88ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;">BRAIN v5 ROADMAP</button>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <input id="avatar-input" type="text" placeholder="Talk to your Astra Assistant..." onkeydown="if(event.key==='Enter')sendAvatarPrompt()" style="flex:1;background:#020a12;border:1px solid #00f0ff66;color:#fff;font-family:monospace;font-size:11px;padding:6px 8px;border-radius:4px;" />
+        <button type="button" onclick="sendAvatarPrompt()" style="background:#00ff88;color:#02120a;font-weight:bold;border:none;font-family:monospace;font-size:11px;padding:6px 12px;border-radius:4px;cursor:pointer;">SEND</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function initAstraAvatar(){
+  const c = document.getElementById('astraAvatarCanvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  window._avatarSpeaking = 0;
+  let t = 0;
+  function renderAvatar() {
+    t += 0.04;
+    if (window._avatarSpeaking > 0) window._avatarSpeaking = Math.max(0, window._avatarSpeaking - 0.015);
+    const energy = 0.25 + window._avatarSpeaking * 0.75;
+    ctx.fillStyle = 'rgba(1, 6, 11, 0.32)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(W / 2, H * 0.46);
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.22)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(0, 0, 78, t * 0.5, t * 0.5 + Math.PI * 1.45); ctx.stroke();
+    ctx.strokeStyle = 'rgba(0, 255, 136, 0.28)';
+    ctx.beginPath(); ctx.arc(0, 0, 68, -t * 0.7, -t * 0.7 + Math.PI * 1.2); ctx.stroke();
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(0, -52);
+    ctx.bezierCurveTo(38, -52, 46, -18, 42, 14);
+    ctx.bezierCurveTo(38, 38, 18, 56, 0, 60);
+    ctx.bezierCurveTo(-18, 56, -38, 38, -42, 14);
+    ctx.bezierCurveTo(-46, -18, -38, -52, 0, -52);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(0, 255, 136, 0.45)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-22, -36); ctx.lineTo(-10, -24); ctx.lineTo(10, -24); ctx.lineTo(22, -36); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, -52); ctx.lineTo(0, -24); ctx.stroke();
+    const eyeGlow = 0.65 + 0.35 * Math.sin(t * 2.2);
+    ctx.fillStyle = 'rgba(0, 240, 255, ' + eyeGlow.toFixed(2) + ')';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.ellipse(-17, -6, 10, 3.8, -0.08, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(17, -6, 10, 3.8, 0.08, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    for (let x = -18; x <= 18; x += 2) {
+      const amp = (1 - Math.abs(x) / 20) * (2.5 + energy * 9 * Math.sin(t * 9 + x * 0.45));
+      const y = 26 + amp;
+      if (x === -18) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(-58, 86); ctx.lineTo(-26, 66); ctx.lineTo(0, 74); ctx.lineTo(26, 66); ctx.lineTo(58, 86);
+    ctx.stroke();
+    ctx.restore();
+    requestAnimationFrame(renderAvatar);
+  }
+  renderAvatar();
+})();
+
+async function sendAvatarPrompt(preset) {
+  const inp = document.getElementById('avatar-input');
+  const log = document.getElementById('avatar-chat-log');
+  const badge = document.getElementById('avatar-state-badge');
+  const msg = (preset || (inp ? inp.value.trim() : '')).trim();
+  if (!msg) return;
+  if (!preset && inp) inp.value = '';
+  if (log) {
+    log.innerHTML += '<div style="color:#00f0ff;margin-top:4px;"><b>[YOU]:</b> ' + msg.replace(/</g,'&lt;') + '</div>';
+    log.scrollTop = log.scrollHeight;
+  }
+  if (badge) badge.textContent = 'THINKING...';
+  window._avatarSpeaking = 0.85;
+  try {
+    const r = await fetch('/api/assistant/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: msg})
+    });
+    const d = await r.json();
+    const reply = d.reply || d.output || 'Command acknowledged.';
+    if (log) {
+      log.innerHTML += '<div style="color:#00ff88;margin-top:4px;"><b>[ASTRA]:</b> ' + String(reply).replace(/</g,'&lt;') + '</div>';
+      log.scrollTop = log.scrollHeight;
+    }
+    if (badge) badge.textContent = 'ACTIVE';
+    window._avatarSpeaking = 1.0;
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(reply);
+        u.rate = 1.04;
+        u.onend = () => { if (badge) badge.textContent = 'STANDBY'; window._avatarSpeaking = 0.1; };
+        window.speechSynthesis.speak(u);
+      } catch (e) {}
+    }
+  } catch (e) {
+    if (log) log.innerHTML += '<div style="color:#ff6688;">[ERR]: ' + e + '</div>';
+    if (badge) badge.textContent = 'STANDBY';
+  }
+}
+</script>
+</div>
 
 <!-- ASTRA_NEURAL_BRAIN_BAY_V1 -->
 <div id="astra-brain-bay" style="margin:10px 0;border:1px solid #00f0ff55;background:radial-gradient(circle at 50% 45%, #07222c 0%, #030b12 75%);border-radius:6px;padding:10px 14px;position:relative;overflow:hidden;">
@@ -1294,155 +1433,4 @@ async function triggerMeshConsensusRun() {
 }
 </script>
 </html>
-<!-- PERSONAL_ASSISTANT_AVATAR_STAGE_V1 -->
-<div id="astra-avatar-stage" style="margin-top:8px;border:1px solid #00f0ff66;background:radial-gradient(circle at 50% 42%, #082330 0%, #02080e 80%);border-radius:6px;padding:12px;display:flex;flex-wrap:wrap;gap:14px;align-items:stretch;">
-  <div style="flex:0 0 250px;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #00ff8844;background:#020911;border-radius:6px;padding:8px;position:relative;">
-    <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#00ff88;margin-bottom:4px;">
-      <span>&#9673; ASTRA PERSONAL AI</span>
-      <span id="avatar-state-badge">STANDBY</span>
-    </div>
-    <canvas id="astraAvatarCanvas" width="230" height="210" style="border-radius:4px;background:#01060b;"></canvas>
-    <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#00f0ff;margin-top:5px;">
-      <span>BRAIN: v4.2 CORE</span>
-      <span>VOICE: LINKED</span>
-    </div>
-  </div>
-  <div style="flex:1;min-width:250px;display:flex;flex-direction:column;justify-content:space-between;font-family:monospace;">
-    <div>
-      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00f0ff33;padding-bottom:6px;margin-bottom:8px;">
-        <span style="color:#00f0ff;font-size:12px;font-weight:bold;">PERSONAL EXECUTIVE ASSISTANT // DIRECT NEURAL LINK</span>
-        <span style="color:#00ff88;font-size:10px;">PORT 8088 &harr; 8109 &harr; 8111</span>
-      </div>
-      <div id="avatar-chat-log" style="height:132px;overflow-y:auto;background:#030c14;border:1px solid #00f0ff33;border-radius:4px;padding:8px;font-size:11px;color:#c9f7ff;line-height:1.5;">
-        <div style="color:#00ff88;">[ASTRA]: Avatar online. Ready to execute cluster tasks, dealership escrow, code deploys, or live briefings.</div>
-      </div>
-    </div>
-    <div style="margin-top:8px;">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
-        <button type="button" onclick="sendAvatarPrompt('Run full 13-port cluster diagnostic')" style="background:#06212c;border:1px solid #00f0ff55;color:#00f0ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;">CLUSTER BRIEF</button>
-        <button type="button" onclick="sendAvatarPrompt('Verify Wyler & DealersLink crypto escrow status')" style="background:#06212c;border:1px solid #00ff8855;color:#00ff88;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;">DEALERSHIP ESCROW</button>
-        <button type="button" onclick="sendAvatarPrompt('Prepare next Brain v5 upgrade checklist')" style="background:#1b0b2e;border:1px solid #ff00ff55;color:#ff88ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;">BRAIN v5 ROADMAP</button>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <input id="avatar-input" type="text" placeholder="Talk to your Astra Assistant..." onkeydown="if(event.key==='Enter')sendAvatarPrompt()" style="flex:1;background:#020a12;border:1px solid #00f0ff66;color:#fff;font-family:monospace;font-size:11px;padding:6px 8px;border-radius:4px;" />
-        <button type="button" onclick="sendAvatarPrompt()" style="background:#00ff88;color:#02120a;font-weight:bold;border:none;font-family:monospace;font-size:11px;padding:6px 12px;border-radius:4px;cursor:pointer;">SEND</button>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-(function initAstraAvatar(){
-  const c = document.getElementById('astraAvatarCanvas');
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  const W = c.width, H = c.height;
-  window._avatarSpeaking = 0;
-  let t = 0;
-  function renderAvatar() {
-    t += 0.04;
-    if (window._avatarSpeaking > 0) window._avatarSpeaking = Math.max(0, window._avatarSpeaking - 0.015);
-    const energy = 0.25 + window._avatarSpeaking * 0.75;
-    ctx.fillStyle = 'rgba(1, 6, 11, 0.32)';
-    ctx.fillRect(0, 0, W, H);
 
-    // Outer orbital HUD rings
-    ctx.save();
-    ctx.translate(W / 2, H * 0.46);
-    ctx.strokeStyle = 'rgba(0, 240, 255, 0.22)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.arc(0, 0, 78, t * 0.5, t * 0.5 + Math.PI * 1.45); ctx.stroke();
-    ctx.strokeStyle = 'rgba(0, 255, 136, 0.28)';
-    ctx.beginPath(); ctx.arc(0, 0, 68, -t * 0.7, -t * 0.7 + Math.PI * 1.2); ctx.stroke();
-
-    // Cybernetic holographic head silhouette
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1.6;
-    ctx.beginPath();
-    ctx.moveTo(0, -52);
-    ctx.bezierCurveTo(38, -52, 46, -18, 42, 14);
-    ctx.bezierCurveTo(38, 38, 18, 56, 0, 60);
-    ctx.bezierCurveTo(-18, 56, -38, 38, -42, 14);
-    ctx.bezierCurveTo(-46, -18, -38, -52, 0, -52);
-    ctx.stroke();
-
-    // Neural crown circuit lines
-    ctx.strokeStyle = 'rgba(0, 255, 136, 0.45)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(-22, -36); ctx.lineTo(-10, -24); ctx.lineTo(10, -24); ctx.lineTo(22, -36); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, -52); ctx.lineTo(0, -24); ctx.stroke();
-
-    // Glowing Visor Eyes
-    const eyeGlow = 0.65 + 0.35 * Math.sin(t * 2.2);
-    ctx.fillStyle = 'rgba(0, 240, 255, ' + eyeGlow.toFixed(2) + ')';
-    ctx.shadowColor = '#00f0ff';
-    ctx.shadowBlur = 10;
-    ctx.beginPath(); ctx.ellipse(-17, -6, 10, 3.8, -0.08, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(17, -6, 10, 3.8, 0.08, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Voice / Speech Waveform Mouth
-    ctx.strokeStyle = '#00ff88';
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    for (let x = -18; x <= 18; x += 2) {
-      const amp = (1 - Math.abs(x) / 20) * (2.5 + energy * 9 * Math.sin(t * 9 + x * 0.45));
-      const y = 26 + amp;
-      if (x === -18) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-
-    // Collar / Shoulders Hologram
-    ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
-    ctx.lineWidth = 1.3;
-    ctx.beginPath();
-    ctx.moveTo(-58, 86); ctx.lineTo(-26, 66); ctx.lineTo(0, 74); ctx.lineTo(26, 66); ctx.lineTo(58, 86);
-    ctx.stroke();
-    ctx.restore();
-
-    requestAnimationFrame(renderAvatar);
-  }
-  renderAvatar();
-})();
-
-async function sendAvatarPrompt(preset) {
-  const inp = document.getElementById('avatar-input');
-  const log = document.getElementById('avatar-chat-log');
-  const badge = document.getElementById('avatar-state-badge');
-  const msg = (preset || (inp ? inp.value.trim() : '')).trim();
-  if (!msg) return;
-  if (!preset && inp) inp.value = '';
-  if (log) {
-    log.innerHTML += '<div style="color:#00f0ff;margin-top:4px;"><b>[YOU]:</b> ' + msg.replace(/</g,'&lt;') + '</div>';
-    log.scrollTop = log.scrollHeight;
-  }
-  if (badge) badge.textContent = 'THINKING...';
-  window._avatarSpeaking = 0.85;
-  try {
-    const r = await fetch('/api/assistant/chat', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: msg})
-    });
-    const d = await r.json();
-    const reply = d.reply || d.output || 'Command acknowledged.';
-    if (log) {
-      log.innerHTML += '<div style="color:#00ff88;margin-top:4px;"><b>[ASTRA]:</b> ' + String(reply).replace(/</g,'&lt;') + '</div>';
-      log.scrollTop = log.scrollHeight;
-    }
-    if (badge) badge.textContent = 'ACTIVE';
-    window._avatarSpeaking = 1.0;
-    if ('speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(reply);
-        u.rate = 1.04;
-        u.onend = () => { if (badge) badge.textContent = 'STANDBY'; window._avatarSpeaking = 0.1; };
-        window.speechSynthesis.speak(u);
-      } catch (e) {}
-    }
-  } catch (e) {
-    if (log) log.innerHTML += '<div style="color:#ff6688;">[ERR]: ' + e + '</div>';
-    if (badge) badge.textContent = 'STANDBY';
-  }
-}
-</script>
