@@ -25,7 +25,7 @@ def fetch_live_ci_telemetry():
             for r in raw_runs:
                 runs_list.append({
                     "run_number": r.get("run_number"),
-                    "head_sha": str(r.get("head_sha") or "")[:7], "head_branch": r.get("head_branch") or "main", "branch": r.get("head_branch") or "main", "head_branch": r.get("head_branch") or "main", "branch": r.get("head_branch") or "main", "head_branch": r.get("head_branch") or "main", "branch": r.get("head_branch") or "main",
+                    "head_sha": str(r.get("head_sha") or "")[:7], "head_branch": r.get("head_branch") or "main", "branch": r.get("head_branch") or "main", "head_branch": r.get("head_branch") or "main", "branch": r.get("head_branch") or "main", "head_branch": r.get("head_branch") or "main", "branch": r.get("head_branch") or "main", "head_branch": r.get("head_branch") or "main", "branch": r.get("head_branch") or "main",
                     "status": r.get("status"),
                     "conclusion": r.get("conclusion") or "running",
                     "name": r.get("name") or "Astra CI Verify"
