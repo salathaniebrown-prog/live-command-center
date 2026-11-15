@@ -105,67 +105,8 @@ async function runMpInfer(indexMode) {
   out.textContent = JSON.stringify(await res.json(), null, 2);
 }
 </script>
-
-
-  <!-- SECTION 5: POLYGLOT CODE EXECUTION ENGINE (8123) -->
-  <div id="astra-section-5" style="margin-top:14px;padding:14px;border:1px solid #ffaa00;background:#030814;border-radius:6px;">
-    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #0b2545;padding-bottom:6px;margin-bottom:10px;">
-      <span style="color:#ffaa00;font-weight:bold;">5. POLYGLOT CODE EXECUTION &amp; SAGA ENGINE (8123)</span>
-      <span style="color:#00ff88;font-size:12px;">PYTHON | JAVA | PHP | GO | .NET: ACTIVE</span>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-      <button onclick="runPolyglotTest('python')" style="background:#1c2d42;color:#ffaa00;border:1px solid #ffaa00;padding:6px 12px;cursor:pointer;">🐍 RUN PYTHON SAGA</button>
-      <button onclick="runPolyglotTest('go')" style="background:#1c2d42;color:#00f0ff;border:1px solid #00f0ff;padding:6px 12px;cursor:pointer;">🐹 RUN GO PIPELINE</button>
-      <button onclick="runPolyglotTest('php')" style="background:#1c2d42;color:#c77dff;border:1px solid #c77dff;padding:6px 12px;cursor:pointer;">🐘 RUN PHP WORKER</button>
-    </div>
-    <pre id="polyglot-out" style="background:#02050c;border:1px solid #102a42;padding:8px;max-height:120px;overflow:auto;font-size:11px;color:#ffe599;">Polyglot execution sandbox ready.</pre>
-  </div>
-
-  <!-- SECTION 6: ENTERPRISE GOVERNANCE & 3,600+ LEGAL TEMPLATES (8125) -->
-  <div id="astra-section-6" style="margin-top:14px;padding:14px;border:1px solid #70e000;background:#030814;border-radius:6px;">
-    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #0b2545;padding-bottom:6px;margin-bottom:10px;">
-      <span style="color:#70e000;font-weight:bold;">6. ENTERPRISE GOVERNANCE &amp; LEGAL TEMPLATES (8125)</span>
-      <span style="color:#00ff88;font-size:12px;">3,600+ TEMPLATES &amp; SSO / XR CONSENT: ARMED</span>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-      <button onclick="loadGovTemplates()" style="background:#113b1f;color:#70e000;border:1px solid #70e000;padding:6px 12px;cursor:pointer;">📜 LOAD LEGAL/DPA SUITE</button>
-      <button onclick="verifyXRCosent()" style="background:#113b1f;color:#00f0ff;border:1px solid #00f0ff;padding:6px 12px;cursor:pointer;">🥽 VERIFY XR CONSENT SHARE</button>
-    </div>
-    <pre id="gov-out" style="background:#02050c;border:1px solid #102a42;padding:8px;max-height:120px;overflow:auto;font-size:11px;color:#b9fbc0;">Governance &amp; compliance ledger online.</pre>
-  </div>
-
-  <!-- SECTION 7: ELITE CINEMA VISUAL STUDIO & AUTOPILOT (8127) -->
-  <div id="astra-section-7" style="margin-top:14px;padding:14px;border:1px solid #ff007f;background:#030814;border-radius:6px;">
-    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #0b2545;padding-bottom:6px;margin-bottom:10px;">
-      <span style="color:#ff007f;font-weight:bold;">7. ELITE CINEMA VISUAL STUDIO &amp; AUTOPILOT (8127)</span>
-      <span style="color:#00ff88;font-size:12px;">2.39:1 ANAMORPHIC STREAM &amp; AI SEARCH: ACTIVE</span>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-      <button onclick="triggerStudioRender()" style="background:#3d0c24;color:#ff007f;border:1px solid #ff007f;padding:6px 12px;cursor:pointer;">🎬 RENDER CINEMA FRAME</button>
-      <button onclick="runAutopilotSync()" style="background:#3d0c24;color:#ff70a6;border:1px solid #ff70a6;padding:6px 12px;cursor:pointer;">🤖 RUN EDGE AUTOPILOT</button>
-    </div>
-    <pre id="studio-out" style="background:#02050c;border:1px solid #102a42;padding:8px;max-height:120px;overflow:auto;font-size:11px;color:#ffc6ff;">Elite Cinema Visual Studio ready.</pre>
-  </div>
-
 </div>
-<pre id="mp-out">[MEDIAPIPE TASKS READY] On-device CPU/GPU acceleration across Web, Android, iOS, Flutter &amp; Desktop.</pre>
-  <!-- SECTION 9: CRYPTOGRAPHIC SPATIAL ASSISTANT (8129) & QISKIT QUANTUM LATTICE (8131) -->
-  <div id="astra-section-9" style="margin-top:14px;padding:14px;border:1px solid #00f0ff;background:#030814;border-radius:6px;">
-    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #0b2545;padding-bottom:6px;margin-bottom:10px;">
-      <span style="color:#00f0ff;font-weight:bold;">9. CRYPTOGRAPHIC SPATIAL ASSISTANT (8129) &amp; QISKIT QUANTUM LATTICE (8131)</span>
-      <span style="color:#00ff88;font-size:12px;">SHA-256 HANDSHAKE &amp; WAL LEDGER: ARMED</span>
-    </div>
-
-    <!-- Spatial & Gesture Handshake Controls -->
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-      <button onclick="runSpatialTest('WITH_HANDS', 'PINCH_SELECT')" style="background:#003b4d;color:#00f0ff;border:1px solid #00f0ff;padding:6px 12px;cursor:pointer;">✋ TEST SPATIAL HANDSHAKE (WITH HANDS)</button>
-      <button onclick="runSpatialTest('WITHOUT_HANDS', 'ZERO_TOUCH_AUTO')" style="background:#0d3328;color:#00ff88;border:1px solid #00ff88;padding:6px 12px;cursor:pointer;">🤖 TEST ZERO-TOUCH (WITHOUT HANDS)</button>
-      <button onclick="runQuantumSimulation()" style="background:#2b103d;color:#e0aaff;border:1px solid #e0aaff;padding:6px 12px;cursor:pointer;">⚛️ RUN QISKIT QASM 3.0 SIMULATION</button>
-    </div>
-    <pre id="spatial-quantum-out" style="background:#02050c;border:1px solid #102a42;padding:8px;max-height:160px;overflow:auto;font-size:11px;color:#9be7ff;white-space:pre-wrap;">Cryptographic Spatial Assistant &amp; QisKit Quantum Lattice ready.</pre>
-  </div>
-
-</div>
+<pre id="mp-out">[MEDIAPIPE TASKS READY] On-device CPU/GPU acceleration across Web, Android, iOS, Flutter &amp; Desktop.</pre></div>
 <script>
 async function buildMpTask(){
   const task_type = document.getElementById('mp-task').value;
@@ -571,7 +512,7 @@ function initiateVoiceDataLink() {
 async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=d.mode+': '+(d.threat||d.grade||d.hardened.length+' OK');}
 </script>
 <!-- ASTRA UPGRADE SUITE: SECTIONS 5, 6 & 7 -->
-<div id="astra-upgrade-suite" style="margin:16px 0 260px 0;font-family:monospace;color:#d6f8ff;">
+<div id="astra-upgrade-suite" style="margin:16px 0 90px 0;font-family:monospace;color:#d6f8ff;">
   <div style="margin-bottom:14px;padding:14px;border:1px solid #00f0ff;background:#070d19;border-radius:6px;">
     <div style="display:flex;justify-content:space-between;border-bottom:1px solid #13304a;padding-bottom:6px;margin-bottom:10px;">
       <span style="color:#00f0ff;font-weight:bold;">5. DURABLE SAGA ENGINE // STRIPE &amp; DATADOG MEMORY // POLYGLOT STUDIO (8123)</span>
@@ -644,66 +585,56 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
   </div>
 </div>
 <script>
-window.refreshSagaState = async function(){
-  const el = document.getElementById('saga-visibility-out');
+async function refreshSagaState(){
   try{
-    const r = await fetch('/api/saga/state');
-    const d = await r.json();
+    const r = await fetch('/api/saga/state'); const d = await r.json();
     const wf = (d.workflows||[])[0] || {};
-    const dd = (d.datadog_memory||[]).slice(0,2).map(m => m.metric + '=' + m.value).join(' | ');
-    const st = (d.stripe_usage||[]).slice(0,2).map(s => s.event_id + '($' + s.amount_usd + ')').join(' | ');
-    const lk = (wf.linear_knowledge||[]).join('\n  ') || 'Ready';
-    el.textContent =
-      'LATEST SAGA: ' + (wf.workflow_id||'N/A') + ' [' + (wf.status||'READY') + '] Retries Absorbed: ' + (wf.retries||0) + '\n' +
-      'LINEAR KNOWLEDGE:\n  ' + lk + '\n' +
-      'DATADOG MEMORY: ' + (dd||'Monitoring') + '\n' +
-      'STRIPE METERS : ' + (st||'Active');
-  }catch(e){ el.textContent = 'Saga state error: ' + e; }
-};
-
-window.runDurableSaga = async function(){
-  document.getElementById('saga-visibility-out').textContent = 'Running self-healing Saga with auto-retry...';
+    const dd = (d.datadog_memory||[]).slice(0,2).map(m=>m.metric+'='+m.value).join(' | ');
+    const st = (d.stripe_usage||[]).slice(0,2).map(s=>s.event_id+'($'+s.amount_usd+')').join(' | ');
+    document.getElementById('saga-visibility-out').textContent =
+      'LATEST SAGA: ' + (wf.workflow_id||'N/A') + ' [' + (wf.status||'READY') + '] Retries Absorbed: ' + (wf.retries||0) + '
+' +
+      'LINEAR KNOWLEDGE:
+  ' + ((wf.linear_knowledge||[]).join('
+  ') || 'Ready') + '
+' +
+      'DATADOG MEMORY: ' + (dd||'Monitoring') + '
+STRIPE METERS : ' + (st||'Active');
+  }catch(e){ document.getElementById('saga-visibility-out').textContent = 'Saga state: ' + e; }
+}
+async function runDurableSaga(){
   await fetch('/api/saga/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:'WebUI Autonomous Recovery Saga'})});
-  await window.refreshSagaState();
-};
-
-window.recordStripeMeter = async function(){
+  await refreshSagaState();
+}
+async function recordStripeMeter(){
   await fetch('/api/stripe/meter', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({meter:'webui_external_interaction', units:50, amount_usd:9.99})});
-  await window.refreshSagaState();
-};
-
-window.runPolyglot = async function(){
+  await refreshSagaState();
+}
+async function runPolyglot(){
   const lang = document.getElementById('poly-lang').value;
   const code = document.getElementById('poly-code').value;
-  const out = document.getElementById('poly-out');
-  out.textContent = 'Executing ' + lang.toUpperCase() + ' in sandbox...';
-  try{
-    const r = await fetch('/api/polyglot/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({language:lang, code:code})});
-    const d = await r.json();
-    out.textContent = '[' + (d.language||lang).toUpperCase() + ' | exit=' + d.exit_code + ' | ' + d.latency_ms + 'ms]\n' + (d.stdout || d.stderr || 'OK');
-  }catch(e){ out.textContent = 'Polyglot error: ' + e; }
-};
-
-window.loadLegalTemplate = async function(){
+  const r = await fetch('/api/polyglot/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({language:lang, code:code})});
+  const d = await r.json();
+  document.getElementById('poly-out').textContent = '[' + d.language.toUpperCase() + ' | exit=' + d.exit_code + ' | ' + d.latency_ms + 'ms]
+' + (d.stdout || d.stderr || 'OK');
+}
+async function loadLegalTemplate(){
   const idx = parseInt(document.getElementById('gov-tpl-idx').value || '1', 10);
   const brand = document.getElementById('gov-brand-input').value;
-  const out = document.getElementById('gov-editor-out');
-  try{
-    const r = await fetch('/api/gov/templates', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({index:idx, brand:brand})});
-    const d = await r.json();
-    out.value = (d.legal_text||'') + '\n\n--- EMBEDDABLE PRIVACY WIDGET SNIPPET ---\n' + (d.embed_code||'');
-  }catch(e){ out.value = 'Template load error: ' + e; }
-};
+  const r = await fetch('/api/gov/templates', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({index:idx, brand:brand})});
+  const d = await r.json();
+  document.getElementById('gov-editor-out').value = d.legal_text + '
 
-window.runVendorSdkScan = async function(){
-  const out = document.getElementById('gov-editor-out');
-  out.value = 'Scanning cluster for Vendors, SSPs & SDKs...';
+--- EMBEDDABLE PRIVACY WIDGET SNIPPET ---
+' + d.embed_code;
+}
+async function runVendorSdkScan(){
   const r = await fetch('/api/gov/scan', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({target:'cluster'})});
   const d = await r.json();
-  out.value = 'SCAN ID: ' + d.scan_id + ' | DETECTED VENDORS/SSPs/SDKs: ' + d.vendors_detected + '\n' + JSON.stringify(d.findings, null, 2);
-};
-
-window.simulateGeoBanner = async function(){
+  document.getElementById('gov-editor-out').value = 'SCAN ID: ' + d.scan_id + ' | DETECTED VENDORS/SSPs/SDKs: ' + d.vendors_detected + '
+' + JSON.stringify(d.findings, null, 2);
+}
+async function simulateGeoBanner(){
   const reg = document.getElementById('gov-geo-select').value;
   const brand = document.getElementById('gov-brand-input').value;
   const col = document.getElementById('gov-color-input').value;
@@ -713,270 +644,40 @@ window.simulateGeoBanner = async function(){
   document.getElementById('gov-preview-title').style.color = col;
   document.getElementById('gov-preview-title').textContent = '[LIVE BANNER SIMULATOR :: ' + d.region + ' | ' + d.enforcement_mode + '] ' + brand;
   document.getElementById('gov-preview-copy').textContent = d.banner_copy;
-  localStorage.setItem('astra_offline_consent_cache', JSON.stringify(d));
-};
-
-window.applyBulkWhiteLabel = async function(){
+}
+async function applyBulkWhiteLabel(){
   const brand = document.getElementById('gov-brand-input').value;
   const col = document.getElementById('gov-color-input').value;
   const r = await fetch('/api/gov/bulk-update', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({brand_name:brand, primary_color:col, sso_provider:'OIDC / SAML 2.0'})});
   const d = await r.json();
-  await window.simulateGeoBanner();
-  document.getElementById('gov-editor-out').value = 'BULK WHITE-LABEL & SSO UPDATED:\n' + JSON.stringify(d, null, 2);
-};
-
-window.issueVrConsentPassport = async function(){
+  await simulateGeoBanner();
+  document.getElementById('gov-editor-out').value = 'BULK WHITE-LABEL & SSO UPDATED:
+' + JSON.stringify(d, null, 2);
+}
+async function issueVrConsentPassport(){
   const r = await fetch('/api/gov/vr-share', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({devices:'android-termux-primary,xr-headset-01,command-center-web'})});
   const d = await r.json();
-  document.getElementById('gov-editor-out').value = 'CROSS-DEVICE VR/XR AI OWNER CONSENT PASSPORT SYNCED:\n' + JSON.stringify(d, null, 2);
-};
-
-window.askGovExpert = async function(){
+  document.getElementById('gov-editor-out').value = 'CROSS-DEVICE VR/XR AI OWNER CONSENT PASSPORT SYNCED:
+' + JSON.stringify(d, null, 2);
+}
+async function askGovExpert(){
   const q = document.getElementById('gov-expert-q').value;
   const r = await fetch('/api/gov/expert', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({question:q})});
   const d = await r.json();
   document.getElementById('gov-editor-out').value = d.answer;
-};
-
-window.loadAutoPlugins = async function(){
-  const r = await fetch('/api/plugins');
-  const d = await r.json();
+}
+async function loadAutoPlugins(){
+  const r = await fetch('/api/plugins'); const d = await r.json();
   document.getElementById('plug-count-badge').textContent = 'POLICY: ' + d.policy + ' (' + d.total_plugins + ' PLUGINS)';
-  document.getElementById('plug-out').textContent = (d.plugins||[]).map(p => '[AUTO-ALLOWED] ' + p.id + ' -> ' + p.name).join('\n');
-};
-
-window.testAutoPlugin = async function(){
+  document.getElementById('plug-out').textContent = (d.plugins||[]).map(p => '[AUTO-ALLOWED] ' + p.id + ' -> ' + p.name).join('
+');
+}
+async function testAutoPlugin(){
   const r = await fetch('/api/plugins/execute', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({plugin_id:'plugin.gov.scanner', args:{target:'cluster'}})});
   const d = await r.json();
   document.getElementById('plug-out').textContent = JSON.stringify(d, null, 2);
-};
-
-
-window.runLiveOnlineSearch = async function(){
-  const q = document.getElementById('elite-search-q').value;
-  const out = document.getElementById('elite-search-out');
-  out.textContent = 'Searching live web & synthesizing with Mastered Python/Cluster Knowledge...';
-  try{
-    const r = await fetch('/api/studio/search', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query:q})});
-    const d = await r.json();
-    out.textContent = d.assistant_response || JSON.stringify(d, null, 2);
-  }catch(e){ out.textContent = 'Search error: ' + e; }
-};
-
-window.renderEliteCinema = async function(){
-  const prompt = document.getElementById('cinema-prompt').value;
-  const lens = document.getElementById('cinema-lens').value;
-  const lut = document.getElementById('cinema-lut').value;
-  const bpm = document.getElementById('cinema-bpm').value;
-  const out = document.getElementById('cinema-out');
-  out.textContent = 'Rendering 2.39:1 Anamorphic sequence & syncing Renoise OSC...';
-  try{
-    const r = await fetch('/api/studio/cinema', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt:prompt, lens:lens, lut:lut, bpm:bpm})});
-    const d = await r.json();
-    document.getElementById('cinema-hud-meta').textContent = d.scene_id + ' | ' + d.lens + ' | ' + d.bpm + ' BPM';
-    out.textContent = JSON.stringify(d, null, 2);
-  }catch(e){ out.textContent = 'Cinema error: ' + e; }
-};
-
-window.runFullAutopilot = async function(){
-  const out = document.getElementById('autopilot-out');
-  out.textContent = 'Running Termux / Linux / Edge / IBM / GitHub Auto-Pilot & auto-installer...';
-  try{
-    const r = await fetch('/api/studio/autopilot', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({auto_install:true})});
-    const d = await r.json();
-    out.textContent = 'STATUS: ' + d.status + ' | PYTHON ' + d.python_version + ' | COMMIT ' + d.git_commit + '\n' +
-      'ACTIONS:\n  • ' + (d.actions_executed||[]).join('\n  • ') + '\n' +
-      'MASTERED PYTHON STDLIB:\n  • ' + ((d.mastered_knowledge||{}).stdlib_core||[]).join('\n  • ');
-  }catch(e){ out.textContent = 'Autopilot error: ' + e; }
-};
-
-(function startEliteCinemaCanvas(){
-  let t = 0;
-  function frame(){
-    const cv = document.getElementById('elite-cinema-canvas');
-    if(cv && cv.getContext){
-      const ctx = cv.getContext('2d');
-      const w = cv.width, h = cv.height;
-      ctx.fillStyle = 'rgba(2, 5, 12, 0.28)';
-      ctx.fillRect(0, 0, w, h);
-      const lut = (document.getElementById('cinema-lut')||{}).value || '';
-      const col = lut.includes('Neon') ? '#e0aaff' : (lut.includes('Noir') ? '#ffb703' : '#00f0ff');
-      ctx.strokeStyle = col;
-      ctx.lineWidth = 1.4;
-      for(let i = 0; i < 14; i++){
-        const y = (h * 0.5) + Math.sin(t * 0.04 + i * 0.45) * (h * 0.34);
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        for(let x = 0; x <= w; x += 32){
-          const wy = y + Math.cos(x * 0.015 + t * 0.06 + i) * 14;
-          ctx.lineTo(x, wy);
-        }
-        ctx.stroke();
-      }
-      ctx.fillStyle = '#00ff88';
-      ctx.font = '11px monospace';
-      ctx.fillText('2.39:1 ANAMORPHIC LIVE TELEMETRY // FRAME ' + t, 12, 18);
-    }
-    t++;
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-})();
-
-setTimeout(() => { window.runFullAutopilot(); }, 500);
-
-
-window.wireSection4AndSecurity = function(){
-  // Dock any floating ITDR / ISPM / HARDEN / LONGCAT-2.5 pill cleanly so it never covers Sections 5-8
-  document.querySelectorAll('div,section,nav').forEach(el => {
-    const txt = (el.textContent || '').trim();
-    if(txt.includes('ITDR') && txt.includes('ISPM') && txt.includes('LONGCAT-2.5') && el.children.length <= 6){
-      el.style.position = 'static';
-      el.style.margin = '12px auto';
-      el.style.zIndex = '1';
-      el.style.width = 'fit-content';
-      if(!document.getElementById('itdr-ispm-out')){
-        const out = document.createElement('pre');
-        out.id = 'itdr-ispm-out';
-        out.style.cssText = 'background:#040811;border:1px solid #00f0ff;color:#00ff88;padding:8px;margin:8px 0;font-family:monospace;font-size:11px;white-space:pre-wrap;';
-        out.textContent = '[ITDR // ISPM // HARDEN // LONGCAT-2.5] Ready — tap any control above to execute.';
-        el.parentNode.insertBefore(out, el.nextSibling);
-      }
-      el.querySelectorAll('button,span,a,div').forEach(btn => {
-        const btxt = (btn.textContent || '').trim();
-        if(['ITDR','ISPM','HARDEN','LONGCAT-2.5 READY'].includes(btxt)){
-          btn.style.cursor = 'pointer';
-          btn.onclick = async function(ev){
-            ev.stopPropagation();
-            const r = await fetch('/api/security/' + btxt.toLowerCase().replace(/[^a-z0-9]/g,''), {
-              method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:btxt})
-            });
-            const d = await r.json();
-            const box = document.getElementById('itdr-ispm-out');
-            if(box) box.textContent = d.output || JSON.stringify(d);
-          };
-        }
-      });
-    }
-  });
-
-  // Ensure all Section 4 MediaPipe buttons update the Section 4 output line deterministically
-  document.querySelectorAll('button').forEach(btn => {
-    const t = (btn.textContent || '').trim().toUpperCase();
-    if(['RUN INFER','INDEX RAG','OPEN WEBGPU RUNNER','BUILD .TASK BUNDLE (GPU)'].includes(t)){
-      btn.onclick = async function(){
-        const r = await fetch('/api/mediapipe/infer', {
-          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:t, query:t})
-        });
-        const d = await r.json();
-        document.querySelectorAll('div,p,span,pre').forEach(node => {
-          if((node.textContent || '').includes('[MEDIAPIPE TASKS READY]') || (node.textContent || '').includes('[MEDIAPIPE EDGE ML 8113]')){
-            if(node.children.length === 0){
-              node.textContent = d.output + ' // Action: ' + t;
-              node.style.color = '#00ff88';
-            }
-          }
-        });
-      };
-    }
-  });
-};
-setTimeout(window.wireSection4AndSecurity, 450);
-
-
-window.upgradeCinemaModalAndLayout = function(){
-  // 1. Enhance the top CINEMA MCP modal (Port 8121) with Elite Lens, LUT & Live Animated Canvas
-  document.querySelectorAll('div').forEach(div => {
-    const t = (div.textContent || '');
-    if(t.includes('CLAUDE AI CINEMATIC VIDEO & RENOISE MCP SYNC STUDIO (PORT 8121)') && !div.dataset.eliteUpgraded){
-      div.dataset.eliteUpgraded = '1';
-      const bar = document.createElement('div');
-      bar.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;padding:6px;background:#040a14;border:1px solid #00f0ff;border-radius:4px;';
-      bar.innerHTML = `
-        <select id="modal-cinema-lens" style="background:#02060d;color:#ffb703;border:1px solid #ffb703;padding:4px;font-family:monospace;font-size:11px;">
-          <option value="35mm Anamorphic">LENS: 35mm Anamorphic</option>
-          <option value="65mm IMAX 15/70">LENS: 65mm IMAX 15/70</option>
-          <option value="14mm FPV Gimbal">LENS: 14mm FPV Gimbal</option>
-          <option value="85mm Prime f/1.2">LENS: 85mm Prime f/1.2</option>
-        </select>
-        <select id="modal-cinema-lut" style="background:#02060d;color:#00f0ff;border:1px solid #00f0ff;padding:4px;font-family:monospace;font-size:11px;">
-          <option value="Cyber-Teal & Gold">LUT: Cyber-Teal &amp; Gold</option>
-          <option value="Quantum Violet Neon">LUT: Quantum Violet Neon</option>
-          <option value="Blade Silver Noir">LUT: Blade Silver Noir</option>
-        </select>
-        <button type="button" onclick="window.triggerEliteModalRender()" style="background:#3d2600;color:#ffb703;border:1px solid #ffb703;padding:4px 10px;font-family:monospace;font-size:11px;cursor:pointer;">🎬 ELITE 4K ANAMORPHIC PASS</button>
-      `;
-      const inputs = div.querySelectorAll('input');
-      if(inputs.length > 0 && inputs[0].parentNode){
-        inputs[0].parentNode.parentNode.insertBefore(bar, inputs[0].parentNode);
-      }
-    }
-  });
-
-  // 2. Ensure Section 8 is appended at the bottom of #astra-upgrade-suite if not already visible
-  const suite = document.getElementById('astra-upgrade-suite');
-  if(suite && !document.getElementById('astra-section-8')){
-    const s8 = document.createElement('div');
-    s8.id = 'astra-section-8';
-    s8.style.cssText = 'margin-top:14px;padding:14px;border:1px solid #ff9e00;background:#090b16;border-radius:6px;';
-    s8.innerHTML = `
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #3d2c10;padding-bottom:6px;margin-bottom:10px;">
-        <span style="color:#ffb703;font-weight:bold;">8. ELITE CINEMA VISUAL STUDIO // LIVE ONLINE SEARCH ASSISTANT // TERMUX-LINUX-EDGE-IBM-GITHUB AUTOPILOT (8127)</span>
-        <span style="color:#00ff88;font-size:12px;">SHORTCUT &amp; AUTO-BOOT: ARMED</span>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-        <input id="elite-search-q" placeholder="Live Online Search + AI Personal Assistant (e.g. Python asyncio sqlite3 WAL, Qiskit OpenQASM 3.0)..." style="flex:1;background:#040811;color:#fff;border:1px solid #00f0ff;padding:7px;font-family:monospace;">
-        <button onclick="window.runLiveOnlineSearch()" style="background:#003b4d;color:#00f0ff;border:1px solid #00f0ff;padding:7px 12px;cursor:pointer;">🌐 SEARCH ONLINE + ASK ASSISTANT</button>
-      </div>
-      <pre id="elite-search-out" style="background:#040811;border:1px solid #102a42;padding:8px;max-height:140px;overflow:auto;font-size:11px;color:#9be7ff;white-space:pre-wrap;margin-bottom:10px;">Online Search + Mastered Python/Cluster Personal Assistant ready.</pre>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-        <button onclick="window.runFullAutopilot()" style="background:#0d3328;color:#00ff88;border:1px solid #00ff88;padding:6px 12px;cursor:pointer;">🚀 TRIGGER TERMUX / LINUX / EDGE / IBM / GITHUB AUTOPILOT</button>
-      </div>
-      <pre id="autopilot-out" style="background:#040811;border:1px solid #133b3a;padding:8px;max-height:140px;overflow:auto;font-size:11px;color:#a7f3d0;white-space:pre-wrap;">Loading Python Mastered Library &amp; Auto-Pilot telemetry...</pre>
-    `;
-    suite.appendChild(s8);
-    if(window.runFullAutopilot) window.runFullAutopilot();
-  }
-};
-
-window.triggerEliteModalRender = async function(){
-  const lens = (document.getElementById('modal-cinema-lens')||{}).value || '35mm Anamorphic';
-  const lut = (document.getElementById('modal-cinema-lut')||{}).value || 'Cyber-Teal & Gold';
-  const r = await fetch('/api/studio/cinema', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt:'Cybernetic supercomputer datacenter flythrough', lens:lens, lut:lut, bpm:128})});
-  const d = await r.json();
-  document.querySelectorAll('div,pre,p').forEach(el => {
-    if((el.textContent || '').includes('LOCAL_DETERMINISTIC_DIRECTOR') && el.children.length === 0){
-      el.textContent = '[' + d.scene_id + ' | ELITE VISUAL STUDIO | ' + d.lens + ' | LUT: ' + d.color_lut + ']\n' +
-        d.shots.map(s => '• Shot ' + s.shot + ' [' + s.timecode + ']: ' + s.camera + ' — ' + s.renoise_pattern).join('\n') +
-        '\nAttestation: ' + d.attestation_hash;
-    }
-  });
-};
-
-setInterval(window.upgradeCinemaModalAndLayout, 800);
-
-
-window.runSpatialTest = async function(mode, gesture){
-  const out = document.getElementById('spatial-quantum-out');
-  out.textContent = 'Executing cryptographic spatial handshake (' + mode + ' :: ' + gesture + ')...';
-  try{
-    const r = await fetch('/api/spatial', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({mode:mode, gesture:gesture, target_action:'EXECUTE_SECURE_NODE_SYNC'})});
-    const d = await r.json();
-    out.textContent = '[SPATIAL HANDSHAKE VERIFIED]\nEvent ID: ' + d.event_id + '\nMode: ' + d.mode + '\nSHA-256 Proof: ' + d.sha256_proof + '\nStatus: ' + d.status;
-  }catch(e){ out.textContent = 'Spatial error: ' + e; }
-};
-
-window.runQuantumSimulation = async function(){
-  const out = document.getElementById('spatial-quantum-out');
-  out.textContent = 'Running OpenQASM 3.0 QisKit lattice simulation on port 8131...';
-  try{
-    const r = await fetch('/api/quantum', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({qasm:'OPENQASM 3.0; qubit[3] q; h q[0];'})});
-    const d = await r.json();
-    out.textContent = '[QISKIT QUANTUM LATTICE SIMULATION]\nSim ID: ' + d.simulation_id + ' | Fidelity: ' + d.fidelity + '\nState Vector: ' + JSON.stringify(d.state_vector) + '\nAttestation: ' + d.attestation_hash;
-  }catch(e){ out.textContent = 'Quantum error: ' + e; }
-};
-
-setTimeout(() => { window.refreshSagaState(); window.loadLegalTemplate(); window.loadAutoPlugins(); }, 400);
+}
+setTimeout(() => { refreshSagaState(); loadLegalTemplate(); loadAutoPlugins(); }, 600);
 </script>
 
 </body>
