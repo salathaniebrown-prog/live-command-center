@@ -165,7 +165,7 @@ function setBrainVisualTier(val) {
     const cy = H * 0.48 + bobY;
 
     // 1. Deep Cybernetic Backdrop + Aura Halo
-    const _hasPhoto = document.getElementById('astraAvatarPhoto') && document.getElementById('astraAvatarPhoto').complete && document.getElementById('astraAvatarPhoto').naturalWidth > 0;
+    const _pEl = document.getElementById('astraAvatarPhoto'); const _hasPhoto = _pEl && _pEl.style.display !== 'none' && _pEl.complete && _pEl.naturalWidth > 0;
     if (_hasPhoto) {
       ctx.clearRect(0, 0, W, H);
       const _img = document.getElementById('astraAvatarPhoto');
@@ -195,7 +195,7 @@ function setBrainVisualTier(val) {
       requestAnimationFrame(render);
       return;
     }
-    const _hasPhoto = document.getElementById('astraAvatarPhoto') && document.getElementById('astraAvatarPhoto').complete && document.getElementById('astraAvatarPhoto').naturalWidth > 0;
+    const _pEl = document.getElementById('astraAvatarPhoto'); const _hasPhoto = _pEl && _pEl.style.display !== 'none' && _pEl.complete && _pEl.naturalWidth > 0;
     if (_hasPhoto) {
       ctx.clearRect(0, 0, W, H);
       const _img = document.getElementById('astraAvatarPhoto');
