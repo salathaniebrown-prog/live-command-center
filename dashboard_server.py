@@ -1697,7 +1697,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         # === BRAIN_V5_LIVE_LEDGER_TOOLS ===
         import json as _js, time as _tm, hashlib as _hl, socket as _sk, sqlite3 as _sq, os as _os, subprocess as _sp, urllib.request as _ur
         _cl = int(self.headers.get("Content-Length", 0))
-        _raw = self.rfile.read(_cl).decode("utf-8", errors="ignore") if _cl > 0 else "{}"
+        _raw = _raw if '_raw' in locals() else '{}'
         try:
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
@@ -1753,7 +1753,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         # === PERSONAL_ASSISTANT_CHAT_API_V1 ===
         import json as _js, time as _tm, hashlib as _hl, socket as _sk
         _cl = int(self.headers.get("Content-Length", 0))
-        _raw = self.rfile.read(_cl).decode("utf-8", errors="ignore") if _cl > 0 else "{}"
+        _raw = _raw if '_raw' in locals() else '{}'
         try:
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
@@ -1783,7 +1783,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         # === BRAIN_AND_REMAINING_FIELDS_V5 ===
         import json as _js, time as _tm, hashlib as _hl
         _cl = int(self.headers.get("Content-Length", 0))
-        _raw = self.rfile.read(_cl).decode("utf-8", errors="ignore") if _cl > 0 else "{}"
+        _raw = _raw if '_raw' in locals() else '{}'
         try:
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
@@ -1827,7 +1827,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         # === RENDER_FIX_CINEMA_AUTOPILOT_V4 ===
         import json as _js, time as _tm, hashlib as _hl, subprocess as _sp
         _cl = int(self.headers.get("Content-Length", 0))
-        _raw = self.rfile.read(_cl).decode("utf-8", errors="ignore") if _cl > 0 else "{}"
+        _raw = _raw if '_raw' in locals() else '{}'
         try:
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:

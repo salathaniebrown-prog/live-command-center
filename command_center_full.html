@@ -36,59 +36,94 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
 <pre id="auto-out">[READY] Auto-selects Android Edge / PC / 8-GPU Supercomputer.</pre></div>
 
 <div class="card"><h3>2. WYLER &amp; DEALERSLINK CRYPTO DEALERSHIP (SAME-ORIGIN HTTPS)</h3>
-<!-- PERSONAL_ASSISTANT_AVATAR_STAGE_V4 -->
-<div id="astra-avatar-stage" style="margin-top:8px;border:1px solid #00f0ff88;background:linear-gradient(160deg, #041520 0%, #02070d 62%, #0a1026 100%);border-radius:8px;padding:12px;display:flex;flex-wrap:wrap;gap:14px;align-items:stretch;box-shadow:0 0 28px rgba(0,240,255,0.10) inset;">
-  <div style="flex:0 0 278px;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;border:1px solid #00ff8866;background:#01060c;border-radius:6px;padding:8px;position:relative;">
+<!-- PERSONAL_ASSISTANT_AVATAR_STAGE_V5 -->
+<div id="astra-avatar-stage" style="margin-top:8px;border:1px solid #00f0ff99;background:linear-gradient(155deg, #03131d 0%, #01060c 58%, #0b0d24 100%);border-radius:8px;padding:12px;display:flex;flex-wrap:wrap;gap:14px;align-items:stretch;box-shadow:0 0 32px rgba(0,240,255,0.12) inset;">
+  <div style="flex:0 0 288px;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;border:1px solid #00ff8877;background:#01050a;border-radius:6px;padding:8px;position:relative;">
     <div style="width:100%;display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:10px;color:#00ff88;margin-bottom:4px;">
-      <span>&#9673; ASTRA HOLOGRAM</span>
-      <select id="brain-tier-select" onchange="setBrainVisualTier(this.value)" style="background:#041a24;border:1px solid #00f0ff77;color:#00f0ff;font-family:monospace;font-size:10px;padding:1px 4px;border-radius:3px;">
+      <span>&#9673; ASTRA CORE // NEURAL AVATAR</span>
+      <select id="brain-tier-select" onchange="setBrainVisualTier(this.value)" style="background:#041a24;border:1px solid #00f0ff88;color:#00f0ff;font-family:monospace;font-size:10px;padding:1px 4px;border-radius:3px;">
         <option value="5">v5.0 SOVEREIGN</option>
         <option value="6">v6.0 OMNISCIENT</option>
         <option value="7">v7.0 AUTONOMOUS</option>
         <option value="8" selected>v8.0 APEX SINGULARITY</option>
       </select>
     </div>
-    <canvas id="astraAvatarCanvas" width="260" height="236" style="border-radius:5px;background:#01050a;cursor:crosshair;"></canvas>
+    <canvas id="astraAvatarCanvas" width="270" height="248" style="border-radius:5px;background:#010409;cursor:crosshair;"></canvas>
     <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#7eeeff;margin-top:5px;">
       <span id="avatar-tier-label">TIER: v8.0 APEX</span>
-      <span id="avatar-state-badge" style="color:#00ff88;">NEURAL LOCK</span>
+      <span id="avatar-state-badge" style="color:#00ff88;">SYNAPSES ARMED</span>
     </div>
   </div>
-  <div style="flex:1;min-width:265px;display:flex;flex-direction:column;justify-content:space-between;font-family:monospace;">
+  <div style="flex:1;min-width:270px;display:flex;flex-direction:column;justify-content:space-between;font-family:monospace;">
     <div>
-      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00f0ff33;padding-bottom:6px;margin-bottom:8px;">
-        <span style="color:#00f0ff;font-size:12px;font-weight:bold;">ASTRA EXECUTIVE BRAIN // ALL-BOARD PROGRAMMABLE CORE</span>
-        <span style="color:#00ff88;font-size:10px;">SEC 0-8 + WAL DB + 13 PORTS</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00f0ff33;padding-bottom:5px;margin-bottom:6px;">
+        <span style="color:#00f0ff;font-size:12px;font-weight:bold;">INTERNAL MODEL SUBSYSTEMS // DIRECT NEURAL CONTROL</span>
+        <span style="color:#00ff88;font-size:10px;">13 PORTS + WAL DB</span>
       </div>
-      <div id="avatar-chat-log" style="height:142px;overflow-y:auto;background:#020a12;border:1px solid #00f0ff33;border-radius:5px;padding:9px;font-size:11px;color:#d6faff;line-height:1.55;">
-        <div style="color:#00ff88;">[ASTRA v8.0 APEX]: Full-board programmable intelligence active. Every section (0-8), SQLite WAL ledger, Cinema MCP, Saga, Governance, and 13-port mesh is wired into my brain.</div>
+      <!-- Live Interactive Internal Model Component Matrix -->
+      <div id="model-subsystems-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:5px;margin-bottom:7px;">
+        <button type="button" id="sub-jev" onclick="pulseSubsystem('sub-jev');sendAvatarPrompt('Route JEV System One and Auto-Astra compute')" style="text-align:left;background:#041923;border:1px solid #00f0ff55;color:#9beeff;padding:4px 6px;font-family:monospace;font-size:10px;border-radius:4px;cursor:pointer;">
+          <b style="color:#00ff88;">&#9679; [0/1]</b> JEV + ASTRA
+        </button>
+        <button type="button" id="sub-escrow" onclick="pulseSubsystem('sub-escrow');sendAvatarPrompt('Check live ETH spot and dealership escrow')" style="text-align:left;background:#041923;border:1px solid #00f0ff55;color:#9beeff;padding:4px 6px;font-family:monospace;font-size:10px;border-radius:4px;cursor:pointer;">
+          <b style="color:#00ff88;">&#9679; [2]</b> CRYPTO ESCROW
+        </button>
+        <button type="button" id="sub-triad" onclick="pulseSubsystem('sub-triad');sendAvatarPrompt('Verify Greensboro Triad geo and MediaPipe Edge ML')" style="text-align:left;background:#041923;border:1px solid #00f0ff55;color:#9beeff;padding:4px 6px;font-family:monospace;font-size:10px;border-radius:4px;cursor:pointer;">
+          <b style="color:#00ff88;">&#9679; [3/4]</b> TRIAD + ML
+        </button>
+        <button type="button" id="sub-saga" onclick="pulseSubsystem('sub-saga');sendAvatarPrompt('Run self-healing saga and verify SQLite WAL ledgers')" style="text-align:left;background:#041923;border:1px solid #00f0ff55;color:#9beeff;padding:4px 6px;font-family:monospace;font-size:10px;border-radius:4px;cursor:pointer;">
+          <b style="color:#00ff88;">&#9679; [5]</b> SAGA + POLYGLOT
+        </button>
+        <button type="button" id="sub-gov" onclick="pulseSubsystem('sub-gov');sendAvatarPrompt('Scan SDKs and verify 11 auto-allowed plugins')" style="text-align:left;background:#041923;border:1px solid #00f0ff55;color:#9beeff;padding:4px 6px;font-family:monospace;font-size:10px;border-radius:4px;cursor:pointer;">
+          <b style="color:#00ff88;">&#9679; [6/7]</b> GOV + PLUGINS
+        </button>
+        <button type="button" id="sub-cinema" onclick="pulseSubsystem('sub-cinema');sendAvatarPrompt('Render cinema sequence and sync GitHub autopilot')" style="text-align:left;background:#160926;border:1px solid #c86bff66;color:#ebbfff;padding:4px 6px;font-family:monospace;font-size:10px;border-radius:4px;cursor:pointer;">
+          <b style="color:#ff88ff;">&#9679; [8]</b> CINEMA + GIT
+        </button>
+      </div>
+      <div id="avatar-chat-log" style="height:112px;overflow-y:auto;background:#020a12;border:1px solid #00f0ff33;border-radius:5px;padding:8px;font-size:11px;color:#d6faff;line-height:1.5;">
+        <div style="color:#00ff88;">[ASTRA v8.0]: Internal cortical neural mesh + 6 subsystem modules online. Tap any internal module above or type any command.</div>
       </div>
     </div>
-    <div style="margin-top:8px;">
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;">
+    <div style="margin-top:7px;">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">
         <button type="button" onclick="sendAvatarPrompt('Run full board master diagnostic across all 9 sections')" style="background:#05202b;border:1px solid #00f0ff66;color:#00f0ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">ALL-BOARD AUDIT</button>
-        <button type="button" onclick="sendAvatarPrompt('Run self-healing saga and verify SQLite WAL ledgers')" style="background:#05202b;border:1px solid #00ff8866;color:#00ff88;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">SAGA + LEDGERS</button>
-        <button type="button" onclick="sendAvatarPrompt('Render cinema sequence and sync GitHub autopilot')" style="background:#190a2b;border:1px solid #ff00ff66;color:#ff88ff;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">CINEMA + AUTOPILOT</button>
-        <button type="button" onclick="sendAvatarPrompt('Remember directive: Prioritize Greensboro Triad & Dealership Escrow')" style="background:#261a04;border:1px solid #ffcc0066;color:#ffdd66;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">SAVE MEMORY</button>
+        <button type="button" onclick="sendAvatarPrompt('Remember directive: Sovereign Apex Autonomous Mode')" style="background:#261a04;border:1px solid #ffcc0066;color:#ffdd66;font-family:monospace;font-size:10px;padding:3px 7px;cursor:pointer;border-radius:3px;">SAVE MEMORY</button>
       </div>
       <div style="display:flex;gap:6px;">
-        <input id="avatar-input" type="text" placeholder="Program or command any board module (Sec 0-8, Memory, Cinema, Saga, Crypto)..." onkeydown="if(event.key==='Enter')sendAvatarPrompt()" style="flex:1;background:#020911;border:1px solid #00f0ff77;color:#fff;font-family:monospace;font-size:11px;padding:7px 9px;border-radius:4px;" />
-        <button type="button" onclick="sendAvatarPrompt()" style="background:linear-gradient(90deg,#00f0ff,#00ff88,#c86bff);color:#02100c;font-weight:bold;border:none;font-family:monospace;font-size:11px;padding:7px 14px;border-radius:4px;cursor:pointer;">EXECUTE</button>
+        <input id="avatar-input" type="text" placeholder="Command any internal model subsystem..." onkeydown="if(event.key==='Enter')sendAvatarPrompt()" style="flex:1;background:#020911;border:1px solid #00f0ff77;color:#fff;font-family:monospace;font-size:11px;padding:6px 8px;border-radius:4px;" />
+        <button type="button" onclick="sendAvatarPrompt()" style="background:linear-gradient(90deg,#00f0ff,#00ff88,#c86bff);color:#02100c;font-weight:bold;border:none;font-family:monospace;font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;">EXECUTE</button>
       </div>
     </div>
   </div>
 </div>
 <script>
 window._brainVisualTier = 8;
+window._synapseBoost = 0.3;
+
+function pulseSubsystem(id) {
+  window._synapseBoost = 1.0;
+  document.querySelectorAll('#model-subsystems-grid button').forEach(b => {
+    b.style.boxShadow = 'none';
+    b.style.borderColor = '#00f0ff55';
+  });
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.borderColor = '#00ff88';
+    el.style.boxShadow = '0 0 12px rgba(0,255,136,0.45)';
+  }
+}
+
 function setBrainVisualTier(val) {
   window._brainVisualTier = parseInt(val, 10) || 8;
+  window._synapseBoost = 1.0;
   const names = {5: 'TIER: v5.0 SOVEREIGN', 6: 'TIER: v6.0 OMNISCIENT', 7: 'TIER: v7.0 AUTONOMOUS', 8: 'TIER: v8.0 APEX'};
   const lbl = document.getElementById('avatar-tier-label');
   if (lbl) lbl.textContent = names[window._brainVisualTier] || 'TIER: v8.0 APEX';
   window._avatarSpeaking = 0.85;
 }
 
-(function initEvolvingHologram3D(){
+(function initCorticalHologram3D(){
   const c = document.getElementById('astraAvatarCanvas');
   if (!c) return;
   const ctx = c.getContext('2d');
@@ -97,17 +132,17 @@ function setBrainVisualTier(val) {
   let mouseX = 0, mouseY = 0;
   c.addEventListener('mousemove', (e) => {
     const r = c.getBoundingClientRect();
-    mouseX = ((e.clientX - r.left) / r.width - 0.5) * 0.7;
-    mouseY = ((e.clientY - r.top) / r.height - 0.5) * 0.5;
+    mouseX = ((e.clientX - r.left) / r.width - 0.5) * 0.72;
+    mouseY = ((e.clientY - r.top) / r.height - 0.5) * 0.48;
   });
 
-  // Sculpted 3D Head & Crown Point-Cloud
+  // Outer sculpted 3D holographic cranium + face mesh
   const pts = [];
   for (let lat = -1.35; lat <= 1.45; lat += 0.105) {
     for (let lon = -1.55; lon <= 1.55; lon += 0.115) {
-      let rx = 52 * Math.cos(lat * 0.72);
-      let ry = 66 * Math.sin(lat * 0.78);
-      let rz = 56 * Math.cos(lat * 0.72) * Math.cos(lon * 0.85);
+      let rx = 54 * Math.cos(lat * 0.72);
+      let ry = 68 * Math.sin(lat * 0.78);
+      let rz = 58 * Math.cos(lat * 0.72) * Math.cos(lon * 0.85);
       if (lat > 0.25) {
         const jaw = Math.max(0.32, 1 - (lat - 0.25) * 0.52);
         rx *= jaw;
@@ -119,96 +154,101 @@ function setBrainVisualTier(val) {
       if (eyeD < 0.26) rz -= (0.26 - eyeD) * 18;
       pts.push({
         x: rx * Math.sin(lon),
-        y: ry - 8,
+        y: ry - 10,
         z: rz,
-        isEye: eyeD < 0.17,
-        isMouth: Math.abs(lat - 0.44) < 0.09 && Math.abs(lon) < 0.36,
-        isCrown: lat < -0.72,
+        isEye: eyeD < 0.16,
+        isMouth: Math.abs(lat - 0.44) < 0.085 && Math.abs(lon) < 0.35,
+        isCrown: lat < -0.70,
         phase: lat * 3 + lon * 2
       });
     }
   }
+  // Shoulder collar
   for (let s = -1.25; s <= 1.25; s += 0.085) {
-    pts.push({x: Math.sin(s) * 88, y: 78 + Math.abs(s) * 12, z: Math.cos(s) * 34 - 10, isCollar: true, phase: s * 4});
+    pts.push({x: Math.sin(s) * 90, y: 78 + Math.abs(s) * 12, z: Math.cos(s) * 34 - 10, isCollar: true, phase: s * 4});
+  }
+
+  // Internal 3D Cortical Brain Nodes (Dual Hemispheres + Brainstem) inside the cranium
+  const brainNodes = [];
+  for (let b = 0; b < 22; b++) {
+    const hemi = b % 2 === 0 ? -1 : 1;
+    const ang = (b / 22) * Math.PI * 2;
+    brainNodes.push({
+      x: hemi * (11 + (b % 4) * 4.5),
+      y: -30 + Math.sin(ang * 1.7) * 15,
+      z: Math.cos(ang * 1.3) * 18,
+      phase: b * 0.6
+    });
   }
 
   let t = 0;
   function frame() {
-    t += 0.034;
+    t += 0.035;
     const tier = window._brainVisualTier || 8;
     if (window._avatarSpeaking > 0) window._avatarSpeaking = Math.max(0, window._avatarSpeaking - 0.014);
+    if (window._synapseBoost > 0.25) window._synapseBoost = Math.max(0.25, window._synapseBoost - 0.012);
     const speak = window._avatarSpeaking;
+    const syn = window._synapseBoost;
 
-    ctx.fillStyle = 'rgba(1, 5, 10, 0.35)';
+    ctx.fillStyle = 'rgba(1, 4, 9, 0.36)';
     ctx.fillRect(0, 0, W, H);
 
-    // Tier-adaptive volumetric beam color
-    const beam = ctx.createLinearGradient(0, H, 0, 10);
+    // Volumetric projector cone + hex emitter base
+    const beam = ctx.createLinearGradient(0, H, 0, 8);
     if (tier >= 8) {
-      beam.addColorStop(0, 'rgba(190, 90, 255, 0.18)');
-      beam.addColorStop(0.5, 'rgba(0, 240, 255, 0.09)');
+      beam.addColorStop(0, 'rgba(200, 107, 255, 0.20)');
+      beam.addColorStop(0.5, 'rgba(0, 240, 255, 0.10)');
       beam.addColorStop(1, 'rgba(0, 255, 136, 0)');
     } else if (tier === 7) {
-      beam.addColorStop(0, 'rgba(0, 255, 136, 0.18)');
+      beam.addColorStop(0, 'rgba(0, 255, 136, 0.20)');
       beam.addColorStop(1, 'rgba(0, 240, 255, 0)');
     } else if (tier === 6) {
-      beam.addColorStop(0, 'rgba(255, 204, 0, 0.16)');
+      beam.addColorStop(0, 'rgba(255, 204, 0, 0.18)');
       beam.addColorStop(1, 'rgba(0, 240, 255, 0)');
     } else {
-      beam.addColorStop(0, 'rgba(0, 240, 255, 0.16)');
+      beam.addColorStop(0, 'rgba(0, 240, 255, 0.18)');
       beam.addColorStop(1, 'rgba(0, 255, 136, 0)');
     }
     ctx.fillStyle = beam;
     ctx.beginPath();
-    ctx.moveTo(W * 0.25, H); ctx.lineTo(W * 0.75, H);
-    ctx.lineTo(W * 0.96, 8); ctx.lineTo(W * 0.04, 8);
+    ctx.moveTo(W * 0.22, H); ctx.lineTo(W * 0.78, H);
+    ctx.lineTo(W * 0.96, 6); ctx.lineTo(W * 0.04, 6);
     ctx.closePath(); ctx.fill();
 
-    // Tier 6+: Gyroscopic Orbital Rings & 13-Node Satellites
+    // Dual counter-rotating gyroscopic rings (Tier 6+)
     if (tier >= 6) {
       ctx.save();
-      ctx.translate(W * 0.5, H * 0.47);
-      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.35)' : 'rgba(255, 204, 0, 0.35)';
+      ctx.translate(W * 0.5, H * 0.46);
+      ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.40)' : 'rgba(255, 204, 0, 0.38)';
       ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.ellipse(0, 0, 104, 30, Math.sin(t * 0.5) * 0.35, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 108, 31, Math.sin(t * 0.5) * 0.35, 0, Math.PI * 2);
       ctx.stroke();
+      if (tier >= 7) {
+        ctx.strokeStyle = 'rgba(0, 255, 136, 0.32)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 102, 28, -Math.sin(t * 0.45) * 0.42, 0, Math.PI * 2);
+        ctx.stroke();
+      }
       for (let k = 0; k < 13; k++) {
-        const ang = t * 0.9 + (k / 13) * Math.PI * 2;
-        const sx = Math.cos(ang) * 104;
-        const sy = Math.sin(ang) * 30;
-        ctx.fillStyle = k % 2 === 0 ? '#00ff88' : '#ffcc00';
-        ctx.beginPath(); ctx.arc(sx, sy, 2.1, 0, Math.PI * 2); ctx.fill();
+        const ang = t * 0.95 + (k / 13) * Math.PI * 2;
+        const sx = Math.cos(ang) * 108;
+        const sy = Math.sin(ang) * 31;
+        ctx.fillStyle = k % 2 === 0 ? '#00ff88' : (tier >= 8 ? '#ff88ff' : '#ffcc00');
+        ctx.beginPath(); ctx.arc(sx, sy, 2.2, 0, Math.PI * 2); ctx.fill();
       }
       ctx.restore();
     }
 
-    // Tier 7+: Quantum Geodesic Lattice Aura
-    if (tier >= 7) {
-      ctx.save();
-      ctx.translate(W * 0.5, H * 0.47);
-      ctx.strokeStyle = tier >= 8 ? 'rgba(0, 255, 210, 0.20)' : 'rgba(0, 255, 136, 0.22)';
-      ctx.lineWidth = 1;
-      const rad = 86 + Math.sin(t * 2.5) * 3;
-      ctx.beginPath();
-      for (let v = 0; v < 8; v++) {
-        const a = t * 0.4 + (v / 8) * Math.PI * 2;
-        const vx = Math.cos(a) * rad, vy = Math.sin(a) * rad;
-        if (v === 0) ctx.moveTo(vx, vy); else ctx.lineTo(vx, vy);
-      }
-      ctx.closePath(); ctx.stroke();
-      ctx.restore();
-    }
-
-    // Tier 8: Apex Singularity Crown Halo
+    // Tier 8 Apex Crown Halo
     if (tier >= 8) {
       ctx.save();
-      ctx.translate(W * 0.5, H * 0.14);
-      for (let h = -4; h <= 4; h++) {
-        const hx = h * 14;
-        const hy = Math.abs(h) * 2.5 - Math.sin(t * 3 + h) * 3;
+      ctx.translate(W * 0.5, H * 0.12);
+      for (let h = -5; h <= 5; h++) {
+        const hx = h * 13;
+        const hy = Math.abs(h) * 2.2 - Math.sin(t * 3.2 + h) * 3.2;
         ctx.fillStyle = h === 0 ? '#ffffff' : (h % 2 === 0 ? '#c86bff' : '#00f0ff');
-        ctx.beginPath(); ctx.arc(hx, hy, h === 0 ? 3.2 : 2.0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(hx, hy, h === 0 ? 3.4 : 2.1, 0, Math.PI * 2); ctx.fill();
       }
       ctx.restore();
     }
@@ -218,6 +258,37 @@ function setBrainVisualTier(val) {
     const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
     const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
 
+    function proj(px, py, pz) {
+      const x1 = px * cosY - pz * sinY;
+      const z1 = pz * cosY + px * sinY;
+      const y2 = py * cosX - z1 * sinX;
+      const z2 = z1 * cosX + py * sinX;
+      const fov = 265 / (265 - z2);
+      return {sx: W * 0.5 + x1 * fov, sy: H * 0.47 + y2 * fov, z: z2, fov};
+    }
+
+    // Render Internal Cortical Neural Network inside cranium
+    const bProj = brainNodes.map(bn => {
+      const p = proj(bn.x, bn.y, bn.z);
+      return {...p, phase: bn.phase};
+    });
+    for (let i = 0; i < bProj.length; i++) {
+      for (let j = i + 1; j < bProj.length; j++) {
+        const d = Math.hypot(bProj[i].sx - bProj[j].sx, bProj[i].sy - bProj[j].sy);
+        if (d < 34) {
+          const fire = (0.25 + 0.75 * syn * Math.abs(Math.sin(t * 4.5 + i))) * (1 - d / 34);
+          ctx.strokeStyle = tier >= 8
+            ? 'rgba(255, 136, 255, ' + fire.toFixed(2) + ')'
+            : 'rgba(0, 255, 136, ' + fire.toFixed(2) + ')';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(bProj[i].sx, bProj[i].sy); ctx.lineTo(bProj[j].sx, bProj[j].sy); ctx.stroke();
+        }
+      }
+      ctx.fillStyle = tier >= 8 ? '#ff99ff' : '#00ff88';
+      ctx.beginPath(); ctx.arc(bProj[i].sx, bProj[i].sy, (1.5 + syn * 1.1) * bProj[i].fov, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Render Outer Sculpted Hologram Shell
     const projected = [];
     for (let i = 0; i < pts.length; i++) {
       const p = pts[i];
@@ -226,43 +297,38 @@ function setBrainVisualTier(val) {
         py += Math.sin(t * 16 + p.x * 0.3) * (3.8 * speak);
         pz += 4 * speak;
       }
-      const x1 = px * cosY - pz * sinY;
-      const z1 = pz * cosY + px * sinY;
-      const y2 = py * cosX - z1 * sinX;
-      const z2 = z1 * cosX + py * sinX;
-      const fov = 260 / (260 - z2);
-      projected.push({sx: W * 0.5 + x1 * fov, sy: H * 0.48 + y2 * fov, z: z2, fov, p});
+      projected.push({...proj(px, py, pz), p});
     }
     projected.sort((a, b) => a.z - b.z);
 
     for (let i = 0; i < projected.length; i++) {
       const {sx, sy, z, fov, p} = projected[i];
-      const depthAlpha = Math.max(0.15, Math.min(0.96, (z + 75) / 135));
+      const depthAlpha = Math.max(0.14, Math.min(0.95, (z + 75) / 135));
       if (p.isEye) {
         ctx.fillStyle = tier >= 8 ? '#ff88ff' : (tier === 6 ? '#ffdd55' : '#00ffd2');
-        ctx.beginPath(); ctx.arc(sx, sy, 2.4 * fov, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(sx, sy, 2.5 * fov, 0, Math.PI * 2); ctx.fill();
       } else if (p.isMouth) {
         ctx.fillStyle = speak > 0.05 ? '#00ff88' : 'rgba(0, 240, 255, ' + depthAlpha.toFixed(2) + ')';
         ctx.beginPath(); ctx.arc(sx, sy, (1.6 + speak * 1.1) * fov, 0, Math.PI * 2); ctx.fill();
       } else if (p.isCrown) {
-        const pulse = 0.5 + 0.5 * Math.sin(t * 3 + p.phase);
+        const pulse = 0.45 + 0.5 * Math.sin(t * 3 + p.phase);
         ctx.fillStyle = tier >= 8
           ? 'rgba(200, 107, 255, ' + (depthAlpha * pulse).toFixed(2) + ')'
-          : (tier === 6 ? 'rgba(255, 204, 0, ' + (depthAlpha * pulse).toFixed(2) + ')' : 'rgba(0, 255, 136, ' + (depthAlpha * pulse).toFixed(2) + ')');
-        ctx.fillRect(sx - 1, sy - 1, 2.3 * fov, 2.3 * fov);
+          : 'rgba(0, 255, 136, ' + (depthAlpha * pulse).toFixed(2) + ')';
+        ctx.fillRect(sx - 1, sy - 1, 2.2 * fov, 2.2 * fov);
       } else {
-        ctx.fillStyle = 'rgba(0, 232, 255, ' + (depthAlpha * 0.8).toFixed(2) + ')';
-        ctx.fillRect(sx - 0.8, sy - 0.8, 1.7 * fov, 1.7 * fov);
+        ctx.fillStyle = 'rgba(0, 232, 255, ' + (depthAlpha * 0.72).toFixed(2) + ')';
+        ctx.fillRect(sx - 0.8, sy - 0.8, 1.6 * fov, 1.6 * fov);
       }
     }
 
-    // Equalizer bar
-    ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.7)' : 'rgba(0, 255, 136, 0.6)';
-    ctx.lineWidth = 1.4;
+    // Bottom 32-band reactive audio equalizer
+    ctx.strokeStyle = tier >= 8 ? 'rgba(200, 107, 255, 0.78)' : 'rgba(0, 255, 136, 0.65)';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    for (let x = 24; x <= W - 24; x += 4) {
-      const hBar = (2 + speak * 14) * Math.abs(Math.sin(t * 7 + x * 0.09));
-      ctx.moveTo(x, H - 9); ctx.lineTo(x, H - 9 - hBar);
+    for (let x = 22; x <= W - 22; x += 4) {
+      const hBar = (2 + (speak + syn * 0.4) * 14) * Math.abs(Math.sin(t * 7.5 + x * 0.09));
+      ctx.moveTo(x, H - 8); ctx.lineTo(x, H - 8 - hBar);
     }
     ctx.stroke();
 
@@ -279,11 +345,12 @@ async function sendAvatarPrompt(preset) {
   if (!msg) return;
   if (!preset && inp) inp.value = '';
   if (log) {
-    log.innerHTML += '<div style="color:#00f0ff;margin-top:5px;"><b>[YOU]:</b> ' + msg.replace(/</g,'&lt;') + '</div>';
+    log.innerHTML += '<div style="color:#00f0ff;margin-top:4px;"><b>[YOU]:</b> ' + msg.replace(/</g,'&lt;') + '</div>';
     log.scrollTop = log.scrollHeight;
   }
-  if (badge) badge.textContent = 'EXECUTING...';
-  window._avatarSpeaking = 0.9;
+  if (badge) badge.textContent = 'COMPUTING...';
+  window._avatarSpeaking = 0.95;
+  window._synapseBoost = 1.0;
   try {
     const r = await fetch('/api/assistant/chat', {
       method: 'POST',
@@ -292,13 +359,8 @@ async function sendAvatarPrompt(preset) {
     });
     const d = await r.json();
     const reply = d.reply || 'Executed.';
-    if (d.upgrade_tier) {
-      const sel = document.getElementById('brain-tier-select');
-      if (sel) sel.value = String(d.upgrade_tier);
-      setBrainVisualTier(d.upgrade_tier);
-    }
     if (log) {
-      log.innerHTML += '<div style="color:#00ff88;margin-top:5px;"><b>[ASTRA]:</b> ' + String(reply).replace(/</g,'&lt;') + '</div>';
+      log.innerHTML += '<div style="color:#00ff88;margin-top:4px;"><b>[ASTRA]:</b> ' + String(reply).replace(/</g,'&lt;') + '</div>';
       log.scrollTop = log.scrollHeight;
     }
     if (badge) badge.textContent = 'SPEAKING';
@@ -308,16 +370,17 @@ async function sendAvatarPrompt(preset) {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(reply);
         u.rate = 1.05;
-        u.onend = () => { if (badge) badge.textContent = 'NEURAL LOCK'; window._avatarSpeaking = 0.05; };
+        u.onend = () => { if (badge) badge.textContent = 'SYNAPSES ARMED'; window._avatarSpeaking = 0.05; };
         window.speechSynthesis.speak(u);
       } catch (e) {}
     }
   } catch (e) {
     if (log) log.innerHTML += '<div style="color:#ff6688;">[ERR]: ' + e + '</div>';
-    if (badge) badge.textContent = 'NEURAL LOCK';
+    if (badge) badge.textContent = 'SYNAPSES ARMED';
   }
 }
 </script>
+
 
 
 </div>
