@@ -1,4 +1,27 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html><html><head>
+<script>
+(function() {
+  const _origCreate = Object.getOwnPropertyDescriptor(window, 'DailyIframe');
+  function wrapDaily(D) {
+    if (!D || D._astraSingletonWrapped) return D;
+    D._astraSingletonWrapped = true;
+    const origCreateObj = D.createCallObject.bind(D);
+    D.createCallObject = function(opts) {
+      const existing = D.getCallInstance && D.getCallInstance();
+      if (existing) return existing;
+      return origCreateObj(opts);
+    };
+    return D;
+  }
+  if (window.DailyIframe) wrapDaily(window.DailyIframe);
+  let _dailyRef = window.DailyIframe;
+  Object.defineProperty(window, 'DailyIframe', {
+    configurable: true,
+    get() { return wrapDaily(_dailyRef); },
+    set(val) { _dailyRef = wrapDaily(val); }
+  });
+})();
+</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ASTRA + ALSTRA // JEV SYSTEM ONE COMMAND CENTER</title>
 <style>
 *{box-sizing:border-box}body{margin:0;padding:10px;background:#03070d;color:#e6f9ff;font-family:monospace}
