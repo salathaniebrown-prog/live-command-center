@@ -1854,9 +1854,16 @@ window.addEventListener('load', refreshTelemetrySpine);
 <script>
 (function() {
   function findAvatarBox() {
-    return document.getElementById('avatar-frame')
-        || document.getElementById('neural-avatar-box')
-        || (document.querySelector('canvas') && document.querySelector('canvas').parentElement);
+    const loadBtn = Array.from(document.querySelectorAll('button')).find(b => /LOAD PORTRAIT/i.test(b.textContent || ''));
+    if (loadBtn) {
+      let card = loadBtn.parentElement;
+      while (card && card.clientHeight < 180) card = card.parentElement;
+      if (card) {
+        const mediaWrap = card.querySelector('img, video, canvas')?.parentElement || card;
+        return mediaWrap;
+      }
+    }
+    return document.getElementById('avatar-frame') || document.getElementById('neural-avatar-box');
   }
 
   function ensureMediaEls() {
@@ -1869,7 +1876,7 @@ window.addEventListener('load', refreshTelemetrySpine);
       v.id = 'given-jackal-cloud-video';
       v.autoplay = true;
       v.playsInline = true;
-      v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:25;display:none;border-radius:8px;background:#000;';
+      v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:50;display:none;border-radius:8px;background:#000;';
       box.appendChild(v);
     }
     if (!a) {
@@ -1959,6 +1966,7 @@ window.addEventListener('load', refreshTelemetrySpine);
         }
       };
 
+      call.on('participant-updated', () => { scanParticipants(); });
       call.on('participant-joined', () => {
         setStatus('BOT JOINED // SYNCING STREAM...');
         scanParticipants();
