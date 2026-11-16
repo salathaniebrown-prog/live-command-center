@@ -1891,6 +1891,10 @@ window.addEventListener('load', refreshTelemetrySpine);
   window.connectGivenJackalCloudDaily = async function() {
     setStatus('STARTING CLOUD ROOM...');
     try {
+      // Unlock Android Chrome audio context on user tap
+      const { v, a } = ensureMediaEls();
+      if (a) { a.muted = false; a.volume = 1.0; }
+
       const resp = await fetch('/api/pipecat/cloud/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1917,27 +1921,52 @@ window.addEventListener('load', refreshTelemetrySpine);
           document.head.appendChild(s);
         });
       }
-      const existingCall = window._astraDailyCall || (window.DailyIframe.getCallInstance && window.DailyIframe.getCallInstance());
-      if (existingCall) {
-        await existingCall.leave().catch(() => {});
-        await existingCall.destroy().catch(() => {});
-        window._astraDailyCall = null;
+      if (window._astraDailyCall) {
+        await window._astraDailyCall.leave().catch(() => {});
       }
-      const { v, a } = ensureMediaEls();
-      const call = (window.DailyIframe.getCallInstance && window.DailyIframe.getCallInstance())
-        || window.DailyIframe.createCallObject({ audioSource: true, videoSource: false });
+      const call = window.DailyIframe.createCallObject({
+        audioSource: true,
+        videoSource: false,
+        subscribeToTracksAutomatically: true
+      });
       window._astraDailyCall = call;
+
+      const attachTrack = (track, kind) => {
+        if (!track) return;
+        if (kind === 'video' && v) {
+          v.srcObject = new MediaStream([track]);
+          v.style.display = 'block';
+          v.play().catch(() => {});
+          setStatus('CLOUD LIVE (768x768)');
+        } else if (kind === 'audio' && a) {
+          a.srcObject = new MediaStream([track]);
+          a.muted = false;
+          a.play().catch(() => {});
+        }
+      };
+
+      const scanParticipants = () => {
+        const parts = call.participants();
+        let remoteCount = 0;
+        Object.values(parts).forEach(p => {
+          if (p.local) return;
+          remoteCount++;
+          if (p.tracks?.video?.persistentTrack) attachTrack(p.tracks.video.persistentTrack, 'video');
+          if (p.tracks?.audio?.persistentTrack) attachTrack(p.tracks.audio.persistentTrack, 'audio');
+        });
+        if (remoteCount === 0) {
+          setStatus('ROOM READY // WAITING FOR BOT (~20s)...');
+        }
+      };
+
+      call.on('participant-joined', () => {
+        setStatus('BOT JOINED // SYNCING STREAM...');
+        scanParticipants();
+      });
 
       call.on('track-started', (ev) => {
         if (!ev || ev.participant?.local) return;
-        if (ev.track.kind === 'video' && v) {
-          v.srcObject = new MediaStream([ev.track]);
-          v.style.display = 'block';
-          setStatus('CLOUD LIVE (768x768)');
-        } else if (ev.track.kind === 'audio' && a) {
-          a.srcObject = new MediaStream([ev.track]);
-          a.play().catch(() => {});
-        }
+        attachTrack(ev.track, ev.track.kind);
       });
 
       call.on('left-meeting', () => {
@@ -1945,9 +1974,9 @@ window.addEventListener('load', refreshTelemetrySpine);
         setStatus('IDLE BREATHING');
       });
 
-      setStatus('JOINING ROOM (COLD START ~15s)...');
+      setStatus('JOINING ROOM...');
       await call.join(token ? { url: roomUrl, token } : { url: roomUrl });
-      setStatus('CONNECTED // LISTENING');
+      scanParticipants();
     } catch (e) {
       setStatus('ERR: ' + (e && e.message ? e.message : e));
     }
