@@ -104,10 +104,10 @@ iframe{width:100%;height:500px;border:1px solid #39ff1455;background:#03080f}
     </div>
     <div id="astraAvatarFrame" style="position:relative;width:270px;height:248px;border-radius:6px;overflow:hidden;border:1px solid #00f0ff66;background:#010409;">
       <img id="astraAvatarPhoto" src="/api/avatar/image?v=1794783454" alt="Astra Cyborg Avatar" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform 0.25s ease, filter 0.25s ease;" onerror="this.style.display='none'" />
+      <video id="astraAvatarVideo" autoplay playsinline style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 22%;z-index:1;"></video>
       <video id="astraHandVideo" autoplay playsinline muted style="display:none;position:absolute;right:6px;top:6px;width:82px;height:62px;border:1px solid #00ff88;border-radius:4px;object-fit:cover;z-index:4;transform:scaleX(-1);"></video>
-      <video id="simli-video" autoplay playsinline style="display:none;position:relative;z-index:3;width:100%;aspect-ratio:1/1;object-fit:contain;background:#02060d;"></video>
-      <audio id="simli-audio" autoplay playsinline style="display:none;"></audio>
-      <canvas id="astra-avatar-canvas" width="240" height="240" style="position:relative;z-index:2;width:100%;height:100%;display:block;"></canvas>
+      <img id="astraAvatarPhoto" src="/api/avatar/image?v=live" crossorigin="anonymous" onerror="this.style.display='none'" style="display:none;" />
+      <canvas id="astraAvatarCanvas" width="236" height="236" style="position:relative;z-index:2;width:100%;height:100%;display:block;"></canvas>
     </div>
     <div style="width:100%;display:flex;justify-content:space-between;font-family:monospace;font-size:10px;color:#7eeeff;margin-top:5px;">
       <input type="file" id="avatar-file-picker" accept="image/*" style="display:none;" onchange="uploadAvatarPhoto(this)" />
@@ -328,186 +328,175 @@ function triggerAvatarLipSyncSpeech(text, badgeEl) {
   }, true);
 })();
 
-(function bootAstraLiveAvatar60FPS(){
-  window._astraPortraitImg = null;
+(function initAvatarLoop(){
+  const c = document.getElementById('astraAvatarCanvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
   window._avatarSpeaking = 0;
-  window._avatarAudioLevel = 0;
+  let mouseX = 0, mouseY = 0;
 
-  function loadPortraitTexture() {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => { window._astraPortraitImg = img; };
-    img.src = '/api/avatar/image?nocache=' + Date.now();
+  c.addEventListener('mousemove', (e) => {
+    const r = c.getBoundingClientRect();
+    mouseX = ((e.clientX - r.left) / r.width - 0.5) * 14;
+    mouseY = ((e.clientY - r.top) / r.height - 0.5) * 10;
+  });
+
+  function drawFaceContour(cx, cy) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 78);
+    ctx.bezierCurveTo(cx + 46, cy - 78, cx + 56, cy - 34, cx + 50, cy + 12);
+    ctx.bezierCurveTo(cx + 44, cy + 46, cx + 22, cy + 72, cx, cy + 76);
+    ctx.bezierCurveTo(cx - 22, cy + 72, cx - 44, cy + 46, cx - 50, cy + 12);
+    ctx.bezierCurveTo(cx - 56, cy - 34, cx - 46, cy - 78, cx, cy - 78);
+    ctx.closePath();
   }
-  loadPortraitTexture();
 
-  function startCanvasLoop() {
-    const c = document.getElementById('astra-avatar-canvas') || (document.getElementById('astra-avatar-canvas') || document.getElementById('astraAvatarCanvas'));
-    if (!c) return;
-    const ctx = c.getContext('2d');
-    const W = c.width, H = c.height;
-    let mouseX = 0, mouseY = 0;
+  let t = 0;
+  let nextBlinkAt = 2.8;
+  let blinkPhase = 0;
 
-    c.addEventListener('mousemove', (e) => {
-      const r = c.getBoundingClientRect();
-      mouseX = ((e.clientX - r.left) / r.width - 0.5) * 14;
-      mouseY = ((e.clientY - r.top) / r.height - 0.5) * 10;
-    });
+  function render() {
+    t += 0.032;
+    const tier = window._brainVisualTier || 10;
+    if (window._avatarSpeaking > 0) window._avatarSpeaking = Math.max(0, window._avatarSpeaking - 0.012);
+    if (window._synapseBoost > 0.25) window._synapseBoost = Math.max(0.25, window._synapseBoost - 0.012);
+    const audioEnv = Math.max(window._avatarAudioLevel || 0, window._avatarSpeaking * 0.85);
+    const syn = window._synapseBoost;
 
-    let t = 0;
-    let nextBlinkAt = 3.0;
-    let blinkPhase = 0;
-    let frameCount = 0;
-    let lastFpsTime = performance.now();
-    let displayFps = 60;
+    // Natural organic blinking scheduler (every ~3.2 to 5.4 seconds)
+    if (t >= nextBlinkAt && blinkPhase === 0) {
+      blinkPhase = 0.01;
+      nextBlinkAt = t + 3.2 + (Math.sin(t * 1.7) + 1) * 1.1;
+    }
+    let eyelidClose = 0;
+    if (blinkPhase > 0) {
+      blinkPhase += 0.16;
+      eyelidClose = Math.sin(Math.min(Math.PI, blinkPhase));
+      if (blinkPhase >= Math.PI) blinkPhase = 0;
+    }
 
-    function render(now) {
-      t += 0.034;
-      frameCount++;
-      if (now - lastFpsTime >= 500) {
-        displayFps = Math.min(60, Math.max(30, Math.round((frameCount * 1000) / (now - lastFpsTime))));
-        frameCount = 0;
-        lastFpsTime = now;
-      }
+    const pEl = document.getElementById('astraAvatarPhoto');
+    const hasPhoto = pEl && pEl.complete && pEl.naturalWidth > 0;
 
-      const tier = window._brainVisualTier || 10;
-      if (window._avatarSpeaking > 0) window._avatarSpeaking = Math.max(0, window._avatarSpeaking - 0.012);
-      if (window._synapseBoost > 0.25) window._synapseBoost = Math.max(0.25, window._synapseBoost - 0.012);
-      const audioEnv = Math.max(window._avatarAudioLevel || 0, window._avatarSpeaking * 0.85);
-      const syn = window._synapseBoost || 0.35;
-
-      // Periodic eyelid blink every 3.0 to 4.8 seconds
-      if (t >= nextBlinkAt && blinkPhase === 0) {
-        blinkPhase = 0.01;
-        nextBlinkAt = t + 3.0 + (Math.sin(t * 1.9) + 1) * 0.9;
-      }
-      let eyelidClose = 0;
-      if (blinkPhase > 0) {
-        blinkPhase += 0.18;
-        eyelidClose = Math.sin(Math.min(Math.PI, blinkPhase));
-        if (blinkPhase >= Math.PI) blinkPhase = 0;
-      }
-
+    if (window._avatarWebRTCActive) {
+      ctx.clearRect(0, 0, W, H);
+    } else if (hasPhoto) {
+      // Live 60FPS Neural Portrait Kinematics: continuous breathing, natural head micro-motion, eye blinks & real-time jaw/lip articulation
       ctx.fillStyle = '#02060d';
       ctx.fillRect(0, 0, W, H);
 
-      // Visible 60FPS continuous breathing + gentle head-tilt oscillation
-      const breathScale = 1.04 + Math.sin(t * 1.7) * 0.018 + audioEnv * 0.014;
-      const headTilt = Math.sin(t * 0.85) * 0.032 + Math.sin(t * 2.4) * audioEnv * 0.018 + mouseX * 0.002;
-      const swayX = Math.sin(t * 0.75) * 3.4 + mouseX * 0.35;
-      const breathY = Math.sin(t * 1.7) * 3.6 - audioEnv * 1.5 + mouseY * 0.3;
+      const breathScale = 1.035 + Math.sin(t * 1.55) * 0.013 + audioEnv * 0.012;
+      const headTilt = Math.sin(t * 0.72) * 0.022 + Math.sin(t * 2.1) * audioEnv * 0.016 + mouseX * 0.0018;
+      const headSwayX = Math.sin(t * 0.65) * 2.4 + mouseX * 0.35;
+      const headBobY = Math.sin(t * 1.55) * 2.6 - audioEnv * 1.4 + mouseY * 0.3;
 
-      const pEl = window._astraPortraitImg;
-      if (pEl && pEl.complete && pEl.naturalWidth > 0) {
-        const sw = pEl.naturalWidth, sh = pEl.naturalHeight;
-        const sMin = Math.min(sw, sh);
-        const sx = (sw - sMin) * 0.5;
-        const sy = Math.max(0, (sh - sMin) * 0.22);
+      // Center-crop square source image cleanly
+      const sw = pEl.naturalWidth, sh = pEl.naturalHeight;
+      const sMin = Math.min(sw, sh);
+      const sx = (sw - sMin) * 0.5;
+      const sy = Math.max(0, (sh - sMin) * 0.22);
 
-        ctx.save();
-        ctx.translate(W * 0.5 + swayX, H * 0.5 + breathY);
-        ctx.rotate(headTilt);
-        ctx.scale(breathScale, breathScale);
-        ctx.drawImage(pEl, sx, sy, sMin, sMin, -W * 0.5, -H * 0.5, W, H);
+      ctx.save();
+      ctx.translate(W * 0.5 + headSwayX, H * 0.5 + headBobY);
+      ctx.rotate(headTilt);
+      ctx.scale(breathScale, breathScale);
+      ctx.drawImage(pEl, sx, sy, sMin, sMin, -W * 0.5, -H * 0.5, W, H);
 
-        // Dynamic lip/jaw articulation when speaking
-        if (audioEnv > 0.03) {
-          const jawDrop = audioEnv * 7.5;
-          const srcMouthY = sy + sMin * 0.56;
-          const srcMouthH = sMin * 0.24;
-          ctx.drawImage(
-            pEl,
-            sx + sMin * 0.28, srcMouthY, sMin * 0.44, srcMouthH,
-            -W * 0.22, H * 0.06 + jawDrop * 0.58, W * 0.44, H * 0.24 + jawDrop * 0.42
-          );
-          const mouthG = ctx.createRadialGradient(0, H * 0.115 + jawDrop * 0.3, 1, 0, H * 0.115 + jawDrop * 0.3, 16);
-          mouthG.addColorStop(0, 'rgba(15, 5, 10, ' + (0.72 * audioEnv).toFixed(2) + ')');
-          mouthG.addColorStop(1, 'rgba(15, 5, 10, 0)');
-          ctx.fillStyle = mouthG;
-          ctx.beginPath();
-          ctx.ellipse(0, H * 0.115 + jawDrop * 0.3, 13 + audioEnv * 3, 2.4 + jawDrop * 0.55, 0, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        // Periodic left-eye organic blink
-        if (eyelidClose > 0.04) {
-          ctx.fillStyle = 'rgba(188, 142, 118, ' + (0.94 * eyelidClose).toFixed(2) + ')';
-          ctx.beginPath();
-          ctx.ellipse(-W * 0.125, -H * 0.095, 15.5, 8.0 * eyelidClose, -0.05, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(24, 14, 12, ' + (0.9 * eyelidClose).toFixed(2) + ')';
-          ctx.lineWidth = 1.7;
-          ctx.beginPath();
-          ctx.moveTo(-W * 0.185, -H * 0.092);
-          ctx.quadraticCurveTo(-W * 0.125, -H * 0.095 + 4.5 * eyelidClose, -W * 0.065, -H * 0.092);
-          ctx.stroke();
-        }
-
-        // Animated glowing bionic eye & cranial circuit pulse on cyborg right half
-        const bionicPulse = 0.5 + 0.5 * Math.sin(t * 4.5) + audioEnv * 0.4;
-        const bEyeG = ctx.createRadialGradient(W * 0.125, -H * 0.095, 1, W * 0.125, -H * 0.095, 18);
-        bEyeG.addColorStop(0, 'rgba(190, 250, 255, ' + Math.min(0.85, 0.48 * bionicPulse).toFixed(2) + ')');
-        bEyeG.addColorStop(0.5, 'rgba(175, 95, 255, ' + Math.min(0.65, 0.32 * bionicPulse).toFixed(2) + ')');
-        bEyeG.addColorStop(1, 'rgba(0, 240, 255, 0)');
-        ctx.fillStyle = bEyeG;
-        ctx.beginPath(); ctx.arc(W * 0.125, -H * 0.095, 18, 0, Math.PI * 2); ctx.fill();
-
-        // Cranial neural energy pulse
-        const brainG = ctx.createRadialGradient(W * 0.11, -H * 0.31, 2, W * 0.11, -H * 0.31, 36);
-        brainG.addColorStop(0, 'rgba(0, 255, 210, ' + (0.32 + 0.18 * Math.sin(t * 3.1) + audioEnv * 0.25).toFixed(2) + ')');
-        brainG.addColorStop(0.6, 'rgba(200, 107, 255, ' + (0.18 + syn * 0.15).toFixed(2) + ')');
-        brainG.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = brainG;
-        ctx.beginPath(); ctx.arc(W * 0.11, -H * 0.31, 36, 0, Math.PI * 2); ctx.fill();
-
-        ctx.restore();
+      // 1. Live Jaw & Lip-Sync Articulation Mesh on Lower Face (mouth region ~ y: +14 to +58)
+      if (audioEnv > 0.03) {
+        const jawDrop = audioEnv * 6.8;
+        // Articulated lower jaw displacement slice
+        const srcMouthY = sy + sMin * 0.56;
+        const srcMouthH = sMin * 0.24;
+        ctx.drawImage(
+          pEl,
+          sx + sMin * 0.28, srcMouthY, sMin * 0.44, srcMouthH,
+          -W * 0.22, H * 0.06 + jawDrop * 0.55, W * 0.44, H * 0.24 + jawDrop * 0.45
+        );
+        // Subtle acoustic oral cavity shadow between lips during open vowels
+        const mouthG = ctx.createRadialGradient(0, H * 0.115 + jawDrop * 0.3, 1, 0, H * 0.115 + jawDrop * 0.3, 16);
+        mouthG.addColorStop(0, 'rgba(18, 6, 12, ' + (0.68 * audioEnv).toFixed(2) + ')');
+        mouthG.addColorStop(1, 'rgba(18, 6, 12, 0)');
+        ctx.fillStyle = mouthG;
+        ctx.beginPath();
+        ctx.ellipse(0, H * 0.115 + jawDrop * 0.3, 13 + audioEnv * 3, 2.2 + jawDrop * 0.55, 0, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      // Holographic scanline & rotating orbital reticle
-      const scanY = (t * 46) % H;
-      ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
-      ctx.fillRect(0, scanY, W, 2);
-
-      ctx.strokeStyle = tier >= 10 ? 'rgba(216, 107, 255, 0.55)' : 'rgba(0, 240, 255, 0.48)';
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.arc(W * 0.5, H * 0.47, 96 + Math.sin(t * 2.2) * 3, -t * 0.8, -t * 0.8 + Math.PI * 1.25);
-      ctx.stroke();
-
-      // Live audio equalizer bars along bottom edge
-      ctx.strokeStyle = audioEnv > 0.05 ? 'rgba(0, 255, 136, 0.95)' : 'rgba(0, 240, 255, 0.55)';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      for (let x = 16; x <= W - 16; x += 4) {
-        const hBar = (2.5 + audioEnv * 18 + Math.abs(Math.sin(t * 3 + x * 0.08)) * 3) * Math.abs(Math.sin(t * 9 + x * 0.12));
-        ctx.moveTo(x, H - 5);
-        ctx.lineTo(x, H - 5 - hBar);
+      // 2. Natural Left-Eye Organic Eyelid Blink (left eye ~ x: -29, y: -22 relative to center)
+      if (eyelidClose > 0.04) {
+        ctx.fillStyle = 'rgba(188, 142, 118, ' + (0.92 * eyelidClose).toFixed(2) + ')';
+        ctx.beginPath();
+        ctx.ellipse(-W * 0.125, -H * 0.095, 15, 7.5 * eyelidClose, -0.05, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(28, 16, 14, ' + (0.85 * eyelidClose).toFixed(2) + ')';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-W * 0.185, -H * 0.092);
+        ctx.quadraticCurveTo(-W * 0.125, -H * 0.095 + 4 * eyelidClose, -W * 0.065, -H * 0.092);
+        ctx.stroke();
       }
-      ctx.stroke();
 
-      // Verifiable live corner badge: FPS: 60 // LIVE MOTION
-      ctx.fillStyle = 'rgba(2, 12, 20, 0.78)';
-      ctx.fillRect(6, 6, 138, 16);
-      ctx.strokeStyle = 'rgba(0, 255, 136, 0.6)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(6, 6, 138, 16);
-      ctx.fillStyle = '#00ff88';
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText('FPS: ' + displayFps + ' // LIVE MOTION', 11, 17);
+      // 3. Right-Eye Bionic Iris Luminance & Cranial Neural Core Pulse
+      const bionicPulse = 0.45 + 0.35 * Math.sin(t * 4.2) + audioEnv * 0.4;
+      const bEyeG = ctx.createRadialGradient(W * 0.125, -H * 0.095, 1, W * 0.125, -H * 0.095, 16);
+      bEyeG.addColorStop(0, 'rgba(180, 245, 255, ' + (0.42 * bionicPulse).toFixed(2) + ')');
+      bEyeG.addColorStop(0.5, 'rgba(165, 95, 255, ' + (0.28 * bionicPulse).toFixed(2) + ')');
+      bEyeG.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      ctx.fillStyle = bEyeG;
+      ctx.beginPath(); ctx.arc(W * 0.125, -H * 0.095, 16, 0, Math.PI * 2); ctx.fill();
 
-      requestAnimationFrame(render);
+      // Cranial neural core energy shimmer (top-right dome)
+      const brainG = ctx.createRadialGradient(W * 0.11, -H * 0.31, 2, W * 0.11, -H * 0.31, 34);
+      brainG.addColorStop(0, 'rgba(0, 255, 210, ' + (0.26 + audioEnv * 0.25).toFixed(2) + ')');
+      brainG.addColorStop(0.6, 'rgba(200, 107, 255, ' + (0.14 + syn * 0.15).toFixed(2) + ')');
+      brainG.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = brainG;
+      ctx.beginPath(); ctx.arc(W * 0.11, -H * 0.31, 34, 0, Math.PI * 2); ctx.fill();
+
+      ctx.restore();
+    } else {
+      // Vector fallback if image hasn't loaded yet
+      ctx.fillStyle = '#02060d';
+      ctx.fillRect(0, 0, W, H);
+      drawFaceContour(W * 0.5, H * 0.48);
+      ctx.strokeStyle = '#00f0ff'; ctx.stroke();
     }
+
+    // Holographic HUD Overlay (Radial Grid Arcs, Bionic Reticle, Hand Landmarks & Live Audio Frequency Equalizer)
+    const scanY = (t * 40) % H;
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.09)';
+    ctx.fillRect(0, scanY, W, 2);
+
+    ctx.strokeStyle = tier >= 10 ? 'rgba(216, 107, 255, 0.48)' : 'rgba(0, 240, 255, 0.42)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(W * 0.5, H * 0.46, 94 + Math.sin(t * 2) * 2.5, -t * 0.6, -t * 0.6 + Math.PI * 1.25);
+    ctx.stroke();
+
+    if (window._handLandmarks && window._handLandmarks.length === 21) {
+      ctx.fillStyle = '#00ff88';
+      window._handLandmarks.forEach(pt => {
+        ctx.beginPath(); ctx.arc((1 - pt.x) * W, pt.y * H, 2.2, 0, Math.PI * 2); ctx.fill();
+      });
+    }
+
+    // Live Voice Frequency Equalizer synced to audioEnv
+    ctx.strokeStyle = audioEnv > 0.05 ? 'rgba(0, 255, 136, 0.92)' : 'rgba(0, 240, 255, 0.45)';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    for (let x = 18; x <= W - 18; x += 4) {
+      const hBar = (2 + (audioEnv * 18 + syn * 3)) * Math.abs(Math.sin(t * 9 + x * 0.12));
+      ctx.moveTo(x, H - 6);
+      ctx.lineTo(x, H - 6 - hBar);
+    }
+    ctx.stroke();
+
     requestAnimationFrame(render);
   }
-
-  if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', startCanvasLoop);
-  } else {
-    startCanvasLoop();
-  }
-  window.addEventListener('load', () => {
-    if (!window._astraPortraitImg) loadPortraitTexture();
-  });
+  render();
+  initAvatarWebRTCBridge();
 })();
 
 async function sendAvatarPrompt(preset) {
