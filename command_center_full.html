@@ -1894,12 +1894,15 @@ window.addEventListener('load', refreshTelemetrySpine);
           document.head.appendChild(s);
         });
       }
-      if (window._astraDailyCall) {
-        await window._astraDailyCall.leave().catch(() => {});
-        window._astraDailyCall.destroy();
+      const existingCall = window._astraDailyCall || (window.DailyIframe.getCallInstance && window.DailyIframe.getCallInstance());
+      if (existingCall) {
+        await existingCall.leave().catch(() => {});
+        await existingCall.destroy().catch(() => {});
+        window._astraDailyCall = null;
       }
       const { v, a } = ensureMediaEls();
-      const call = window.DailyIframe.createCallObject({ audioSource: true, videoSource: false });
+      const call = (window.DailyIframe.getCallInstance && window.DailyIframe.getCallInstance())
+        || window.DailyIframe.createCallObject({ audioSource: true, videoSource: false });
       window._astraDailyCall = call;
 
       call.on('track-started', (ev) => {
