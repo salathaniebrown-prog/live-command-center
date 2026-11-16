@@ -1814,6 +1814,131 @@ setInterval(refreshTelemetrySpine, 8000);
 window.addEventListener('load', refreshTelemetrySpine);
 </script>
 
+
+<script>
+(function() {
+  function findAvatarBox() {
+    return document.getElementById('avatar-frame')
+        || document.getElementById('neural-avatar-box')
+        || (document.querySelector('canvas') && document.querySelector('canvas').parentElement);
+  }
+
+  function ensureMediaEls() {
+    const box = findAvatarBox();
+    let v = document.getElementById('given-jackal-cloud-video');
+    let a = document.getElementById('given-jackal-cloud-audio');
+    if (!v && box) {
+      box.style.position = 'relative';
+      v = document.createElement('video');
+      v.id = 'given-jackal-cloud-video';
+      v.autoplay = true;
+      v.playsInline = true;
+      v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:25;display:none;border-radius:8px;background:#000;';
+      box.appendChild(v);
+    }
+    if (!a) {
+      a = document.createElement('audio');
+      a.id = 'given-jackal-cloud-audio';
+      a.autoplay = true;
+      document.body.appendChild(a);
+    }
+    return { v, a };
+  }
+
+  function setStatus(txt) {
+    const st = document.getElementById('simli-live-status');
+    if (st) st.textContent = txt;
+    const badge = Array.from(document.querySelectorAll('*')).find(el => el.children.length === 0 && /IDLE BREATHING|TIER: v10\.0/i.test(el.textContent));
+    if (badge) badge.textContent = 'TIER: v10.0 OMEGA // ' + txt;
+  }
+
+  window.connectGivenJackalCloudDaily = async function() {
+    setStatus('STARTING CLOUD ROOM...');
+    try {
+      const resp = await fetch('/api/pipecat/cloud/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agent: 'given-jackal', body: { source: 'astra-8088' } })
+      });
+      const session = await resp.json();
+      if (!resp.ok || session.error) {
+        setStatus('CLOUD ERR: ' + (session.error || resp.status));
+        return;
+      }
+      const roomUrl = session.dailyRoom || session.room_url || session.url;
+      const token = session.dailyToken || session.token;
+      if (!roomUrl) {
+        setStatus('NO DAILY ROOM');
+        return;
+      }
+      setStatus('LOADING DAILY SDK...');
+      if (!window.DailyIframe) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://unpkg.com/@daily-co/daily-js';
+          s.onload = resolve;
+          s.onerror = () => reject(new Error('daily-js load failed'));
+          document.head.appendChild(s);
+        });
+      }
+      if (window._astraDailyCall) {
+        await window._astraDailyCall.leave().catch(() => {});
+        window._astraDailyCall.destroy();
+      }
+      const { v, a } = ensureMediaEls();
+      const call = window.DailyIframe.createCallObject({ audioSource: true, videoSource: false });
+      window._astraDailyCall = call;
+
+      call.on('track-started', (ev) => {
+        if (!ev || ev.participant?.local) return;
+        if (ev.track.kind === 'video' && v) {
+          v.srcObject = new MediaStream([ev.track]);
+          v.style.display = 'block';
+          setStatus('CLOUD LIVE (768x768)');
+        } else if (ev.track.kind === 'audio' && a) {
+          a.srcObject = new MediaStream([ev.track]);
+          a.play().catch(() => {});
+        }
+      });
+
+      call.on('left-meeting', () => {
+        if (v) v.style.display = 'none';
+        setStatus('IDLE BREATHING');
+      });
+
+      setStatus('JOINING ROOM (COLD START ~15s)...');
+      await call.join(token ? { url: roomUrl, token } : { url: roomUrl });
+      setStatus('CONNECTED // LISTENING');
+    } catch (e) {
+      setStatus('ERR: ' + (e && e.message ? e.message : e));
+    }
+  };
+
+  window.hangUpGivenJackalCloud = async function() {
+    if (window._astraDailyCall) {
+      await window._astraDailyCall.leave().catch(() => {});
+      window._astraDailyCall.destroy();
+      window._astraDailyCall = null;
+    }
+    const v = document.getElementById('given-jackal-cloud-video');
+    if (v) v.style.display = 'none';
+    setStatus('IDLE BREATHING');
+  };
+
+  // Bind buttons by label as an unbreakable fallback even if inline onclick had a syntax issue
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('button').forEach(btn => {
+      const t = (btn.textContent || '').trim().toUpperCase();
+      if (t.includes('TALK CLOUD') || t.includes('GIVEN JACKAL')) {
+        btn.onclick = (e) => { e.preventDefault(); window.connectGivenJackalCloudDaily(); };
+      } else if (t === 'HANG UP') {
+        btn.onclick = (e) => { e.preventDefault(); window.hangUpGivenJackalCloud(); };
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 
 
