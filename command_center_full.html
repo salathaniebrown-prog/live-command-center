@@ -568,6 +568,10 @@ async function sendAvatarPrompt(preset) {
   <button type="button" onclick="simliSetCameraPreset('closeup')" style="background:#052230;border:1px solid #00f0ff55;color:#88eeff;padding:4px 7px;border-radius:3px;cursor:pointer;">CAM: CLOSEUP</button>
   <button type="button" onclick="simliSetCameraPreset('wide')" style="background:#052230;border:1px solid #00f0ff55;color:#88eeff;padding:4px 7px;border-radius:3px;cursor:pointer;">CAM: WIDE</button>
   <button type="button" onclick="toggleSimliKeyDrawer()" style="background:#1c1204;border:1px solid #ffcc0066;color:#ffdd77;padding:4px 7px;border-radius:3px;cursor:pointer;">API KEYS</button>
+  <button type="button" onclick="controlGivenJackal('start_local')" style="background:#072b22;border:1px solid #00ff8888;color:#00ff88;padding:4px 7px;border-radius:3px;cursor:pointer;">GIVEN JACKAL (7860)</button>
+  <button type="button" onclick="controlGivenJackal('deploy_cloud')" style="background:#1a0c30;border:1px solid #c86bff88;color:#ebbfff;padding:4px 7px;border-radius:3px;cursor:pointer;">DEPLOY CLOUD</button>
+  <button type="button" id="btn-pipecat-daily" onclick="connectGivenJackalCloudDaily()" style="background:#00e5ff;color:#021016;font-weight:bold;border:none;padding:4px 8px;border-radius:3px;cursor:pointer;">TALK CLOUD (DAILY)</button>
+  <button type="button" onclick="disconnectGivenJackalCloudDaily()" style="background:#2b0912;border:1px solid #ff557788;color:#ff8899;padding:4px 7px;border-radius:3px;cursor:pointer;">HANG UP</button>
   <span id="simli-live-status" style="color:#00f0ff;margin-left:auto;">READY</span>
 </div>
 <div id="simli-key-drawer" style="display:none;margin-top:5px;padding:8px;background:#020b12;border:1px solid #ffcc0066;border-radius:5px;font-family:monospace;font-size:10px;">
@@ -577,6 +581,7 @@ async function sendAvatarPrompt(preset) {
     <input id="key-deepgram" type="password" placeholder="DEEPGRAM_API_KEY" style="background:#01060b;border:1px solid #00f0ff55;color:#fff;padding:5px;border-radius:3px;" />
     <input id="key-openai" type="password" placeholder="OPENAI_API_KEY" style="background:#01060b;border:1px solid #00f0ff55;color:#fff;padding:5px;border-radius:3px;" />
     <input id="key-inworld" type="password" placeholder="INWORLD_API_KEY" style="background:#01060b;border:1px solid #00f0ff55;color:#fff;padding:5px;border-radius:3px;" />
+    <input id="key-pipecat-pub" type="password" placeholder="PIPECAT_PUBLIC_API_KEY (pk_...)" style="grid-column:span 2;background:#01060b;border:1px solid #00ff8855;color:#fff;padding:5px;border-radius:3px;" />
   </div>
   <button type="button" onclick="saveSimliServerKeys()" style="background:#00f0ff;color:#021014;font-weight:bold;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;">SAVE TO SERVER ~/.astra_env</button>
 </div>
@@ -597,6 +602,21 @@ function appendSimliLog(msg, color = '#00f0ff') {
   }
 }
 
+
+window.controlGivenJackal = async function(action) {
+  const st = document.getElementById('simli-live-status');
+  if (st) st.textContent = action === 'deploy_cloud' ? 'DEPLOYING CLOUD...' : 'STARTING 7860...';
+  const r = await fetch('/api/pipecat/control', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action })
+  });
+  const d = await r.json();
+  if (st) st.textContent = d.status || 'OK';
+  appendSimliLog(d.output || 'Done', '#00ff88');
+  if (d.url) window.open(d.url, '_blank');
+};
+
 window.toggleSimliKeyDrawer = function() {
   const d = document.getElementById('simli-key-drawer');
   if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
@@ -608,6 +628,7 @@ window.saveSimliServerKeys = async function() {
     DEEPGRAM_API_KEY: document.getElementById('key-deepgram').value,
     OPENAI_API_KEY: document.getElementById('key-openai').value,
     INWORLD_API_KEY: document.getElementById('key-inworld').value,
+    PIPECAT_PUBLIC_API_KEY: document.getElementById('key-pipecat-pub').value,
   };
   const r = await fetch('/api/simli/keys', {
     method: 'POST',
@@ -615,7 +636,7 @@ window.saveSimliServerKeys = async function() {
     body: JSON.stringify(payload)
   });
   const d = await r.json();
-  ['key-simli', 'key-deepgram', 'key-openai', 'key-inworld'].forEach(id => {
+  ['key-simli', 'key-deepgram', 'key-openai', 'key-inworld', 'key-pipecat-pub'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });

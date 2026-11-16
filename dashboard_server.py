@@ -1618,6 +1618,63 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             _data = _js.loads(_raw) if _raw.strip() else {}
         except Exception:
             _data = {}
+        if self.path.startswith("/api/pipecat/cloud/start"):
+            import urllib.request as _ur, urllib.error as _ue
+            _env_p = _os.path.join(_os.path.expanduser("~"), ".astra_env")
+            _env = {}
+            if _os.path.exists(_env_p):
+                for _ln in open(_env_p, encoding="utf-8", errors="ignore"):
+                    if "=" in _ln and not _ln.strip().startswith("#"):
+                        _k, _v = _ln.strip().split("=", 1)
+                        _env[_k.strip()] = _v.strip().strip('"').strip("'")
+            _pub_key = _env.get("PIPECAT_PUBLIC_API_KEY", "").strip()
+            if not _pub_key:
+                _b = _js.dumps({"error": "PIPECAT_PUBLIC_API_KEY is missing in ~/.astra_env"}).encode("utf-8")
+                self.send_response(400); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+                return
+            _agent = (_data.get("agent") or "given-jackal").strip()
+            _url = f"https://api.pipecat.daily.co/v1/public/{_agent}/start"
+            _body = _js.dumps({"createDailyRoom": True, **(_data.get("body") or {})}).encode("utf-8")
+            _req = _ur.Request(
+                _url,
+                data=_body,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {_pub_key}",
+                },
+                method="POST",
+            )
+            try:
+                with _ur.urlopen(_req, timeout=20) as _resp:
+                    _raw = _resp.read()
+                self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_raw))); self.end_headers(); self.wfile.write(_raw)
+            except _ue.HTTPError as _he:
+                _err = _he.read().decode("utf-8", "ignore")
+                _b = _js.dumps({"error": f"Pipecat Cloud {_he.code}: {_err}"}).encode("utf-8")
+                self.send_response(_he.code); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            except Exception as _ex:
+                _b = _js.dumps({"error": str(_ex)}).encode("utf-8")
+                self.send_response(500); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
+
+        if self.path.startswith("/api/pipecat/control"):
+            _act = (_data.get("action") or "start_local").strip()
+            _gj_dir = _os.path.join(_os.path.expanduser("~"), "given-jackal-pipecat")
+            if _act == "start_local":
+                _sp.Popen("pkill -f 'given-jackal-pipecat/bot.py' || true", shell=True)
+                _log = open(_os.path.join(_os.path.expanduser("~"), "given_jackal.log"), "a")
+                _sp.Popen(["python3", "bot.py", "--transport", "webrtc", "--port", "7860"], cwd=_gj_dir, stdout=_log, stderr=_log, start_new_session=True)
+                _res = {"status": "RUNNING", "url": "http://127.0.0.1:7860/client", "output": "[GIVEN JACKAL 7860] Local Pipecat WebRTC bot started -> Open http://127.0.0.1:7860/client"}
+            elif _act == "deploy_cloud":
+                _out = _sp.getoutput(f"cd {_gj_dir} && pipecat cloud secrets set given-jackal-secrets --file .env && pipecat cloud deploy --yes")
+                _res = {"status": "DEPLOY_TRIGGERED", "output": _out[-600:] if _out else "Triggered Pipecat Cloud deploy"}
+            else:
+                _sp.Popen("pkill -f 'given-jackal-pipecat/bot.py' || true", shell=True)
+                _res = {"status": "STOPPED", "output": "[GIVEN JACKAL] Local bot stopped."}
+            _b = _js.dumps(_res).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
+            return
+
         if self.path.startswith("/api/simli/token"):
             import astra_simli_agent as _asa
             _code, _payload = _asa.mint_simli_session_token()
@@ -1634,13 +1691,19 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                     if "=" in _ln and not _ln.strip().startswith("#"):
                         _k, _v = _ln.strip().split("=", 1)
                         _existing[_k.strip()] = _v.strip()
-            for _k in ["SIMLI_API_KEY", "DEEPGRAM_API_KEY", "OPENAI_API_KEY", "INWORLD_API_KEY"]:
+            for _k in ["SIMLI_API_KEY", "DEEPGRAM_API_KEY", "OPENAI_API_KEY", "INWORLD_API_KEY", "PIPECAT_PUBLIC_API_KEY"]:
                 if _data.get(_k):
                     _existing[_k] = str(_data[_k]).strip()
             with open(_env_p, "w", encoding="utf-8") as _ef:
                 for _k, _v in _existing.items():
                     _ef.write(f'{_k}="{_v}"\n')
             _os.chmod(_env_p, 0o600)
+            _gj_env = _os.path.join(_os.path.expanduser("~"), "given-jackal-pipecat", ".env")
+            if _os.path.isdir(_os.path.dirname(_gj_env)):
+                with open(_gj_env, "w", encoding="utf-8") as _gf:
+                    for _k in ["SIMLI_API_KEY", "DEEPGRAM_API_KEY", "OPENAI_API_KEY", "INWORLD_API_KEY"]:
+                        _gf.write(f"{_k}={_existing.get(_k, '')}\n")
+                _os.chmod(_gj_env, 0o600)
             import astra_simli_agent as _asa
             _b = _js.dumps(_asa.missing_keys_status()).encode("utf-8")
             self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
