@@ -1666,7 +1666,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                 _sp.Popen(["python3", "bot.py", "--transport", "webrtc", "--port", "7860"], cwd=_gj_dir, stdout=_log, stderr=_log, start_new_session=True)
                 _res = {"status": "RUNNING", "url": "http://127.0.0.1:7860/client", "output": "[GIVEN JACKAL 7860] Local Pipecat WebRTC bot started -> Open http://127.0.0.1:7860/client"}
             elif _act == "deploy_cloud":
-                _out = _sp.getoutput(f"cd {_gj_dir} && pipecat cloud secrets set given-jackal-secrets --file .env && pipecat cloud deploy --yes")
+                _out = _sp.getoutput(f"cd {_gj_dir} && pipecat cloud secrets set given-jackal-secrets --file .env --skip && pipecat cloud deploy --force")
                 _res = {"status": "DEPLOY_TRIGGERED", "output": _out[-600:] if _out else "Triggered Pipecat Cloud deploy"}
             else:
                 _sp.Popen("pkill -f 'given-jackal-pipecat/bot.py' || true", shell=True)
