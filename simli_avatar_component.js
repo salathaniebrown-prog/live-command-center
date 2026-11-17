@@ -15,12 +15,11 @@ export class SimliAvatar {
   }
 
   async _loadSimliSDK() {
-    // Load simli-client@^3.2.0 from local server bundle (/simli-client.js) or ESM CDN fallback
-    try {
-      return await import('/simli-client.js');
-    } catch (_) {
-      return await import('https://esm.sh/simli-client@^3.2.0');
-    }
+    this.onStatus('LOADING SIMLI SDK...');
+    return await Promise.race([
+      import('https://esm.sh/simli-client@3.2.0?bundle'),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('Simli SDK CDN timeout (check internet or use TALK CLOUD DAILY)')), 7000))
+    ]);
   }
 
   async _mintSessionToken() {
