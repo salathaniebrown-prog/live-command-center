@@ -3,25 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>ALSTRA // OFF-AXIS 3D ANAMORPHIC SPATIAL ARTIFACT ENGINE</title>
+<title>ALSTRA // OFF-AXIS 3D SPATIAL ARTIFACT & WEB AUDIO DSP SONAR</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:#010409; color:#d6f8ff; font-family:monospace; overflow:hidden; height:100vh; width:100vw; }
   canvas#gl { position:fixed; inset:0; width:100vw; height:100vh; display:block; }
   #hud {
     position:fixed; top:10px; left:10px; right:10px; z-index:20;
-    background:rgba(2,12,22,0.82); border:1px solid #00f0ff; border-radius:8px;
+    background:rgba(2,12,22,0.84); border:1px solid #00f0ff; border-radius:8px;
     padding:10px 12px; backdrop-filter:blur(6px);
   }
   .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:space-between; }
   .btn {
     background:#072235; color:#00f0ff; border:1px solid #00f0ff;
-    padding:5px 9px; border-radius:5px; font-family:monospace; font-size:11px;
+    padding:5px 8px; border-radius:5px; font-family:monospace; font-size:11px;
     font-weight:bold; cursor:pointer;
   }
   .btn.active { background:#00ff9d; color:#02080d; border-color:#00ff9d; }
+  .btn.dsp { background:#0f2942; color:#38bdf8; border-color:#38bdf8; }
+  .btn.dsp.active { background:#f59e0b; color:#02080d; border-color:#fbbf24; }
   .btn.ar { background:#a855f7; color:#fff; border-color:#c084fc; }
   #telemetry-bar { margin-top:6px; font-size:11px; color:#7dd3fc; line-height:1.4; }
+  #fft-bar { margin-top:4px; font-size:10px; color:#00ff9d; letter-spacing:0.4px; }
   video#cam { position:fixed; bottom:10px; right:10px; width:96px; height:72px; border:1px solid #00ff9d; border-radius:6px; opacity:0.75; transform:scaleX(-1); display:none; z-index:25; object-fit:cover; }
 </style>
 </head>
@@ -31,8 +34,11 @@
 
 <div id="hud">
   <div class="row">
-    <strong style="color:#00f0ff;font-size:12px;">[ALSTRA OFF-AXIS 3D ANAMORPHIC SPATIAL ENGINE // :8151]</strong>
+    <strong style="color:#00f0ff;font-size:12px;">[ALSTRA OFF-AXIS 3D & WEB AUDIO DSP SONAR // :8151]</strong>
     <div style="display:flex;flex-wrap:wrap;gap:5px;">
+      <button id="btn-synth" class="btn dsp" onclick="toggleTelemetrySynth()">TELEMETRY SYNTH</button>
+      <button id="btn-mic" class="btn dsp" onclick="toggleMicSonar()">MIC SONAR</button>
+      <button id="btn-ping" class="btn dsp" onclick="triggerSonarPing(1.0)">SONAR PING</button>
       <button id="btn-cam" class="btn" onclick="toggleEyeTracking()">FRONT-CAM EYE TRACK</button>
       <button id="btn-gyro" class="btn" onclick="enableGyro()">GYRO PARALLAX</button>
       <button id="btn-ghost" class="btn" onclick="togglePeppersGhost()">4-WAY PEPPER'S GHOST</button>
@@ -40,6 +46,7 @@
     </div>
   </div>
   <div id="telemetry-bar">Initializing Off-Axis Asymmetric Frustum & 60 FPS Telemetry Physics...</div>
+  <div id="fft-bar">DSP ENGINE: STANDBY | SUB-BASS: 0.00 | MID: 0.00 | HIGH: 0.00 | STEREO PAN: 0.00</div>
 </div>
 
 <script>
@@ -53,20 +60,20 @@ window.addEventListener('resize', () => {
   height = canvas.height = window.innerHeight;
 });
 
-// Viewer eye coordinates in screen-normalized units (z=0 is the glass surface!)
+// Viewer eye coordinates (z=0 anchors directly to physical screen glass)
 const eye = { x: 0.0, y: 0.0, z: 2.35, targetX: 0.0, targetY: 0.0 };
 let peppersGhost = false;
 let spatialAROverlay = false;
 let xrSession = null;
 
-// Live Telemetry Physics State (polled from 8151 -> 8090/8088/8143/8149)
+// Live Telemetry Physics State
 const physics = {
   rotationSpeed: 0.85,
   laserIntensity: 1.15,
   zExtrusion: 0.65,
-  shaHash: 'SHA256-LOADING',
-  cpuLoad: 0.2,
-  derivMs: 0.0,
+  shaHash: 'SHA256-SYNCING',
+  cpuLoad: 0.35,
+  derivMs: 0.12,
   nodes: [
     { id: '8088', x: -1.1, y: 0.6, z: 0.35, c: [0.0, 0.94, 1.0] },
     { id: '8090', x:  0.0, y: 0.8, z: 0.65, c: [0.0, 1.0, 0.61] },
@@ -77,13 +84,204 @@ const physics = {
   ]
 };
 
-// Pointer / Touch Parallax
+// ============================================================================
+// BROWSER-SIDE WEB AUDIO API DSP ENGINE & TELEMETRY SONAR (60 FPS FFT)
+// ============================================================================
+const dsp = {
+  ctx: null,
+  analyser: null,
+  fftData: null,
+  masterGain: null,
+  panner: null,
+  filter: null,
+  subOsc: null,
+  harmOsc: null,
+  synthActive: false,
+  micActive: false,
+  micStream: null,
+  micSource: null,
+  subEnergy: 0.0,
+  midEnergy: 0.0,
+  highEnergy: 0.0,
+  sonarPulse: 0.0,
+  lastPingTime: 0
+};
+
+function ensureAudioContext() {
+  if (!dsp.ctx) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    dsp.ctx = new AudioCtx();
+    dsp.analyser = dsp.ctx.createAnalyser();
+    dsp.analyser.fftSize = 256;
+    dsp.analyser.smoothingTimeConstant = 0.78;
+    dsp.fftData = new Uint8Array(dsp.analyser.frequencyBinCount);
+
+    dsp.filter = dsp.ctx.createBiquadFilter();
+    dsp.filter.type = 'lowpass';
+    dsp.filter.frequency.value = 420;
+    dsp.filter.Q.value = 6.5;
+
+    dsp.panner = dsp.ctx.createStereoPanner ? dsp.ctx.createStereoPanner() : null;
+    dsp.masterGain = dsp.ctx.createGain();
+    dsp.masterGain.gain.value = 0.22;
+
+    if (dsp.panner) {
+      dsp.filter.connect(dsp.panner);
+      dsp.panner.connect(dsp.masterGain);
+    } else {
+      dsp.filter.connect(dsp.masterGain);
+    }
+    dsp.masterGain.connect(dsp.analyser);
+    dsp.analyser.connect(dsp.ctx.destination);
+  }
+  if (dsp.ctx.state === 'suspended') {
+    dsp.ctx.resume();
+  }
+}
+
+function toggleTelemetrySynth() {
+  ensureAudioContext();
+  const btn = document.getElementById('btn-synth');
+  if (dsp.synthActive) {
+    try { dsp.subOsc.stop(); dsp.harmOsc.stop(); } catch {}
+    dsp.subOsc = null;
+    dsp.harmOsc = null;
+    dsp.synthActive = false;
+    btn.classList.remove('active');
+    return;
+  }
+  const now = dsp.ctx.currentTime;
+  dsp.subOsc = dsp.ctx.createOscillator();
+  dsp.subOsc.type = 'sine';
+  dsp.subOsc.frequency.setValueAtTime(58.0, now);
+
+  dsp.harmOsc = dsp.ctx.createOscillator();
+  dsp.harmOsc.type = 'sawtooth';
+  dsp.harmOsc.frequency.setValueAtTime(116.0, now);
+
+  const harmGain = dsp.ctx.createGain();
+  harmGain.gain.value = 0.28;
+
+  dsp.subOsc.connect(dsp.filter);
+  dsp.harmOsc.connect(harmGain);
+  harmGain.connect(dsp.filter);
+
+  dsp.subOsc.start(now);
+  dsp.harmOsc.start(now);
+  dsp.synthActive = true;
+  btn.classList.add('active');
+  triggerSonarPing(1.0);
+}
+
+async function toggleMicSonar() {
+  ensureAudioContext();
+  const btn = document.getElementById('btn-mic');
+  if (dsp.micActive) {
+    if (dsp.micStream) dsp.micStream.getTracks().forEach(t => t.stop());
+    if (dsp.micSource) try { dsp.micSource.disconnect(); } catch {}
+    dsp.micStream = null;
+    dsp.micSource = null;
+    dsp.micActive = false;
+    btn.classList.remove('active');
+    return;
+  }
+  try {
+    dsp.micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    dsp.micSource = dsp.ctx.createMediaStreamSource(dsp.micStream);
+    // Route mic to analyser only (zero speaker feedback loop)
+    dsp.micSource.connect(dsp.analyser);
+    dsp.micActive = true;
+    btn.classList.add('active');
+  } catch {
+    alert('Microphone permission unavailable; using Telemetry Synth DSP mode.');
+  }
+}
+
+function triggerSonarPing(intensity = 1.0) {
+  ensureAudioContext();
+  const now = dsp.ctx.currentTime;
+  const pingOsc = dsp.ctx.createOscillator();
+  const pingGain = dsp.ctx.createGain();
+  pingOsc.type = 'sine';
+  const baseFreq = 520 + Math.min(600, Math.abs(physics.derivMs) * 45);
+  pingOsc.frequency.setValueAtTime(baseFreq, now);
+  pingOsc.frequency.exponentialRampToValueAtTime(baseFreq * 1.85, now + 0.14);
+  pingOsc.frequency.exponentialRampToValueAtTime(160, now + 0.55);
+
+  pingGain.gain.setValueAtTime(0.001, now);
+  pingGain.gain.linearRampToValueAtTime(0.24 * intensity, now + 0.02);
+  pingGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.58);
+
+  pingOsc.connect(pingGain);
+  pingGain.connect(dsp.analyser);
+  pingGain.connect(dsp.ctx.destination);
+  pingOsc.start(now);
+  pingOsc.stop(now + 0.6);
+
+  dsp.sonarPulse = 1.0;
+}
+
+function updateAudioDSP(t) {
+  if (!dsp.ctx || !dsp.analyser) {
+    dsp.sonarPulse *= 0.94;
+    return;
+  }
+
+  // Modulate live synth oscillators + spatial stereo panner from telemetry & head position
+  if (dsp.synthActive && dsp.subOsc && dsp.harmOsc) {
+    const now = dsp.ctx.currentTime;
+    const cpuMod = Math.min(45.0, physics.cpuLoad * 18.0);
+    const pulseLfo = Math.sin(t * (2.2 + physics.rotationSpeed)) * 8.0;
+    dsp.subOsc.frequency.setTargetAtTime(55.0 + cpuMod * 0.5, now, 0.08);
+    dsp.harmOsc.frequency.setTargetAtTime(110.0 + cpuMod + pulseLfo, now, 0.08);
+    dsp.filter.frequency.setTargetAtTime(280.0 + cpuMod * 22.0 + Math.abs(Math.sin(t * 1.7)) * 340.0, now, 0.08);
+
+    // Periodic automatic telemetry sonar ping every ~3.2s
+    if (t - dsp.lastPingTime > 3.2) {
+      dsp.lastPingTime = t;
+      triggerSonarPing(0.65);
+    }
+  }
+
+  if (dsp.panner) {
+    const panVal = Math.max(-0.95, Math.min(0.95, eye.x * 0.75));
+    dsp.panner.pan.setTargetAtTime(panVal, dsp.ctx.currentTime, 0.05);
+  }
+
+  // Sample 128-bin FFT spectrum at 60 FPS
+  dsp.analyser.getByteFrequencyData(dsp.fftData);
+  let sub = 0, mid = 0, high = 0;
+  for (let i = 0; i < 10; i++) sub += dsp.fftData[i];
+  for (let i = 10; i < 48; i++) mid += dsp.fftData[i];
+  for (let i = 48; i < 110; i++) high += dsp.fftData[i];
+
+  const targetSub = (sub / (10 * 255));
+  const targetMid = (mid / (38 * 255));
+  const targetHigh = (high / (62 * 255));
+
+  dsp.subEnergy += (targetSub - dsp.subEnergy) * 0.35;
+  dsp.midEnergy += (targetMid - dsp.midEnergy) * 0.35;
+  dsp.highEnergy += (targetHigh - dsp.highEnergy) * 0.35;
+  dsp.sonarPulse = Math.max(dsp.sonarPulse * 0.93, dsp.subEnergy * 1.15);
+
+  const modeLabel = (dsp.synthActive && dsp.micActive) ? 'SYNTH+MIC FUSION'
+    : dsp.synthActive ? 'TELEMETRY SYNTH'
+    : dsp.micActive ? 'MIC ACOUSTIC SONAR'
+    : 'ARMED';
+  const panReadout = dsp.panner ? dsp.panner.pan.value.toFixed(2) : '0.00';
+  document.getElementById('fft-bar').textContent =
+    `DSP ENGINE: ${modeLabel} | SUB-BASS: ${dsp.subEnergy.toFixed(2)} | MID: ${dsp.midEnergy.toFixed(2)} | ` +
+    `HIGH: ${dsp.highEnergy.toFixed(2)} | SONAR RING: ${dsp.sonarPulse.toFixed(2)} | STEREO PAN: ${panReadout}`;
+}
+
+// ============================================================================
+// HEAD / EYE / GYRO / POINTER PARALLAX TRACKING
+// ============================================================================
 window.addEventListener('pointermove', (e) => {
   eye.targetX = ((e.clientX / width) - 0.5) * 2.2;
   eye.targetY = -((e.clientY / height) - 0.5) * 1.8;
 });
 
-// Gyroscope Parallax
 function enableGyro() {
   const btn = document.getElementById('btn-gyro');
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -98,7 +296,6 @@ function enableGyro() {
   btn.classList.add('active');
 }
 
-// Front-Camera Face / Eye Tracking (Browser FaceDetector + Luminance Centroid Fallback)
 let camStream = null;
 async function toggleEyeTracking() {
   const vid = document.getElementById('cam');
@@ -158,7 +355,7 @@ async function toggleEyeTracking() {
       requestAnimationFrame(trackLoop);
     }
     trackLoop();
-  } catch (e) {
+  } catch {
     alert('Camera unavailable or permission blocked; use Gyro or Touch/Mouse parallax.');
   }
 }
@@ -166,10 +363,12 @@ async function toggleEyeTracking() {
 function togglePeppersGhost() {
   peppersGhost = !peppersGhost;
   document.getElementById('btn-ghost').classList.toggle('active', peppersGhost);
+  triggerSonarPing(0.8);
 }
 
 async function enterSpatialAR() {
   const btn = document.getElementById('btn-ar');
+  triggerSonarPing(1.0);
   if (navigator.xr && await navigator.xr.isSessionSupported('immersive-ar').catch(() => false)) {
     try {
       xrSession = await navigator.xr.requestSession('immersive-ar', { optionalFeatures: ['local-floor', 'dom-overlay'], domOverlay: { root: document.getElementById('hud') } });
@@ -181,6 +380,7 @@ async function enterSpatialAR() {
       const onXRFrame = (t, frame) => {
         if (!xrSession) return;
         xrSession.requestAnimationFrame(onXRFrame);
+        updateAudioDSP(t * 0.001);
         const pose = frame.getViewerPose(refSpace);
         const layer = xrSession.renderState.baseLayer;
         gl.bindFramebuffer(gl.FRAMEBUFFER, layer.framebuffer);
@@ -198,13 +398,14 @@ async function enterSpatialAR() {
       return;
     } catch {}
   }
-  // Spatial Pop-Out Detached Mode (Zero-Headset Negative-Parallax Full-Glass Projection)
   spatialAROverlay = !spatialAROverlay;
   btn.classList.toggle('active', spatialAROverlay);
   eye.z = spatialAROverlay ? 1.55 : 2.35;
 }
 
-// WebGL Shaders
+// ============================================================================
+// WEBGL OFF-AXIS PERSPECTIVE & AUDIO-REACTIVE SONAR SHADERS
+// ============================================================================
 const VS = `
 attribute vec3 aPos;
 attribute vec3 aCol;
@@ -223,7 +424,7 @@ precision mediump float;
 varying vec3 vCol;
 uniform float uGlow;
 void main() {
-  gl_FragColor = vec4(vCol * uGlow, 0.95);
+  gl_FragColor = vec4(vCol * uGlow, 0.96);
 }`;
 
 function compileShader(type, src) {
@@ -246,7 +447,6 @@ const uModel = gl.getUniformLocation(prog, 'uModel');
 const uPointSize = gl.getUniformLocation(prog, 'uPointSize');
 const uGlow = gl.getUniformLocation(prog, 'uGlow');
 
-// Asymmetric Off-Axis Perspective Matrix (Anchors z=0 plane to physical glass!)
 function offAxisFrustum(ex, ey, ez, aspect, near, far) {
   const halfW = aspect;
   const halfH = 1.0;
@@ -288,7 +488,6 @@ function rotMat(ax, ay, az, tx, ty, tz, s) {
   ]);
 }
 
-// Build Geometry Buffers: Recessed Screen Box + Floating SHA-256 Cube + Holographic Node Lasers
 const buf = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 gl.enableVertexAttribArray(aPos);
@@ -310,6 +509,19 @@ function makeBoxLines(w, h, zFront, zBack, r, g, b) {
   return arr;
 }
 
+function makeSonarRing(radius, zPos, segments, r, g, b) {
+  const arr = [];
+  for (let i = 0; i < segments; i++) {
+    const a1 = (i / segments) * Math.PI * 2;
+    const a2 = ((i + 1) / segments) * Math.PI * 2;
+    arr.push(
+      Math.cos(a1) * radius, Math.sin(a1) * radius, zPos, r, g, b,
+      Math.cos(a2) * radius, Math.sin(a2) * radius, zPos, r, g, b
+    );
+  }
+  return arr;
+}
+
 const roomCage = new Float32Array([
   ...makeBoxLines(2.6, 1.9, 0.0, -2.2, 0.04, 0.45, 0.65),
   ...makeBoxLines(1.8, 1.3, -0.5, -2.2, 0.02, 0.25, 0.40)
@@ -324,56 +536,71 @@ function renderScene(t, projMat, viewMat) {
   gl.uniformMatrix4fv(uProj, false, projMat);
   gl.uniformMatrix4fv(uView, false, viewMat);
 
-  // 1. Recessed Virtual Room Tunnel (Behind Glass: z < 0)
+  // 1. Recessed Virtual Window Tunnel (z < 0)
   gl.uniformMatrix4fv(uModel, false, rotMat(0, 0, 0, 0, 0, 0, 1));
-  gl.uniform1f(uGlow, 0.85);
+  gl.uniform1f(uGlow, 0.85 + dsp.subEnergy * 0.65);
   gl.bufferData(gl.ARRAY_BUFFER, roomCage, gl.DYNAMIC_DRAW);
   gl.drawArrays(gl.LINES, 0, roomCage.length / 6);
 
-  // 2. Central Floating SHA-256 Build Cube (Negative Parallax: z > 0 -> pops OUT of screen!)
-  const spin = t * physics.rotationSpeed;
-  const popZ = physics.zExtrusion;
-  gl.uniformMatrix4fv(uModel, false, rotMat(spin * 0.7, spin, spin * 0.3, 0, 0, popZ, 1.0));
-  gl.uniform1f(uGlow, physics.laserIntensity);
+  // 2. Audio-Reactive SHA-256 Build Cube (Sub-bass pumps Z-extrusion & scale!)
+  const spin = t * (physics.rotationSpeed + dsp.midEnergy * 1.8);
+  const popZ = physics.zExtrusion + dsp.subEnergy * 0.42;
+  const cubeScale = 1.0 + dsp.subEnergy * 0.38;
+  gl.uniformMatrix4fv(uModel, false, rotMat(spin * 0.7, spin, spin * 0.3, 0, 0, popZ, cubeScale));
+  gl.uniform1f(uGlow, physics.laserIntensity + dsp.midEnergy * 1.1);
   gl.bufferData(gl.ARRAY_BUFFER, cubeWire, gl.DYNAMIC_DRAW);
   gl.drawArrays(gl.LINES, 0, cubeWire.length / 6);
 
-  // 3. Holographic Cluster Nodes + Volumetric Laser Vectors to Central Cube
+  // 3. Expanding 3D Telemetry Sonar Shockwave Rings (driven by Web Audio FFT & Sonar Pings)
+  const ringRadius = 0.32 + ((t * 0.85) % 1.15) + dsp.sonarPulse * 0.45;
+  const ringGlow = Math.max(0.25, (1.15 - (ringRadius % 1.15)) * (0.7 + dsp.sonarPulse * 1.4));
+  const sonarVerts = new Float32Array([
+    ...makeSonarRing(ringRadius, popZ, 48, 0.0, 1.0, 0.78),
+    ...makeSonarRing(ringRadius * 0.65, popZ + 0.12, 36, 0.96, 0.62, 0.04)
+  ]);
+  gl.uniformMatrix4fv(uModel, false, rotMat(0, 0, t * 0.4, 0, 0, 0, 1));
+  gl.uniform1f(uGlow, ringGlow);
+  gl.bufferData(gl.ARRAY_BUFFER, sonarVerts, gl.DYNAMIC_DRAW);
+  gl.drawArrays(gl.LINES, 0, sonarVerts.length / 6);
+
+  // 4. Holographic Cluster Nodes + Audio-Reactive Laser Vectors
   const laserVerts = [];
   const nodePts = [];
   for (let i = 0; i < physics.nodes.length; i++) {
     const n = physics.nodes[i];
-    const orb = t * 0.45 + i * 1.05;
-    const nx = n.x * Math.cos(orb * 0.25) - 0.12 * Math.sin(orb);
-    const ny = n.y + 0.08 * Math.cos(orb * 1.3);
-    const nz = popZ * 0.85 + 0.18 * Math.sin(orb);
+    const orb = t * (0.45 + dsp.midEnergy * 0.6) + i * 1.05;
+    const radialBeat = 1.0 + dsp.subEnergy * 0.22 * Math.sin(t * 6.0 + i);
+    const nx = (n.x * Math.cos(orb * 0.25) - 0.12 * Math.sin(orb)) * radialBeat;
+    const ny = (n.y + 0.08 * Math.cos(orb * 1.3)) * radialBeat;
+    const nz = popZ * 0.85 + 0.18 * Math.sin(orb) + dsp.highEnergy * 0.18;
     const [r, g, b] = n.c;
-    // Laser beam from floating node to floating SHA-256 cube center
     laserVerts.push(nx, ny, nz, r, g, b, 0, 0, popZ, 0.0, 1.0, 0.75);
     nodePts.push(nx, ny, nz, r, g, b);
   }
 
   gl.uniformMatrix4fv(uModel, false, rotMat(0, 0, 0, 0, 0, 0, 1));
-  gl.uniform1f(uGlow, physics.laserIntensity * 1.15);
+  gl.uniform1f(uGlow, physics.laserIntensity * (1.1 + dsp.highEnergy * 1.25));
   const lArr = new Float32Array(laserVerts);
   gl.bufferData(gl.ARRAY_BUFFER, lArr, gl.DYNAMIC_DRAW);
   gl.drawArrays(gl.LINES, 0, lArr.length / 6);
 
-  gl.uniform1f(uPointSize, 14.0);
+  gl.uniform1f(uPointSize, 13.0 + dsp.subEnergy * 10.0);
   const pArr = new Float32Array(nodePts);
   gl.bufferData(gl.ARRAY_BUFFER, pArr, gl.DYNAMIC_DRAW);
   gl.drawArrays(gl.POINTS, 0, pArr.length / 6);
 }
 
-// 60 FPS Animation Loop
+// 60 FPS Render Loop
 gl.enable(gl.DEPTH_TEST);
 function animate(now) {
   requestAnimationFrame(animate);
   if (xrSession) return;
 
+  const t = now * 0.001;
+  updateAudioDSP(t);
+
   eye.x += (eye.targetX - eye.x) * 0.12;
   eye.y += (eye.targetY - eye.y) * 0.12;
-  const t = now * 0.001;
 
   gl.clearColor(0.004, 0.016, 0.035, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -404,7 +631,7 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 
-// Poll Live Telemetry Physics from Port 8151
+// Poll Live Telemetry Physics from same-origin /v1/spatial/physics
 async function pollPhysics() {
   try {
     const d = await fetch('/v1/spatial/physics').then(r => r.json());
@@ -413,8 +640,8 @@ async function pollPhysics() {
     physics.laserIntensity = p.laser_intensity || physics.laserIntensity;
     physics.zExtrusion = Math.min(1.15, (p.z_extrusion_cm || 6.5) / 10.0);
     physics.shaHash = p.sha256_cube_hash || physics.shaHash;
-    physics.cpuLoad = p.cpu_load_1m ?? 0;
-    physics.derivMs = p.latency_derivative_ms ?? 0;
+    physics.cpuLoad = p.cpu_load_1m ?? physics.cpuLoad;
+    physics.derivMs = p.latency_derivative_ms ?? physics.derivMs;
 
     document.getElementById('telemetry-bar').textContent =
       `EYE (${eye.x.toFixed(2)}, ${eye.y.toFixed(2)}, ${eye.z.toFixed(2)}) | Z-POP: +${p.z_extrusion_cm}cm | ` +
