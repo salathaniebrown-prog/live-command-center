@@ -71,7 +71,20 @@ def compute_spatial_physics_frame() -> dict:
     }
 
 
-class ReuseTCP(socketserver.TCPServer):
+import threading
+CACHED_FRAME = {}
+def _bg_refresh():
+    global CACHED_FRAME
+    while True:
+        try:
+            CACHED_FRAME = compute_spatial_physics_frame()
+        except Exception:
+            pass
+        time.sleep(1.5)
+threading.Thread(target=_bg_refresh, daemon=True).start()
+
+class ReuseTCP(socketserver.ThreadingTCPServer):
+    daemon_threads = True
     allow_reuse_address = True
 
 
@@ -110,14 +123,14 @@ class SpatialHandler(http.server.BaseHTTPRequestHandler):
             if html_file.exists():
                 return self._send_html(html_file)
         if path in ("/", "/health", "/v1/telemetry", "/v1/spatial/physics"):
-            return self._send_json(compute_spatial_physics_frame())
+            return self._send_json(CACHED_FRAME or compute_spatial_physics_frame())
         return self._send_json({"ok": False, "error": f"Unknown GET path: {path}"}, 404)
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))
         if length > 0:
             self.rfile.read(length)
-        return self._send_json(compute_spatial_physics_frame())
+        return self._send_json(CACHED_FRAME or compute_spatial_physics_frame())
 
 
 if __name__ == "__main__":

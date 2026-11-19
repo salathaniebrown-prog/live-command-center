@@ -407,7 +407,7 @@ requestAnimationFrame(animate);
 // Poll Live Telemetry Physics from Port 8151
 async function pollPhysics() {
   try {
-    const d = await fetch('http://127.0.0.1:8151/v1/spatial/physics').then(r => r.json());
+    const d = await fetch('/v1/spatial/physics').then(r => r.json());
     const p = d.physics || {};
     physics.rotationSpeed = p.rotation_speed || physics.rotationSpeed;
     physics.laserIntensity = p.laser_intensity || physics.laserIntensity;
