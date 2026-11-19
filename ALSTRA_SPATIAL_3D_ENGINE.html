@@ -39,6 +39,7 @@
       <button id="btn-synth" class="btn dsp" onclick="toggleTelemetrySynth()">TELEMETRY SYNTH</button>
       <button id="btn-mic" class="btn dsp" onclick="toggleMicSonar()">MIC SONAR</button>
       <button id="btn-ping" class="btn dsp" onclick="triggerSonarPing(1.0)">SONAR PING</button>
+      <button id="btn-ult" class="btn dsp" onclick="toggleUltrasonicCarrier()">ULTRASONIC TX</button>
       <button id="btn-cam" class="btn" onclick="toggleEyeTracking()">FRONT-CAM EYE TRACK</button>
       <button id="btn-gyro" class="btn" onclick="enableGyro()">GYRO PARALLAX</button>
       <button id="btn-ghost" class="btn" onclick="togglePeppersGhost()">4-WAY PEPPER'S GHOST</button>
@@ -553,6 +554,13 @@ function renderScene(t, projMat, viewMat) {
   gl.bufferData(gl.ARRAY_BUFFER, cubeWire, gl.DYNAMIC_DRAW);
   gl.drawArrays(gl.LINES, 0, cubeWire.length / 6);
 
+  // 2B. Ghosted +50ms Time-Crystal Predicted Wireframe Overlay (ahead of live telemetry)
+  const predShift = (timeCrystalOverlay.predictedVec[0] || 0.04) * 1.4;
+  gl.uniformMatrix4fv(uModel, false, rotMat(spin * 0.7 + 0.22, spin + 0.22, spin * 0.3, predShift, 0.05, popZ + 0.14, cubeScale * 1.12));
+  gl.uniform1f(uGlow, 0.55 + dsp.highEnergy * 0.8);
+  gl.bufferData(gl.ARRAY_BUFFER, cubeWire, gl.DYNAMIC_DRAW);
+  gl.drawArrays(gl.LINES, 0, cubeWire.length / 6);
+
   // 3. Expanding 3D Telemetry Sonar Shockwave Rings (driven by Web Audio FFT & Sonar Pings)
   const ringRadius = 0.32 + ((t * 0.85) % 1.15) + dsp.sonarPulse * 0.45;
   const ringGlow = Math.max(0.25, (1.15 - (ringRadius % 1.15)) * (0.7 + dsp.sonarPulse * 1.4));
@@ -876,6 +884,60 @@ async function syncSynapticAndRfLoop() {
   } catch {}
 }
 setInterval(syncSynapticAndRfLoop, 1600);
+
+
+// ============================================================================
+// ULTRASONIC AIR-GAP CARRIER (18.5-21.7 kHz) & +50ms GHOSTED TIME-CRYSTAL OVERLAY
+// ============================================================================
+const timeCrystalOverlay = {
+  sidebandHz: 19450.0,
+  predictedVec: [0.02, -0.01, 0.18, 0.24, 0.01, -0.52, 0.25, 0.38],
+  ultOsc: null,
+  ultGain: null,
+  ultActive: false
+};
+
+function toggleUltrasonicCarrier() {
+  ensureAudioContext();
+  const btn = document.getElementById('btn-ult');
+  if (timeCrystalOverlay.ultActive) {
+    try { timeCrystalOverlay.ultOsc.stop(); } catch {}
+    timeCrystalOverlay.ultOsc = null;
+    timeCrystalOverlay.ultActive = false;
+    btn.classList.remove('active');
+    return;
+  }
+  const now = dsp.ctx.currentTime;
+  timeCrystalOverlay.ultOsc = dsp.ctx.createOscillator();
+  timeCrystalOverlay.ultGain = dsp.ctx.createGain();
+  timeCrystalOverlay.ultOsc.type = 'sine';
+  timeCrystalOverlay.ultOsc.frequency.setValueAtTime(timeCrystalOverlay.sidebandHz, now);
+  timeCrystalOverlay.ultGain.gain.setValueAtTime(0.035, now);
+  timeCrystalOverlay.ultOsc.connect(timeCrystalOverlay.ultGain);
+  timeCrystalOverlay.ultGain.connect(dsp.ctx.destination);
+  timeCrystalOverlay.ultOsc.start(now);
+  timeCrystalOverlay.ultActive = true;
+  btn.classList.add('active');
+}
+
+async function syncTimeCrystalOverlay() {
+  try {
+    const d = await fetch('/v1/landauer/telemetry').then(r => r.json());
+    const t = d.telemetry || {};
+    const tc = t.time_crystal || {};
+    const us = t.ultrasonic_sideband || {};
+    if (Array.isArray(tc.predicted_next_vector)) {
+      timeCrystalOverlay.predictedVec = tc.predicted_next_vector;
+    }
+    if (us.acoustic_sideband_hz) {
+      timeCrystalOverlay.sidebandHz = us.acoustic_sideband_hz;
+      if (timeCrystalOverlay.ultActive && timeCrystalOverlay.ultOsc && dsp.ctx) {
+        timeCrystalOverlay.ultOsc.frequency.setTargetAtTime(timeCrystalOverlay.sidebandHz, dsp.ctx.currentTime, 0.05);
+      }
+    }
+  } catch {}
+}
+setInterval(syncTimeCrystalOverlay, 1500);
 
 // Poll Live Telemetry Physics from same-origin /v1/spatial/physics
 async function pollPhysics() {

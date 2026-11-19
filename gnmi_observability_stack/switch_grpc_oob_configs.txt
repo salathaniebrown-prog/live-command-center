@@ -1,0 +1,21 @@
+# ==============================================================================
+# MULTI-VENDOR SWITCH gRPC / gNMI AGENT ACTIVATION OVER MGMT-OOB VRF
+# ==============================================================================
+# 1. Cisco IOS-XR:
+#    grpc
+#     port 57400
+#     vrf MGMT-OOB
+#     no-tls
+#    !
+# 2. Arista EOS:
+#    management api gnmi
+#     transport grpc MGMT-OOB
+#      vrf MGMT-OOB
+#      port 6030
+#     provider eos-native
+#    !
+# 3. Juniper Junos:
+#    set system services extension-service request-response grpc clear-text port 50051
+#    set routing-instances MGMT-OOB interface fxp0.0
+# 4. Nokia SR Linux:
+#    set / system grpc-server mgmt admin-state enable network-instance mgmt port 57400

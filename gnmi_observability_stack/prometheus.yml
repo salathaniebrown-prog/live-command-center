@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 2s
+  evaluation_interval: 2s
+
+scrape_configs:
+  - job_name: "alstra-gnmi-openconfig-8138"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["host.docker.internal:8138"]
+        labels:
+          vrf: "MGMT-OOB"
+          cluster: "alstra-sovereign"
+
+  - job_name: "gnmic-collector-9803"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["gnmic:9803"]
+        labels:
+          explorer_port: "9804"

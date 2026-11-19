@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  gnmic:
+    image: ghcr.io/openconfig/gnmic:latest
+    container_name: alstra-gnmic-collector
+    command: --config /app/gnmic.yml subscribe
+    ports:
+      - "9804:9804"   # gNMIc Explorer TCP 9804
+      - "9803:9803"   # gNMIc Prometheus Exporter
+    volumes:
+      - ./gnmic.yml:/app/gnmic.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: alstra-prometheus-tsdb
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+    ports:
+      - "9090:9090"   # Prometheus TSDB TCP 9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - gnmic
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: alstra-grafana-obs
+    ports:
+      - "3000:3000"   # Grafana Visualization UI
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=alstra
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped

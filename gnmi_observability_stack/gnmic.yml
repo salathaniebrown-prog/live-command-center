@@ -1,0 +1,49 @@
+api:
+  address: :9804
+  enable-metrics: true
+
+targets:
+  alstra-node-8088:
+    address: host.docker.internal:8088
+    insecure: true
+    protocol: http
+  alstra-node-8090:
+    address: host.docker.internal:8090
+    insecure: true
+    protocol: http
+  alstra-node-8135:
+    address: host.docker.internal:8135
+    insecure: true
+    protocol: http
+  alstra-node-8136:
+    address: host.docker.internal:8136
+    insecure: true
+    protocol: http
+
+subscriptions:
+  openconfig-unified-sensor-plan:
+    paths:
+      - /interfaces/interface/state/counters
+      - /components/component/state
+      - /system/cpus/cpu/state
+      - /network-instances/network-instance[name=MGMT-OOB]
+    mode: stream
+    stream-mode: sample
+    sample-interval: 2s
+    encoding: json_ietf
+
+outputs:
+  prom-output:
+    type: prometheus
+    listen: :9803
+    path: /metrics
+    metric-prefix: gnmic_openconfig
+  # Uncomment when external InfluxDB / Kafka brokers are attached:
+  # influx-output:
+  #   type: influxdb
+  #   url: http://host.docker.internal:8086
+  #   database: alstra_openconfig
+  # kafka-output:
+  #   type: kafka
+  #   address: host.docker.internal:9092
+  #   topic: alstra.openconfig.telemetry

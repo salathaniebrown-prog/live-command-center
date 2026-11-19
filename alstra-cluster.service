@@ -1,0 +1,17 @@
+[Unit]
+Description=Alstra Sovereign 30-Port Autonomous Spatial, Neuromorphic & MPS Control Cluster
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User=
+WorkingDirectory=/data/data/com.termux/files/home
+Environment=PATH=/data/data/com.termux/files/home/bin:/data/data/com.termux/files/home/.local/bin:/data/data/com.termux/files/usr/bin:/product/bin:/apex/com.android.runtime/bin:/apex/com.android.art/bin:/apex/com.android.virt/bin:/system_ext/bin:/system/bin:/system/xbin:/odm/bin:/vendor/bin:/vendor/xbin:/data/data/com.termux/files/home/.local/bin
+ExecStart=/data/data/com.termux/files/home/.termux/boot/start_alstra_cluster.sh
+ExecReload=/usr/bin/env pm2 reload all
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

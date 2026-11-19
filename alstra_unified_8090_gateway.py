@@ -80,6 +80,20 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        if self.path.startswith("/v1/gnmi"):
+            return self._proxy_upstream(f"http://127.0.0.1:8138{self.path}")
+        if self.path.startswith("/v1/multipath"):
+            return self._proxy_upstream(f"http://127.0.0.1:8136{self.path}")
+        if self.path.startswith("/v1/phaselock"):
+            return self._proxy_upstream(f"http://127.0.0.1:8135{self.path}")
+        if self.path.startswith("/v1/breaker"):
+            return self._proxy_upstream(f"http://127.0.0.1:8134{self.path}")
+        if self.path.startswith("/v1/control"):
+            return self._proxy_upstream(f"http://127.0.0.1:8128{self.path}")
+        if self.path.startswith("/v1/landauer"):
+            return self._proxy_upstream(f"http://127.0.0.1:8129{self.path}")
+        if self.path.startswith("/v1/ultrasonic"):
+            return self._proxy_upstream(f"http://127.0.0.1:8130{self.path}")
         if self.path.startswith("/v1/neuro"):
             return self._proxy_upstream(f"http://127.0.0.1:8157{self.path}")
         if self.path.startswith("/v1/synaptic"):
@@ -92,6 +106,36 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?")[0]
+        if path == "/v1/cluster/unify":
+            import socket as _usock
+            ports = [8088,8090,8095,8099,8108,8109,8111,8113,8115,8117,8119,8121,8123,8125,8127,8128,8129,8130,8131,8134,8135,8136,8137,8138,8139,8141,8143,8145,8147,8149,8151,8153,8155,8157]
+            online = []
+            for p in ports:
+                s = _usock.socket(_usock.AF_INET, _usock.SOCK_STREAM)
+                s.settimeout(0.08)
+                try:
+                    if s.connect_ex(("127.0.0.1", p)) == 0:
+                        online.append(p)
+                finally:
+                    s.close()
+            return self._send_json({"ok": True, "unified_cluster": "ALSTRA_JEV_SYSTEM_ONE", "online_count": len(online), "total_ports": len(ports), "online_ports": online, "views": ["/", "/spatial", "/radial", "/metrics", "/forensic", "/docs"]})
+        if path.startswith("/v1/gnmi") or path == "/metrics":
+            return self._proxy_upstream(f"http://127.0.0.1:8138{self.path}")
+        if path.startswith("/v1/multipath"):
+            return self._proxy_upstream(f"http://127.0.0.1:8136{self.path}")
+        if path.startswith("/v1/phaselock"):
+            return self._proxy_upstream(f"http://127.0.0.1:8135{self.path}")
+        if path.startswith("/v1/breaker"):
+            return self._proxy_upstream(f"http://127.0.0.1:8134{self.path}")
+        if path.startswith("/v1/control"):
+            return self._proxy_upstream(f"http://127.0.0.1:8128{self.path}")
+        if path.startswith("/v1/landauer"):
+            return self._proxy_upstream(f"http://127.0.0.1:8129{self.path}")
+        if path.startswith("/v1/ultrasonic"):
+            return self._proxy_upstream(f"http://127.0.0.1:8130{self.path}")
+        if path.startswith("/v1/hud") or path.startswith("/radial"):
+            target = "/" if path.startswith("/radial") else self.path
+            return self._proxy_upstream(f"http://127.0.0.1:8131{target}")
         if path.startswith("/v1/neuro"):
             return self._proxy_upstream(f"http://127.0.0.1:8157{self.path}")
         if path.startswith("/v1/synaptic"):
