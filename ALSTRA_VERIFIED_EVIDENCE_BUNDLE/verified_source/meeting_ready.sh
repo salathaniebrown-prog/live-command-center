@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+/data/data/com.termux/files/home/.astra_light_keepalive.sh
 set -euo pipefail
 cd "$HOME"
 

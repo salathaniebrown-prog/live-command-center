@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-11-19T17:57:03Z",
+  "generated_utc": "2026-11-19T22:22:50Z",
   "workspace": "/data/data/com.termux/files/home",
-  "verified_artifact_count": 124,
+  "verified_artifact_count": 127,
   "artifacts": [
     {
       "file": "alstra_master_spine_8095.py",
@@ -66,12 +66,12 @@
     },
     {
       "file": "alstra_unified_8090_gateway.py",
-      "bytes": 9232,
-      "mtime_utc": "2026-11-19T17:48:08Z",
-      "sha256": "423dfa77a9ad73aec9f7ae06ad6dc6803fc3045606ee0a339890896140bc894f",
+      "bytes": 11951,
+      "mtime_utc": "2026-11-19T21:43:15Z",
+      "sha256": "78558e14e43be7ce6add8fa6d8363cb951e0fa9d85dc802f3046a09379b74eca",
       "status": "VERIFIED_EXECUTABLE_CODE",
-      "total_lines": 181,
-      "executable_lines": 165,
+      "total_lines": 245,
+      "executable_lines": 227,
       "classes": [
         "ThreadingReuseTCP",
         "UnifiedGatewayHandler"
@@ -82,6 +82,7 @@
         "_proxy_upstream",
         "do_OPTIONS",
         "do_POST",
+        "_route_v1_upstream",
         "do_GET"
       ],
       "imports": [
@@ -90,6 +91,7 @@
         "pathlib",
         "socket",
         "socketserver",
+        "subprocess",
         "urllib.error",
         "urllib.request"
       ]
@@ -409,6 +411,14 @@
       ]
     },
     {
+      "file": "alstra_save.sh",
+      "bytes": 1074,
+      "mtime_utc": "2026-11-19T19:41:04Z",
+      "sha256": "1731f63cba46408b0bc0d229886e2a0d2e76e526b5f40aaebb746f4aa10a6474",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 25
+    },
+    {
       "file": "astra-pilot.sh",
       "bytes": 1079,
       "mtime_utc": "2026-11-10T19:55:37Z",
@@ -494,6 +504,32 @@
         "sqlite3",
         "subprocess",
         "time"
+      ]
+    },
+    {
+      "file": "astra_alstra_dual_persona_8159.py",
+      "bytes": 3271,
+      "mtime_utc": "2026-11-19T21:52:18Z",
+      "sha256": "a727c08d6030d51532887b7bcc81987b06cf7d869708d0a913c7d88137d4aec4",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 88,
+      "executable_lines": 79,
+      "classes": [
+        "ReuseTCP",
+        "Handler"
+      ],
+      "functions": [
+        "log_message",
+        "_send",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "socketserver",
+        "time",
+        "urllib.request"
       ]
     },
     {
@@ -896,12 +932,12 @@
     },
     {
       "file": "astra_github_watchdog_daemon.py",
-      "bytes": 944,
-      "mtime_utc": "2026-11-19T17:43:35Z",
-      "sha256": "7a47f2851571f532f73bbd341fccdd47cfd4b567168d058664aeeaba5a25d317",
+      "bytes": 1056,
+      "mtime_utc": "2026-11-19T19:17:33Z",
+      "sha256": "7c35ab702a1854858bd4aa1142a12e911c6db0c204432445254bb20cde25aa7e",
       "status": "VERIFIED_EXECUTABLE_CODE",
-      "total_lines": 23,
-      "executable_lines": 22,
+      "total_lines": 30,
+      "executable_lines": 25,
       "classes": [
         "ReuseTCP",
         "H"
@@ -995,6 +1031,33 @@
         "sys",
         "time",
         "uuid"
+      ]
+    },
+    {
+      "file": "astra_grafana_v2_native_3000.py",
+      "bytes": 11786,
+      "mtime_utc": "2026-11-19T22:08:34Z",
+      "sha256": "6be6216e67eb7efc0f8b9b888bb2738a641101d78ea342805d163790cc7355d7",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 202,
+      "executable_lines": 185,
+      "classes": [
+        "ReuseTCP",
+        "Handler"
+      ],
+      "functions": [
+        "get_live_metrics",
+        "log_message",
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socketserver",
+        "time",
+        "urllib.request"
       ]
     },
     {
@@ -1629,12 +1692,12 @@
     },
     {
       "file": "astra_tdd_guardrails.py",
-      "bytes": 3805,
-      "mtime_utc": "2026-11-19T17:56:31Z",
-      "sha256": "b844ca251b47ba6ef79549f0d1bea7a46aeaa049d6978f2fa58aa762f5b702fb",
+      "bytes": 4254,
+      "mtime_utc": "2026-11-19T19:29:33Z",
+      "sha256": "f9ec3b7e8ec3e744efc8c541cf928159d850c60320e0ad46abcfe6ec44790107",
       "status": "VERIFIED_EXECUTABLE_CODE",
-      "total_lines": 85,
-      "executable_lines": 74,
+      "total_lines": 93,
+      "executable_lines": 83,
       "classes": [
         "AstraTddContractSuite"
       ],
@@ -2319,11 +2382,11 @@
     },
     {
       "file": "meeting_ready.sh",
-      "bytes": 1103,
-      "mtime_utc": "2026-11-19T17:43:46Z",
-      "sha256": "5c4405124cc37981f206e4f65c1ad6d1f7dfaff3c792f8e77874a3648f990b35",
+      "bytes": 1162,
+      "mtime_utc": "2026-11-19T19:37:45Z",
+      "sha256": "4535f48ef17ac0168e3d540e9e048b115b712ea07f650e0cef309341a00b40bb",
       "status": "VERIFIED_ASSET",
-      "total_lines": 34
+      "total_lines": 35
     },
     {
       "file": "mopar_insurance_engine.py",
@@ -2750,9 +2813,9 @@
   "sqlite_databases": [
     {
       "db_name": ".astra_local_brain.db",
-      "size_bytes": 2486272,
+      "size_bytes": 7114752,
       "journal_mode": "wal",
-      "sha256": "aae0cbfbbacf155d40253e3b0b927586f09a0d9f1134035200097af41dd57a7e",
+      "sha256": "dc6a599f8bbe3681c8755eb12a231af6537d939ff460318e4bb72cb07393cb6d",
       "tables": {
         "local_records": 424
       }
@@ -2768,15 +2831,15 @@
     }
   ],
   "git_commits": [
+    "491c8237c950f3fa1962a06782a11fa8bc1f3798|2026-11-19T16:53:00-05:00|salathaniebrown-prog|fix(stability-ram): restore 8090 avatar/quick routes & guard System UI RAM on 3.4GB tablet [v2026.20261119-215227]",
+    "863ccfc9743296fdc25e4ca3bee89424388ce358|2026-11-19T16:51:50-05:00|salathaniebrown-prog|fix(stability-ram): restore 8090 avatar/quick routes & guard System UI RAM on 3.4GB tablet [v2026.20261119-215134]",
+    "1ed3d5b6db14a738664304c3987d90f4f184eddd|2026-11-19T16:43:31-05:00|salathaniebrown-prog|feat(dual-avatar-dock): embed ALSTRA cybernetic portrait & zero-typing one-tap dock in 8090 UI [v2026.20261119-214318]",
+    "5058070e45f3db359e6636aeb891c006820ee569|2026-11-19T16:41:43-05:00|salathaniebrown-prog|feat(dual-persona-8159): lock ASTRA female + ALSTRA half-human/half-robot cybernetic model router & zero-typing tablet macros [v2026.20261119-214135]",
+    "602f26f82b33b605d87966e0dcddac6abf42295c|2026-11-19T14:43:42-05:00|salathaniebrown-prog|chore(ci): force-track action-gh-release v3 workflow for immutable release archives",
+    "d494ffd90c2d9d911e8dca9e025eed1cdba4f2c2|2026-11-19T14:41:11-05:00|salathaniebrown-prog|feat(permanent-vault): lock 34-port unified fabric, 5x2 Cyber-Neon matrix & boot persistence [v2026.20261119-194105]",
+    "42006d685a74a67f447fc69b2812af7cb69c761f|2026-11-19T14:35:44-05:00|salathaniebrown-prog|feat(cyber-neon-3000): deploy native 5x2 single-screen Cyber-Neon observation matrix on port 3000",
+    "be512d745362d988b40e84902cf98906c0036627|2026-11-19T14:29:37-05:00|salathaniebrown-prog|feat(unify-grafana-v2): pass 4/4 TDD contracts, unify 34-port fabric & add 5x2 Cyber-Neon Grafana v2 dashboard",
     "90070c27ed8ad9b697f03a89bdf78028e561ecec|2026-11-19T12:56:40-05:00|salathaniebrown-prog|feat(unify-cluster): unify 34-port autonomous fabric, /v1/cluster/unify, 8095 HTTP/JSON spine & gNMI OpenConfig stack",
-    "1f59df23e1255fc43f04145968b4c6448ac744d3|2026-11-19T08:39:05-05:00|salathaniebrown-prog|feat(neuro-mps-merkle): deploy C zero-copy ring buffer, TCAD/SKCF spike encoder, MPS tensor-train compression & Merkle WAL spine (8157)",
-    "41cf823b00124c9b198ad65f0ff2692dee053e73|2026-11-19T08:08:02-05:00|salathaniebrown-prog|feat(synaptic-rf-mitosis): deploy Cognitive Gaze BCI, Ambient RF Plasma Ripples & Darwinian Code Mitosis Swarm Daemon (8155)",
-    "81d100c9d45db61414e1198199bf3d1cb885cd4e|2026-11-19T07:51:52-05:00|salathaniebrown-prog|feat(aot-photonic): deploy Optical Acoustic Telemetry & Photonic Resonance Engine (8153) with closed-loop prism auto-gain & Genius Brain pre-triggers",
-    "0d71740a7cf1919081d576958395d9a5f635ec95|2026-11-19T07:35:21-05:00|salathaniebrown-prog|feat(peppers-ghost,voice): add 45-deg 2x2 interlocking nested laser-cutting SVG generator & voice-command triggers for Autonomous Agent (8145)",
-    "5e52e5e726c33c13325bd84272fc6ffc7b1b081a|2026-11-19T07:19:03-05:00|salathaniebrown-prog|feat(spatial-audio): upgrade Off-Axis 3D & 4-Way Pepper's Ghost engine with 60 FPS Web Audio API DSP Synthesizer & Telemetry Sonar",
-    "86fdf2a9c607365b03dad8e7325d7d9b6a89dc99|2026-11-19T07:12:04-05:00|salathaniebrown-prog|fix(gateway-8090,spatial-8151): add /api/* proxy pass-through & sub-2ms non-blocking spatial telemetry cache",
-    "a2eb3718c9623fe25aca2aa7910c917b1e5f1227|2026-11-18T19:56:03-05:00|salathaniebrown-prog|feat(spatial-3d): deploy Off-Axis 3D WebGL/WebXR Spatial Engine (8151), Shadow Forge (8149), Agent (8145), Mesh (8147), /docs & 25-port TDD suite",
-    "e808531d1068444120bf91609acd5884c9dbab7f|2026-11-18T16:37:25-05:00|salathaniebrown-prog|feat(forensic): add AST-verified 101-artifact code manifest and /forensic viewer on port 8090",
-    "6992f81c7aa1010d02c21a03744b647c800010d2|2026-11-18T14:14:52-05:00|salathaniebrown-prog|feat(architecture): unify 8088/8090 gateway with 8095 Master Spine, 8099 WAL Genius Brain & MCP Stdio Bridge"
+    "1f59df23e1255fc43f04145968b4c6448ac744d3|2026-11-19T08:39:05-05:00|salathaniebrown-prog|feat(neuro-mps-merkle): deploy C zero-copy ring buffer, TCAD/SKCF spike encoder, MPS tensor-train compression & Merkle WAL spine (8157)"
   ]
 }

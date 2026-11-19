@@ -35,7 +35,7 @@ HTML_UI = """<!DOCTYPE html>
 </head>
 <body>
 <header>
-  <div><strong style="color:#7dd3fc">ALSTRA // JEV SYSTEM ONE</strong> — 8090 &amp; 8088 Cyber-Neon Command Matrix <span style="color:#c084fc">[5x2 fillScreen:true]</span></div>
+  <div><img src="/assets/alstra_avatar.jpg" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%2338bdf8'/><stop offset='100%' stop-color='%23c084fc'/></linearGradient></defs><rect width='100' height='100' rx='50' fill='%2306101f' stroke='url(%23g)' stroke-width='4'/><path d='M50 12 A38 38 0 0 1 50 88 Z' fill='%231e293b'/><circle cx='36' cy='44' r='5' fill='%23e0f2fe'/><circle cx='64' cy='44' r='6' fill='%2338bdf8'/><path d='M34 66 Q50 74 66 66' stroke='%237dd3fc' stroke-width='3' fill='none'/></svg>';" style="width:26px;height:26px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:1px solid #38bdf8;"/><strong style="color:#7dd3fc">ALSTRA // JEV SYSTEM ONE</strong> — 8090 &amp; 8088 Cyber-Neon Command Matrix <span style="color:#c084fc">[5x2 fillScreen:true]</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <span class="badge" id="hdr-nodes">NODES: SYNCING</span>
     <span class="badge" style="border-color:#c084fc;color:#e879f9" id="hdr-vrf">VRF: MGMT-OOB</span>
@@ -169,6 +169,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def log_message(self, *_): pass
     def do_GET(self):
         p = self.path.split("?")[0]
+        if p == "/assets/alstra_avatar.jpg":
+            av = Path.home() / "assets" / "alstra_avatar.jpg"
+            if av.exists():
+                raw = av.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/jpeg")
+                self.send_header("Connection", "close")
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+                return
         if p == "/api/live":
             raw = json.dumps(get_live_metrics()).encode("utf-8")
             ctype = "application/json"

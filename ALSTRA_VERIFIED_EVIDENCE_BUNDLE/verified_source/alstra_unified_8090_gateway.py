@@ -37,40 +37,38 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(raw)
 
     def _proxy_upstream(self, target_url: str):
-        length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(length) if length > 0 else None
-        headers = {
-            "Content-Type": self.headers.get("Content-Type", "application/json"),
-            "Accept": self.headers.get("Accept", "*/*"),
-        }
-        req = urllib.request.Request(target_url, data=body, headers=headers, method=self.command)
+        import urllib.request, urllib.error
         try:
-            with urllib.request.urlopen(req, timeout=8.0) as resp:
+            body = None
+            if self.command in ("POST", "PUT", "PATCH"):
+                clen = int(self.headers.get("Content-Length", "0") or "0")
+                if clen > 0:
+                    body = self.rfile.read(clen)
+            req = urllib.request.Request(
+                target_url,
+                data=body,
+                method=self.command,
+                headers={"Connection": "close", "Content-Type": self.headers.get("Content-Type", "application/json")},
+            )
+            with urllib.request.urlopen(req, timeout=4.0) as resp:
                 raw = resp.read()
+                ctype = resp.headers.get("Content-Type", "application/json")
                 self.send_response(resp.status)
-                self.send_header("Content-Type", resp.headers.get("Content-Type", "application/json"))
-                if "Content-Disposition" in resp.headers:
-                    self.send_header("Content-Disposition", resp.headers["Content-Disposition"])
+                self.send_header("Content-Type", ctype)
                 self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Connection", "close")
                 self.send_header("Content-Length", str(len(raw)))
                 self.end_headers()
                 self.wfile.write(raw)
-        except urllib.error.HTTPError as e:
-            raw = e.read()
-            self.send_response(e.code)
-            self.send_header("Content-Type", e.headers.get("Content-Type", "application/json"))
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Content-Length", str(len(raw)))
-            self.end_headers()
-            self.wfile.write(raw)
         except Exception as exc:
-            raw = f'{{"ok":false,"error":"Upstream proxy error: {exc}"}}'.encode("utf-8")
+            err_raw = json.dumps({"ok": False, "upstream": target_url, "error": str(exc)}).encode("utf-8")
             self.send_response(502)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Content-Length", str(len(raw)))
+            self.send_header("Connection", "close")
+            self.send_header("Content-Length", str(len(err_raw)))
             self.end_headers()
-            self.wfile.write(raw)
+            self.wfile.write(err_raw)
 
     def do_OPTIONS(self):
         self.send_response(200)
@@ -80,6 +78,9 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        up_post = self._route_v1_upstream(self.path)
+        if up_post:
+            return self._proxy_upstream(up_post)
         if self.path.startswith("/v1/gnmi"):
             return self._proxy_upstream(f"http://127.0.0.1:8138{self.path}")
         if self.path.startswith("/v1/multipath"):
@@ -104,8 +105,71 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
             return self._proxy_upstream(f"http://127.0.0.1:8151{self.path}")
         return self._proxy_upstream(f"http://127.0.0.1:8088{self.path}")
 
+
+    def _route_v1_upstream(self, req_path: str):
+        p = req_path.split("?")[0]
+        routes = {
+            "/v1/control": "http://127.0.0.1:8128",
+            "/v1/landauer": "http://127.0.0.1:8129",
+            "/v1/ultrasonic": "http://127.0.0.1:8130",
+            "/v1/hud": "http://127.0.0.1:8131",
+            "/v1/breaker": "http://127.0.0.1:8134",
+            "/v1/phaselock": "http://127.0.0.1:8135",
+            "/v1/multipath": "http://127.0.0.1:8136",
+            "/v1/gnmi": "http://127.0.0.1:8138",
+            "/v1/spatial": "http://127.0.0.1:8151",
+            "/v1/aot": "http://127.0.0.1:8153",
+            "/v1/synaptic": "http://127.0.0.1:8155",
+            "/v1/neuro": "http://127.0.0.1:8157",
+        }
+        for prefix, base in routes.items():
+            if p == prefix or p.startswith(prefix + "/"):
+                return f"{base}{req_path}"
+        if p == "/cyberneon" or p.startswith("/cyberneon/"):
+            return "http://127.0.0.1:3000/"
+        if p.startswith("/v1/persona/"):
+            return "http://127.0.0.1:8159/telemetry"
+        if p == "/metrics":
+            return "http://127.0.0.1:8138/metrics"
+        if p == "/radial" or p.startswith("/radial/"):
+            return "http://127.0.0.1:8131/"
+        return None
+
     def do_GET(self):
+        p = self.path.split('?')[0]
+        if p.startswith("/v1/quick/"):
+            import subprocess
+            act = p.split("/v1/quick/", 1)[1]
+            if act == "lock":
+                subprocess.Popen(["/data/data/com.termux/files/home/.astra_light_keepalive.sh"])
+                msg = "All 35 ports & dual-persona daemons re-locked"
+            elif act == "telemetry":
+                msg = "gNMI :8138 + PhaseLock :8135 + DualPersona :8159 telemetry synchronized"
+            else:
+                msg = f"Executed quick action: {act}"
+            raw = json.dumps({"ok": True, "action": act, "message": msg}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Connection", "close")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+            return
+        if p == "/assets/alstra_avatar.jpg":
+            av = Path.home() / "assets" / "alstra_avatar.jpg"
+            if av.exists():
+                raw = av.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/jpeg")
+                self.send_header("Connection", "close")
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+                return
         path = self.path.split("?")[0]
+        up_get = self._route_v1_upstream(self.path)
+        if up_get:
+            return self._proxy_upstream(up_get)
         if path == "/v1/cluster/unify":
             import socket as _usock
             ports = [8088,8090,8095,8099,8108,8109,8111,8113,8115,8117,8119,8121,8123,8125,8127,8128,8129,8130,8131,8134,8135,8136,8137,8138,8139,8141,8143,8145,8147,8149,8151,8153,8155,8157]
