@@ -1,97 +1,83 @@
 #!/usr/bin/env python3
-"""
-Unified Mirror Gateway on Port 8090:
-- Proxies all live 8088 API & UI routes seamlessly so 8090 never breaks
-- Injects live Genius Brain (8099) & Master Spine (8095) control deck into the UI
-"""
 import http.server
+import os
 import socketserver
 import urllib.request
-import urllib.error
+from pathlib import Path
 
-PORT = 8090
-UPSTREAM_8088 = "http://127.0.0.1:8088"
+PORT = int(os.environ.get("ALSTRA_SHADOW_PORT", "8090"))
+HOME = Path.home()
 
-OVERLAY_WIDGET = """
-<div id="alstra-8095-8099-deck" style="margin:12px auto;max-width:1280px;padding:12px;background:#06131f;border:1px solid #00f0ff;border-radius:8px;font-family:monospace;color:#d6f8ff;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-    <strong style="color:#00f0ff;">ALSTRA UNIVERSAL TELEMETRY & GENIUS BRAIN MESH (8095 MASTER SPINE // 8099 WAL BRAIN)</strong>
-    <button onclick="syncAlstraBrain()" style="background:#00f0ff;color:#041018;border:none;padding:4px 10px;border-radius:4px;font-weight:bold;cursor:pointer;">SYNC 8095 + 8099</button>
-  </div>
-  <div id="alstra-brain-telemetry-bar" style="font-size:12px;color:#00ff9d;">Connecting to 127.0.0.1:8095 & 127.0.0.1:8099...</div>
-</div>
-<script>
-async function syncAlstraBrain() {
-  try {
-    const [mRes, bRes] = await Promise.all([
-      fetch('http://127.0.0.1:8095/v1/telemetry').then(r => r.json()),
-      fetch('http://127.0.0.1:8099/v1/telemetry').then(r => r.json())
-    ]);
-    const hw = mRes.hardware || {};
-    document.getElementById('alstra-brain-telemetry-bar').textContent =
-      `[MASTER 8095: ${mRes.status}] Temp: ${hw.temperature_c}°C | Load: ${hw.load_1m} | Workers: ${mRes.worker_count}  ||  ` +
-      `[BRAIN 8099 WAL: ${bRes.status}] Context Keys: ${bRes.context_keys_count} | Ledger Tasks: ${bRes.cumulative_tasks_executed}`;
-  } catch (e) {
-    document.getElementById('alstra-brain-telemetry-bar').textContent = 'Syncing 8095/8099 endpoints...';
-  }
-}
-syncAlstraBrain();
-setInterval(syncAlstraBrain, 6000);
-</script>
-"""
 
-class ReuseTCP(socketserver.TCPServer):
+class ThreadingReuseTCP(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
+    daemon_threads = True
 
-class GatewayHandler(http.server.BaseHTTPRequestHandler):
-    def _proxy(self, method: str):
-        target = UPSTREAM_8088 + self.path
-        length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(length) if length > 0 else None
-        headers = {"Content-Type": self.headers.get("Content-Type", "application/json")} if body else {}
-        req = urllib.request.Request(target, data=body, headers=headers, method=method)
-        try:
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                raw = resp.read()
-                ctype = resp.headers.get("Content-Type", "text/html")
-                if "text/html" in ctype and b"alstra-8095-8099-deck" not in raw:
-                    html = raw.decode("utf-8", errors="ignore")
-                    if "</body>" in html:
-                        html = html.replace("</body>", OVERLAY_WIDGET + "\n</body>")
-                    else:
-                        html += OVERLAY_WIDGET
-                    raw = html.encode("utf-8")
-                self.send_response(resp.status)
-                self.send_header("Content-Type", ctype)
-                self.send_header("Content-Length", str(len(raw)))
-                self.end_headers()
-                self.wfile.write(raw)
-        except Exception as exc:
-            err = json.dumps({"ok": False, "upstream": target, "error": str(exc)}).encode("utf-8")
-            self.send_response(502)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(err)))
+
+class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
+    def log_message(self, *_args):
+        return
+
+    def _serve_file(self, file_path: Path):
+        if not file_path.exists():
+            raw = f"<h1>Missing artifact: {file_path.name}</h1>".encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(raw)))
             self.end_headers()
-            self.wfile.write(err)
+            self.wfile.write(raw)
+            return
+        raw = file_path.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
 
     def do_GET(self):
-        if self.path.startswith("/forensic"):
-            f_html = Path.home() / "ALSTRA_VERIFIED_EVIDENCE_BUNDLE" / "index.html"
-            if f_html.exists():
-                raw = f_html.read_bytes()
-                self.send_response(200)
-                self.send_header("Content-Type", "text/html; charset=utf-8")
-                self.send_header("Content-Length", str(len(raw)))
-                self.end_headers()
-                self.wfile.write(raw)
-                return
-        self._proxy("GET")
+        path = self.path.split("?")[0]
+        if path.startswith("/spatial"):
+            return self._serve_file(HOME / "ALSTRA_SPATIAL_3D_ENGINE.html")
+        if path.startswith("/docs"):
+            return self._serve_file(HOME / "ALSTRA_API_CONSOLE.html")
+        if path.startswith("/forensic"):
+            return self._serve_file(HOME / "ALSTRA_VERIFIED_EVIDENCE_BUNDLE" / "index.html")
 
-    def do_POST(self):
-        self._proxy("POST")
+        # Root unified dashboard: locked 8088 core UI + additive ~/.astra_ui_addons/*.html cards
+        base_html = ""
+        try:
+            with urllib.request.urlopen("http://127.0.0.1:8088/", timeout=2.5) as r:
+                base_html = r.read().decode("utf-8", errors="replace")
+        except Exception:
+            locked = HOME / ".astra_locked_core_ui.html"
+            if locked.exists():
+                base_html = locked.read_text(encoding="utf-8", errors="replace")
+            else:
+                base_html = "<!doctype html><html><body style='background:#020813;color:#d6f8ff;font-family:monospace;'><h2>JEV SYSTEM ONE // ALSTRA UNIFIED GATEWAY (:8090)</h2></body></html>"
+
+        addons_dir = HOME / ".astra_ui_addons"
+        addon_blocks = []
+        if addons_dir.exists():
+            for f in sorted(addons_dir.glob("*.html")):
+                addon_blocks.append(f.read_text(encoding="utf-8", errors="replace"))
+
+        injected = "\n".join(addon_blocks)
+        if "</body>" in base_html:
+            final_html = base_html.replace("</body>", f"\n{injected}\n</body>", 1)
+        else:
+            final_html = f"{base_html}\n{injected}"
+
+        raw = final_html.encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
+
 
 if __name__ == "__main__":
-    import json
-    with ReuseTCP(("127.0.0.1", PORT), GatewayHandler) as srv:
-        print(f"[✔] Unified Mirror Gateway active on 127.0.0.1:{PORT} -> proxying 8088 + 8095/8099")
+    with ThreadingReuseTCP(("0.0.0.0", PORT), UnifiedGatewayHandler) as srv:
+        print(f"[✔] Alstra Unified Gateway active on 0.0.0.0:{PORT}")
         srv.serve_forever()

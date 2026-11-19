@@ -1,0 +1,9 @@
+services:
+  alstra-spatial-3d:
+    build: .
+    container_name: alstra-spatial-3d-engine
+    ports:
+      - "8151:8151"
+    environment:
+      - ALSTRA_SHADOW_PORT=8151
+    restart: unless-stopped

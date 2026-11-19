@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>ALSTRA // OFF-AXIS 3D ANAMORPHIC SPATIAL ARTIFACT ENGINE</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#010409; color:#d6f8ff; font-family:monospace; overflow:hidden; height:100vh; width:100vw; }
+  canvas#gl { position:fixed; inset:0; width:100vw; height:100vh; display:block; }
+  #hud {
+    position:fixed; top:10px; left:10px; right:10px; z-index:20;
+    background:rgba(2,12,22,0.82); border:1px solid #00f0ff; border-radius:8px;
+    padding:10px 12px; backdrop-filter:blur(6px);
+  }
+  .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:space-between; }
+  .btn {
+    background:#072235; color:#00f0ff; border:1px solid #00f0ff;
+    padding:5px 9px; border-radius:5px; font-family:monospace; font-size:11px;
+    font-weight:bold; cursor:pointer;
+  }
+  .btn.active { background:#00ff9d; color:#02080d; border-color:#00ff9d; }
+  .btn.ar { background:#a855f7; color:#fff; border-color:#c084fc; }
+  #telemetry-bar { margin-top:6px; font-size:11px; color:#7dd3fc; line-height:1.4; }
+  video#cam { position:fixed; bottom:10px; right:10px; width:96px; height:72px; border:1px solid #00ff9d; border-radius:6px; opacity:0.75; transform:scaleX(-1); display:none; z-index:25; object-fit:cover; }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<video id="cam" autoplay playsinline muted></video>
+
+<div id="hud">
+  <div class="row">
+    <strong style="color:#00f0ff;font-size:12px;">[ALSTRA OFF-AXIS 3D ANAMORPHIC SPATIAL ENGINE // :8151]</strong>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;">
+      <button id="btn-cam" class="btn" onclick="toggleEyeTracking()">FRONT-CAM EYE TRACK</button>
+      <button id="btn-gyro" class="btn" onclick="enableGyro()">GYRO PARALLAX</button>
+      <button id="btn-ghost" class="btn" onclick="togglePeppersGhost()">4-WAY PEPPER'S GHOST</button>
+      <button id="btn-ar" class="btn ar" onclick="enterSpatialAR()">ENTER SPATIAL AR</button>
+    </div>
+  </div>
+  <div id="telemetry-bar">Initializing Off-Axis Asymmetric Frustum & 60 FPS Telemetry Physics...</div>
+</div>
+
+<script>
+const canvas = document.getElementById('gl');
+const gl = canvas.getContext('webgl', { antialias: true, alpha: true, xrCompatible: true });
+
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+});
+
+// Viewer eye coordinates in screen-normalized units (z=0 is the glass surface!)
+const eye = { x: 0.0, y: 0.0, z: 2.35, targetX: 0.0, targetY: 0.0 };
+let peppersGhost = false;
+let spatialAROverlay = false;
+let xrSession = null;
+
+// Live Telemetry Physics State (polled from 8151 -> 8090/8088/8143/8149)
+const physics = {
+  rotationSpeed: 0.85,
+  laserIntensity: 1.15,
+  zExtrusion: 0.65,
+  shaHash: 'SHA256-LOADING',
+  cpuLoad: 0.2,
+  derivMs: 0.0,
+  nodes: [
+    { id: '8088', x: -1.1, y: 0.6, z: 0.35, c: [0.0, 0.94, 1.0] },
+    { id: '8090', x:  0.0, y: 0.8, z: 0.65, c: [0.0, 1.0, 0.61] },
+    { id: '8095', x:  1.1, y: 0.6, z: 0.35, c: [0.22, 0.74, 0.97] },
+    { id: '8099', x: -1.1, y:-0.6, z: 0.45, c: [0.66, 0.33, 0.97] },
+    { id: '8143', x:  0.0, y:-0.8, z: 0.75, c: [0.96, 0.62, 0.04] },
+    { id: '8149', x:  1.1, y:-0.6, z: 0.55, c: [0.93, 0.28, 0.60] }
+  ]
+};
+
+// Pointer / Touch Parallax
+window.addEventListener('pointermove', (e) => {
+  eye.targetX = ((e.clientX / width) - 0.5) * 2.2;
+  eye.targetY = -((e.clientY / height) - 0.5) * 1.8;
+});
+
+// Gyroscope Parallax
+function enableGyro() {
+  const btn = document.getElementById('btn-gyro');
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().catch(() => {});
+  }
+  window.addEventListener('deviceorientation', (ev) => {
+    if (ev.gamma !== null && ev.beta !== null) {
+      eye.targetX = Math.max(-1.4, Math.min(1.4, (ev.gamma / 35.0)));
+      eye.targetY = Math.max(-1.2, Math.min(1.2, ((ev.beta - 45.0) / 35.0)));
+    }
+  });
+  btn.classList.add('active');
+}
+
+// Front-Camera Face / Eye Tracking (Browser FaceDetector + Luminance Centroid Fallback)
+let camStream = null;
+async function toggleEyeTracking() {
+  const vid = document.getElementById('cam');
+  const btn = document.getElementById('btn-cam');
+  if (camStream) {
+    camStream.getTracks().forEach(t => t.stop());
+    camStream = null;
+    vid.style.display = 'none';
+    btn.classList.remove('active');
+    return;
+  }
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 160, height: 120 }, audio: false });
+    vid.srcObject = camStream;
+    vid.style.display = 'block';
+    btn.classList.add('active');
+
+    const detector = ('FaceDetector' in window) ? new window.FaceDetector({ fastMode: true, maxDetectedFaces: 1 }) : null;
+    const off = document.createElement('canvas');
+    off.width = 64; off.height = 48;
+    const octx = off.getContext('2d');
+
+    async function trackLoop() {
+      if (!camStream) return;
+      if (vid.readyState >= 2) {
+        if (detector) {
+          try {
+            const faces = await detector.detect(vid);
+            if (faces.length > 0) {
+              const b = faces[0].boundingBox;
+              const cx = (b.x + b.width * 0.5) / vid.videoWidth;
+              const cy = (b.y + b.height * 0.42) / vid.videoHeight;
+              eye.targetX = -(cx - 0.5) * 2.6;
+              eye.targetY = -(cy - 0.5) * 2.1;
+            }
+          } catch {}
+        } else {
+          octx.drawImage(vid, 0, 0, 64, 48);
+          const img = octx.getImageData(0, 0, 64, 48).data;
+          let sx = 0, sy = 0, wsum = 0;
+          for (let y = 0; y < 48; y++) {
+            for (let x = 0; x < 64; x++) {
+              const i = (y * 64 + x) * 4;
+              const r = img[i], g = img[i+1], b = img[i+2];
+              if (r > 75 && g > 45 && r > g && r > b) {
+                const w = r - b;
+                sx += x * w; sy += y * w; wsum += w;
+              }
+            }
+          }
+          if (wsum > 500) {
+            eye.targetX = -((sx / wsum) / 64 - 0.5) * 2.6;
+            eye.targetY = -((sy / wsum) / 48 - 0.5) * 2.1;
+          }
+        }
+      }
+      requestAnimationFrame(trackLoop);
+    }
+    trackLoop();
+  } catch (e) {
+    alert('Camera unavailable or permission blocked; use Gyro or Touch/Mouse parallax.');
+  }
+}
+
+function togglePeppersGhost() {
+  peppersGhost = !peppersGhost;
+  document.getElementById('btn-ghost').classList.toggle('active', peppersGhost);
+}
+
+async function enterSpatialAR() {
+  const btn = document.getElementById('btn-ar');
+  if (navigator.xr && await navigator.xr.isSessionSupported('immersive-ar').catch(() => false)) {
+    try {
+      xrSession = await navigator.xr.requestSession('immersive-ar', { optionalFeatures: ['local-floor', 'dom-overlay'], domOverlay: { root: document.getElementById('hud') } });
+      await gl.makeXRCompatible();
+      xrSession.updateRenderState({ baseLayer: new XRWebGLLayer(xrSession, gl) });
+      const refSpace = await xrSession.requestReferenceSpace('local');
+      btn.classList.add('active');
+      xrSession.addEventListener('end', () => { xrSession = null; btn.classList.remove('active'); });
+      const onXRFrame = (t, frame) => {
+        if (!xrSession) return;
+        xrSession.requestAnimationFrame(onXRFrame);
+        const pose = frame.getViewerPose(refSpace);
+        const layer = xrSession.renderState.baseLayer;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, layer.framebuffer);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        if (pose) {
+          for (const view of pose.views) {
+            const vp = layer.getViewport(view);
+            gl.viewport(vp.x, vp.y, vp.width, vp.height);
+            renderScene(t * 0.001, view.projectionMatrix, view.transform.inverse.matrix);
+          }
+        }
+      };
+      xrSession.requestAnimationFrame(onXRFrame);
+      return;
+    } catch {}
+  }
+  // Spatial Pop-Out Detached Mode (Zero-Headset Negative-Parallax Full-Glass Projection)
+  spatialAROverlay = !spatialAROverlay;
+  btn.classList.toggle('active', spatialAROverlay);
+  eye.z = spatialAROverlay ? 1.55 : 2.35;
+}
+
+// WebGL Shaders
+const VS = `
+attribute vec3 aPos;
+attribute vec3 aCol;
+uniform mat4 uProj;
+uniform mat4 uView;
+uniform mat4 uModel;
+uniform float uPointSize;
+varying vec3 vCol;
+void main() {
+  vCol = aCol;
+  gl_Position = uProj * uView * uModel * vec4(aPos, 1.0);
+  gl_PointSize = uPointSize;
+}`;
+const FS = `
+precision mediump float;
+varying vec3 vCol;
+uniform float uGlow;
+void main() {
+  gl_FragColor = vec4(vCol * uGlow, 0.95);
+}`;
+
+function compileShader(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog);
+gl.useProgram(prog);
+
+const aPos = gl.getAttribLocation(prog, 'aPos');
+const aCol = gl.getAttribLocation(prog, 'aCol');
+const uProj = gl.getUniformLocation(prog, 'uProj');
+const uView = gl.getUniformLocation(prog, 'uView');
+const uModel = gl.getUniformLocation(prog, 'uModel');
+const uPointSize = gl.getUniformLocation(prog, 'uPointSize');
+const uGlow = gl.getUniformLocation(prog, 'uGlow');
+
+// Asymmetric Off-Axis Perspective Matrix (Anchors z=0 plane to physical glass!)
+function offAxisFrustum(ex, ey, ez, aspect, near, far) {
+  const halfW = aspect;
+  const halfH = 1.0;
+  const scale = near / ez;
+  const left   = (-halfW - ex) * scale;
+  const right  = ( halfW - ex) * scale;
+  const bottom = (-halfH - ey) * scale;
+  const top    = ( halfH - ey) * scale;
+
+  const out = new Float32Array(16);
+  out[0]  = (2 * near) / (right - left);
+  out[5]  = (2 * near) / (top - bottom);
+  out[8]  = (right + left) / (right - left);
+  out[9]  = (top + bottom) / (top - bottom);
+  out[10] = -(far + near) / (far - near);
+  out[11] = -1;
+  out[14] = -(2 * far * near) / (far - near);
+  return out;
+}
+
+function viewFromEye(ex, ey, ez) {
+  return new Float32Array([
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    -ex, -ey, -ez, 1
+  ]);
+}
+
+function rotMat(ax, ay, az, tx, ty, tz, s) {
+  const cx = Math.cos(ax), sx = Math.sin(ax);
+  const cy = Math.cos(ay), sy = Math.sin(ay);
+  const cz = Math.cos(az), sz = Math.sin(az);
+  return new Float32Array([
+    s * (cy * cz), s * (cy * sz), s * (-sy), 0,
+    s * (sx * sy * cz - cx * sz), s * (sx * sy * sz + cx * cz), s * (sx * cy), 0,
+    s * (cx * sy * cz + sx * sz), s * (cx * sy * sz - sx * cz), s * (cx * cy), 0,
+    tx, ty, tz, 1
+  ]);
+}
+
+// Build Geometry Buffers: Recessed Screen Box + Floating SHA-256 Cube + Holographic Node Lasers
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.enableVertexAttribArray(aPos);
+gl.enableVertexAttribArray(aCol);
+gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 24, 0);
+gl.vertexAttribPointer(aCol, 3, gl.FLOAT, false, 24, 12);
+
+function makeBoxLines(w, h, zFront, zBack, r, g, b) {
+  const hw = w * 0.5, hh = h * 0.5;
+  const pts = [
+    [-hw,-hh,zFront, hw,-hh,zFront], [hw,-hh,zFront, hw,hh,zFront], [hw,hh,zFront, -hw,hh,zFront], [-hw,hh,zFront, -hw,-hh,zFront],
+    [-hw,-hh,zBack,  hw,-hh,zBack],  [hw,-hh,zBack,  hw,hh,zBack],  [hw,hh,zBack,  -hw,hh,zBack],  [-hw,hh,zBack,  -hw,-hh,zBack],
+    [-hw,-hh,zFront, -hw,-hh,zBack], [hw,-hh,zFront, hw,-hh,zBack], [hw,hh,zFront, hw,hh,zBack], [-hw,hh,zFront, -hw,hh,zBack]
+  ];
+  const arr = [];
+  for (const [x1,y1,z1,x2,y2,z2] of pts) {
+    arr.push(x1,y1,z1,r,g,b, x2,y2,z2,r,g,b);
+  }
+  return arr;
+}
+
+const roomCage = new Float32Array([
+  ...makeBoxLines(2.6, 1.9, 0.0, -2.2, 0.04, 0.45, 0.65),
+  ...makeBoxLines(1.8, 1.3, -0.5, -2.2, 0.02, 0.25, 0.40)
+]);
+
+const cubeWire = new Float32Array([
+  ...makeBoxLines(0.72, 0.72, 0.36, -0.36, 0.0, 0.96, 1.0),
+  ...makeBoxLines(0.42, 0.42, 0.21, -0.21, 0.0, 1.0, 0.62)
+]);
+
+function renderScene(t, projMat, viewMat) {
+  gl.uniformMatrix4fv(uProj, false, projMat);
+  gl.uniformMatrix4fv(uView, false, viewMat);
+
+  // 1. Recessed Virtual Room Tunnel (Behind Glass: z < 0)
+  gl.uniformMatrix4fv(uModel, false, rotMat(0, 0, 0, 0, 0, 0, 1));
+  gl.uniform1f(uGlow, 0.85);
+  gl.bufferData(gl.ARRAY_BUFFER, roomCage, gl.DYNAMIC_DRAW);
+  gl.drawArrays(gl.LINES, 0, roomCage.length / 6);
+
+  // 2. Central Floating SHA-256 Build Cube (Negative Parallax: z > 0 -> pops OUT of screen!)
+  const spin = t * physics.rotationSpeed;
+  const popZ = physics.zExtrusion;
+  gl.uniformMatrix4fv(uModel, false, rotMat(spin * 0.7, spin, spin * 0.3, 0, 0, popZ, 1.0));
+  gl.uniform1f(uGlow, physics.laserIntensity);
+  gl.bufferData(gl.ARRAY_BUFFER, cubeWire, gl.DYNAMIC_DRAW);
+  gl.drawArrays(gl.LINES, 0, cubeWire.length / 6);
+
+  // 3. Holographic Cluster Nodes + Volumetric Laser Vectors to Central Cube
+  const laserVerts = [];
+  const nodePts = [];
+  for (let i = 0; i < physics.nodes.length; i++) {
+    const n = physics.nodes[i];
+    const orb = t * 0.45 + i * 1.05;
+    const nx = n.x * Math.cos(orb * 0.25) - 0.12 * Math.sin(orb);
+    const ny = n.y + 0.08 * Math.cos(orb * 1.3);
+    const nz = popZ * 0.85 + 0.18 * Math.sin(orb);
+    const [r, g, b] = n.c;
+    // Laser beam from floating node to floating SHA-256 cube center
+    laserVerts.push(nx, ny, nz, r, g, b, 0, 0, popZ, 0.0, 1.0, 0.75);
+    nodePts.push(nx, ny, nz, r, g, b);
+  }
+
+  gl.uniformMatrix4fv(uModel, false, rotMat(0, 0, 0, 0, 0, 0, 1));
+  gl.uniform1f(uGlow, physics.laserIntensity * 1.15);
+  const lArr = new Float32Array(laserVerts);
+  gl.bufferData(gl.ARRAY_BUFFER, lArr, gl.DYNAMIC_DRAW);
+  gl.drawArrays(gl.LINES, 0, lArr.length / 6);
+
+  gl.uniform1f(uPointSize, 14.0);
+  const pArr = new Float32Array(nodePts);
+  gl.bufferData(gl.ARRAY_BUFFER, pArr, gl.DYNAMIC_DRAW);
+  gl.drawArrays(gl.POINTS, 0, pArr.length / 6);
+}
+
+// 60 FPS Animation Loop
+gl.enable(gl.DEPTH_TEST);
+function animate(now) {
+  requestAnimationFrame(animate);
+  if (xrSession) return;
+
+  eye.x += (eye.targetX - eye.x) * 0.12;
+  eye.y += (eye.targetY - eye.y) * 0.12;
+  const t = now * 0.001;
+
+  gl.clearColor(0.004, 0.016, 0.035, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  if (!peppersGhost) {
+    gl.viewport(0, 0, width, height);
+    const aspect = width / Math.max(1, height);
+    const proj = offAxisFrustum(eye.x, eye.y, eye.z, aspect, 0.1, 20.0);
+    const view = viewFromEye(eye.x, eye.y, eye.z);
+    renderScene(t, proj, view);
+  } else {
+    // 4-Way Pepper's Ghost Tabletop Pyramid Projection Mode (North, South, East, West quadrants)
+    const s = Math.min(width, height) * 0.36;
+    const cx = width * 0.5, cy = height * 0.5;
+    const quads = [
+      { x: cx - s * 0.5, y: cy + s * 0.35, rot: 0 },
+      { x: cx - s * 0.5, y: cy - s * 1.35, rot: Math.PI },
+      { x: cx - s * 1.35, y: cy - s * 0.5, rot: Math.PI * 0.5 },
+      { x: cx + s * 0.35, y: cy - s * 0.5, rot: -Math.PI * 0.5 }
+    ];
+    for (const q of quads) {
+      gl.viewport(q.x, q.y, s, s);
+      const proj = offAxisFrustum(eye.x * 0.4, eye.y * 0.4, 2.2, 1.0, 0.1, 20.0);
+      const view = viewFromEye(eye.x * 0.4, eye.y * 0.4, 2.2);
+      renderScene(t + q.rot * 0.15, proj, view);
+    }
+  }
+}
+requestAnimationFrame(animate);
+
+// Poll Live Telemetry Physics from Port 8151
+async function pollPhysics() {
+  try {
+    const d = await fetch('http://127.0.0.1:8151/v1/spatial/physics').then(r => r.json());
+    const p = d.physics || {};
+    physics.rotationSpeed = p.rotation_speed || physics.rotationSpeed;
+    physics.laserIntensity = p.laser_intensity || physics.laserIntensity;
+    physics.zExtrusion = Math.min(1.15, (p.z_extrusion_cm || 6.5) / 10.0);
+    physics.shaHash = p.sha256_cube_hash || physics.shaHash;
+    physics.cpuLoad = p.cpu_load_1m ?? 0;
+    physics.derivMs = p.latency_derivative_ms ?? 0;
+
+    document.getElementById('telemetry-bar').textContent =
+      `EYE (${eye.x.toFixed(2)}, ${eye.y.toFixed(2)}, ${eye.z.toFixed(2)}) | Z-POP: +${p.z_extrusion_cm}cm | ` +
+      `SPIN: ${p.rotation_speed} rad/s | LASER: ${p.laser_intensity}x | CPU: ${p.cpu_load_1m} | DERIV: ${p.latency_derivative_ms}ms | ` +
+      `SHA256: ${String(physics.shaHash).slice(0, 16)}...`;
+  } catch {}
+}
+pollPhysics();
+setInterval(pollPhysics, 1500);
+</script>
+</body>
+</html>
