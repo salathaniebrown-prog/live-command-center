@@ -118,6 +118,24 @@ class SpatialHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?")[0]
+        if path == "/api/peppers-ghost/svg":
+            from urllib.parse import parse_qs, urlparse
+            from astra_peppers_ghost_svg import PRESETS, generate_nested_svg
+            qs = parse_qs(urlparse(self.path).query)
+            preset = qs.get("preset", ["giant"])[0].lower()
+            cfg = PRESETS.get(preset, PRESETS["giant"])
+            t_val = float(qs.get("t", [cfg["T"]])[0])
+            b_val = float(qs.get("b", [cfg["B"]])[0])
+            kerf = float(qs.get("kerf", [0.18])[0])
+            svg_raw = generate_nested_svg(t_val, b_val, kerf, f"Custom/Preset ({preset.upper()})").encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "image/svg+xml; charset=utf-8")
+            self.send_header("Content-Disposition", f'attachment; filename="peppers_ghost_{preset}_2x2_nested.svg"')
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(svg_raw)))
+            self.end_headers()
+            self.wfile.write(svg_raw)
+            return
         if path in ("/spatial", "/ui"):
             html_file = HOME / "ALSTRA_SPATIAL_3D_ENGINE.html"
             if html_file.exists():

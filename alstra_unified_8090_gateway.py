@@ -86,7 +86,7 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?")[0]
-        if path.startswith("/v1/spatial"):
+        if path.startswith("/v1/spatial") or path.startswith("/api/peppers-ghost"):
             return self._proxy_upstream(f"http://127.0.0.1:8151{self.path}")
         if path.startswith("/api/"):
             return self._proxy_upstream(f"http://127.0.0.1:8088{self.path}")

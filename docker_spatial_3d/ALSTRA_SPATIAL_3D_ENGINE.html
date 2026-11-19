@@ -42,6 +42,8 @@
       <button id="btn-cam" class="btn" onclick="toggleEyeTracking()">FRONT-CAM EYE TRACK</button>
       <button id="btn-gyro" class="btn" onclick="enableGyro()">GYRO PARALLAX</button>
       <button id="btn-ghost" class="btn" onclick="togglePeppersGhost()">4-WAY PEPPER'S GHOST</button>
+      <button id="btn-voice" class="btn dsp" onclick="toggleVoiceAgent()">VOICE AGENT</button>
+      <a class="btn" href="/api/peppers-ghost/svg?preset=giant" download="peppers_ghost_giant_480mm_2x2.svg" style="text-decoration:none;">2x2 SVG (480mm)</a>
       <button id="btn-ar" class="btn ar" onclick="enterSpatialAR()">ENTER SPATIAL AR</button>
     </div>
   </div>
@@ -630,6 +632,82 @@ function animate(now) {
   }
 }
 requestAnimationFrame(animate);
+
+
+// ============================================================================
+// MICROPHONE VOICE-COMMAND TRIGGERS -> AUTONOMOUS AGENT (:8145) & SPATIAL HUD
+// ============================================================================
+let speechRec = null;
+let voiceAgentActive = false;
+
+async function dispatchVoiceToAgent(transcript) {
+  const clean = transcript.trim();
+  if (!clean) return;
+  const bar = document.getElementById('fft-bar');
+  bar.textContent = `VOICE TRIGGER: "${clean}" -> DISPATCHING TO AUTONOMOUS AGENT (:8145)...`;
+  triggerSonarPing(1.0);
+
+  const lower = clean.toLowerCase();
+  if (lower.includes('pepper') || lower.includes('ghost') || lower.includes('pyramid')) {
+    if (!peppersGhost) togglePeppersGhost();
+  }
+  if (lower.includes('spatial') || lower.includes('ar')) {
+    enterSpatialAR();
+  }
+  if (lower.includes('synth') || lower.includes('audio')) {
+    if (!dsp.synthActive) toggleTelemetrySynth();
+  }
+  if (lower.includes('giant') || lower.includes('svg') || lower.includes('laser')) {
+    window.open('/api/peppers-ghost/svg?preset=giant', '_blank');
+  }
+
+  try {
+    const res = await fetch('http://127.0.0.1:8145/v1/agent/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ objective: `Voice Command: ${clean}`, source: 'spatial_3d_voice_trigger' })
+    });
+    const data = await res.json();
+    bar.textContent = `AGENT (:8145) EXECUTED: "${clean}" | RUN_ID: ${data.run_id || 'OK'}`;
+  } catch {
+    bar.textContent = `VOICE COMMAND LOGGED: "${clean}" (Agent 8145 local trigger)`;
+  }
+}
+
+function toggleVoiceAgent() {
+  const btn = document.getElementById('btn-voice');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    const manual = prompt('SpeechRecognition API unavailable in this WebView — enter voice command for Agent :8145:', 'Run autonomous agent verification cycle');
+    if (manual) dispatchVoiceToAgent(manual);
+    return;
+  }
+  if (voiceAgentActive && speechRec) {
+    voiceAgentActive = false;
+    try { speechRec.stop(); } catch {}
+    btn.classList.remove('active');
+    return;
+  }
+  speechRec = new SR();
+  speechRec.continuous = true;
+  speechRec.interimResults = false;
+  speechRec.lang = 'en-US';
+  speechRec.onresult = (ev) => {
+    const last = ev.results[ev.results.length - 1];
+    if (last && last.isFinal) {
+      dispatchVoiceToAgent(last[0].transcript);
+    }
+  };
+  speechRec.onend = () => {
+    if (voiceAgentActive) {
+      try { speechRec.start(); } catch {}
+    }
+  };
+  speechRec.start();
+  voiceAgentActive = true;
+  btn.classList.add('active');
+  document.getElementById('fft-bar').textContent = 'VOICE AGENT LISTENING: Speak aloud ("Run agent", "Pepper's ghost", "Sonar ping", "Giant SVG")...';
+}
 
 // Poll Live Telemetry Physics from same-origin /v1/spatial/physics
 async function pollPhysics() {
