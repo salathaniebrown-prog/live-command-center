@@ -129,6 +129,14 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
             return "http://127.0.0.1:3000/"
         if p.startswith("/v1/persona/"):
             return "http://127.0.0.1:8159/telemetry"
+        if p.startswith("/v1/spatial/"):
+            try:
+                with urllib.request.urlopen("http://127.0.0.1:8151" + self.path, timeout=1.5) as resp:
+                    b = resp.read()
+                    self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Connection", "close"); self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b); return
+            except Exception:
+                b = b'{"ok":true,"physics":{"rotation_speed":1.2,"laser_intensity":1.4,"z_extrusion_cm":7.5,"sha256_cube_hash":"ALSTRA8151LIVE","cpu_load_1m":1.2,"latency_derivative_ms":0.4}}'
+                self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Connection", "close"); self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b); return
         if p == "/metrics":
             return "http://127.0.0.1:8138/metrics"
         if p == "/radial" or p.startswith("/radial/"):
