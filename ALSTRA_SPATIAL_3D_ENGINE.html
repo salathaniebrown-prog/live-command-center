@@ -271,7 +271,7 @@ function updateAudioDSP(t) {
     : dsp.micActive ? 'MIC ACOUSTIC SONAR'
     : 'ARMED';
   const panReadout = dsp.panner ? dsp.panner.pan.value.toFixed(2) : '0.00';
-  document.getElementById('fft-bar').textContent =
+  document.getElementById('fft-bar').textContent = `AOT LUX: ${aotClosedLoop.ambientLux}lx | PRISM CONTRAST: ${aotClosedLoop.contrastRatio}x | AUTO-LUMA: ${aotClosedLoop.autoLumaGain}x | ROOM: ${aotClosedLoop.roomDbfs}dBFS (${aotClosedLoop.resonanceHz}Hz) || ` +
     `DSP ENGINE: ${modeLabel} | SUB-BASS: ${dsp.subEnergy.toFixed(2)} | MID: ${dsp.midEnergy.toFixed(2)} | ` +
     `HIGH: ${dsp.highEnergy.toFixed(2)} | SONAR RING: ${dsp.sonarPulse.toFixed(2)} | STEREO PAN: ${panReadout}`;
 }
@@ -335,7 +335,7 @@ async function toggleEyeTracking() {
             }
           } catch {}
         } else {
-          octx.drawImage(vid, 0, 0, 64, 48);
+          sampleCameraPrismOptics(vid, octx); octx.drawImage(vid, 0, 0, 64, 48);
           const img = octx.getImageData(0, 0, 64, 48).data;
           let sx = 0, sy = 0, wsum = 0;
           for (let y = 0; y < 48; y++) {
@@ -708,6 +708,92 @@ function toggleVoiceAgent() {
   btn.classList.add('active');
   document.getElementById('fft-bar').textContent = 'VOICE AGENT LISTENING: Speak aloud ("Run agent", "Pepper's ghost", "Sonar ping", "Giant SVG")...';
 }
+
+
+// ============================================================================
+// CLOSED-LOOP OPTICAL REFLECTION CALIBRATION & ACOUSTIC RESONANCE (:8153)
+// ============================================================================
+const aotClosedLoop = {
+  ambientLux: 120.0,
+  prismLuma: 185.0,
+  contrastRatio: 2.45,
+  roomDbfs: -42.0,
+  resonanceHz: 118.5,
+  autoLumaGain: 1.15,
+  autoSonarVol: 0.22
+};
+
+function sampleCameraPrismOptics(videoEl, offCtx) {
+  if (!videoEl || videoEl.readyState < 2) return;
+  offCtx.drawImage(videoEl, 0, 0, 64, 48);
+  const data = offCtx.getImageData(0, 0, 64, 48).data;
+  let borderLuma = 0, borderCount = 0;
+  let centerLuma = 0, centerCount = 0;
+  for (let y = 0; y < 48; y++) {
+    for (let x = 0; x < 64; x++) {
+      const i = (y * 64 + x) * 4;
+      const luma = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
+      if (x >= 20 && x <= 44 && y >= 14 && y <= 34) {
+        centerLuma += luma;
+        centerCount++;
+      } else {
+        borderLuma += luma;
+        borderCount++;
+      }
+    }
+  }
+  const avgBorder = borderLuma / Math.max(1, borderCount);
+  const avgCenter = centerLuma / Math.max(1, centerCount);
+  aotClosedLoop.ambientLux = +(avgBorder * 2.1).toFixed(1);
+  aotClosedLoop.prismLuma = +(avgCenter * 1.15).toFixed(1);
+}
+
+function sampleAcousticResonance() {
+  if (!dsp.analyser || !dsp.fftData) return;
+  let sumSq = 0;
+  let peakBin = 1;
+  let peakVal = 0;
+  for (let i = 1; i < dsp.fftData.length; i++) {
+    const v = dsp.fftData[i] / 255.0;
+    sumSq += v * v;
+    if (dsp.fftData[i] > peakVal) {
+      peakVal = dsp.fftData[i];
+      peakBin = i;
+    }
+  }
+  const rms = Math.sqrt(sumSq / dsp.fftData.length);
+  aotClosedLoop.roomDbfs = +(20 * Math.log10(Math.max(0.0005, rms))).toFixed(1);
+  const nyquist = (dsp.ctx ? dsp.ctx.sampleRate : 48000) * 0.5;
+  aotClosedLoop.resonanceHz = +((peakBin / dsp.fftData.length) * nyquist).toFixed(1);
+}
+
+async function syncAotPhotonicLoop() {
+  sampleAcousticResonance();
+  try {
+    const res = await fetch('/v1/aot/ingest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ambient_lux: aotClosedLoop.ambientLux,
+        prism_reflection_luma: aotClosedLoop.prismLuma,
+        room_noise_dbfs: aotClosedLoop.roomDbfs,
+        acoustic_resonance_hz: aotClosedLoop.resonanceHz
+      })
+    });
+    const j = await res.json();
+    const aot = j.aot || {};
+    aotClosedLoop.contrastRatio = aot.prism_contrast_ratio ?? aotClosedLoop.contrastRatio;
+    aotClosedLoop.autoLumaGain = aot.auto_luminance_gain ?? aotClosedLoop.autoLumaGain;
+    aotClosedLoop.autoSonarVol = aot.auto_sonar_volume ?? aotClosedLoop.autoSonarVol;
+
+    // Hands-free auto-adjust hologram brightness & sonar master volume as room light/noise changes
+    physics.laserIntensity = Math.max(0.65, Math.min(2.6, aotClosedLoop.autoLumaGain));
+    if (dsp.masterGain && dsp.ctx) {
+      dsp.masterGain.gain.setTargetAtTime(aotClosedLoop.autoSonarVol, dsp.ctx.currentTime, 0.12);
+    }
+  } catch {}
+}
+setInterval(syncAotPhotonicLoop, 1400);
 
 // Poll Live Telemetry Physics from same-origin /v1/spatial/physics
 async function pollPhysics() {
