@@ -565,6 +565,23 @@ function renderScene(t, projMat, viewMat) {
   gl.bufferData(gl.ARRAY_BUFFER, sonarVerts, gl.DYNAMIC_DRAW);
   gl.drawArrays(gl.LINES, 0, sonarVerts.length / 6);
 
+  // 3B. Visible Ambient RF & Electromagnetic Translucent Plasma Ripples inside Pyramid
+  const plasmaVerts = [];
+  const baseR = 0.28 + synapticState.plasmaAmp * 0.35;
+  for (let k = 0; k < 3; k++) {
+    const phase = ((t * (0.45 + synapticState.plasmaFreq * 0.12) + k * 0.33) % 1.0);
+    const pr = baseR + phase * 0.95;
+    const pz = popZ * 0.65 - 0.18 + k * 0.11;
+    const fade = 1.0 - phase * 0.65;
+    // Violet-cyan electromagnetic plasma harmonic ring
+    plasmaVerts.push(...makeSonarRing(pr, pz, 56, 0.58 * fade, 0.22 * fade, 0.98 * fade));
+  }
+  gl.uniformMatrix4fv(uModel, false, rotMat(Math.sin(t * 0.7) * 0.12, Math.cos(t * 0.6) * 0.12, -t * 0.25, 0, 0, 0, 1));
+  gl.uniform1f(uGlow, 0.75 + synapticState.plasmaAmp * 0.95);
+  const plArr = new Float32Array(plasmaVerts);
+  gl.bufferData(gl.ARRAY_BUFFER, plArr, gl.DYNAMIC_DRAW);
+  gl.drawArrays(gl.LINES, 0, plArr.length / 6);
+
   // 4. Holographic Cluster Nodes + Audio-Reactive Laser Vectors
   const laserVerts = [];
   const nodePts = [];
@@ -795,6 +812,71 @@ async function syncAotPhotonicLoop() {
 }
 setInterval(syncAotPhotonicLoop, 1400);
 
+
+// ============================================================================
+// COGNITIVE GAZE BCI (68-PT PROXY) + TRANSLUCENT RF PLASMA RIPPLES (:8155)
+// ============================================================================
+const synapticState = {
+  fixation: 0.91,
+  saccadeVel: 28.4,
+  blinkBpm: 14.0,
+  mode: 'HIGH_FIXATION',
+  wifiRssi: -52,
+  socTemp: 37.8,
+  plasmaAmp: 0.42,
+  plasmaFreq: 2.412,
+  winningMutant: 'MUTANT_ALPHA_SIMD',
+  prevEyeX: 0.0,
+  prevEyeY: 0.0,
+  blinkCounter: 0,
+  lastBlinkTs: performance.now()
+};
+
+function updateCognitiveGazeMetrics() {
+  const dx = eye.x - synapticState.prevEyeX;
+  const dy = eye.y - synapticState.prevEyeY;
+  synapticState.prevEyeX = eye.x;
+  synapticState.prevEyeY = eye.y;
+
+  const instVel = Math.sqrt(dx * dx + dy * dy) * 850.0;
+  synapticState.saccadeVel = +(synapticState.saccadeVel * 0.85 + instVel * 0.15).toFixed(1);
+  const instFix = Math.max(0.25, Math.min(0.99, 1.0 - (synapticState.saccadeVel / 220.0)));
+  synapticState.fixation = +(synapticState.fixation * 0.88 + instFix * 0.12).toFixed(3);
+
+  if (synapticState.saccadeVel > 95.0 || synapticState.blinkBpm > 24.0) {
+    synapticState.mode = 'HIGH_SACCADE';
+  } else if (synapticState.fixation >= 0.78 && synapticState.saccadeVel < 45.0) {
+    synapticState.mode = 'HIGH_FIXATION';
+  } else {
+    synapticState.mode = 'HYBRID_AGENT';
+  }
+}
+
+async function syncSynapticAndRfLoop() {
+  updateCognitiveGazeMetrics();
+  try {
+    const res = await fetch('/v1/synaptic/bci', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pupil_fixation_stability: synapticState.fixation,
+        saccadic_velocity_deg_s: synapticState.saccadeVel,
+        blink_rate_bpm: synapticState.blinkBpm,
+        gaze_vector: [+eye.x.toFixed(3), +eye.y.toFixed(3), +eye.z.toFixed(3)]
+      })
+    });
+    const j = await res.json();
+    const rf = j.rf_spectrum || {};
+    const mit = j.mitosis || {};
+    synapticState.wifiRssi = rf.wifi_rssi_dbm ?? synapticState.wifiRssi;
+    synapticState.socTemp = rf.soc_temp_c ?? synapticState.socTemp;
+    synapticState.plasmaAmp = rf.plasma_ripple_amplitude ?? synapticState.plasmaAmp;
+    synapticState.plasmaFreq = rf.em_plasma_freq_hz ?? synapticState.plasmaFreq;
+    synapticState.winningMutant = mit.active_production_mutant ?? synapticState.winningMutant;
+  } catch {}
+}
+setInterval(syncSynapticAndRfLoop, 1600);
+
 // Poll Live Telemetry Physics from same-origin /v1/spatial/physics
 async function pollPhysics() {
   try {
@@ -807,7 +889,7 @@ async function pollPhysics() {
     physics.cpuLoad = p.cpu_load_1m ?? physics.cpuLoad;
     physics.derivMs = p.latency_derivative_ms ?? physics.derivMs;
 
-    document.getElementById('telemetry-bar').textContent =
+    updateCognitiveGazeMetrics(); document.getElementById('telemetry-bar').textContent = `BCI: ${synapticState.mode} (FIX:${synapticState.fixation} | SACC:${synapticState.saccadeVel}°/s | BLINK:${synapticState.blinkBpm}/m) | RF: ${synapticState.wifiRssi}dBm / ${synapticState.socTemp}°C | WINNER: ${synapticState.winningMutant} || ` +
       `EYE (${eye.x.toFixed(2)}, ${eye.y.toFixed(2)}, ${eye.z.toFixed(2)}) | Z-POP: +${p.z_extrusion_cm}cm | ` +
       `SPIN: ${p.rotation_speed} rad/s | LASER: ${p.laser_intensity}x | CPU: ${p.cpu_load_1m} | DERIV: ${p.latency_derivative_ms}ms | ` +
       `SHA256: ${String(physics.shaHash).slice(0, 16)}...`;

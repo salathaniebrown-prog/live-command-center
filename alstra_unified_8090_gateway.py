@@ -80,6 +80,8 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        if self.path.startswith("/v1/synaptic"):
+            return self._proxy_upstream(f"http://127.0.0.1:8155{self.path}")
         if self.path.startswith("/v1/aot"):
             return self._proxy_upstream(f"http://127.0.0.1:8153{self.path}")
         if self.path.startswith("/v1/spatial"):
@@ -88,6 +90,8 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?")[0]
+        if path.startswith("/v1/synaptic"):
+            return self._proxy_upstream(f"http://127.0.0.1:8155{self.path}")
         if path.startswith("/v1/aot"):
             return self._proxy_upstream(f"http://127.0.0.1:8153{self.path}")
         if path.startswith("/v1/spatial") or path.startswith("/api/peppers-ghost"):
