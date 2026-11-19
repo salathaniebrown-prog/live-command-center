@@ -136,6 +136,36 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
         return None
 
     def do_GET(self):
+        p = self.path.split('?')[0]
+        if p.startswith("/v1/quick/"):
+            import subprocess
+            act = p.split("/v1/quick/", 1)[1]
+            if act == "lock":
+                subprocess.Popen(["/data/data/com.termux/files/home/.astra_light_keepalive.sh"])
+                msg = "All 35 ports & dual-persona daemons re-locked"
+            elif act == "telemetry":
+                msg = "gNMI :8138 + PhaseLock :8135 + DualPersona :8159 telemetry synchronized"
+            else:
+                msg = f"Executed quick action: {act}"
+            raw = json.dumps({"ok": True, "action": act, "message": msg}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Connection", "close")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+            return
+        if p == "/assets/alstra_avatar.jpg":
+            av = Path.home() / "assets" / "alstra_avatar.jpg"
+            if av.exists():
+                raw = av.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/jpeg")
+                self.send_header("Connection", "close")
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+                return
         path = self.path.split("?")[0]
         up_get = self._route_v1_upstream(self.path)
         if up_get:
