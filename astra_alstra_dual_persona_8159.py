@@ -73,7 +73,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         clen = int(self.headers.get("Content-Length", "0") or "0")
         body = json.loads(self.rfile.read(clen).decode("utf-8")) if clen > 0 else {}
         prompt = str(body.get("prompt", "")).lower()
-        target = "alstra" if any(k in prompt for k in ("train", "supercomputer", "deep", "telemetry", "analyze", "alstra", "architecture")) else "astra"
+        target = "astra" if any(k in prompt for k in ("train", "supercomputer", "deep", "telemetry", "analyze", "alstra", "architecture")) else "alstra"
         self._send(200, {
             "ok": True,
             "routed_to": PERSONAS[target]["name"],
