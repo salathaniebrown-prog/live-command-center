@@ -127,6 +127,8 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
                 return f"{base}{req_path}"
         if p == "/cyberneon" or p.startswith("/cyberneon/"):
             return "http://127.0.0.1:3000/"
+        if p.startswith("/v1/persona/"):
+            return "http://127.0.0.1:8159/telemetry"
         if p == "/metrics":
             return "http://127.0.0.1:8138/metrics"
         if p == "/radial" or p.startswith("/radial/"):
