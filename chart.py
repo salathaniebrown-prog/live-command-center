@@ -29,21 +29,21 @@ def run_chart():
     # ANSI Color Code mappings
     CYAN, GREEN, RESET = "\033[1;36m", "\033[1;32m", "\033[0m"
     history = [0] * 40 # Chart width columns
-    
+
     print("\033[?25l") # Hide default cursor blinking block
     try:
         while True:
             val = get_mem_metric()
             history.append(val)
             history.pop(0)
-            
+
             # Clear window frames and redraw header info
             sys.stdout.write("\033[H\033[J")
             sys.stdout.write(f"{CYAN}+-----------------------------------------------------------+{RESET}\n")
             sys.stdout.write(f"{CYAN}|{RESET}  JARVIS SOVEREIGN CORE HUD - REALTIME TELEMETRY PLOTTER   {CYAN}|{RESET}\n")
             sys.stdout.write(f"{CYAN}+-----------------------------------------------------------+{RESET}\n")
             sys.stdout.write(f" Current Memory Pressure Loading: {GREEN}{val} MB{RESET}\n\n")
-            
+
             # Dynamic Bar Axis Rendering (Max cap normalized to 4000MB)
             max_val = max(max(history), 4000)
             for row in range(12, 0, -1):
@@ -57,7 +57,7 @@ def run_chart():
                     else:
                         sys.stdout.write(" ")
                 sys.stdout.write("\n")
-                
+
             sys.stdout.write("       ┗" + "━" * 40 + ">\n")
             sys.stdout.write("         [ Real-time Sampling Interval Stream Grid Index ]\n")
             sys.stdout.flush()

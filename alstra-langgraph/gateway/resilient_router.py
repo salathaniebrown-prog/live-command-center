@@ -7,7 +7,7 @@ FALLBACK_LOG = os.path.expanduser("~/alstra-langgraph/ledger/fallback_routing.lo
 
 def execute_with_fallback(prompt_text):
     print("[*] Dispatching payload through ALSTRA Resilient Local Fallback Router...")
-    
+
     # Simulating intelligent fallback from cloud rate-limits to local sovereign node
     routing_decision = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -19,11 +19,11 @@ def execute_with_fallback(prompt_text):
         "error_rate": 0.0,
         "execution_mode": "ZERO_WAIT_TIME_LOCAL"
     }
-    
+
     os.makedirs(os.path.dirname(FALLBACK_LOG), exist_ok=True)
     with open(FALLBACK_LOG, "a") as f:
         f.write(json.dumps(routing_decision) + "\n")
-        
+
     print(json.dumps(routing_decision, indent=2))
     print("[+] Resilient Router engaged: Bypassed cloud wait times instantly via local sovereign execution!")
 

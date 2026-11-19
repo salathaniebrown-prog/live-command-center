@@ -7,7 +7,7 @@ TELEMETRY_ENDPOINT = "http://127.0.0.1:8099/api/agent/command"
 
 def deploy_edge_workspace():
     print("[WORKSPACE] Initializing Alstra Edge Workspace & IBM Cloud Telemetry Bridge...")
-    
+
     payload = {
         "workspace_mode": "ACTIVE_EDGE_HYBRID_CLOUD",
         "quantum_security": "IBM_QUANTUM_SAFE_LATTICE_CRYPTO",

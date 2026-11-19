@@ -1,0 +1,12 @@
+apiVersion: 1
+providers:
+  - name: "Alstra-Cyber-Neon-v2"
+    orgId: 1
+    folder: "Alstra Command Center"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

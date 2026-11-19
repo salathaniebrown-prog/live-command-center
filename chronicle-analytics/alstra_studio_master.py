@@ -12,7 +12,7 @@ from astrapy import DataAPIClient
 
 # --- SYSTEM SPACE MATRIX CONSTANTS ---
 WIDTH, HEIGHT = 1000, 1000
-TOTAL_FRAMES = 60  
+TOTAL_FRAMES = 60
 NUM_CORES = multiprocessing.cpu_count() if 'multiprocessing' in sys.modules else 8
 DB_NAME = "deep_space_telemetry.db"
 LOG_FILE = "telemetry.log"
@@ -51,18 +51,18 @@ def processing_core_node(frame_index, compute_multiplier=1.0):
     accumulator = 1.0
     for _ in range(adjusted_limit):
         accumulator = math.sin(accumulator) * math.cos(accumulator) + 1.0001
-        
+
     img = Image.new("RGB", (WIDTH, HEIGHT), "black")
     draw = ImageDraw.Draw(img)
-    
+
     np.random.seed(frame_index)
     for _ in range(120):
         rx, ry = np.random.randint(0, WIDTH), np.random.randint(0, HEIGHT)
         draw.rectangle([rx, ry, rx+1, ry+1], fill=(255, 255, 255))
-        
+
     mirrored_idx = (TOTAL_FRAMES - 1) - frame_index
     coords = {}
-    
+
     for p_id, cfg in PLANET_CONFIG.items():
         speed_factor = cfg["speed"]
         orbit_r = cfg["radius"]
@@ -71,7 +71,7 @@ def processing_core_node(frame_index, compute_multiplier=1.0):
         cy = 500 + int(orbit_r * np.sin(angle))
         coords[p_id] = (cx, cy)
         draw.ellipse([cx - 14, cy - 14, cx + 14, cy + 14], fill=cfg["color"])
-        
+
     duration = time.perf_counter() - start_time
     ideal_baseline = 0.0018
     estimated_load = ((duration - ideal_baseline) / duration) * 100.0
@@ -90,7 +90,7 @@ def execute_ultimate_matrix_suite():
     log_system_event("==================================================================")
     log_system_event(" 🧠 ALSTRA OMEGA SUITE RUNTIME INITIALIZED IN ACTIVE PATH ENVIRONMENT")
     log_system_event("==================================================================")
-    
+
     try:
         # Establish Explicit Cloud Handshake Layer
         client = DataAPIClient(caller_name="ALSTRA_MASTER", caller_version="3.0.0")
@@ -106,39 +106,39 @@ def execute_ultimate_matrix_suite():
             frame_images = [None] * TOTAL_FRAMES
             core_loads = [0.0] * NUM_CORES
             data_db_buffer = []
-            
+
             with ThreadPoolExecutor(max_workers=NUM_CORES) as executor:
                 futures = [executor.submit(processing_core_node, f) for f in range(TOTAL_FRAMES)]
                 for idx, future in enumerate(futures):
                     f_idx, pil_img, load_val, coords = future.result()
                     frame_images[f_idx] = pil_img
                     core_loads[idx % NUM_CORES] = load_val
-                    
+
                     flux_val = 1.0 - (0.14 if math.sin(f_idx) > 0.45 else 0.0)
                     for p_id in PLANET_CONFIG.keys():
                         cx, cy = coords[p_id]
                         data_db_buffer.append((p_id, f_idx, cx, cy, load_val, flux_val))
-            
+
             # Save Local Matrix Track Animation file
             frame_images[0].save("alstra_core_soul.gif", save_all=True, append_images=frame_images[1:], duration=45, loop=0)
             run_storage_janitor()
-            
+
             avg_cpu = sum(core_loads) / NUM_CORES
             ws_status = check_background_process("live_stream.py")
             intel_status = check_background_process("intel_catcher.py")
-            
+
             # Sync to Cloud Database Space
             if collection is not None and loop_count % 3 == 0:
                 try:
                     sync_payload = {
-                        "cycle": loop_count, "avg_cpu": f"{avg_cpu:.2f}%", 
+                        "cycle": loop_count, "avg_cpu": f"{avg_cpu:.2f}%",
                         "liquidity_asset": 303200226, "status": "NOMINAL"
                     }
                     collection.insert_one(sync_payload)
                     log_system_event(f"Astra Sync Success | Cycle #{loop_count} Data Packages Embedded.")
                 except Exception as ex:
                     log_system_event(f"Astra Sync Constraint: {ex}")
-            
+
             clear_console()
             print("==================================================================")
             print(f" 👤 Toby Wright co... \"The best picture ever 💕\" ")
@@ -154,11 +154,11 @@ def execute_ultimate_matrix_suite():
             print("------------------------------------------------------------------")
             print(f" Dedicated RAM Allocation : [{'█'*19}{'░'*1}] {mem_pct:.1f}% | Storage: OPTIMAL")
             print("==================================================================")
-            
+
             del frame_images
             time.sleep(1.0)
             loop_count += 1
-            
+
     except KeyboardInterrupt:
         print("\n\n[DETACHED] Alstra Studio Assistant safely resting in background.")
 

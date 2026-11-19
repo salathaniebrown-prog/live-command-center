@@ -13,7 +13,7 @@ def get_ai_response():
             "prompt": SYSTEM_PROMPT + "\nProvide a short status update on global network stability.",
             "stream": False
         })
-        
+
         if response.status_code == 200:
             ai_text = response.json()['response']
             # Save the response to a file for the web UI to read

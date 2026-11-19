@@ -89,7 +89,7 @@ class ActiveJetiEngine:
                 "access_tier": self.tier
             }
         }
-        
+
         payload_str = json.dumps(state)
         sig = self.sign_payload(payload_str, nonce)
 
@@ -119,6 +119,6 @@ class ActiveJetiEngine:
 if __name__ == "__main__":
     engine = ActiveJetiEngine()
     nonce = int(time.time()) # Real-time unique nonce
-    
+
     # Execute the Jeti engine
     asyncio.run(engine.execute_jeti_state(nonce))

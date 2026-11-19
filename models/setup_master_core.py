@@ -13,7 +13,7 @@ def verify_and_heal():
         conn.commit()
         conn.close()
         print("[+] Initialized missing deep-space SQLite ledger.")
-    
+
     # Ensure PM2 resurrects processes correctly
     subprocess.run(["pm2", "save"], check=True)
     print("[+] Master Core Architecture stabilized and synced.")

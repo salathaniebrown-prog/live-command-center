@@ -15,7 +15,7 @@ def run_daemon_pulse():
         }
         data = json.dumps(payload).encode('utf-8')
         req = urllib.request.Request(GATEWAY_URL, data=data, headers={"Content-Type": "application/json", "X-API-Key": "ALSTRA-ADMIN-TOKEN-bc_iqr25ias-SECURE"}, method="POST")
-        
+
         try:
             with urllib.request.urlopen(req) as resp:
                 res = json.loads(resp.read().decode())
@@ -29,7 +29,7 @@ def run_daemon_pulse():
                 print(f"[+] [{log_data['timestamp']}] Background Persistence Pulse Locked.")
         except Exception as e:
             print(f"[!] Daemon Pulse Error: {e}")
-        
+
         time.sleep(30) # Continuous pulse every 30 seconds
 
 if __name__ == "__main__":

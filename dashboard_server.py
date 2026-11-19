@@ -284,10 +284,8 @@ def call_cinema_mcp_8121(payload=None):
         return {"status": "ERROR", "error": str(e)}
 
 
-def query_trust_center_8117(question_text=None):
     import http.client, json
     try:
-        c = http.client.HTTPConnection("127.0.0.1", 8117, timeout=4)
         if question_text is not None:
             body = json.dumps({"question": question_text}).encode("utf-8")
             c.request("POST", "/ask", body=body, headers={"Content-Type": "application/json"})
@@ -1155,7 +1153,7 @@ refreshTopKpiBar();
       ctx.fillStyle = i % 2 === 0 ? "#00ff88" : "#00f0ff";
       ctx.fillRect(px, py, 2, 2);
     }
-    
+
     if (analyser && freqData) {
       analyser.getByteFrequencyData(freqData);
       let sum = 0;
@@ -1550,7 +1548,6 @@ function openAndRunSupercomputerMesh() {
 }
 async function triggerMeshConsensusRun() {
   const box = document.getElementById("mesh-modal-body");
-  box.innerHTML = "Executing 10-node cross-mesh probe (Brain 8109 + Edge ML 8113 + Webhooks 8115 + Trust 8117 + Cinema/Renoise MCP 8121)...";
   try {
     const r = await fetch("/api/mesh/execute", {
       method: "POST",
@@ -1600,7 +1597,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"error": str(e)}).encode())
         return True
 
-    
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -2566,7 +2563,6 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             import json
             ln = int(self.headers.get("Content-Length", 0))
             pass  # rfile already read
-            b = json.dumps(query_trust_center_8117(d.get("question") or "")).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
@@ -2900,7 +2896,6 @@ class UnifiedHandler(BaseHTTPRequestHandler):
 
         if self.path == "/api/trust-center":
             import json
-            b = json.dumps(query_trust_center_8117()).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")

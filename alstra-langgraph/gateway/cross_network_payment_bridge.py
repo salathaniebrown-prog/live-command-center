@@ -21,10 +21,10 @@ class CrossNetworkBridgeHandler(http.server.BaseHTTPRequestHandler):
             content_length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(content_length)
             data = json.loads(body.decode() or "{}")
-            
+
             source_network = data.get("network", "FEDNOW_TO_POLYGON_MESH")
             amount_usd = data.get("amount_usd", 100.0)
-            
+
             # Cross-network payment settlement payload routing
             settlement_record = {
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -37,11 +37,11 @@ class CrossNetworkBridgeHandler(http.server.BaseHTTPRequestHandler):
                 "status": "CROSS_NETWORK_SETTLEMENT_VERIFIED",
                 "error_rate": 0.0
             }
-            
+
             os.makedirs(os.path.dirname(LEDGER_PATH), exist_ok=True)
             with open(LEDGER_PATH, "a") as f:
                 f.write(json.dumps(settlement_record) + "\n")
-                
+
             self._set_headers(200)
             self.wfile.write(json.dumps(settlement_record, indent=2).encode())
             print(f"[{time.strftime('%H:%M:%S', time.gmtime())}] [SETTLED] Cross-network payment of ${amount_usd} processed via {source_network} -> Vault {VAULT_ADDRESS}")

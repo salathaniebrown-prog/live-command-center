@@ -19,10 +19,10 @@ def check_in_edge_node():
     }
     json_bytes = json.dumps(payload).encode('utf-8')
     context = ssl._create_unverified_context()
-    
+
     req = urllib.request.Request(TARGET_URL, data=json_bytes, method="POST")
     req.add_header("Content-Type", "application/json")
-    
+
     print(f"[*] Shipping status ping directly to secure pipeline at {TARGET_URL}...")
     try:
         with urllib.request.urlopen(req, context=context, timeout=5) as resp:

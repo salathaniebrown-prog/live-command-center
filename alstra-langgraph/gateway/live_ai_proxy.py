@@ -19,7 +19,7 @@ class RealTimeAIProxyHandler(http.server.BaseHTTPRequestHandler):
         if self.path == "/proxy/v1/generate":
             content_length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(content_length)
-            
+
             api_key = os.environ.get("GEMINI_API_KEY", "")
             if not api_key:
                 self._set_headers(400)
@@ -28,7 +28,7 @@ class RealTimeAIProxyHandler(http.server.BaseHTTPRequestHandler):
 
             target_url = f"{AI_STUDIO_URL}?key={api_key}"
             req = urllib.request.Request(target_url, data=body, headers={"Content-Type": "application/json"}, method="POST")
-            
+
             try:
                 with urllib.request.urlopen(req) as resp:
                     response_data = resp.read()

@@ -18,7 +18,7 @@ def init_db():
     conn = sqlite3.connect(LEDGER_DB)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS local_monetization_ledger
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, business_unit TEXT, service_location TEXT, 
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, business_unit TEXT, service_location TEXT,
                   revenue_usd REAL, eth_equivalent REAL, payment_status TEXT, timestamp REAL)''')
     conn.commit()
     conn.close()
@@ -38,7 +38,7 @@ def get_ledger():
     conn.close()
     total_usd = sum(r[2] for r in rows)
     return jsonify({
-        "status": "operational", 
+        "status": "operational",
         "summary": {"total_monetization_usd": total_usd, "active_nodes": 10248},
         "monetization": rows
     }), 200
@@ -47,15 +47,15 @@ def get_ledger():
 def ai_gateway():
     if request.method == 'OPTIONS':
         return jsonify({}), 200
-    
+
     if request.method == 'GET':
         data = {}
     else:
         data = request.get_json(force=True) or {}
-        
+
     requested_provider = str(data.get("provider", "gemini")).lower()
     prompt = data.get("prompt", "System Status Check")
-    
+
     keys = {
         "gemini": os.getenv("GEMINI_API_KEY", ""),
         "claude": os.getenv("ANTHROPIC_API_KEY", ""),
@@ -63,7 +63,7 @@ def ai_gateway():
     }
 
     fallback_chain = [requested_provider] + [p for p in ["gemini", "claude", "openai"] if p != requested_provider]
-    
+
     active_provider = None
     active_key = ""
     failover_occurred = False
@@ -103,10 +103,10 @@ def ai_gateway():
 def control_execute():
     if request.method == 'OPTIONS':
         return jsonify({}), 200
-    
+
     post_data = request.get_json(force=True) or {}
     command = post_data.get('command', '')
-    
+
     if command == "PURGE_MEMORY":
         gc.collect()
         result = "Garbage collection completed. Memory ceiling cleared."
@@ -123,7 +123,7 @@ def control_execute():
         result = "Optic Phase Shift executed across 10,248 nodes. Phase offset: 180.0 deg."
     else:
         result = f"Command '{command}' processed successfully."
-        
+
     return jsonify({
         "status": "SUCCESS",
         "command": command,
@@ -135,18 +135,18 @@ def control_execute():
 def assistant_action():
     if request.method == 'OPTIONS':
         return jsonify({}), 200
-    
+
     data = request.get_json(force=True) or {}
     action = data.get("action", "STATUS_CHECK")
-    
+
     actions_map = {
         "START_DEV_BOARD": "Dev board matrix online. Level 99 Autonomous Neural Core initialized.",
         "RECONCILE_WALLETS": "Coinbase CDP Vault 0x5f04...Df5 reconciled. $5,420,180.00 USDC verified.",
         "OVERCLOCK_TURBO": "Clock speed locked at 1.2GHz Turbo across 10,248 nodes."
     }
-    
+
     result = actions_map.get(action, f"Assistant action '{action}' executed successfully.")
-    
+
     return jsonify({
         "status": "SUCCESS",
         "action": action,

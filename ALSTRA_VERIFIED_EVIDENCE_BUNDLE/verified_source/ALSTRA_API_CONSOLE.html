@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ALSTRA // INTERACTIVE OPENAPI & 23-PORT ENDPOINT CONSOLE</title>
+<style>
+  body { background:#02080d; color:#d6f8ff; font-family:monospace; margin:16px; }
+  h2 { color:#00f0ff; margin-bottom:4px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:10px; margin-top:14px; }
+  .card { background:#04131d; border:1px solid #155e75; border-radius:6px; padding:10px; }
+  .btn { background:#00f0ff; color:#02080d; border:none; padding:4px 9px; border-radius:4px; font-weight:bold; cursor:pointer; margin-right:6px; margin-top:6px; }
+  .btn-post { background:#00ff9d; color:#02080d; }
+  pre { background:#010508; border:1px solid #0e7490; padding:10px; border-radius:6px; overflow-x:auto; max-height:340px; color:#a5f3fc; font-size:11px; }
+</style>
+</head>
+<body>
+<h2>ALSTRA // INTERACTIVE OPENAPI 3.1 & LIVE 23-PORT ENDPOINT TESTER</h2>
+<div style="color:#00ff9d;font-size:12px;">Click any endpoint below to execute a live HTTP GET/POST call across your Termux & Linux Edge cluster.</div>
+
+<div style="margin-top:12px;">
+  <button class="btn" onclick="pingAll23()">PING ALL 23 CLUSTER PORTS</button>
+  <button class="btn" onclick="callApi('GET', 'http://127.0.0.1:8143/openapi.json')">LOAD OPENAPI 3.1 SPEC (8143)</button>
+  <button class="btn btn-post" onclick="callApi('POST', 'http://127.0.0.1:8145/v1/run', {objective:'Live Investor Walkthrough Verification Cycle'})">RUN AUTONOMOUS AGENT (8145)</button>
+  <button class="btn btn-post" onclick="callApi('POST', 'http://127.0.0.1:8147/v1/peers/enroll', {peer_id:'edge-workstation-01', endpoint:'http://127.0.0.1:8143'})">ENROLL MESH PEER (8147)</button>
+</div>
+
+<h3 style="color:#38bdf8;margin-top:16px;">Live Response Inspector</h3>
+<pre id="console-out">Ready. Select any endpoint button to inspect live JSON output...</pre>
+
+<div class="grid" id="cards"></div>
+
+<script>
+const ENDPOINTS = [
+  { name: "8095 // Termux Master Spine", get: "http://127.0.0.1:8095/v1/telemetry" },
+  { name: "8099 // SQLite WAL Genius Brain", get: "http://127.0.0.1:8099/v1/telemetry" },
+  { name: "8117 // Trust Center Watchdog", get: "http://127.0.0.1:8117/v1/telemetry" },
+  { name: "8137 // Context-Telemetry & VR", get: "http://127.0.0.1:8137/v1/telemetry" },
+  { name: "8139 // OpenAI Tool Proxy (/v1)", get: "http://127.0.0.1:8139/v1/models" },
+  { name: "8141 // GitHub Watchdog Daemon", get: "http://127.0.0.1:8141/v1/telemetry" },
+  { name: "8143 // Linux Edge & Solar Node", get: "http://127.0.0.1:8143/v1/telemetry", post: "http://127.0.0.1:8143/v1/cloud/sync" },
+  { name: "8145 // Autonomous AI Agent Loop", get: "http://127.0.0.1:8145/v1/telemetry", post: "http://127.0.0.1:8145/v1/run" },
+  { name: "8147 // Multi-Device LAN/CF Mesh", get: "http://127.0.0.1:8147/v1/peers", post: "http://127.0.0.1:8147/v1/peers/enroll" }
+];
+
+const container = document.getElementById('cards');
+ENDPOINTS.forEach(ep => {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `<div style="color:#38bdf8;font-weight:bold;">${ep.name}</div>` +
+    `<button class="btn" onclick="callApi('GET','${ep.get}')">GET TELEMETRY</button>` +
+    (ep.post ? `<button class="btn btn-post" onclick="callApi('POST','${ep.post}',{})">POST ACTION</button>` : '');
+  container.appendChild(div);
+});
+
+async function callApi(method, url, body) {
+  const out = document.getElementById('console-out');
+  out.textContent = `[${method}] ${url} ...`;
+  try {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (method === 'POST') opts.body = JSON.stringify(body || {});
+    const res = await fetch(url, opts);
+    const txt = await res.text();
+    out.textContent = `HTTP ${res.status} — ${method} ${url}\n\n${txt}`;
+  } catch (e) {
+    out.textContent = `ERROR calling ${url}: ${e}`;
+  }
+}
+
+async function pingAll23() {
+  const ports = [8088,8090,8095,8099,8108,8109,8111,8113,8115,8117,8119,8121,8123,8125,8127,8129,8131,8137,8139,8141,8143,8145,8147];
+  const out = document.getElementById('console-out');
+  out.textContent = 'Probing all 23 ports...';
+  const results = await Promise.all(ports.map(async p => {
+    try {
+      const r = await fetch(`http://127.0.0.1:${p}/`);
+      return `${p}:HTTP_${r.status}`;
+    } catch {
+      return `${p}:OFFLINE`;
+    }
+  }));
+  out.textContent = `23-PORT LIVE MESH AUDIT:\n` + results.join(' | ');
+}
+</script>
+</body>
+</html>

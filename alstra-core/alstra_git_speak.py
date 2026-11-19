@@ -30,24 +30,24 @@ def gather_latest_payload_summary() -> str:
     """Extracts tracking state from the zero-latency structural ledger."""
     if not os.path.exists(DB_PATH):
         return "Generic system matrix state change."
-        
+
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute("SELECT command, nonce FROM verified_commands ORDER BY id DESC LIMIT 1")
         row = cursor.fetchone()
         conn.close()
-        
+
         if row:
             return f"Command vector {row[0]} verified under sequential identifier block {row[1]}"
     except Exception as e:
         print(f"[-] Meta extraction note: {e}")
-        
+
     return "Optimized infrastructure payload alignment complete."
 
 def execute_sovereign_git_push():
     os.chdir(REPO_DIR)
-    
+
     # 1. Check for untracked infrastructure changes
     status_proc = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
     if not status_proc.stdout.strip():
@@ -59,7 +59,7 @@ def execute_sovereign_git_push():
     # 2. Compile verbal script based on actual ledger history
     payload_summary = gather_latest_payload_summary()
     tts_announcement = f"Initiating secure handshake. Synchronizing master workspace payload data to GitHub. {payload_summary}."
-    
+
     # Speak prior to starting the network layer push
     speak_notification(tts_announcement)
 
@@ -67,19 +67,19 @@ def execute_sovereign_git_push():
     try:
         print("[*] Stage 1: Staging workspace payload updates...")
         subprocess.run(["git", "add", "."], check=True)
-        
+
         print("[*] Stage 2: Packaging ledger verification blocks...")
         commit_msg = f"telemetry-sync: {payload_summary}"
         subprocess.run(["git", "commit", "-m", commit_msg], check=True)
-        
+
         print("[*] Stage 3: Routing secure stream to GitHub upstream branch...")
         # Redirecting stream output tracking directly to stdout
         subprocess.run(["git", "push", "origin", "main"], check=True)
-        
+
         success_msg = "GitHub telemetry sync verified. Distribution channel locked with zero errors."
         speak_notification(success_msg)
         print(f"[⚡] SUCCESS: {success_msg}")
-        
+
     except subprocess.CalledProcessError as e:
         error_msg = "Pipeline restriction encountered during remote data transport operations."
         speak_notification(error_msg)

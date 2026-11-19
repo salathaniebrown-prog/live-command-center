@@ -1,0 +1,685 @@
+{
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "alstra-8090-8088-cyber-neon",
+    "labels": {
+      "cluster": "alstra-sovereign",
+      "vrf": "MGMT-OOB"
+    }
+  },
+  "spec": {
+    "title": "ALSTRA // JEV SYSTEM ONE — 8090 & 8088 Cyber-Neon Command Matrix",
+    "description": "Single-screen 5x2 locked Grafana v2 telemetry matrix isolated to Alstra ports 8090 and 8088",
+    "tags": ["alstra", "cyber-neon", "8090", "8088", "openconfig"],
+    "editable": true,
+    "liveNow": true,
+    "cursorSync": "Crosshair",
+    "preload": true,
+    "timeSettings": {
+      "from": "now-15m",
+      "to": "now",
+      "autoRefresh": "5s",
+      "autoRefreshIntervals": ["5s", "10s", "30s", "1m", "5m"],
+      "timezone": "browser"
+    },
+    "variables": [
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "instance",
+          "label": "Alstra Node",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Alstra-Prometheus-TSDB"
+          },
+          "query": {
+            "kind": "PrometheusQuery",
+            "spec": {
+              "qryType": 1,
+              "query": "label_values(up{instance=~\".*(8090|8088).*\"}, instance)"
+            }
+          },
+          "regex": "/.*(8090|8088).*/",
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*(8090|8088).*",
+          "current": {
+            "selected": true,
+            "text": "All (8090 + 8088)",
+            "value": "$__all"
+          },
+          "refresh": "onDashboardLoad"
+        }
+      }
+    ],
+    "layout": {
+      "kind": "AutoGridLayout",
+      "spec": {
+        "maxColumnCount": 5,
+        "columnWidthMode": "standard",
+        "rowHeightMode": "standard",
+        "fillScreen": true,
+        "items": [
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-1-uptime" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-2-cpu-busy" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-3-mem-used" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-4-root-disk" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-5-cpu-mode" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-6-sys-load" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-7-mem-breakdown" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-8-disk-io" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-9-net-traffic" } } },
+          { "kind": "AutoGridLayoutItem", "spec": { "element": { "kind": "ElementReference", "name": "panel-10-fs-usage" } } }
+        ]
+      }
+    },
+    "elements": {
+      "panel-1-uptime": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1,
+          "title": "01 // CLUSTER UPTIME (8090/8088)",
+          "vizConfig": {
+            "kind": "stat",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "textMode": "value_and_name"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "color": { "mode": "thresholds" },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "semi-dark-red" },
+                      { "value": 60, "color": "purple" },
+                      { "value": 300, "color": "super-light-blue" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "time() - process_start_time_seconds{instance=~\"$instance\"}",
+                        "legendFormat": "{{instance}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-2-cpu-busy": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2,
+          "title": "02 // CPU BUSY %",
+          "vizConfig": {
+            "kind": "gauge",
+            "spec": {
+              "options": {
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "min": 0,
+                  "max": 100,
+                  "color": { "mode": "thresholds" },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "super-light-blue" },
+                      { "value": 65, "color": "purple" },
+                      { "value": 85, "color": "semi-dark-red" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$instance\"}[1m])) * 100) or avg by (instance) (rate(process_cpu_seconds_total{instance=~\"$instance\"}[1m])) * 100",
+                        "legendFormat": "{{instance}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-3-mem-used": {
+        "kind": "Panel",
+        "spec": {
+          "id": 3,
+          "title": "03 // MEMORY PRESSURE %",
+          "vizConfig": {
+            "kind": "gauge",
+            "spec": {
+              "options": {
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "min": 0,
+                  "max": 100,
+                  "color": { "mode": "thresholds" },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "super-light-blue" },
+                      { "value": 75, "color": "purple" },
+                      { "value": 86.5, "color": "semi-dark-red" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"})) * 100 or (process_resident_memory_bytes{instance=~\"$instance\"} / 36700160) * 100",
+                        "legendFormat": "{{instance}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-4-root-disk": {
+        "kind": "Panel",
+        "spec": {
+          "id": 4,
+          "title": "04 // ROOT STORAGE %",
+          "vizConfig": {
+            "kind": "gauge",
+            "spec": {
+              "options": {
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percent",
+                  "min": 0,
+                  "max": 100,
+                  "color": { "mode": "thresholds" },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "super-light-blue" },
+                      { "value": 70, "color": "purple" },
+                      { "value": 90, "color": "semi-dark-red" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "(1 - (node_filesystem_avail_bytes{mountpoint=\"/\",instance=~\"$instance\"} / node_filesystem_size_bytes{mountpoint=\"/\",instance=~\"$instance\"})) * 100 or alstra_gnmi_node_up{node=~\"8090|8088\"} * 42",
+                        "legendFormat": "{{instance}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-5-cpu-mode": {
+        "kind": "Panel",
+        "spec": {
+          "id": 5,
+          "title": "05 // KURAMOTO COHERENCE & CPU STREAM",
+          "vizConfig": {
+            "kind": "timeseries",
+            "spec": {
+              "options": {
+                "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "fillOpacity": 28,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": true
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "super-light-blue" },
+                      { "value": 0.88, "color": "purple" },
+                      { "value": 0.98, "color": "semi-dark-red" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "alstra_gnmi_kuramoto_order_r{node=~\"8090|8088\"} or rate(node_cpu_seconds_total{mode!=\"idle\",instance=~\"$instance\"}[1m])",
+                        "legendFormat": "Node {{node}} {{mode}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-6-sys-load": {
+        "kind": "Panel",
+        "spec": {
+          "id": 6,
+          "title": "06 // PROBE RTT & SYSTEM LOAD",
+          "vizConfig": {
+            "kind": "timeseries",
+            "spec": {
+              "options": {
+                "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ms",
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "fillOpacity": 28,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": true
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "super-light-blue" },
+                      { "value": 5, "color": "purple" },
+                      { "value": 25, "color": "semi-dark-red" }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": { "id": "byRegexp", "options": ".*8090.*" },
+                    "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "super-light-blue" } }]
+                  },
+                  {
+                    "matcher": { "id": "byRegexp", "options": ".*8088.*" },
+                    "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }]
+                  }
+                ]
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "alstra_gnmi_probe_rtt_ms{node=~\"8090|8088\"} or node_load1{instance=~\"$instance\"}",
+                        "legendFormat": "RTT :{{node}} {{instance}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-7-mem-breakdown": {
+        "kind": "Panel",
+        "spec": {
+          "id": 7,
+          "title": "07 // DAEMON RSS MEMORY (35M CAP)",
+          "vizConfig": {
+            "kind": "timeseries",
+            "spec": {
+              "options": {
+                "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "bytes",
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "fillOpacity": 28,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": true
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "super-light-blue" },
+                      { "value": 25000000, "color": "purple" },
+                      { "value": 35000000, "color": "semi-dark-red" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "process_resident_memory_bytes{instance=~\"$instance\"} or node_memory_Active_bytes{instance=~\"$instance\"}",
+                        "legendFormat": "RSS {{instance}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-8-disk-io": {
+        "kind": "Panel",
+        "spec": {
+          "id": 8,
+          "title": "08 // FOUNTAIN FEC & DISK I/O",
+          "vizConfig": {
+            "kind": "timeseries",
+            "spec": {
+              "options": {
+                "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "Bps",
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "fillOpacity": 28,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": true
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "super-light-blue" },
+                      { "value": 5000000, "color": "purple" },
+                      { "value": 25000000, "color": "semi-dark-red" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "rate(node_disk_read_bytes_total{instance=~\"$instance\"}[1m]) or rate(alstra_gnmi_fountain_fec_recoveries{node=~\"8090|8088\"}[1m])",
+                        "legendFormat": "I/O :{{node}} {{instance}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-9-net-traffic": {
+        "kind": "Panel",
+        "spec": {
+          "id": 9,
+          "title": "09 // OPENCONFIG NETWORK TRAFFIC (8090/8088)",
+          "vizConfig": {
+            "kind": "timeseries",
+            "spec": {
+              "options": {
+                "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "Bps",
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "fillOpacity": 28,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": true
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "super-light-blue" },
+                      { "value": 100000, "color": "purple" },
+                      { "value": 1000000, "color": "semi-dark-red" }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": { "id": "byRegexp", "options": ".*8090.*" },
+                    "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "super-light-blue" } }]
+                  },
+                  {
+                    "matcher": { "id": "byRegexp", "options": ".*8088.*" },
+                    "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }]
+                  }
+                ]
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "rate(alstra_gnmi_in_octets{node=~\"8090|8088\"}[1m])",
+                        "legendFormat": "RX :{{node}}"
+                      }
+                    }
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "B",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "rate(alstra_gnmi_out_octets{node=~\"8090|8088\"}[1m])",
+                        "legendFormat": "TX :{{node}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "panel-10-fs-usage": {
+        "kind": "Panel",
+        "spec": {
+          "id": 10,
+          "title": "10 // NODE HEALTH & FILESYSTEM USAGE",
+          "vizConfig": {
+            "kind": "timeseries",
+            "spec": {
+              "options": {
+                "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+                "tooltip": { "mode": "multi", "sort": "desc" }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "color": { "mode": "palette-classic" },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 2,
+                    "fillOpacity": 28,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": true
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": null, "color": "semi-dark-red" },
+                      { "value": 0.5, "color": "purple" },
+                      { "value": 1, "color": "super-light-blue" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "refId": "A",
+                    "datasource": { "type": "prometheus", "uid": "Alstra-Prometheus-TSDB" },
+                    "query": {
+                      "kind": "PrometheusQuery",
+                      "spec": {
+                        "expr": "alstra_gnmi_node_up{node=~\"8090|8088\"} or up{instance=~\"$instance\"}",
+                        "legendFormat": "UP :{{node}} {{instance}}"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

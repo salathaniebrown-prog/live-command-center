@@ -37,7 +37,7 @@ def run_aggregation():
 
     # Aggregate raw historical logs per VIN
     cursor.execute("""
-        SELECT 
+        SELECT
             vin_id,
             COUNT(event_id) AS total_pings,
             MIN(recorded_at_utc) AS first_ping,
@@ -56,9 +56,9 @@ def run_aggregation():
     else:
         for vin, count, first_ts, last_ts in summaries:
             cursor.execute("""
-                SELECT transit_status, gps_coordinates 
-                FROM asset_transit_history 
-                WHERE vin_id = ? 
+                SELECT transit_status, gps_coordinates
+                FROM asset_transit_history
+                WHERE vin_id = ?
                 ORDER BY event_id DESC LIMIT 1
             """, (vin,))
             latest = cursor.fetchone()
@@ -66,7 +66,7 @@ def run_aggregation():
             latest_coords = latest[1] if latest else "0.0,0.0"
 
             cursor.execute("""
-                INSERT INTO asset_transit_rollups 
+                INSERT INTO asset_transit_rollups
                 (vin_id, total_checkpoints, first_seen_utc, last_seen_utc, latest_status, latest_coords, aggregated_at_utc)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(vin_id) DO UPDATE SET

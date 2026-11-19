@@ -62,7 +62,6 @@ def parse_stack_traces_and_debug():
         os.path.join(HOME, "dashboard.log"),
         os.path.join(HOME, "dealership_8099.log"),
         os.path.join(HOME, "webhook_8115.log"),
-        os.path.join(HOME, "trust_8117.log"),
         os.path.join(HOME, "mesh_8119.log"),
         os.path.join(HOME, "cinema_8121.log"),
         os.path.join(HOME, "astra-unified-brain", "watchdog.log")

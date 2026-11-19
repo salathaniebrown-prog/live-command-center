@@ -46,7 +46,7 @@ class OllamaClusterRouter:
                 return True
         except Exception:
             pass
-        
+
         node.consecutive_failures += 1
         if node.consecutive_failures >= 3 and node.is_healthy:
             node.is_healthy = False
@@ -74,7 +74,7 @@ class OllamaClusterRouter:
             try:
                 task_payload, future = await self.queue.get()
                 node = self._get_active_node()
-                
+
                 if not node:
                     future.set_exception(RuntimeError("No available nodes in the cluster."))
                     self.queue.task_done()
@@ -82,7 +82,7 @@ class OllamaClusterRouter:
 
                 success = False
                 response_data = None
-                
+
                 for target_node in sorted(self.nodes, key=lambda x: x.priority):
                     try:
                         resp = await self.client.post(
@@ -102,7 +102,7 @@ class OllamaClusterRouter:
                     future.set_result(response_data)
                 else:
                     future.set_exception(RuntimeError("All cluster nodes failed to process the request."))
-                
+
                 self.queue.task_done()
             except asyncio.CancelledError:
                 break

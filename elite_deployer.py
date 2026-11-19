@@ -10,10 +10,10 @@ def call_gemini(prompt, max_retries=3, backoff_factor=2):
     api_key = os.environ.get('GEMINI_API_KEY')
     if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable is not set. Run: export GEMINI_API_KEY='your_key'")
-    
+
     url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
     payload = {'contents': [{'parts': [{'text': prompt}]}]}
-    
+
     req = urllib.request.Request(
         url,
         data=json.dumps(payload).encode('utf-8'),
@@ -22,7 +22,7 @@ def call_gemini(prompt, max_retries=3, backoff_factor=2):
             'x-goog-api-key': api_key
         }
     )
-    
+
     for attempt in range(max_retries):
         try:
             with urllib.request.urlopen(req) as res:

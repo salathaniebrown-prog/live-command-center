@@ -1,14 +1,12 @@
 import http.client, os, py_compile, subprocess, time
 
 HOME = os.path.expanduser("~")
-PORTS = (8088, 8099, 8108, 8109, 8111, 8113, 8115, 8117, 8119, 8121)
 
 SCRIPT_MAP = {
     8088: ("python3", os.path.join(HOME, "dashboard_server.py")),
     8099: ("python3", os.path.join(HOME, "dealership_module.py")),
     8113: ("python3", os.path.join(HOME, "astra-mediapipe-tasks", "mediapipe_edge_ml.py")),
     8115: ("python3", os.path.join(HOME, "webhook_listener_8115.py")),
-    8117: ("python3", os.path.join(HOME, "trust_center_8117.py")),
     8119: ("python3", os.path.join(HOME, "agentic_mesh_8119.py")),
     8121: ("python3", os.path.join(HOME, "studio_cinema_mcp_8121.py")),
 }

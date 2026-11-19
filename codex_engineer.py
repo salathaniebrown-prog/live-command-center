@@ -26,7 +26,7 @@ def ask_ai_to_fix(filepath, error_msg):
             result = json.loads(response.read().decode('utf-8'))
             # Extract text from Gemini response
             fixed_code = result['candidates'][0]['content']['parts'][0]['text'].strip()
-            
+
             # Clean up markdown formatting if the AI added it
             if fixed_code.startswith("```python"):
                 fixed_code = fixed_code[9:]
@@ -34,7 +34,7 @@ def ask_ai_to_fix(filepath, error_msg):
                 fixed_code = fixed_code[3:]
             if fixed_code.endswith("```"):
                 fixed_code = fixed_code[:-3]
-                
+
             with open(filepath, 'w') as f:
                 f.write(fixed_code.strip())
             return True, "Code fixed successfully."
@@ -45,12 +45,12 @@ class CodexHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers.get('Content-Length', 0))
         post_data = json.loads(self.rfile.read(content_length).decode('utf-8'))
-        
+
         filepath = post_data.get('filepath')
         error_msg = post_data.get('error')
-        
+
         success, message = ask_ai_to_fix(filepath, error_msg)
-        
+
         self.send_response(200 if success else 500)
         self.send_header("Content-Type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")

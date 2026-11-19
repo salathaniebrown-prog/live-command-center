@@ -14,11 +14,11 @@ class HardenedTelemetryHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         ports = [8088, 8095, 8096, 8097, 8098, 8099, 8100, 8112]
         active_nodes = sum(1 for p in ports if subprocess.run(["nc", "-z", "127.0.0.1", str(p)], capture_output=True).returncode == 0)
-        
+
         load1, load5, load15 = os.getloadavg() if hasattr(os, "getloadavg") else (0.0, 0.0, 0.0)
         st = os.statvfs(os.path.expanduser("~"))
         disk_free_gb = round((st.f_bavail * st.f_frsize) / (1024**3), 2)
-        
+
         payload = {
             "status": "NOMINAL_SECURE",
             "assistant": "Astra Tier-1 Sentinel",

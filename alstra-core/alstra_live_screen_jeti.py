@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Alstra Sovereign Live Screen & Voice Jeti Engine
-Renders the holographic blue lightning interface, executes real-time 
+Renders the holographic blue lightning interface, executes real-time
 Android TTS audio feedback, and commits zero-latency WAL telemetry.
 """
 
@@ -73,7 +73,7 @@ class LiveScreenJeti:
         while True:
             nonce = int(time.time() * 1000) % 2147483647
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-            
+
             state = {
                 "authority": self.authority,
                 "timestamp": timestamp,
@@ -81,11 +81,11 @@ class LiveScreenJeti:
                 "voice_synth": "ENABLED",
                 "wal_ledger": "ZERO_LATENCY_LOCKED"
             }
-            
+
             payload_str = json.dumps(state)
             sig = self.sign_state(payload_str, nonce)
             self.verify_and_commit(payload_str, nonce, sig)
-            
+
             gc.collect()
 
             # Trigger live Android TTS voice output

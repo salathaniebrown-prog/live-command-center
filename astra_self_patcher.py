@@ -5,15 +5,15 @@ def self_patch_and_verify(target_file="astra_spatial_assistant.py", enhancement_
     target_path = os.path.join(os.path.expanduser("~"), target_file)
     if not os.path.exists(target_path):
         return {"status": "ERROR", "message": f"Target {target_file} not found"}
-    
+
     with open(target_path, "r", encoding="utf-8") as f:
         content = f.read()
-    
+
     if enhancement_comment not in content:
         content = enhancement_comment + "\n" + content
         with open(target_path, "w", encoding="utf-8") as f:
             f.write(content)
-            
+
     try:
         py_compile.compile(target_path, doraise=True)
         # Run TDD Guardrails

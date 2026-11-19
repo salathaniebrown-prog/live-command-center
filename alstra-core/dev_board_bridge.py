@@ -31,7 +31,7 @@ class DevBoardHardwareBridge:
 
     def sync_to_edge_daemon(self):
         hardware_metrics = self.poll_dev_board_sensors()
-        
+
         payload = {
             "bridge_source": "DEV_BOARD_HARDWARE_INTERFACE",
             "communication_protocols": ["I2C", "SPI", "UART"],
@@ -46,11 +46,11 @@ class DevBoardHardwareBridge:
         }).encode('utf-8')
 
         req = urllib.request.Request(
-            TELEMETRY_ENDPOINT, 
-            data=data, 
+            TELEMETRY_ENDPOINT,
+            data=data,
             headers={'Content-Type': 'application/json'}
         )
-        
+
         try:
             with urllib.request.urlopen(req) as response:
                 res = json.loads(response.read().decode())

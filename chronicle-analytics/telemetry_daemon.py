@@ -21,14 +21,14 @@ def run_telemetry_spine_sync():
     log_system_event("==================================================================")
     log_system_event(" 📡 TELEMETRY CORE INITIALIZED: COINBASE LIQUIDITY ENGINE LINK   ")
     log_system_event("==================================================================")
-    
+
     try:
         # Establish explicit handshake matrix bypassing inspector traps
         client = DataAPIClient(caller_name="BROWN_COMMAND", caller_version="2.0.0")
         db = client.get_database_by_api_endpoint(ENDPOINT, token=TOKEN)
         collection = db.get_collection("alstra_exoplanet_vectors")
         log_system_event("Telemetry Engine Core Linked to Astra DB Vector Cloud.")
-        
+
         # Symmetrical tracking parameters matching your verified interface
         mock_payload = {
             "liquidity_asset": 303200226,
@@ -36,11 +36,11 @@ def run_telemetry_spine_sync():
             "parcel_id": "7864-12-3456",
             "connection_status": "RESTORED_14MS"
         }
-        
+
         # Ship structured metrics payload to vector space collection
         inserted = collection.insert_one(mock_payload)
         log_system_event(f"State Synced | Status: 200 | Data: {json.dumps({'insertedIds': [inserted.inserted_id]})}")
-        
+
     except Exception as err:
         log_system_event(f"[CRITICAL ERROR] Vector engine sync failed: {err}")
 

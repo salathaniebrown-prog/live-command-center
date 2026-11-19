@@ -15,7 +15,6 @@ SERVICES = {
     8111: (os.path.join(HOME, "invoice_agent_8111.py"), os.path.join(HOME, "invoice_8111.log")),
     8113: (os.path.join(HOME, "astra-mediapipe-tasks", "mediapipe_edge_ml.py"), os.path.join(HOME, "astra-mediapipe-tasks", "mp.log")),
     8115: (os.path.join(HOME, "webhook_listener_8115.py"), os.path.join(HOME, "webhook_8115.log")),
-    8117: (os.path.join(HOME, "trust_center_8117.py"), os.path.join(HOME, "trust_8117.log")),
     8119: (os.path.join(HOME, "agentic_mesh_8119.py"), os.path.join(HOME, "mesh_8119.log")),
     8121: (os.path.join(HOME, "studio_cinema_mcp_8121.py"), os.path.join(HOME, "cinema_8121.log")),
 }

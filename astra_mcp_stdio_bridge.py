@@ -7,7 +7,6 @@ from typing import Any, Dict
 
 MASTER_SPINE_URL = "http://127.0.0.1:8095"
 GENIUS_BRAIN_URL = "http://127.0.0.1:8099"
-TRUST_CENTER_URL = "http://127.0.0.1:8117"
 
 TOOLS = [
     {
@@ -18,7 +17,6 @@ TOOLS = [
             "properties": {
                 "target": {
                     "type": "string",
-                    "enum": ["master_8095", "brain_8099", "trust_8117"],
                     "default": "brain_8099",
                     "description": "Target service endpoint to inspect."
                 }
@@ -97,7 +95,6 @@ def dispatch_tool(name: str, args: Dict[str, Any]) -> Dict[str, Any]:
         base = {
             "master_8095": f"{MASTER_SPINE_URL}/v1/telemetry",
             "brain_8099": f"{GENIUS_BRAIN_URL}/v1/telemetry",
-            "trust_8117": f"{TRUST_CENTER_URL}/"
         }.get(target, f"{GENIUS_BRAIN_URL}/v1/telemetry")
         return http_json("GET", base)
 

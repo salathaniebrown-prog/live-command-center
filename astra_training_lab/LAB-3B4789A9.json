@@ -1,0 +1,7 @@
+{
+  "job_id": "LAB-3B4789A9",
+  "ts": "2026-11-18 10:25:51",
+  "model": "Gemini-2.5-Pro + Banana-2",
+  "task": "Gemini 2.5 Pro + Nano Banana 2 multi-modal training run",
+  "status": "QUEUED_ON_WORKSTATION"
+}

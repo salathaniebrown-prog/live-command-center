@@ -15,7 +15,7 @@ edge_path = os.path.expanduser("~/astra-mediapipe-tasks/mediapipe_edge_ml.py")
 if os.path.exists(edge_path):
     with open(edge_path, "r") as f:
         ecode = f.read()
-    
+
     fallback_fn = '''
 def fetch_live_eth_usd():
     import urllib.request, json

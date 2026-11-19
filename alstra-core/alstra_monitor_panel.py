@@ -12,10 +12,10 @@ class VisualTelemetryHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         payload = json.loads(post_data.decode('utf-8'))
-        
+
         # Extract signing parameters from visual engine headers
         signature = self.headers.get('X-Alstra-Signature-Ed25519', 'UNSIGNED')
-        
+
         print("\n" + "="*70)
         print(f" 🖥️  [LIVE COMMAND CENTER VISUAL ALERT] | LEVEL: {payload.get('alert_level', 'UNKNOWN')}")
         print(f" TIME: {payload.get('timestamp')} | AUTH: {payload.get('root_authority')}")
@@ -24,7 +24,7 @@ class VisualTelemetryHandler(BaseHTTPRequestHandler):
         print(f" ENGINE MATRIX STATE: {json.dumps(payload.get('system_state'), indent=2)}")
         print(f" CRYPTO AUTHENTICITY SEAL: {signature[:32]}...")
         print("="*70 + "\n")
-        
+
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()

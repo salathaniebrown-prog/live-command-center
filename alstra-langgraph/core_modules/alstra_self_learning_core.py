@@ -7,7 +7,7 @@ LOG_FILE = os.path.expanduser("~/alstra-langgraph/ledger/self_learning_omniverse
 
 def execute_autonomous_learning_loop():
     print("[*] Initializing ALSTRA 24/7 365 Omniverse Self-Learning Intelligence Core...")
-    
+
     # Continuous recursive knowledge synthesis loop covering online & offline tech stacks
     domains = [
         "LINUX_KERNEL_OPTIMIZATION",
@@ -16,7 +16,7 @@ def execute_autonomous_learning_loop():
         "BIO_GENOMIC_SYNTHESIS_PIPELINES",
         "MOBILE_AUTOMOTIVE_DISPATCH_LOGIC"
     ]
-    
+
     while True:
         for domain in domains:
             timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -30,13 +30,13 @@ def execute_autonomous_learning_loop():
                 "vector_memory": "DATASTAX_ASTRA_SYNCHRONIZED",
                 "error_rate": 0.0
             }
-            
+
             os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
             with open(LOG_FILE, "a") as f:
                 f.write(json.dumps(learning_frame) + "\n")
-                
+
             print(f"[+] [{timestamp}] Domain Optimized: {domain} | Status: 100% Self-Healing")
-        
+
         # 24/7/365 continuous pulse interval (runs every 60 seconds autonomously)
         time.sleep(60)
 

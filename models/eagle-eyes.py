@@ -26,8 +26,8 @@ class EagleEyesDroneDaemon:
         for port in self.ports:
             try:
                 req = urllib.request.Request(
-                    f"http://127.0.0.1:{port}/api/logs", 
-                    data=data, 
+                    f"http://127.0.0.1:{port}/api/logs",
+                    data=data,
                     headers={'Content-Type': 'application/json'}
                 )
                 urllib.request.urlopen(req, timeout=1)

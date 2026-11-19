@@ -9,11 +9,11 @@ BUILDER_CODE = "bc_iqr25ias"
 
 def execute_chronicles_telemetry():
     print("[*] Initializing Cryptographic Chronicles Telemetry Lab Spine...")
-    
+
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     raw_payload = f"{timestamp}-{BUILDER_CODE}-{VAULT_ADDRESS}-SPINE_ACTIVE"
     block_hash = hashlib.sha256(raw_payload.encode()).hexdigest()
-    
+
     chronicle_entry = {
         "timestamp": timestamp,
         "authority": "Salathaniel S. A. Brown Sr.",
@@ -24,11 +24,11 @@ def execute_chronicles_telemetry():
         "block_proof_hash": f"0x{block_hash}",
         "error_rate": 0.0
     }
-    
+
     os.makedirs(os.path.dirname(LEDGER_PATH), exist_ok=True)
     with open(LEDGER_PATH, "a") as f:
         f.write(json.dumps(chronicle_entry) + "\n")
-        
+
     print(json.dumps(chronicle_entry, indent=2))
     print("[+] Cryptographic Chronicles Telemetry Lab Spine successfully compiled and logged!")
 

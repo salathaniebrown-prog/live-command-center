@@ -109,7 +109,7 @@ class JetiOmegaEngine:
 
 if __name__ == "__main__":
     engine = JetiOmegaEngine()
-    
+
     # Define and sign the command
     cmd = engine.generate_command()
     nonce = int(time.time())

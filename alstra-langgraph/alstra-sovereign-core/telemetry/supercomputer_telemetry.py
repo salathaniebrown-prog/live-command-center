@@ -6,7 +6,7 @@ TELEMETRY_LOG = os.path.expanduser("~/alstra-langgraph/alstra-sovereign-core/led
 
 def emit_grade_a_telemetry():
     print("[*] Initializing Grade-A Supercomputer Docker & Artifact Telemetry...")
-    
+
     telemetry_frame = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "authority": "Salathaniel S. A. Brown Sr.",
@@ -18,11 +18,11 @@ def emit_grade_a_telemetry():
         "starlink_backhaul_ms": 24.2,
         "error_rate": 0.0
     }
-    
+
     os.makedirs(os.path.dirname(TELEMETRY_LOG), exist_ok=True)
     with open(TELEMETRY_LOG, "a") as f:
         f.write(json.dumps(telemetry_frame) + "\n")
-        
+
     print(json.dumps(telemetry_frame, indent=2))
     print("[+] Grade-A Supercomputer Docker Artifact Telemetry Emitted & Logged Successfully!")
 

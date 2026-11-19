@@ -23,7 +23,7 @@ app = FastAPI()
 DB_NAME = "deepspace_core.db"
 
 # --- SECURE CONFIGURATION ---
-# Pull the key from the environment file. 
+# Pull the key from the environment file.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
@@ -69,13 +69,13 @@ def fetch_deep_space_telemetry():
         name = "JAMES WEBB SPACE TELESCOPE"
         tle1 = "1 50463U 21130A   23324.50000000  .00000000  00000-0  00000-0 0  9999"
         tle2 = "2 50463  10.1234  45.6789 0000000  00.0000 000.0000  1.00000000    10"
-        
+
         ts = load.timescale()
         t = ts.now()
         satellite = EarthSatellite(tle1, tle2, name, ts)
         geocentric = satellite.at(t)
         distance_km = geocentric.distance().km
-        
+
         return {
             "name": name,
             "status": "DEEP SPACE LOCK",
@@ -107,7 +107,7 @@ def sign_and_log(payload_dict):
     block_data = last_hash + payload_str
     block_hash = hashlib.sha256(block_data.encode()).hexdigest()
     sig = private_key.sign(block_hash.encode())
-    
+
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -117,37 +117,37 @@ def sign_and_log(payload_dict):
     )
     conn.commit()
     conn.close()
-    
+
     last_hash = block_hash
     return {"block_hash": block_hash, "signature": sig.hex()}
 
 @app.post("/ask_jeti")
 async def ask_jeti(request: dict):
     user_query = request.get("query", "")
-    
+
     sat_data = fetch_deep_space_telemetry()
     cpu_data = get_max_cpu_telemetry()
-    
+
     prompt = f"""
     You are Jeti, the AI co-pilot of the Alstra Sovereign Deep Space Command Center.
     Current Telemetry: Tracking {sat_data['name']} at {sat_data['altitude_km']} km distance.
     Hardware Status: CPU Load is {cpu_data['cpu_percent']} at {cpu_data['cpu_freq']} GHz.
     Authority: Salathaniel S A Brown Sr.
-    
+
     User Query: {user_query}
-    
+
     Respond in a brief, highly tactical, sci-fi AI voice (max 2 sentences). Do not use markdown.
     """
-    
+
     try:
         response = ai_model.generate_content(prompt)
         ai_text = response.text.replace("*", "").strip()
-        
+
         try:
             subprocess.Popen(["termux-tts-speak", ai_text], stderr=subprocess.DEVNULL)
         except Exception:
             pass
-            
+
         return {"response": ai_text}
     except Exception as e:
         return {"response": f"AI Core Error: {str(e)}"}
@@ -176,21 +176,21 @@ async def websocket_endpoint(websocket: WebSocket):
     while True:
         sat_data = fetch_deep_space_telemetry()
         cpu_data = get_max_cpu_telemetry()
-        
+
         telemetry = {
             "satellite": sat_data,
             "hardware": cpu_data,
             "nonce": int(time.time() * 1000)
         }
-        
+
         crypto_data = sign_and_log(telemetry)
         telemetry["crypto"] = crypto_data
-        
+
         try:
             await websocket.send_text(json.dumps(telemetry))
         except:
             break
-            
+
         await asyncio.sleep(1)
 
 @app.get("/")
@@ -201,5 +201,5 @@ async def get():
 
 if __name__ == "__main__":
     init_db()
-    os.environ['SKYFIELD_DOWNLOAD'] = 'false' 
+    os.environ['SKYFIELD_DOWNLOAD'] = 'false'
     uvicorn.run(app, host="0.0.0.0", port=5000)

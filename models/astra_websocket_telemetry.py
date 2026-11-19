@@ -15,18 +15,18 @@ async def handle_client(reader, writer):
     try:
         request_data = await reader.read(2048)
         request_text = request_data.decode('utf-8', errors='ignore')
-        
+
         key = None
         for line in request_text.split('\r\n'):
             if line.lower().startswith('sec-websocket-key:'):
                 key = line.split(':', 1)[1].strip()
                 break
-                
+
         if key:
             guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
             sha1 = hashlib.sha1((key + guid).encode('utf-8')).digest()
             accept_key = base64.b64encode(sha1).decode('utf-8')
-            
+
             response = (
                 "HTTP/1.1 101 Switching Protocols\r\n"
                 "Upgrade: websocket\r\n"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Alstra Sovereign Infrastructure Malicious Attack Simulator
-Generates signature mismatch payloads and transmits them across secure TLS endpoints 
+Generates signature mismatch payloads and transmits them across secure TLS endpoints
 to test local threat isolation triggers and verbal notifications.
 """
 
@@ -14,11 +14,11 @@ TARGET_URL = "https://127.0.0.1:8099"
 
 def execute_malicious_injection():
     print("[*] Configuring baseline penetration injection vector profile...")
-    
+
     # Generate an explicitly invalid signature string
-    spoofed_signature = "cafebabe1234deadbeef" * 4 
+    spoofed_signature = "cafebabe1234deadbeef" * 4
     malicious_nonce = 99999999
-    
+
     attack_payload = {
         "alert_level": "CRITICAL_INJECTION_TEST",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -30,16 +30,16 @@ def execute_malicious_injection():
             "nonce_sequence": malicious_nonce
         }
     }
-    
+
     json_bytes = json.dumps(attack_payload).encode('utf-8')
-    
+
     # Ignore self-signed signature validation issues exclusively during test delivery execution
     test_context = ssl._create_unverified_context()
-    
+
     req = urllib.request.Request(TARGET_URL, data=json_bytes, method="POST")
     req.add_header("Content-Type", "application/json")
     req.add_header("X-Alstra-Signature-Ed25519", spoofed_signature)
-    
+
     print(f"[*] Attacking TLS endpoint pipeline structure at: {TARGET_URL}")
     print(f"[!] Sending spoofed signature token: {spoofed_signature[:24]}...")
 

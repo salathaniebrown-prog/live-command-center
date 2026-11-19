@@ -146,7 +146,6 @@ def run_termux_linux_edge_ibm_github_autopilot(auto_install=True):
         actions.append("All core Termux/Linux binaries verified (python3, git, curl, sqlite3)")
 
     # 2. Check all cluster ports (8088..8127)
-    ports = [8088, 8099, 8109, 8111, 8113, 8115, 8117, 8119, 8121, 8123, 8125, 8127]
     live_ports = []
     for p in ports:
         try:

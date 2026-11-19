@@ -21,7 +21,7 @@ async def import_telemetry():
         "go_daemon": "OFFLINE",
         "sqlite_tables": 0
     }
-    
+
     # Query Go Daemon on port 8099
     try:
         req = urllib.request.Request("http://127.0.0.1:8099/telemetry")
@@ -61,21 +61,21 @@ async def handle_connection(websocket):
                 try:
                     payload = json.loads(message)
                     action = payload.get("action", "").lower()
-                    
+
                     if action == "heal":
                         response = {"status": "SUCCESS", "message": "System defense and process table stabilized."}
                     elif action == "status":
                         response = {"status": "SUCCESS", "data": await import_telemetry()}
                     else:
                         response = {"status": "ACKNOWLEDGED", "command": action}
-                        
+
                     await websocket.send(json.dumps({"type": "command_response", "data": response}))
                 except json.JSONDecodeError:
                     await websocket.send(json.dumps({"type": "error", "message": "Invalid JSON payload"}))
 
         # Run both tasks concurrently
         await asyncio.gather(telemetry_loop(), command_listener())
-        
+
     except websockets.exceptions.ConnectionClosed:
         print(f"[-] Client disconnected: {websocket.remote_address}")
 

@@ -26,7 +26,7 @@ class GlobalVirtualPowerGrid:
         while self.is_running:
             await asyncio.sleep(0.002)  # Low-overhead sampling interval
             self.grid_nodes[node_id] += power_weight
-            
+
             if self.grid_nodes[node_id] % 5000000 == 0:
                 logging.info(f"[{node_id}] Grid Sync -> Dynamic Units Allocated: {self.grid_nodes[node_id]}")
 
@@ -39,7 +39,7 @@ class GlobalVirtualPowerGrid:
 
     async def start_grid_matrix(self):
         logging.info("Initializing multi-stream virtual grid infrastructure network loop...")
-        
+
         # Parallel loop operations managing global data routing segments
         tasks = [
             asyncio.create_task(self.grid_worker("CHINA_SOLAR_MATRIX", 50000)),
@@ -49,7 +49,7 @@ class GlobalVirtualPowerGrid:
             asyncio.create_task(self.grid_worker("UKRAINE_DIGITAL_SOIL_TELEMETRY", 75000))
         ]
         monitor = asyncio.create_task(self.aggregate_grid_telemetry())
-        
+
         await asyncio.gather(*tasks, monitor)
 
 if __name__ == "__main__":

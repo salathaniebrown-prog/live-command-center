@@ -11,7 +11,6 @@ SERVICES = [
     (8111, "JEV_INVOICE_AGENT", ["python3", os.path.join(HOME, "invoice_agent_8111.py")], os.path.join(HOME, "invoice_8111.log")),
     (8113, "EDGE_ML_MARKET", ["python3", os.path.join(HOME, "astra-mediapipe-tasks", "mediapipe_edge_ml.py")], os.path.join(HOME, "astra-mediapipe-tasks", "mp.log")),
     (8115, "CRYPTO_CARD_WEBHOOKS", ["python3", os.path.join(HOME, "webhook_listener_8115.py")], os.path.join(HOME, "webhook_8115.log")),
-    (8117, "AGENTIC_TRUST_CENTER", ["python3", os.path.join(HOME, "trust_center_8117.py")], os.path.join(HOME, "trust_8117.log")),
     (8119, "SUPERCOMPUTER_MESH", ["python3", os.path.join(HOME, "agentic_mesh_8119.py")], os.path.join(HOME, "mesh_8119.log")),
     (8121, "CINEMA_RENOISE_MCP", ["python3", os.path.join(HOME, "studio_cinema_mcp_8121.py")], os.path.join(HOME, "cinema_8121.log")),
 ]
@@ -92,7 +91,6 @@ def stage_2_cluster_self_heal():
 def stage_3_functional_e2e_smoke():
     tests = [
         ("KPI_SUMMARY_8088", 8088, "GET", "/api/kpi-summary", None),
-        ("TRUST_AI_ASK_8117", 8117, "POST", "/ask", {"question": "Verify SOC 2 encryption"}),
         ("MESH_CONSENSUS_8119", 8119, "POST", "/execute", {"goal": "E2E meta-command validation"}),
         ("CINEMA_MCP_8121", 8121, "POST", "/render", {"prompt": "E2E beat sync check", "bpm": 128})
     ]

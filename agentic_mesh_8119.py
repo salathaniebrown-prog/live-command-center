@@ -14,7 +14,6 @@ CLUSTER_NODES = {
     8111: "JEV_INVOICE_AGENT",
     8113: "EDGE_ML_MARKET_FEED",
     8115: "CRYPTO_CARD_WEBHOOKS",
-    8117: "AGENTIC_TRUST_CENTER",
     8119: "SUPERCOMPUTER_MESH_BUS"
 }
 
@@ -57,7 +56,6 @@ def validate_and_execute_mission(goal_text):
     # 1. Gather real-time cross-node intelligence in parallel sequence
     n_brain = probe_node(8109, "/route", {"mission": goal, "mode": "SUPERCOMPUTER_MESH"})
     n_edge = probe_node(8113, "/")
-    n_trust = probe_node(8117, "/ask", {"question": goal})
     n_wh = probe_node(8115, "/")
     n_cinema = probe_node(8121, "/render", {"title": "MESH_SYNC_CINEMA", "prompt": goal, "bpm": 128, "fps": 24})
 
@@ -95,7 +93,6 @@ def validate_and_execute_mission(goal_text):
     ).strip()
 
     attestation = "0x" + hashlib.sha256(f"{exec_id}|{goal}|{synthesis}|{score_pct}|{ts}".encode("utf-8")).hexdigest()
-    invoked_list = ["8109:BRAIN", "8113:EDGE_ML", "8115:WEBHOOKS", "8117:TRUST", f"8121:CINEMA_MCP({cinema_id})"]
 
     conn = sqlite3.connect(DB_PATH)
     conn.execute(

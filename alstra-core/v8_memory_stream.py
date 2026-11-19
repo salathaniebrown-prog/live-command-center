@@ -24,14 +24,14 @@ class V8MemoryStreamOptimizer:
     def trigger_memory_upgrade(self):
         print(f"\n[MEMORY CLEANER] Milestone of {self.request_counter} requests reached!")
         print("[MEMORY CLEANER] Upgrading V8 heap GC pointers & flushing NASA SC15 metadata cache...")
-        
+
         # Trigger Node.js V8 garbage collection & Python GC
         payload = {
             "event": "AUTOMATED_MEMORY_UPGRADE",
             "requests_processed": self.request_counter,
             "status": "V8_HEAP_OPTIMIZED_ZERO_ERROR"
         }
-        
+
         data = json.dumps({
             "command": f"Automated memory cleaner triggered after {self.request_counter} requests. V8 bridge memory upgraded.",
             "speak": True,
@@ -49,7 +49,7 @@ class V8MemoryStreamOptimizer:
     def simulate_incoming_request_stream(self, total_simulated_requests=2500):
         self.setup_virtual_environment()
         print(f"[STREAM] Starting physical data web robot stream for {total_simulated_requests} requests...")
-        
+
         for i in range(1, total_simulated_requests + 1):
             self.request_counter += 1
             # Simulate high-frequency robot telemetry packet

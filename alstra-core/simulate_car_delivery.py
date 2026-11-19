@@ -27,7 +27,7 @@ def dispatch_mock_car_delivery_metrics():
 
     nonce = int(time.time() * 1000)
     # Target delivery parameters using your tracked mock luxury vehicle profile
-    vin_id = "5YJSA1E28NF192761" 
+    vin_id = "5YJSA1E28NF192761"
     transit_status = "IN_TRANSIT_DISPATCHED_TO_HUB_GREENSBORO"
     gps_coords = "36.0726,-79.7920" # Local coordinate bounds
 
@@ -52,7 +52,7 @@ def dispatch_mock_car_delivery_metrics():
 
     print(f"[*] Dispatching signed vehicle freight status vector data...")
     print(f"[*] VIN Profile: {vin_id} | Routing Status: {transit_status}")
-    
+
     try:
         with urllib.request.urlopen(req, context=ssl_context, timeout=5) as resp:
             print(f"[⚡] NETWORK PIPELINE RESPONSE: HTTP {resp.getcode()} -> {resp.read().decode('utf-8')}")

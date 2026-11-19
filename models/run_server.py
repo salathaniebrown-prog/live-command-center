@@ -13,7 +13,7 @@ async def telemetry_broadcast():
             exporter = OpenQASMExporter(num_qubits=2, num_clbits=2)
             exporter.add_gate("h", 0)
             exporter.add_gate("cx", 0, 1)
-            
+
             payload = {
                 "event": "QASM_STREAM",
                 "qasm_code": exporter.export(),

@@ -24,7 +24,7 @@ def get_bci_status():
     signal_quality = round(random.uniform(98.2, 99.9), 2)
     sampling_rate_hz = 1000
     synaptic_latency_ms = round(random.uniform(1.2, 2.8), 2)
-    
+
     return {
         "bci_device_id": "ROMTEC-BCI-LINK-v1",
         "connection_status": "ACTIVE_SYNCHRONIZED",

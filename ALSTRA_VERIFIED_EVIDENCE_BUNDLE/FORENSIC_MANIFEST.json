@@ -1,0 +1,2782 @@
+{
+  "generated_utc": "2026-11-19T17:57:03Z",
+  "workspace": "/data/data/com.termux/files/home",
+  "verified_artifact_count": 124,
+  "artifacts": [
+    {
+      "file": "alstra_master_spine_8095.py",
+      "bytes": 2590,
+      "mtime_utc": "2026-11-19T17:48:06Z",
+      "sha256": "5ac72ee9151a2d4b1523faa5469a120411d4b41fdd657ba85f25424f5ab340ab",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 90,
+      "executable_lines": 75,
+      "classes": [
+        "ReuseTCP",
+        "SpineHandler"
+      ],
+      "functions": [
+        "read_thermal",
+        "log_message",
+        "_send",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socketserver",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "alstra_genius_brain_8099.py",
+      "bytes": 6817,
+      "mtime_utc": "2026-11-18T19:13:47Z",
+      "sha256": "8de121c6a5f7ef797682bf6fdb1de536b109d8595a8905daafafcd95a5d641c3",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 177,
+      "executable_lines": 160,
+      "classes": [
+        "ReuseTCP",
+        "BrainHandler"
+      ],
+      "functions": [
+        "init_db",
+        "_send",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "ast",
+        "http.server",
+        "json",
+        "pathlib",
+        "socketserver",
+        "sqlite3",
+        "subprocess",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "alstra_unified_8090_gateway.py",
+      "bytes": 9232,
+      "mtime_utc": "2026-11-19T17:48:08Z",
+      "sha256": "423dfa77a9ad73aec9f7ae06ad6dc6803fc3045606ee0a339890896140bc894f",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 181,
+      "executable_lines": 165,
+      "classes": [
+        "ThreadingReuseTCP",
+        "UnifiedGatewayHandler"
+      ],
+      "functions": [
+        "log_message",
+        "_serve_file",
+        "_proxy_upstream",
+        "do_OPTIONS",
+        "do_POST",
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "os",
+        "pathlib",
+        "socket",
+        "socketserver",
+        "urllib.error",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "astra_mcp_stdio_bridge.py",
+      "bytes": 7193,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "554fdac9ef56e1e414a1fdca5cc597498264eb4c8b964dc9afb55bac3067be27",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 182,
+      "executable_lines": 166,
+      "classes": [],
+      "functions": [
+        "http_json",
+        "dispatch_tool",
+        "send_response",
+        "main"
+      ],
+      "imports": [
+        "json",
+        "sys",
+        "typing",
+        "urllib.error",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "astra_saga_gov_nodes.py",
+      "bytes": 1948,
+      "mtime_utc": "2026-11-18T18:57:52Z",
+      "sha256": "4478b5360ebfd4cb95641b5fcc9d17c87a400077a85ef3a63aa4fee0be7f986d",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 53,
+      "executable_lines": 46,
+      "classes": [
+        "ReuseTCP",
+        "NodeHandler"
+      ],
+      "functions": [
+        "make_handler",
+        "serve_port",
+        "_send",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "socketserver",
+        "threading",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_context_telemetry_monitor.py",
+      "bytes": 2610,
+      "mtime_utc": "2026-11-18T18:55:43Z",
+      "sha256": "00fa2e84456967ba77d1c356fbdf50abea430eb83fb8fc0ac47ccc73744c712c",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 63,
+      "executable_lines": 57,
+      "classes": [
+        "ReuseTCP",
+        "Handler"
+      ],
+      "functions": [
+        "collect_state",
+        "_send",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "pathlib",
+        "socketserver",
+        "sqlite3",
+        "sys",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_openai_tool_proxy.py",
+      "bytes": 1622,
+      "mtime_utc": "2026-11-18T18:55:43Z",
+      "sha256": "c7fe6e0bbed2da173985d57602637ae7f250c90d0dd3042dd3bb73d5a04f642c",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 36,
+      "executable_lines": 32,
+      "classes": [
+        "ReuseTCP",
+        "Proxy"
+      ],
+      "functions": [
+        "_send",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "socketserver",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_meeting_freeze.sh",
+      "bytes": 2107,
+      "mtime_utc": "2026-11-19T00:48:20Z",
+      "sha256": "34ba79c016fbcf9a9eb157120d0404ced827061593b216020201d987fbe35223",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 53
+    },
+    {
+      "file": "dashboard_server.py",
+      "bytes": 208728,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "2eb529a17193bbbfed31fb6a99465f4c931ad1178929ab766ddc5d53520ac3b2",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 3685,
+      "executable_lines": 3384,
+      "classes": [
+        "UnifiedHandler"
+      ],
+      "functions": [
+        "fetch_live_ci_telemetry",
+        "universal_command_router",
+        "fetch_onchain_balances",
+        "get_live_kpis",
+        "execute_supercomputer_mesh_8119",
+        "call_cinema_mcp_8121",
+        "get_live_handoff_manifest",
+        "fetch_onchain_balances",
+        "fetch_onchain_balances",
+        "get_real_eth_spot_price",
+        "fetch_onchain_balances",
+        "lookup_certificate_record",
+        "process_voice_data_agent",
+        "get_hardware_gpu_metrics",
+        "get_live_kpis",
+        "build_ledger_export_payload",
+        "trigger_1click_dealership_pipeline",
+        "trigger_1click_dealership_pipeline",
+        "trigger_1click_dealership_pipeline",
+        "trigger_1click_dealership_pipeline",
+        "get_live_kpis",
+        "trigger_1click_dealership_pipeline",
+        "trigger_1click_dealership_pipeline",
+        "trigger_1click_dealership_pipeline",
+        "proxy_port",
+        "_proxy",
+        "do_OPTIONS",
+        "do_POST",
+        "do_HEAD",
+        "end_headers",
+        "do_GET"
+      ],
+      "imports": [
+        "astra_plugin_registry",
+        "astra_simli_agent",
+        "base64",
+        "csv",
+        "email.message",
+        "gc",
+        "glob",
+        "hashlib",
+        "hmac",
+        "http.client",
+        "http.server",
+        "io",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "smtplib",
+        "socket",
+        "socketserver",
+        "sqlite3",
+        "subprocess",
+        "sys",
+        "time",
+        "traceback",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "server.py",
+      "bytes": 5467,
+      "mtime_utc": "2026-11-18T22:58:54Z",
+      "sha256": "f61cb8b51b6da54b2e700cbde090ffd542e51f271ccbe4207c658392dbf7608e",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 117,
+      "executable_lines": 104,
+      "classes": [
+        "ReusableTCPServer",
+        "MasterAstraHandler"
+      ],
+      "functions": [
+        "send_json",
+        "get_live_gh_ci",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "random",
+        "socketserver",
+        "subprocess"
+      ]
+    },
+    {
+      "file": "command_center_full.html",
+      "bytes": 130773,
+      "mtime_utc": "2026-11-18T17:53:48Z",
+      "sha256": "fa925333e8297ffcfbdd20e8dba7c8d2074725ab2b4d4c0c30317069dfc222dd",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 2303
+    },
+    {
+      "file": "ALSTRA_API_CONSOLE.html",
+      "bytes": 4443,
+      "mtime_utc": "2026-11-19T00:48:21Z",
+      "sha256": "7c4b78a2b6af527125615d6807871512f89f9b593af9d3b4f9a09d06c0b450c6",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 85
+    },
+    {
+      "file": "ALSTRA_SPATIAL_3D_ENGINE.html",
+      "bytes": 37464,
+      "mtime_utc": "2026-11-19T14:09:42Z",
+      "sha256": "f8b7ce6ab3865465a02ad52c1a3cb877f8d7eb3ac2fff3aae2975fe939460924",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 964
+    },
+    {
+      "file": "_gpu_daemon.py",
+      "bytes": 1912,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "8c9fd4da77cae7374a9d2e2169ec9e90b938f568a03912866e6e84aa9ceb4fa3",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 50,
+      "executable_lines": 40,
+      "classes": [],
+      "functions": [],
+      "imports": [
+        "asyncio",
+        "fastapi",
+        "json",
+        "random",
+        "time"
+      ]
+    },
+    {
+      "file": "agentic_mesh_8119.py",
+      "bytes": 6514,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "a0ab5cbc0345d0f336d7fa48c3521582cbff8c0ee7f14c8189dace148d294841",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 160,
+      "executable_lines": 138,
+      "classes": [
+        "AgenticMeshHandler"
+      ],
+      "functions": [
+        "init_mesh_db",
+        "probe_node",
+        "validate_and_execute_mission",
+        "_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.client",
+        "http.server",
+        "json",
+        "os",
+        "sqlite3",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "alstra_autopilot.py",
+      "bytes": 2498,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "ad74b5778bde5346094864300091a5cb97355f71e2004bb8992e23d2e4758d9e",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 69,
+      "executable_lines": 62,
+      "classes": [
+        "AlstraAutopilotHandler"
+      ],
+      "functions": [
+        "do_GET",
+        "log_to_ledger",
+        "log_message"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "socketserver",
+        "sqlite3",
+        "sys",
+        "time"
+      ]
+    },
+    {
+      "file": "astra-pilot.sh",
+      "bytes": 1079,
+      "mtime_utc": "2026-11-10T19:55:37Z",
+      "sha256": "cbef23f8dbb050267f810433c328b00335f4451dac3ee644ebbf57f7f305a705",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 14
+    },
+    {
+      "file": "astra_4agent_sandbox.py",
+      "bytes": 6210,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "4f0cdf42c6c153f98b0656cf876e8a91426f7f2f7d53c5dc9b3c01a13b5f7e08",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 145,
+      "executable_lines": 124,
+      "classes": [],
+      "functions": [
+        "port_alive",
+        "create_atomic_checkpoint",
+        "rollback_checkpoint",
+        "role_architect_plan",
+        "role_worker_execute",
+        "role_test_runner_validate",
+        "run_4agent_autonomous_cycle"
+      ],
+      "imports": [
+        "hashlib",
+        "http.client",
+        "json",
+        "os",
+        "py_compile",
+        "shutil",
+        "sqlite3",
+        "subprocess",
+        "sys",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_ai_brain.py",
+      "bytes": 1053,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "8c5f1cfec8e7e346077d7e25b38ea6460e6186aee1c99e7d4a55267c9752088f",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 30,
+      "executable_lines": 23,
+      "classes": [],
+      "functions": [
+        "get_ai_response"
+      ],
+      "imports": [
+        "json",
+        "requests",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_ai_memory_healer.py",
+      "bytes": 6838,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "1309647567e6f9d5007462284f4f656f1ab3d209d7718f1a731d77cd7899182c",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 164,
+      "executable_lines": 148,
+      "classes": [],
+      "functions": [
+        "get_db",
+        "init_memory_db",
+        "save_good_mirror",
+        "record_fix",
+        "parse_stack_traces_and_debug",
+        "iterative_self_correct"
+      ],
+      "imports": [
+        "ast",
+        "hashlib",
+        "http.client",
+        "json",
+        "os",
+        "py_compile",
+        "re",
+        "sqlite3",
+        "subprocess",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_atomic_shadow_forge.py",
+      "bytes": 12928,
+      "mtime_utc": "2026-11-19T00:48:21Z",
+      "sha256": "e074900a49c4e7000aa2d10dbc16ca7d1c0cd546c4d84fb4ffd0cd8e94e302b8",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 313,
+      "executable_lines": 266,
+      "classes": [
+        "ReuseTCP",
+        "ForgeHandler",
+        "ShadowHandler"
+      ],
+      "functions": [
+        "tap_metric",
+        "default_compute_kernel",
+        "compute_latency_derivative",
+        "synthesize_in_memory_candidate",
+        "ephemeral_shadow_mirror_and_atomic_swap",
+        "idle_cycle_daemon",
+        "log_message",
+        "_send",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST",
+        "log_message",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "ast",
+        "collections",
+        "datetime",
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socketserver",
+        "threading",
+        "time",
+        "types",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_autonomous_agent_8145.py",
+      "bytes": 5907,
+      "mtime_utc": "2026-11-19T00:48:21Z",
+      "sha256": "f4a32cd3455ca3f55b725a3dddb4fbd1a3d88c7f73b32793ef422dccc0643362",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 152,
+      "executable_lines": 127,
+      "classes": [
+        "ReuseTCP",
+        "AgentHandler"
+      ],
+      "functions": [
+        "post_json",
+        "get_json",
+        "run_autonomous_cycle",
+        "_send",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "astra_contract_middleware",
+        "datetime",
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socketserver",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_cinema_mcp.py",
+      "bytes": 286,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "71a1d789375f5d91287daf4332c0cabaae7b1c2821fc9c13048a8a8ee696b875",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 5,
+      "executable_lines": 4,
+      "classes": [
+        "H"
+      ],
+      "functions": [
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "socketserver"
+      ]
+    },
+    {
+      "file": "astra_circuit_breaker_8134.py",
+      "bytes": 9253,
+      "mtime_utc": "2026-11-19T16:56:02Z",
+      "sha256": "056eaf66d31a24342fc57c00f913d3ea8e9685feb6a7d6c6555cc75165557680",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 263,
+      "executable_lines": 227,
+      "classes": [
+        "ThreadingReuseTCP",
+        "CircuitBreakerHandler"
+      ],
+      "functions": [
+        "init_breaker_db",
+        "flush_sqlite_wal",
+        "read_memory_and_thermal",
+        "scan_and_isolate_runaways",
+        "evaluate_circuit_breaker",
+        "_bg_breaker_loop",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "signal",
+        "socketserver",
+        "sqlite3",
+        "subprocess",
+        "threading",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_cognitive_rf_mitosis_8155.py",
+      "bytes": 15014,
+      "mtime_utc": "2026-11-19T13:07:40Z",
+      "sha256": "eca7c6aebcf736499177de8adf1d19a210eff2d7376cca071013cbc46c151e97",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 391,
+      "executable_lines": 340,
+      "classes": [
+        "ThreadingReuseTCP",
+        "SynapticHandler"
+      ],
+      "functions": [
+        "init_synaptic_db",
+        "sample_termux_rf_and_thermal",
+        "_run_mutant_worker",
+        "run_darwinian_deathmatch",
+        "ingest_cognitive_bci",
+        "_background_rf_and_mitosis_loop",
+        "_atomic_promote",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST",
+        "_teleport_ping"
+      ],
+      "imports": [
+        "concurrent.futures",
+        "hashlib",
+        "http.server",
+        "json",
+        "math",
+        "os",
+        "pathlib",
+        "random",
+        "re",
+        "socketserver",
+        "sqlite3",
+        "subprocess",
+        "threading",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_command_center.html",
+      "bytes": 130773,
+      "mtime_utc": "2026-11-18T22:58:54Z",
+      "sha256": "fa925333e8297ffcfbdd20e8dba7c8d2074725ab2b4d4c0c30317069dfc222dd",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 2303
+    },
+    {
+      "file": "astra_contract_middleware.py",
+      "bytes": 1720,
+      "mtime_utc": "2026-11-19T00:48:21Z",
+      "sha256": "6cf1944e9dcbeb72edb1106c82570232d9630522f9e726503182a75ed097283c",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 50,
+      "executable_lines": 41,
+      "classes": [],
+      "functions": [
+        "resolve_bind_port",
+        "build_contract_envelope",
+        "inject_handler_contract",
+        "wrapped_do_get"
+      ],
+      "imports": [
+        "astra_contract_middleware",
+        "json",
+        "os",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_e2e_validator.py",
+      "bytes": 6283,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "2518b41f62591ba9986b244f1d4573f8b3f3f67b7e312aaa973b684d8b4d4ba8",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 137,
+      "executable_lines": 124,
+      "classes": [],
+      "functions": [
+        "init_validation_db",
+        "stage_1_static_and_secret_audit",
+        "probe_http",
+        "stage_2_cluster_self_heal",
+        "stage_3_functional_e2e_smoke",
+        "execute_meta_validation_cycle"
+      ],
+      "imports": [
+        "ast",
+        "hashlib",
+        "http.client",
+        "json",
+        "os",
+        "py_compile",
+        "sqlite3",
+        "subprocess",
+        "sys",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_edge_ml.py",
+      "bytes": 285,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "dc859941a0fade25bf56f7d9ac549602fbe4ae310907094f17c6ed5d8409a9bb",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 5,
+      "executable_lines": 4,
+      "classes": [
+        "H"
+      ],
+      "functions": [
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "socketserver"
+      ]
+    },
+    {
+      "file": "astra_elite_cinema_autopilot.py",
+      "bytes": 10457,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "b4fae43a4f94dc822842dce0c88bb64c0ddf9fe4d298d297bba89dd4d799eedb",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 229,
+      "executable_lines": 200,
+      "classes": [
+        "StudioAutopilotHandler",
+        "ThreadedStudioServer"
+      ],
+      "functions": [
+        "live_online_search_assistant",
+        "run_cinema_studio_render",
+        "run_termux_linux_edge_ibm_github_autopilot",
+        "log_message",
+        "_send",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.client",
+        "http.server",
+        "json",
+        "os",
+        "platform",
+        "shutil",
+        "socket",
+        "socketserver",
+        "subprocess",
+        "sys",
+        "time",
+        "urllib.parse",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_forensic_showcase.py",
+      "bytes": 8700,
+      "mtime_utc": "2026-11-18T21:36:21Z",
+      "sha256": "c1a1fe3ecb67766de4104cd4e5f31e2b35ee0d1ee519c4f7df7072bc8fba62f2",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 209,
+      "executable_lines": 188,
+      "classes": [],
+      "functions": [
+        "sha256_file",
+        "audit_python_file",
+        "audit_sqlite_dbs",
+        "build_bundle"
+      ],
+      "imports": [
+        "ast",
+        "datetime",
+        "hashlib",
+        "html",
+        "json",
+        "os",
+        "pathlib",
+        "shutil",
+        "sqlite3",
+        "subprocess",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_fountain_bbr_bridge_8136.py",
+      "bytes": 8001,
+      "mtime_utc": "2026-11-19T17:23:18Z",
+      "sha256": "48c1c3ecbed1d22f5c69aa22290fadc0ac5a900c46febea626a84bfb796de915",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 205,
+      "executable_lines": 176,
+      "classes": [
+        "ThreadingReuseTCP",
+        "FountainBbr8136Handler"
+      ],
+      "functions": [
+        "_xor_bytes",
+        "fountain_encode_and_heal",
+        "sample_kernel_tcp_bbr",
+        "_bg_multipath_loop",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "random",
+        "socket",
+        "socketserver",
+        "threading",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_generator_evaluator_loop.py",
+      "bytes": 6038,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "3cbd70dbddf08497d2a7205cb34506073a369d71cca38640890e9bb0b1fecdf1",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 141,
+      "executable_lines": 121,
+      "classes": [],
+      "functions": [
+        "check_port",
+        "read_runtime_traceback",
+        "evaluate_environment",
+        "apply_actionable_patch",
+        "run_generator_evaluator_loop"
+      ],
+      "imports": [
+        "hashlib",
+        "http.client",
+        "json",
+        "os",
+        "py_compile",
+        "sqlite3",
+        "subprocess",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_github_watchdog_daemon.py",
+      "bytes": 944,
+      "mtime_utc": "2026-11-19T17:43:35Z",
+      "sha256": "7a47f2851571f532f73bbd341fccdd47cfd4b567168d058664aeeaba5a25d317",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 23,
+      "executable_lines": 22,
+      "classes": [
+        "ReuseTCP",
+        "H"
+      ],
+      "functions": [
+        "log_message",
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "pathlib",
+        "socketserver",
+        "subprocess",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_gnmi_openconfig_8138.py",
+      "bytes": 10514,
+      "mtime_utc": "2026-11-19T17:43:43Z",
+      "sha256": "c893fb154e443f656b03ce680078d1aaae8db1702d6c4585f4dff5525d83246f",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 256,
+      "executable_lines": 226,
+      "classes": [
+        "ThreadingReuseTCP",
+        "Gnmi8138Handler"
+      ],
+      "functions": [
+        "_probe_node",
+        "collect_openconfig_yang_snapshot",
+        "render_prometheus_metrics",
+        "render_influx_line_protocol",
+        "_bg_gnmi_loop",
+        "log_message",
+        "_send_json",
+        "_send_text",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socket",
+        "socketserver",
+        "threading",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_governance_engine.py",
+      "bytes": 24912,
+      "mtime_utc": "2026-11-18T17:53:47Z",
+      "sha256": "56572aff9501ab4ec4c39baf5c5fa6c88780a73f1f16e1fa48361067f7b2a3c9",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 475,
+      "executable_lines": 445,
+      "classes": [
+        "GovHandler",
+        "ThreadedGovServer"
+      ],
+      "functions": [
+        "init_db",
+        "render_template_by_index",
+        "search_templates",
+        "scan_vendors_and_sdks",
+        "evaluate_geo_policy",
+        "ai_telemetry_expert_answer",
+        "get_governance_state",
+        "log_message",
+        "_send_json",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "csv",
+        "hashlib",
+        "http.server",
+        "io",
+        "json",
+        "os",
+        "re",
+        "socketserver",
+        "sqlite3",
+        "sys",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_invoice_agent.py",
+      "bytes": 283,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "12e7d2207177c6b6b8b1cd98ebaaba8c2afbf11fcfd84800b0196acdb1f3eef4",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 5,
+      "executable_lines": 4,
+      "classes": [
+        "H"
+      ],
+      "functions": [
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "socketserver"
+      ]
+    },
+    {
+      "file": "astra_linux_edge_node.py",
+      "bytes": 12308,
+      "mtime_utc": "2026-11-18T22:58:54Z",
+      "sha256": "4678e3d7595a32432b8abc76a742830d1fc903df8d4df26d6f2e0d84ca123e77",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 302,
+      "executable_lines": 268,
+      "classes": [
+        "ReuseTCP",
+        "EdgeNodeHandler"
+      ],
+      "functions": [
+        "get_hardware_profile",
+        "get_network_and_solar",
+        "ensure_certificates",
+        "load_beta_meta",
+        "_send",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "datetime",
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "platform",
+        "shutil",
+        "socketserver",
+        "subprocess",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_memory_upgrade.sh",
+      "bytes": 1816,
+      "mtime_utc": "2026-11-10T23:33:02Z",
+      "sha256": "2859c68b7138f580a257ca81c8be7d218019610b298097fba3b2cde9a7442d96",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 46
+    },
+    {
+      "file": "astra_mesh_bridge_8147.py",
+      "bytes": 5801,
+      "mtime_utc": "2026-11-19T00:48:21Z",
+      "sha256": "806dfaa19925767555074691a7c263c77add5caa16cfce6ed05bbc37a1927bd7",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 161,
+      "executable_lines": 135,
+      "classes": [
+        "ReuseTCP",
+        "MeshBridgeHandler"
+      ],
+      "functions": [
+        "load_peers",
+        "save_peers",
+        "detect_lan_and_tunnel",
+        "_send",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "astra_contract_middleware",
+        "datetime",
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socket",
+        "socketserver",
+        "subprocess",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_mps_control_8128.py",
+      "bytes": 7921,
+      "mtime_utc": "2026-11-19T14:34:45Z",
+      "sha256": "6a7083db04c13df8bff38555c6c763710f10e62a706dfa8a2a0e9ca17655cae4",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 210,
+      "executable_lines": 178,
+      "classes": [
+        "ThreadingReuseTCP",
+        "Control8128Handler"
+      ],
+      "functions": [
+        "compute_mps_entanglement_and_control",
+        "_bg_control_loop",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "math",
+        "os",
+        "pathlib",
+        "socket",
+        "socketserver",
+        "sqlite3",
+        "struct",
+        "threading",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_neuromorphic_mps_spine_8157.py",
+      "bytes": 15962,
+      "mtime_utc": "2026-11-19T13:38:47Z",
+      "sha256": "6a8a8be595a360651cb666a303a4a155091b9706aee54910beb09de7b181cf71",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 431,
+      "executable_lines": 360,
+      "classes": [
+        "NeuroTelemetrySlot",
+        "NeuroZeroCopyRing",
+        "ZeroCopyNeuroSpine",
+        "ThreadingReuseTCP",
+        "NeuroMpsHandler"
+      ],
+      "functions": [
+        "_svd_2x4",
+        "_svd_4x2",
+        "mps_tensor_train_fold",
+        "init_wal_tables",
+        "_autonomous_fusion_loop",
+        "__init__",
+        "close",
+        "ingest_vector",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "ctypes",
+        "hashlib",
+        "http.server",
+        "json",
+        "math",
+        "mmap",
+        "os",
+        "pathlib",
+        "random",
+        "socketserver",
+        "sqlite3",
+        "struct",
+        "threading",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_peppers_ghost_svg.py",
+      "bytes": 5206,
+      "mtime_utc": "2026-11-19T12:35:11Z",
+      "sha256": "e113771a1cf54910655cd2761beae61bb24583ce343033f2d9600309a8d1a108",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 114,
+      "executable_lines": 95,
+      "classes": [],
+      "functions": [
+        "compute_frustum_dims",
+        "generate_nested_svg",
+        "trap_points"
+      ],
+      "imports": [
+        "math",
+        "pathlib"
+      ]
+    },
+    {
+      "file": "astra_photonic_acoustic_8153.py",
+      "bytes": 8074,
+      "mtime_utc": "2026-11-19T12:51:38Z",
+      "sha256": "0c3fb9e399c0b7c3c422669cc674da17758483944abacc851e78c80fb5b244aa",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 222,
+      "executable_lines": 189,
+      "classes": [
+        "ThreadingReuseTCP",
+        "AotHandler"
+      ],
+      "functions": [
+        "init_aot_db",
+        "trigger_genius_brain_ahead",
+        "compute_closed_loop_gains",
+        "ingest_sensor_frame",
+        "_post",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socketserver",
+        "sqlite3",
+        "threading",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_plugin_registry.py",
+      "bytes": 6901,
+      "mtime_utc": "2026-11-15T18:02:52Z",
+      "sha256": "05cf655a62a435c3cc00a34a7586caa06a4370074af90d7f853054317610f121",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 111,
+      "executable_lines": 102,
+      "classes": [],
+      "functions": [
+        "sync_plugins",
+        "execute_plugin"
+      ],
+      "imports": [
+        "glob",
+        "http.client",
+        "importlib.util",
+        "json",
+        "os",
+        "py_compile",
+        "sys",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_quantum_lattice.py",
+      "bytes": 1965,
+      "mtime_utc": "2026-11-17T14:23:21Z",
+      "sha256": "6a138154416f57fd80e667bc2f7a3d43a7cf7c7e1f2c1f3c9a34de6578cacdba",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 52,
+      "executable_lines": 47,
+      "classes": [
+        "QuantumHandler"
+      ],
+      "functions": [
+        "simulate_quantum_lattice",
+        "log_message",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "socketserver",
+        "sys",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_radial_hud_cicd_8131.py",
+      "bytes": 9434,
+      "mtime_utc": "2026-11-19T14:34:51Z",
+      "sha256": "9f92af20d29eb9592f5f691de3d772b6a675909911d113ea889c91fb141073dc",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 238,
+      "executable_lines": 219,
+      "classes": [
+        "ThreadingReuseTCP",
+        "Hud8131Handler"
+      ],
+      "functions": [
+        "log_message",
+        "_send_json",
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socketserver",
+        "subprocess",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_saga_engine.py",
+      "bytes": 15551,
+      "mtime_utc": "2026-11-14T19:24:19Z",
+      "sha256": "a81d0aedb322f5f6ee700fc34736bb954047adefe899fd68680d0baa01e482c9",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 390,
+      "executable_lines": 364,
+      "classes": [
+        "SagaHandler",
+        "ThreadedServer"
+      ],
+      "functions": [
+        "init_db",
+        "record_datadog_sample",
+        "record_stripe_usage",
+        "execute_durable_saga",
+        "detect_toolchains",
+        "run_polyglot_code",
+        "get_full_visibility_state",
+        "background_telemetry_loop",
+        "log_message",
+        "_send",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "shutil",
+        "socketserver",
+        "sqlite3",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "threading",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_self_correct_brain.py",
+      "bytes": 7852,
+      "mtime_utc": "2026-11-18T17:53:48Z",
+      "sha256": "11bbbd2af26abe62ea855382a7afed89e78d8e9041ca00f3d6be990fa53d0a48",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 211,
+      "executable_lines": 198,
+      "classes": [],
+      "functions": [
+        "load_all_env",
+        "record_lesson",
+        "verify_python_source",
+        "_call_anthropic",
+        "_call_openai",
+        "ask_brain",
+        "self_correct_code"
+      ],
+      "imports": [
+        "ast",
+        "json",
+        "os",
+        "py_compile",
+        "subprocess",
+        "tempfile",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_self_patcher.py",
+      "bytes": 1313,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "a973cae614dbbd7296657852705ba593bfccdde508ff4ec0215c4b40dd99239e",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 31,
+      "executable_lines": 24,
+      "classes": [],
+      "functions": [
+        "self_patch_and_verify"
+      ],
+      "imports": [
+        "os",
+        "py_compile",
+        "subprocess",
+        "sys"
+      ]
+    },
+    {
+      "file": "astra_shadow_sandbox.py",
+      "bytes": 9371,
+      "mtime_utc": "2026-11-19T00:48:21Z",
+      "sha256": "66cf32925cde9502aed6153ae02886c83e7c84554758a068dd7a537fad58a607",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 225,
+      "executable_lines": 186,
+      "classes": [],
+      "functions": [
+        "stage_1_hygiene_and_ast",
+        "stage_2_secret_guard",
+        "stage_3_contract_self_mutate",
+        "stage_4_shadow_boot_and_probe",
+        "evict_legacy_port_holder",
+        "stage_5_pm2_atomic_swap",
+        "stage_6_tdd_and_git_commit",
+        "main"
+      ],
+      "imports": [
+        "argparse",
+        "ast",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "signal",
+        "socket",
+        "subprocess",
+        "sys",
+        "time",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "astra_simli_agent.py",
+      "bytes": 10961,
+      "mtime_utc": "2026-11-18T17:53:48Z",
+      "sha256": "cf7cc3c687a0cc8ca8009706885c53f8fb8104344c5da64ec77fb55490b61d64",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 276,
+      "executable_lines": 241,
+      "classes": [],
+      "functions": [
+        "load_server_env",
+        "missing_keys_status",
+        "mint_simli_session_token",
+        "generate_llm_reply",
+        "synthesize_inworld_pcm16_16khz",
+        "start_deepgram_relay_server",
+        "_runner"
+      ],
+      "imports": [
+        "asyncio",
+        "base64",
+        "json",
+        "os",
+        "simli",
+        "threading",
+        "urllib.error",
+        "urllib.request",
+        "websockets"
+      ]
+    },
+    {
+      "file": "astra_skill_synthesizer.py",
+      "bytes": 1,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 1,
+      "executable_lines": 0,
+      "classes": [],
+      "functions": [],
+      "imports": []
+    },
+    {
+      "file": "astra_spatial_3d_server_8151.py",
+      "bytes": 6344,
+      "mtime_utc": "2026-11-19T12:35:12Z",
+      "sha256": "9fbb2b923d795c9df371b731877b3242deac5aba3d1161754881f9033c9fcb52",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 157,
+      "executable_lines": 134,
+      "classes": [
+        "ReuseTCP",
+        "SpatialHandler"
+      ],
+      "functions": [
+        "fetch_json_safe",
+        "compute_spatial_physics_frame",
+        "_bg_refresh",
+        "log_message",
+        "_send_json",
+        "_send_html",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "astra_peppers_ghost_svg",
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "socketserver",
+        "threading",
+        "time",
+        "urllib.parse",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_spatial_assistant.py",
+      "bytes": 3605,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "ad76336509c569bc48028438867667d90389661b47a1ea1372cb9802dfdd4b7e",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 109,
+      "executable_lines": 96,
+      "classes": [
+        "SpatialHandler",
+        "ThreadedSpatialServer"
+      ],
+      "functions": [
+        "init_db",
+        "process_spatial_action",
+        "log_message",
+        "_send",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "socketserver",
+        "sqlite3",
+        "sys",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_spectral_phaselock_8135.py",
+      "bytes": 8726,
+      "mtime_utc": "2026-11-19T17:11:06Z",
+      "sha256": "ef8fc388af650d9ee0f440d6a44470b148db4cb22df2bafd2347742fe008d0e1",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 245,
+      "executable_lines": 203,
+      "classes": [
+        "Mmap4KBRing",
+        "ThreadingReuseTCP",
+        "PhaseLock8135Handler"
+      ],
+      "functions": [
+        "_probe_port_rtt_ms",
+        "step_phaselock_cycle",
+        "_bg_phaselock_loop",
+        "__init__",
+        "write_frame",
+        "close",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "math",
+        "mmap",
+        "os",
+        "pathlib",
+        "socket",
+        "socketserver",
+        "struct",
+        "threading",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_start.sh",
+      "bytes": 1018,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "7467e0491d91e229f7a772e2312835a5c939bd61806da2fa7e01d03c99cf7874",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 29
+    },
+    {
+      "file": "astra_supercomputer_mesh.py",
+      "bytes": 280,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "b240b921dc9edb6938e664917cc9f71e7f95fda9eaf9007bf28ccc5d4c8c0c05",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 5,
+      "executable_lines": 4,
+      "classes": [
+        "H"
+      ],
+      "functions": [
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "socketserver"
+      ]
+    },
+    {
+      "file": "astra_tdd_guardrails.py",
+      "bytes": 3805,
+      "mtime_utc": "2026-11-19T17:56:31Z",
+      "sha256": "b844ca251b47ba6ef79549f0d1bea7a46aeaa049d6978f2fa58aa762f5b702fb",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 85,
+      "executable_lines": 74,
+      "classes": [
+        "AstraTddContractSuite"
+      ],
+      "functions": [
+        "_urlopen_retry",
+        "test_01_static_syntax_hygiene",
+        "test_02_gateway_ui_routes",
+        "test_03_forensic_manifest_integrity",
+        "test_04_formal_api_contract_specifications"
+      ],
+      "imports": [
+        "ast",
+        "json",
+        "pathlib",
+        "subprocess",
+        "time",
+        "unittest",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_telemetry_addon.py",
+      "bytes": 66,
+      "mtime_utc": "2026-11-12T19:12:48Z",
+      "sha256": "e2e8e99392c17338cd79f3fa0811fb38569b67d079a11cc4863b4a51ecc2c8d1",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 1,
+      "executable_lines": 0,
+      "classes": [],
+      "functions": [],
+      "imports": []
+    },
+    {
+      "file": "astra_telemetry_hud.py",
+      "bytes": 2885,
+      "mtime_utc": "2026-11-12T19:12:49Z",
+      "sha256": "4408bd98afb25730febb8712763d6777e456d4c9bf6f6b9d35290c2ce83eeced",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 71,
+      "executable_lines": 64,
+      "classes": [
+        "HUDHandler"
+      ],
+      "functions": [
+        "check_port",
+        "do_GET",
+        "log_message"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "socket",
+        "urllib.parse"
+      ]
+    },
+    {
+      "file": "astra_time_crystal_landauer_8129.py",
+      "bytes": 8322,
+      "mtime_utc": "2026-11-19T14:34:46Z",
+      "sha256": "9e6ff5938888b1743b0df4f793b9dc935752ca7ad59d30849428878a8e58135c",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 235,
+      "executable_lines": 202,
+      "classes": [
+        "ThreadingReuseTCP",
+        "Landauer8129Handler"
+      ],
+      "functions": [
+        "init_landauer_db",
+        "step_time_crystal_and_landauer",
+        "_bg_landauer_loop",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "math",
+        "os",
+        "pathlib",
+        "socketserver",
+        "sqlite3",
+        "threading",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_trust_center.py",
+      "bytes": 216,
+      "mtime_utc": "2026-11-19T00:47:14Z",
+      "sha256": "99dd9baf5c797b4ae348a884aa0862e41c51c8e92361c3183330231812de826d",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 4,
+      "executable_lines": 3,
+      "classes": [
+        "H"
+      ],
+      "functions": [
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "socketserver"
+      ]
+    },
+    {
+      "file": "astra_trust_center_8117.py",
+      "bytes": 1521,
+      "mtime_utc": "2026-11-19T00:48:21Z",
+      "sha256": "fd7a40f307b5bdea7d4c9543b4b4310cce43a2bebbb69d6008795f67002bb07f",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 52,
+      "executable_lines": 43,
+      "classes": [
+        "ReuseTCP",
+        "TrustCenterHandler"
+      ],
+      "functions": [
+        "log_message",
+        "_reply",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "socketserver",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_ultrasonic_decoder_8130.py",
+      "bytes": 4168,
+      "mtime_utc": "2026-11-19T14:34:49Z",
+      "sha256": "a09bdd342e7d6398c417b0ababd0ec9d1198334d784b1cee7a91c4bbe0325804",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 118,
+      "executable_lines": 101,
+      "classes": [
+        "ThreadingReuseTCP",
+        "Ultrasonic8130Handler"
+      ],
+      "functions": [
+        "decode_ultrasonic_tone",
+        "_bg_sideband_listener",
+        "log_message",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "socketserver",
+        "threading",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "astra_unified_brain.py",
+      "bytes": 281,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "b6c79bbbdb071ece62d56fe51b9abc70d8f6796a97f10bdec1e1a945c38e0859",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 5,
+      "executable_lines": 4,
+      "classes": [
+        "H"
+      ],
+      "functions": [
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "socketserver"
+      ]
+    },
+    {
+      "file": "astra_universal_supervisor.sh",
+      "bytes": 1414,
+      "mtime_utc": "2026-11-18T18:04:00Z",
+      "sha256": "56205cf5961daa524aedd0539480aaa9f60e25e28bba0818e6b16afe9aa98550",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 36
+    },
+    {
+      "file": "astra_visual_e2e.py",
+      "bytes": 2133,
+      "mtime_utc": "2026-11-14T15:36:57Z",
+      "sha256": "fd0aa3fbe59f1e662f944f0836e8ae07f2895d49e71ceafb4bb040c2909d4fb5",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 59,
+      "executable_lines": 50,
+      "classes": [],
+      "functions": [
+        "run_visual_regression_check"
+      ],
+      "imports": [
+        "hashlib",
+        "http.client",
+        "json",
+        "os",
+        "re",
+        "sqlite3",
+        "time"
+      ]
+    },
+    {
+      "file": "astra_webhook_listener.py",
+      "bytes": 284,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "a512d7b3dbfa7769b3429a5c1b64054b9f448644712c33a521317d3d2b9dd01e",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 5,
+      "executable_lines": 4,
+      "classes": [
+        "H"
+      ],
+      "functions": [
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "socketserver"
+      ]
+    },
+    {
+      "file": "auto_fixer.py",
+      "bytes": 1405,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "94e90b2d699d0be7e24d9e006b70ee61bfa546138911b4667af8e277421c127d",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 43,
+      "executable_lines": 33,
+      "classes": [],
+      "functions": [
+        "fix_indentation"
+      ],
+      "imports": [
+        "ast",
+        "sys"
+      ]
+    },
+    {
+      "file": "backup.sh",
+      "bytes": 173,
+      "mtime_utc": "2026-11-11T01:15:23Z",
+      "sha256": "9a324d95740a280c0f064cfd955faa8e0e8f36ca4444c26a77aa5f48a086769e",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 5
+    },
+    {
+      "file": "boot_infinite_brain.sh",
+      "bytes": 1297,
+      "mtime_utc": "2026-11-14T17:04:58Z",
+      "sha256": "68f1c28d39c0023455fcb005d9e3edcb592d87f0afb4c572c65ebb71f45d459b",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 16
+    },
+    {
+      "file": "browser_agent.py",
+      "bytes": 2842,
+      "mtime_utc": "2026-11-14T14:49:31Z",
+      "sha256": "16e4993c24e27c6a14ae6a424290406c1d906fe4d53da09ec55677e067bc4710",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 76,
+      "executable_lines": 68,
+      "classes": [
+        "AgentParser",
+        "BrowserAgentHandler"
+      ],
+      "functions": [
+        "__init__",
+        "handle_starttag",
+        "handle_endtag",
+        "handle_data",
+        "do_GET",
+        "do_POST",
+        "log_message"
+      ],
+      "imports": [
+        "html.parser",
+        "http.server",
+        "json",
+        "os",
+        "urllib.parse",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "chart.py",
+      "bytes": 2852,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "94e700f36a6be828d274c802dee5f100fc1c2f29d2239bf02ac53aeef3c2cdc4",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 69,
+      "executable_lines": 55,
+      "classes": [],
+      "functions": [
+        "get_mem_metric",
+        "run_chart"
+      ],
+      "imports": [
+        "os",
+        "sys",
+        "time"
+      ]
+    },
+    {
+      "file": "check_all.sh",
+      "bytes": 869,
+      "mtime_utc": "2026-11-14T17:04:52Z",
+      "sha256": "ce3d1c63b28d77ebcfaa78594ba3be1d47894d09975321b1e8f9c3698290099a",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 12
+    },
+    {
+      "file": "codex_engineer.py",
+      "bytes": 2588,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "94350dd1843828a0f34a8e275b168296a5ca8bb9843350e08f8ed8cd30327b7f",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 66,
+      "executable_lines": 50,
+      "classes": [
+        "CodexHandler"
+      ],
+      "functions": [
+        "ask_ai_to_fix",
+        "do_POST",
+        "log_message"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "command_center.sh",
+      "bytes": 6297,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "41eab8d5a33bc0d42641ad36f81b0a8c4c0c34291b241e1889872519a70db419",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 161
+    },
+    {
+      "file": "connect_ai.sh",
+      "bytes": 418,
+      "mtime_utc": "2026-11-07T00:49:18Z",
+      "sha256": "89cffa8da25fd06a3afa0e3607cdf915fcfe0e65146a08bbe9b307920cb2ec52",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 14
+    },
+    {
+      "file": "core_engine.py",
+      "bytes": 2442,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "29464836734e5aebf513ca36993c0d5677c4ef694ab846fa507af8b82ea1e086",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 60,
+      "executable_lines": 49,
+      "classes": [
+        "GlobalVirtualPowerGrid"
+      ],
+      "functions": [
+        "__init__"
+      ],
+      "imports": [
+        "asyncio",
+        "logging",
+        "sys"
+      ]
+    },
+    {
+      "file": "core_monitor.sh",
+      "bytes": 368,
+      "mtime_utc": "2026-11-10T23:25:33Z",
+      "sha256": "e28d4888e15f39744f6bfbbc767899da21d7dc4f55b483a11293b10a802a2534",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 12
+    },
+    {
+      "file": "dashboard.html",
+      "bytes": 22492,
+      "mtime_utc": "2026-11-13T23:49:52Z",
+      "sha256": "681dfff47e1a4f5f74d33985ce49858bb7faea737df5a12fb8402a24786b2533",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 428
+    },
+    {
+      "file": "dealership_module.py",
+      "bytes": 7733,
+      "mtime_utc": "2026-11-15T02:30:15Z",
+      "sha256": "6089d01a3e16455f1dccda2764585071f37a6316c30100016707ae15ee6f2d0a",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 168,
+      "executable_lines": 160,
+      "classes": [
+        "DealershipHandler"
+      ],
+      "functions": [
+        "init_db",
+        "_send",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "random",
+        "sqlite3",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "deploy.sh",
+      "bytes": 1039,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "166d6e5af4fbed2d3cebeb61abcce437b77f8ad19875d1fe888c4508c0712592",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 17
+    },
+    {
+      "file": "dual_stream_bridge.py",
+      "bytes": 5806,
+      "mtime_utc": "2026-11-13T23:49:52Z",
+      "sha256": "cde35a645498dc5474b32f18198383e5a657d2a45dbd8e40b5cc13e94a0b5ccf",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 148,
+      "executable_lines": 135,
+      "classes": [
+        "DualStreamHandler"
+      ],
+      "functions": [
+        "init_db",
+        "log_event",
+        "launch_android_intent",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST",
+        "log_message"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "sqlite3",
+        "subprocess",
+        "time",
+        "urllib.parse"
+      ]
+    },
+    {
+      "file": "dual_stream_module.html",
+      "bytes": 4430,
+      "mtime_utc": "2026-11-13T23:49:52Z",
+      "sha256": "ef4a17dc86178fbce0f015d15a8dd6e800de91572e6328af01b379e2a3535b8b",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 87
+    },
+    {
+      "file": "eagle-eyes.py",
+      "bytes": 1467,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "ecebc0a19850a9ce59b20eb28463c8cac4c95ca8ad8483f91cecc7c964fe0d49",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 42,
+      "executable_lines": 38,
+      "classes": [
+        "EagleEyesDroneDaemon"
+      ],
+      "functions": [
+        "__init__",
+        "get_telemetry_packet",
+        "dispatch_packet"
+      ],
+      "imports": [
+        "json",
+        "random",
+        "time",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "elite_deployer.py",
+      "bytes": 1869,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "5bea0026e2ab62528677e018094e36f37f8f6f03899c174be7aae612b1d0fbe6",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 53,
+      "executable_lines": 44,
+      "classes": [],
+      "functions": [
+        "call_gemini",
+        "generate_task_files",
+        "deploy_project"
+      ],
+      "imports": [
+        "json",
+        "os",
+        "subprocess",
+        "sys",
+        "time",
+        "urllib.error",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "execute_telemetry.py",
+      "bytes": 884,
+      "mtime_utc": "2026-11-12T01:50:14Z",
+      "sha256": "986a661bc72f894b464074ffa4faf7a499b8a8d1adf699b8d7969ee4c0470455",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 22,
+      "executable_lines": 20,
+      "classes": [],
+      "functions": [
+        "execute_sovereign_telemetry"
+      ],
+      "imports": [
+        "json",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "fix_8101_8108.py",
+      "bytes": 1124,
+      "mtime_utc": "2026-11-12T17:08:48Z",
+      "sha256": "6db57e3ad260073ff10f94a5eb9b502bd22353ca6c78f1a522f03635938a130e",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 17,
+      "executable_lines": 13,
+      "classes": [],
+      "functions": [],
+      "imports": [
+        "os",
+        "subprocess"
+      ]
+    },
+    {
+      "file": "fix_watchdog.py",
+      "bytes": 678,
+      "mtime_utc": "2026-11-18T17:53:48Z",
+      "sha256": "36e45879323e497c344f990c00c12b455c7a31a696e2e6d5e417c820ac714987",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 13,
+      "executable_lines": 13,
+      "classes": [],
+      "functions": [],
+      "imports": [
+        "os"
+      ]
+    },
+    {
+      "file": "generate_chat_handoff.py",
+      "bytes": 3578,
+      "mtime_utc": "2026-11-14T14:25:05Z",
+      "sha256": "bb47dec711c06b254ccbe7e3a91079140cbbee57a03426bff23091499135d132",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 77,
+      "executable_lines": 64,
+      "classes": [],
+      "functions": [
+        "check_port",
+        "count_rows"
+      ],
+      "imports": [
+        "http.client",
+        "json",
+        "os",
+        "sqlite3",
+        "subprocess",
+        "time"
+      ]
+    },
+    {
+      "file": "global-telemetry.py",
+      "bytes": 3097,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "ff646cab1e6533487982e86969576632178b16dde6ed6e363c608651c1fd4829",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 74,
+      "executable_lines": 60,
+      "classes": [],
+      "functions": [
+        "fetch_json",
+        "log_event",
+        "run_hourly_backup"
+      ],
+      "imports": [
+        "json",
+        "os",
+        "shutil",
+        "sqlite3",
+        "time",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "index.html",
+      "bytes": 130773,
+      "mtime_utc": "2026-11-18T22:58:54Z",
+      "sha256": "fa925333e8297ffcfbdd20e8dba7c8d2074725ab2b4d4c0c30317069dfc222dd",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 2303
+    },
+    {
+      "file": "injector.sh",
+      "bytes": 1705,
+      "mtime_utc": "2026-11-10T22:06:25Z",
+      "sha256": "956c1bfa1498ad5bb9a9bcdee88069286c122b7252f040cefa826e27c292c9eb",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 48
+    },
+    {
+      "file": "invoice_agent_8111.py",
+      "bytes": 3106,
+      "mtime_utc": "2026-11-18T17:53:47Z",
+      "sha256": "3f6a3511816fcd47ecef36847ba8a6c1e5b92824460d5b4ddd6b2f0bd7dbcd49",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 92,
+      "executable_lines": 80,
+      "classes": [
+        "InvoiceRouterHandler"
+      ],
+      "functions": [
+        "init_db",
+        "_send_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "sqlite3",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "main_prober.py",
+      "bytes": 1344,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "fdf511d6fe96b1e6f3372d225572c7df011795074029fed010894999133948a3",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 33,
+      "executable_lines": 27,
+      "classes": [],
+      "functions": [
+        "probe",
+        "main"
+      ],
+      "imports": [
+        "argparse",
+        "concurrent.futures",
+        "json",
+        "time",
+        "urllib.error",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "meeting_ready.sh",
+      "bytes": 1103,
+      "mtime_utc": "2026-11-19T17:43:46Z",
+      "sha256": "5c4405124cc37981f206e4f65c1ad6d1f7dfaff3c792f8e77874a3648f990b35",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 34
+    },
+    {
+      "file": "mopar_insurance_engine.py",
+      "bytes": 2030,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "aefc2e7d00a811dbd896856301309353a98a7052ba3f09e1cd56bbf7c23c0278",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 66,
+      "executable_lines": 59,
+      "classes": [],
+      "functions": [
+        "init_db",
+        "log_event"
+      ],
+      "imports": [
+        "json",
+        "random",
+        "sqlite3",
+        "time"
+      ]
+    },
+    {
+      "file": "ollama_router.py",
+      "bytes": 5140,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "ea65ab15df8d7febbb68f9d06ba2a336a2d5966cd34499d6fa104c9d45073ee6",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 139,
+      "executable_lines": 118,
+      "classes": [
+        "Node",
+        "OllamaClusterRouter"
+      ],
+      "functions": [
+        "__init__",
+        "__init__",
+        "_get_active_node"
+      ],
+      "imports": [
+        "asyncio",
+        "httpx",
+        "logging",
+        "typing"
+      ]
+    },
+    {
+      "file": "patch_stack.py",
+      "bytes": 1727,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "9de10bf10080fad00c92ebd2af49269056163ebfb7ddc9b7cb984317cc2e05c0",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 42,
+      "executable_lines": 37,
+      "classes": [],
+      "functions": [],
+      "imports": [
+        "os",
+        "re"
+      ]
+    },
+    {
+      "file": "provision.sh",
+      "bytes": 827,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "b6e9ec252432b2db320879f018dd9a681244626a5e6dcfcd3a84c598956e23b9",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 20
+    },
+    {
+      "file": "python_worker.py",
+      "bytes": 2861,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "9c8ac1e53a82dfa2e39cd6a12c70004b63de5c5b9f3011388347a238ada7bae0",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 71,
+      "executable_lines": 63,
+      "classes": [],
+      "functions": [
+        "log_db",
+        "get_temp_c",
+        "eth_mempool_listener",
+        "compute_tensor"
+      ],
+      "imports": [
+        "asyncio",
+        "concurrent.futures",
+        "json",
+        "math",
+        "os",
+        "sqlite3",
+        "subprocess",
+        "threading",
+        "time",
+        "websockets"
+      ]
+    },
+    {
+      "file": "run-agent-router.sh",
+      "bytes": 665,
+      "mtime_utc": "2026-11-12T18:59:50Z",
+      "sha256": "eaa085acb050ca947d495ccae73affe0bcdba7e8ce9f6ecb7915b7260afac081",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 20
+    },
+    {
+      "file": "start-spine.sh",
+      "bytes": 1084,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "697cfa513141062d74d82bb9c57e230ebf53ed3e4fdb4242ee177171402d898e",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 34
+    },
+    {
+      "file": "start.sh",
+      "bytes": 143,
+      "mtime_utc": "2026-11-09T14:47:29Z",
+      "sha256": "779a2c0b0cc452fe4369ac2c7d66ac1c6063bee3a01af7346acce3eab19565af",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 5
+    },
+    {
+      "file": "start_dashboard.sh",
+      "bytes": 1697,
+      "mtime_utc": "2026-11-12T15:32:42Z",
+      "sha256": "24d8b3858001adef8d0e0d58fb7f599b8375326cb0a518226532e87d5b6d70c1",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 30
+    },
+    {
+      "file": "start_stack.sh",
+      "bytes": 1709,
+      "mtime_utc": "2026-11-10T22:19:28Z",
+      "sha256": "b97f2cdfd409fa93d20ec490663662a76dd13656cdb5816a9917868318e40b96",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 44
+    },
+    {
+      "file": "start_tunnel.sh",
+      "bytes": 463,
+      "mtime_utc": "2026-11-14T14:49:31Z",
+      "sha256": "e1cb3bcefeab30d101bb99bbe78f77e7356092125c532c41d308e0a2cc76349b",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 16
+    },
+    {
+      "file": "stop-spine.sh",
+      "bytes": 402,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "49660bdd59e825a08c82443d7dee3837c69d660fe1d4d09459a2a119b8456a07",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 9
+    },
+    {
+      "file": "stop_stack.sh",
+      "bytes": 263,
+      "mtime_utc": "2026-11-10T22:02:31Z",
+      "sha256": "aec047a6773f7df14abc817d44a5200dffed0bf3260887100a92a46291a5d256",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 7
+    },
+    {
+      "file": "studio_auto_engine.py",
+      "bytes": 7870,
+      "mtime_utc": "2026-11-06T22:56:37Z",
+      "sha256": "d2b752402207dd4b1838e9261f97ad67a38310732a2e57369923513f132cdb1f",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 129,
+      "executable_lines": 122,
+      "classes": [
+        "AutoStudioHandler"
+      ],
+      "functions": [
+        "_send_json",
+        "do_POST",
+        "do_GET"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "sqlite3",
+        "time"
+      ]
+    },
+    {
+      "file": "studio_cinema_mcp_8121.py",
+      "bytes": 8789,
+      "mtime_utc": "2026-11-18T17:53:47Z",
+      "sha256": "1cc377146a93bcef1f00f79bc8207774594a84d5d20b25294317619a8f08a683",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 187,
+      "executable_lines": 164,
+      "classes": [
+        "CinemaMcpHandler"
+      ],
+      "functions": [
+        "init_cinema_db",
+        "send_renoise_osc_trigger",
+        "synthesize_claude_director_plan",
+        "build_cinema_sync_project",
+        "osc_str",
+        "_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "socket",
+        "sqlite3",
+        "struct",
+        "time",
+        "urllib.request",
+        "uuid"
+      ]
+    },
+    {
+      "file": "supercomputer_link.sh",
+      "bytes": 284,
+      "mtime_utc": "2026-11-12T01:56:55Z",
+      "sha256": "22aab9cd7151cda888fa8e3514df51c98ac5a24c1e8180be0f8fa927a763e3a9",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 6
+    },
+    {
+      "file": "telemetry_reporter.py",
+      "bytes": 1,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 1,
+      "executable_lines": 0,
+      "classes": [],
+      "functions": [],
+      "imports": []
+    },
+    {
+      "file": "telemetry_sentinel.py",
+      "bytes": 1701,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "2aea4698f1efa10b09ef4f308aa444b810d509353d68b4df2f414f06601f64eb",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 45,
+      "executable_lines": 37,
+      "classes": [
+        "ReusableHTTPServer",
+        "HardenedTelemetryHandler"
+      ],
+      "functions": [
+        "do_GET",
+        "log_message"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "subprocess",
+        "time"
+      ]
+    },
+    {
+      "file": "termux_heal.sh",
+      "bytes": 847,
+      "mtime_utc": "2026-11-12T02:02:44Z",
+      "sha256": "f80618aef77be9bc85fc2e0a66f11e14347e9d07c400e4ff2346ab62c2d2fe88",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 25
+    },
+    {
+      "file": "test_compose_bridge.sh",
+      "bytes": 3458,
+      "mtime_utc": "2026-11-13T23:49:52Z",
+      "sha256": "df9665daed8927c11c3784c5847f4fe35f2257612caeb877ec070345aa962aa0",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 101
+    },
+    {
+      "file": "test_mesh.py",
+      "bytes": 1421,
+      "mtime_utc": "2026-11-11T20:35:29Z",
+      "sha256": "eb9680bc329c27f28e8279770f26cd7a4a02f51a2e48aedb9b5869809ceca17b",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 33,
+      "executable_lines": 29,
+      "classes": [],
+      "functions": [
+        "sample"
+      ],
+      "imports": [
+        "argparse",
+        "concurrent.futures",
+        "json",
+        "statistics",
+        "time",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "test_script.py",
+      "bytes": 36,
+      "mtime_utc": "2026-11-18T17:53:48Z",
+      "sha256": "5adff1701f787e69023e753901a8836627593c6971917327a58f964f3bea1b3f",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 2,
+      "executable_lines": 2,
+      "classes": [],
+      "functions": [
+        "test"
+      ],
+      "imports": []
+    },
+    {
+      "file": "ticker.py",
+      "bytes": 3399,
+      "mtime_utc": "2026-11-19T00:13:04Z",
+      "sha256": "93255bd3ec552a730c4974a660e5026999c6907ac1f9c5998a2ea0134f68d9c3",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 75,
+      "executable_lines": 59,
+      "classes": [],
+      "functions": [
+        "fetch_crypto_price",
+        "fetch_stock_price",
+        "render_dashboard"
+      ],
+      "imports": [
+        "json",
+        "sys",
+        "time",
+        "urllib.request"
+      ]
+    },
+    {
+      "file": "trust_center_8117.py",
+      "bytes": 1521,
+      "mtime_utc": "2026-11-19T00:53:02Z",
+      "sha256": "fd7a40f307b5bdea7d4c9543b4b4310cce43a2bebbb69d6008795f67002bb07f",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 52,
+      "executable_lines": 43,
+      "classes": [
+        "ReuseTCP",
+        "TrustCenterHandler"
+      ],
+      "functions": [
+        "log_message",
+        "_reply",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "http.server",
+        "json",
+        "os",
+        "socketserver",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "verify_all.sh",
+      "bytes": 1308,
+      "mtime_utc": "2026-11-14T14:11:32Z",
+      "sha256": "7906783f6f1c1eea7dbf1f516817cc2a738fc45133fc1da62f74e85c056fe952",
+      "status": "VERIFIED_ASSET",
+      "total_lines": 37
+    },
+    {
+      "file": "webhook_listener_8115.py",
+      "bytes": 5070,
+      "mtime_utc": "2026-11-14T14:46:49Z",
+      "sha256": "3851979db70955d71cd0bbef5af8694e5d275a415b5d386378f835d530cd3c19",
+      "status": "VERIFIED_EXECUTABLE_CODE",
+      "total_lines": 119,
+      "executable_lines": 103,
+      "classes": [
+        "CryptoWebhookHandler"
+      ],
+      "functions": [
+        "init_db",
+        "verify_hmac",
+        "forward_to_jev_8111",
+        "_json",
+        "do_OPTIONS",
+        "do_GET",
+        "do_POST"
+      ],
+      "imports": [
+        "hashlib",
+        "hmac",
+        "http.client",
+        "http.server",
+        "json",
+        "os",
+        "sqlite3",
+        "time",
+        "uuid"
+      ]
+    },
+    {
+      "file": "websocket_telemetry_streamer.py",
+      "bytes": 1563,
+      "mtime_utc": "2026-11-13T23:49:52Z",
+      "sha256": "e98a15493722c9948ffb61e3045cfe1fccc3d6980051557ac6d217f7663b5897",
+      "status": "MINIMAL_SCRIPT",
+      "total_lines": 42,
+      "executable_lines": 31,
+      "classes": [],
+      "functions": [],
+      "imports": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "random",
+        "websockets"
+      ]
+    }
+  ],
+  "sqlite_databases": [
+    {
+      "db_name": ".astra_local_brain.db",
+      "size_bytes": 2486272,
+      "journal_mode": "wal",
+      "sha256": "aae0cbfbbacf155d40253e3b0b927586f09a0d9f1134035200097af41dd57a7e",
+      "tables": {
+        "local_records": 424
+      }
+    },
+    {
+      "db_name": ".astra_multichain_assets.db",
+      "size_bytes": 20480,
+      "journal_mode": "wal",
+      "sha256": "0524429fe10655841a6f4bb8d49150c554a30760aa5fecc5b634eef088533090",
+      "tables": {
+        "multichain_asset_snapshots": 6
+      }
+    }
+  ],
+  "git_commits": [
+    "90070c27ed8ad9b697f03a89bdf78028e561ecec|2026-11-19T12:56:40-05:00|salathaniebrown-prog|feat(unify-cluster): unify 34-port autonomous fabric, /v1/cluster/unify, 8095 HTTP/JSON spine & gNMI OpenConfig stack",
+    "1f59df23e1255fc43f04145968b4c6448ac744d3|2026-11-19T08:39:05-05:00|salathaniebrown-prog|feat(neuro-mps-merkle): deploy C zero-copy ring buffer, TCAD/SKCF spike encoder, MPS tensor-train compression & Merkle WAL spine (8157)",
+    "41cf823b00124c9b198ad65f0ff2692dee053e73|2026-11-19T08:08:02-05:00|salathaniebrown-prog|feat(synaptic-rf-mitosis): deploy Cognitive Gaze BCI, Ambient RF Plasma Ripples & Darwinian Code Mitosis Swarm Daemon (8155)",
+    "81d100c9d45db61414e1198199bf3d1cb885cd4e|2026-11-19T07:51:52-05:00|salathaniebrown-prog|feat(aot-photonic): deploy Optical Acoustic Telemetry & Photonic Resonance Engine (8153) with closed-loop prism auto-gain & Genius Brain pre-triggers",
+    "0d71740a7cf1919081d576958395d9a5f635ec95|2026-11-19T07:35:21-05:00|salathaniebrown-prog|feat(peppers-ghost,voice): add 45-deg 2x2 interlocking nested laser-cutting SVG generator & voice-command triggers for Autonomous Agent (8145)",
+    "5e52e5e726c33c13325bd84272fc6ffc7b1b081a|2026-11-19T07:19:03-05:00|salathaniebrown-prog|feat(spatial-audio): upgrade Off-Axis 3D & 4-Way Pepper's Ghost engine with 60 FPS Web Audio API DSP Synthesizer & Telemetry Sonar",
+    "86fdf2a9c607365b03dad8e7325d7d9b6a89dc99|2026-11-19T07:12:04-05:00|salathaniebrown-prog|fix(gateway-8090,spatial-8151): add /api/* proxy pass-through & sub-2ms non-blocking spatial telemetry cache",
+    "a2eb3718c9623fe25aca2aa7910c917b1e5f1227|2026-11-18T19:56:03-05:00|salathaniebrown-prog|feat(spatial-3d): deploy Off-Axis 3D WebGL/WebXR Spatial Engine (8151), Shadow Forge (8149), Agent (8145), Mesh (8147), /docs & 25-port TDD suite",
+    "e808531d1068444120bf91609acd5884c9dbab7f|2026-11-18T16:37:25-05:00|salathaniebrown-prog|feat(forensic): add AST-verified 101-artifact code manifest and /forensic viewer on port 8090",
+    "6992f81c7aa1010d02c21a03744b647c800010d2|2026-11-18T14:14:52-05:00|salathaniebrown-prog|feat(architecture): unify 8088/8090 gateway with 8095 Master Spine, 8099 WAL Genius Brain & MCP Stdio Bridge"
+  ]
+}

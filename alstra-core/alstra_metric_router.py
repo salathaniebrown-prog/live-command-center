@@ -30,7 +30,7 @@ class AlstraMetricRouter:
             print("[!] Core error: Asymmetric Ed25519 private key signature file missing.")
             print("[*] Instantiating fallback/generation check...")
             sys.exit(1)
-            
+
         with open(self.private_key_path, "rb") as f:
             self.private_key = serialization.load_pem_private_key(f.read(), password=None)
 
@@ -41,7 +41,7 @@ class AlstraMetricRouter:
             "cpu_memory_state": "OPTIMAL_ZERO_LAG",
             "ledger_verified_height": 0
         }
-        
+
         if os.path.exists(DB_PATH):
             try:
                 conn = sqlite3.connect(DB_PATH)
@@ -51,14 +51,14 @@ class AlstraMetricRouter:
                 conn.close()
             except Exception as e:
                 metrics["database_error_flag"] = str(e)
-                
+
         return metrics
 
     def forward_secure_metrics_package(self, command_vector: str):
         """Assembles, signs, encrypts, and transmits metric packets across network endpoints."""
         nonce = int(time.time() * 1000) # Precise epoch millisecond nonce sequence
         local_metrics = self.extract_recent_metrics()
-        
+
         # Package metrics according to Alstra secure webhook ingestion layout schemas
         payload = {
             "alert_level": "METRIC_ROUTING_HEARTBEAT",
@@ -72,22 +72,22 @@ class AlstraMetricRouter:
                 "telemetry_metrics": local_metrics
             }
         }
-        
+
         # Calculate matching Ed25519 cryptographic structural authenticity signature
         signing_buffer = f"{nonce}:{command_vector}".encode('utf-8')
         signature_hex = self.private_key.sign(signing_buffer).hex()
-        
+
         # Stream payload across secure socket network channels
         json_data = json.dumps(payload).encode('utf-8')
-        
+
         # Instruct network client to trust local self-signed TLS development infrastructure certificates
         ssl_context = ssl._create_unverified_context()
-        
+
         print(f"[*] Transporting secure metric vector packet to -> {self.destination_endpoint}")
         req = urllib.request.Request(self.destination_endpoint, data=json_data, method="POST")
         req.add_header("Content-Type", "application/json")
         req.add_header("X-Alstra-Signature-Ed25519", signature_hex)
-        
+
         try:
             with urllib.request.urlopen(req, context=ssl_context, timeout=8) as response:
                 print(f"[⚡] ROUTER HANDSHAKE SUCCESS: Receiver Node returned HTTP {response.getcode()}")
@@ -98,6 +98,6 @@ class AlstraMetricRouter:
 if __name__ == "__main__":
     # Route data locally to port 8099 over secure HTTPS endpoint configuration
     TARGET_MASTER_NODE = "https://127.0.0.1:8099"
-    
+
     router = AlstraMetricRouter(destination_endpoint=TARGET_MASTER_NODE)
     router.forward_secure_metrics_package(command_vector="SYNC_DISTRIBUTED_NODE_METRICS")

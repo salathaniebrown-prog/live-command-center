@@ -17,7 +17,7 @@ TARGET_URL = "http://127.0.0.1:8099"
 
 def fire_signed_test_payload():
     private_key_path = os.path.join(KEY_DIR, "sovereign_ed25519.pem")
-    
+
     # 1. Verify that your authority keypair has been provisioned
     if not os.path.exists(private_key_path):
         print("[!] Execution error: Ed25519 authority private key file not found.")
@@ -31,7 +31,7 @@ def fire_signed_test_payload():
     # 3. Assemble simulation world-building tracking data
     test_nonce = int(time.time())
     test_command = "SIMULATE_WORLD_GRID_INITIALIZATION"
-    
+
     payload_data = {
         "alert_level": "SUCCESS_VERIFIED",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -44,11 +44,11 @@ def fire_signed_test_payload():
             "simulation_matrix_depth": "8_WORKER_PIPELINES_SATURATED"
         }
     }
-    
+
     # 4. Generate asymmetric cryptographic signature matching your engine specs
     signing_bytes = f"{test_nonce}:{test_command}".encode('utf-8')
     signature_hex = private_key.sign(signing_bytes).hex()
-    
+
     # 5. Route payload data across local network sockets
     json_bytes = json.dumps(payload_data).encode('utf-8')
     req = urllib.request.Request(TARGET_URL, data=json_bytes, method="POST")

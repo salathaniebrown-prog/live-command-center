@@ -22,13 +22,13 @@ class AlstraAutopilotHandler(http.server.BaseHTTPRequestHandler):
                     "timestamp": time.time()
                 }
                 payload = json.dumps(response_data).encode("utf-8")
-                
+
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
                 self.send_header("X-Astra-Pilot", "Autonomous-Active")
                 self.end_headers()
                 self.wfile.write(payload)
-                
+
                 self.log_to_ledger("AUTOPILOT_GET", response_data)
             else:
                 self.send_response(404)

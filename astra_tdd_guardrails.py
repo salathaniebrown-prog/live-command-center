@@ -69,10 +69,18 @@ class AstraTddContractSuite(unittest.TestCase):
         self.assertGreaterEqual(max(data.get("artifact_count", 0), data.get("total_artifacts", 0), len(data.get("artifacts", []))), 100)
 
     def test_04_formal_api_contract_specifications(self):
-        for name, url in ENDPOINTS.items():
+        contract_urls = [
+            "http://127.0.0.1:8090/v1/gnmi/telemetry",
+            "http://127.0.0.1:8090/v1/phaselock/telemetry",
+            "http://127.0.0.1:8090/v1/multipath/telemetry",
+            "http://127.0.0.1:8090/v1/breaker/telemetry",
+            "http://127.0.0.1:8138/metrics",
+        ]
+        for url in contract_urls:
             with _urlopen_retry(url, timeout=4.0) as r:
-                self.assertEqual(r.status, 200, f"{name} returned HTTP {r.status}")
-
+                self.assertEqual(r.status, 200, f"{url} returned HTTP {r.status}")
+                body = r.read().decode("utf-8", errors="replace")
+                self.assertTrue(len(body) > 10, f"{url} returned empty payload")
 
 if __name__ == "__main__":
     t0 = time.time()

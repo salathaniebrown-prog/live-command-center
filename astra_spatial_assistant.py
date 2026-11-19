@@ -34,10 +34,10 @@ def process_spatial_action(mode="WITH_HANDS", gesture="PINCH_SELECT", target_act
     ev_id = "SPATIAL-" + uuid.uuid4().hex[:8].upper()
     now = time.time()
     vector_data = {"gesture": gesture, "confidence": 0.984, "spatial_coords": {"x": 0.12, "y": 0.85, "z": -1.4}}
-    
+
     proof_payload = f"{ev_id}:{mode}:{gesture}:{target_action}:{now}"
     sha256_proof = hashlib.sha256(proof_payload.encode()).hexdigest()
-    
+
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
         "INSERT INTO spatial_telemetry VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -45,7 +45,7 @@ def process_spatial_action(mode="WITH_HANDS", gesture="PINCH_SELECT", target_act
     )
     conn.commit()
     conn.close()
-    
+
     return {
         "event_id": ev_id,
         "mode": mode,

@@ -7,15 +7,15 @@ AUDIT_LOG = os.path.expanduser("~/alstra-langgraph/alstra-sovereign-core/ledger/
 
 def run_auto_repair_audit():
     print("[*] Initiating ALSTRA-Heal Auto-Repair Audit & Node Verification...")
-    
+
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    
+
     endpoints = {
         "gateway_8099": "http://localhost:8099/v1/health",
         "proxy_8090": "http://localhost:8090/proxy/v1/generate",
         "bridge_8091": "http://localhost:8091/api/v1/cross-network/settle"
     }
-    
+
     node_status = {}
     for name, url in endpoints.items():
         try:
@@ -27,7 +27,7 @@ def run_auto_repair_audit():
                 node_status[name] = "ONLINE_VERIFIED"
         except Exception:
             node_status[name] = "ACTIVE_DAEMON_LISTENING"
-            
+
     audit_report = {
         "timestamp": timestamp,
         "authority": "Salathaniel S. A. Brown Sr.",
@@ -39,11 +39,11 @@ def run_auto_repair_audit():
         "compute_eflops": 121.55,
         "error_rate": 0.0
     }
-    
+
     os.makedirs(os.path.dirname(AUDIT_LOG), exist_ok=True)
     with open(AUDIT_LOG, "a") as f:
         f.write(json.dumps(audit_report) + "\n")
-        
+
     print(json.dumps(audit_report, indent=2))
     print("[+] ALSTRA-Heal Audit Completed: All microserver nodes operating at 100% fidelity!")
 

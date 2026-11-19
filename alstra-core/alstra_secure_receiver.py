@@ -44,7 +44,7 @@ class SecureWebhookHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers.get('Content-Length', 0))
         post_data = self.rfile.read(content_length)
         signature_hex = self.headers.get('X-Alstra-Signature-Ed25519', 'UNSIGNED')
-        
+
         try:
             payload = json.loads(post_data.decode('utf-8'))
         except Exception:
@@ -70,7 +70,7 @@ class SecureWebhookHandler(BaseHTTPRequestHandler):
             cursor = conn.cursor()
             cursor.execute("PRAGMA journal_mode=WAL;")
             timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-            
+
             # 1. Update Current Live Snapshot
             cursor.execute("""
                 INSERT INTO asset_delivery_ledger (vin_id, operator_authority, transit_status, gps_coordinates, last_handshake_utc, payload_signature)
@@ -87,14 +87,14 @@ class SecureWebhookHandler(BaseHTTPRequestHandler):
                 INSERT INTO asset_transit_history (vin_id, operator_authority, transit_status, gps_coordinates, recorded_at_utc, payload_signature)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (vin, authority, status, coords, timestamp, signature_hex))
-            
+
             # 3. Update Cluster Mesh Status
             cursor.execute("""
                 INSERT INTO node_cluster_states (node_id, node_type, status, latency, last_seen)
                 VALUES (?, 'External Transit Array', 'status-syncing', '24ms', ?)
                 ON CONFLICT(node_id) DO UPDATE SET status='status-syncing', last_seen=excluded.last_seen
             """, (f"CAR-DELIVERY-{vin[-6:]}", timestamp))
-            
+
             conn.commit()
             conn.close()
 

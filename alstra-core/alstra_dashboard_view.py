@@ -39,7 +39,7 @@ class DashboardViewHandler(BaseHTTPRequestHandler):
             for r_id, r_type, r_status, r_lat, r_seen in rows:
                 try:
                     struct_time = time.strptime(r_seen, "%Y-%m-%dT%H:%M:%SZ")
-                    if current_time - (time.mktime(struct_time) - time.timezone) > 45: 
+                    if current_time - (time.mktime(struct_time) - time.timezone) > 45:
                         r_status = "status-offline"
                 except Exception: pass
                 default_nodes[r_id] = {"name": r_id, "type": r_type, "status": r_status, "latency": r_lat}
@@ -55,7 +55,7 @@ class DashboardViewHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.end_headers()
-        
+
         # Build layout directly into the safe stream
         from alstra_dashboard_view import DashboardTemplateEngine
         html_out = DashboardTemplateEngine.get_header()

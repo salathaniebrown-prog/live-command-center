@@ -32,13 +32,13 @@ def log_event(event_type, payload):
 
 if __name__ == "__main__":
     init_db()
-    
+
     parts = [
         {"sku": "TR6060-HELLCAT", "amount": 5650.00, "channel": "mopar_transmission"},
         {"sku": "FORG-24-CUBAN", "amount": 3100.00, "channel": "custom_wheels_rims"},
         {"sku": "MOPAR-HEMI-62L", "amount": 9400.00, "channel": "engine_crate"}
     ]
-    
+
     while True:
         choice = random.choice(["MOPAR", "INSURANCE"])
         if choice == "MOPAR":
@@ -62,5 +62,5 @@ if __name__ == "__main__":
                 "status": "QUOTE_BOUND"
             }
             log_event("INSURANCE_AUTO", payload)
-            
+
         time.sleep(10)

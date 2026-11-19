@@ -38,7 +38,7 @@ HTML_CONTENT = """
         body { margin: 0; padding: 10px; background-color: var(--bg-color); color: var(--text-main); font-family: 'Courier New', monospace; height: 100vh; box-sizing: border-box; display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 200px; gap: 10px; }
         .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; position: relative; overflow: hidden; }
         .panel-header { color: var(--text-highlight); font-size: 14px; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
-        
+
         #map-container { grid-column: 1 / 2; grid-row: 1 / 2; padding: 0; }
         #map { width: 100%; height: 100%; border-radius: 6px; z-index: 1; }
         .leaflet-layer { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
@@ -48,7 +48,7 @@ HTML_CONTENT = """
         .avatar-face { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #1f3a5f, #0a0e17); border: 2px solid var(--text-highlight); box-shadow: 0 0 20px rgba(88, 166, 255, 0.3); position: relative; margin-bottom: 20px; }
         .avatar-eye { width: 15px; height: 15px; background: var(--text-highlight); border-radius: 50%; position: absolute; top: 40%; }
         .eye-left { left: 30%; } .eye-right { right: 30%; }
-        
+
         #log-container { grid-column: 1 / 2; grid-row: 2 / 3; }
         #console-output { font-size: 12px; color: var(--text-green); overflow-y: auto; height: 140px; display: flex; flex-direction: column-reverse;}
         #console-output div { margin-bottom: 3px; }
@@ -85,7 +85,7 @@ HTML_CONTENT = """
                 const response = await fetch('https://opensky-network.org/api/states/all');
                 const data = await response.json();
                 // Get a sample of planes
-                const planes = data.states.slice(0, 30); 
+                const planes = data.states.slice(0, 30);
                 planes.forEach(plane => {
                     const lat = plane[6]; const lon = plane[5]; const callsign = plane[1] || "UNKNOWN";
                     if(lat && lon) {
@@ -133,7 +133,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'text/event-stream')
             self.send_header('Cache-Control', 'no-cache')
             self.end_headers()
-            
+
             try:
                 with open(LOG_FILE, "r") as f:
                     # Keep streaming the last line
@@ -146,7 +146,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         self.wfile.flush()
             except Exception:
                 pass
-                
+
         elif self.path == '/get-ai-voice':
             # Return the latest AI thought
             try:
@@ -154,12 +154,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     ai_text = f.read()
             except:
                 ai_text = "AI data streaming offline. Standby."
-            
+
             self.send_response(200)
             self.send_header("Content-type", "text/plain")
             self.end_headers()
             self.wfile.write(ai_text.encode())
-            
+
         else:
             # Serve HTML
             self.send_response(200)
