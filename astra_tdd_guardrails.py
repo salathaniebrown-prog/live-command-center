@@ -24,6 +24,7 @@ ENDPOINTS = {
     "SPATIAL_3D_8151": "http://127.0.0.1:8151/v1/spatial/physics",
     "PHOTONIC_AOT_8153": "http://127.0.0.1:8153/v1/aot/telemetry",
     "SYNAPTIC_MITOSIS_8155": "http://127.0.0.1:8155/v1/synaptic/telemetry",
+    "NEUROMORPHIC_MPS_8157": "http://127.0.0.1:8157/v1/neuro/telemetry",
 }
 
 
