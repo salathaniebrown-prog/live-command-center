@@ -125,6 +125,8 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
         for prefix, base in routes.items():
             if p == prefix or p.startswith(prefix + "/"):
                 return f"{base}{req_path}"
+        if p == "/cyberneon" or p.startswith("/cyberneon/"):
+            return "http://127.0.0.1:3000/"
         if p == "/metrics":
             return "http://127.0.0.1:8138/metrics"
         if p == "/radial" or p.startswith("/radial/"):
