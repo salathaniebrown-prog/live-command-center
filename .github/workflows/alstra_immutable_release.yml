@@ -1,0 +1,21 @@
+name: Alstra Immutable Upgrade Archive
+on:
+  push:
+    tags:
+      - 'v2026.*'
+permissions:
+  contents: write
+jobs:
+  archive-upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Permanent GitHub Release Snapshot
+        uses: softprops/action-gh-release@v3
+        with:
+          name: "Alstra AI Supercomputer Snapshot ${{ github.ref_name }}"
+          body: |
+            Immutable verified snapshot of the 34-port Alstra AI fabric, gNMI/OpenConfig telemetry spine, and Cyber-Neon v2 command matrix.
+          files: |
+            ALSTRA_IMMUTABLE_VAULT/*
+          generate_release_notes: true
