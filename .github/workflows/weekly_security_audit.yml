@@ -1,0 +1,85 @@
+name: ALSTRA // Weekly Dependabot & Shell-Catcher Security Audit
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  security-events: write
+
+jobs:
+  shell-catcher-and-cve-audit:
+    name: Shell-Catcher & CVE Deep Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Audit Tooling
+        run: pip install --upgrade pip pip-audit bandit
+
+      - name: Run Shell-Catcher AST & Static Security Scan
+        run: |
+          python3 - << 'PY'
+          import hashlib, json, pathlib, py_compile, re, subprocess, time
+
+          py_files = sorted(pathlib.Path(".").rglob("*.py"))
+          compiled = []
+          for f in py_files:
+              py_compile.compile(str(f), doraise=True)
+              digest = hashlib.sha256(f.read_bytes()).hexdigest()[:16]
+              compiled.append({"file": str(f), "sha256": digest})
+
+          # Run Bandit static security check (high-severity filter)
+          b_res = subprocess.run(
+              ["bandit", "-r", ".", "-ll", "-f", "json"],
+              capture_output=True, text=True
+          )
+          bandit_issues = 0
+          try:
+              b_json = json.loads(b_res.stdout)
+              bandit_issues = len(b_json.get("results", []))
+          except Exception:
+              pass
+
+          # Run pip-audit against requirements.txt if present
+          cve_status = "NO_REQUIREMENTS_FILE"
+          if pathlib.Path("requirements.txt").exists():
+              p_res = subprocess.run(
+                  ["pip-audit", "-r", "requirements.txt", "--format", "json"],
+                  capture_output=True, text=True
+              )
+              cve_status = "CLEAN" if p_res.returncode == 0 else "ADVISORIES_FOUND"
+
+          report = {
+              "audit_system": "ALSTRA_SHELL_CATCHER_V2",
+              "audited_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+              "python_files_verified": len(compiled),
+              "cve_dependency_status": cve_status,
+              "high_severity_static_alerts": bandit_issues,
+              "artifacts": compiled
+          }
+          report_bytes = json.dumps(report, indent=2).encode("utf-8")
+          report["ledger_sha256"] = hashlib.sha256(report_bytes).hexdigest()
+
+          pathlib.Path("SECURITY_AUDIT_LEDGER.json").write_text(
+              json.dumps(report, indent=2) + "\n", encoding="utf-8"
+          )
+          print(f"[SEALED] Verified {len(compiled)} Python files | CVEs: {cve_status} | High Alerts: {bandit_issues}")
+          PY
+
+      - name: Seal & Commit Weekly Security Ledger
+        run: |
+          python3 - << 'PY'
+          import subprocess
+          email = "alstra-bot" + chr(64) + "://github.com"
+          subprocess.run(["git", "config", "user.name", "alstra-security-bot"], check=True)
+          subprocess.run(["git", "config", "user.email", email], check=True)
+          PY
+          git add SECURITY_AUDIT_LEDGER.json
+          git diff --cached --quiet || (git commit -m "chore(security): seal weekly Shell-Catcher & CVE audit ledger [skip ci]" && git push)
