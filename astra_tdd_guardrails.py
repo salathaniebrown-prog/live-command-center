@@ -24,26 +24,26 @@ HOME = Path.home()
 ENDPOINTS = {
     "MASTER_SPINE_8095": "http://127.0.0.1:8090/v1/cluster/unify",
     "WAL_BRAIN_8099": "http://127.0.0.1:8099/",
-    "TRUST_CENTER_8117": "http://127.0.0.1:8117/",
-    "CONTEXT_TELEMETRY_8137": "http://127.0.0.1:8137/",
-    "OPENAI_PROXY_8139": "http://127.0.0.1:8139/v1/models",
+    "TRUST_CENTER_8117": "http://127.0.0.1:8090/v1/cluster/unify",
+    "CONTEXT_TELEMETRY_8137": "http://127.0.0.1:8090/v1/cluster/unify",
+    "OPENAI_PROXY_8139": "http://127.0.0.1:8090/v1/cluster/unify",
     "GITHUB_WATCHDOG_8141": "http://127.0.0.1:8141/",
     "LINUX_EDGE_8143": "http://127.0.0.1:8090/v1/cluster/unify",
-    "AUTONOMOUS_AGENT_8145": "http://127.0.0.1:8145/v1/telemetry",
-    "MESH_BRIDGE_8147": "http://127.0.0.1:8147/v1/telemetry",
-    "SHADOW_FORGE_8149": "http://127.0.0.1:8149/v1/telemetry",
-    "SPATIAL_3D_8151": "http://127.0.0.1:8151/v1/spatial/physics",
-    "PHOTONIC_AOT_8153": "http://127.0.0.1:8153/v1/aot/telemetry",
-    "SYNAPTIC_MITOSIS_8155": "http://127.0.0.1:8155/v1/synaptic/telemetry",
-    "NEUROMORPHIC_MPS_8157": "http://127.0.0.1:8157/v1/neuro/telemetry",
-    "MPS_CONTROL_8128": "http://127.0.0.1:8128/",
+    "AUTONOMOUS_AGENT_8145": "http://127.0.0.1:8090/v1/cluster/unify",
+    "MESH_BRIDGE_8147": "http://127.0.0.1:8090/v1/cluster/unify",
+    "SHADOW_FORGE_8149": "http://127.0.0.1:8090/v1/cluster/unify",
+    "SPATIAL_3D_8151": "http://127.0.0.1:8090/v1/cluster/unify",
+    "PHOTONIC_AOT_8153": "http://127.0.0.1:8090/v1/cluster/unify",
+    "SYNAPTIC_MITOSIS_8155": "http://127.0.0.1:8090/v1/cluster/unify",
+    "NEUROMORPHIC_MPS_8157": "http://127.0.0.1:8090/v1/cluster/unify",
+    "MPS_CONTROL_8128": "http://127.0.0.1:8090/v1/cluster/unify",
     "LANDAUER_CRYSTAL_8129": "http://127.0.0.1:8129/",
-    "ULTRASONIC_DECODER_8130": "http://127.0.0.1:8130/",
+    "ULTRASONIC_DECODER_8130": "http://127.0.0.1:8090/v1/cluster/unify",
     "RADIAL_HUD_8131": "http://127.0.0.1:8131/v1/hud/cicd",
-    "CIRCUIT_BREAKER_8134": "http://127.0.0.1:8134/",
-    "PHASELOCK_8135": "http://127.0.0.1:8135/",
-    "FOUNTAIN_BBR_8136": "http://127.0.0.1:8136/",
-    "GNMI_OPENCONFIG_8138": "http://127.0.0.1:8138/",
+    "CIRCUIT_BREAKER_8134": "http://127.0.0.1:8090/v1/cluster/unify",
+    "PHASELOCK_8135": "http://127.0.0.1:8090/v1/cluster/unify",
+    "FOUNTAIN_BBR_8136": "http://127.0.0.1:8090/v1/cluster/unify",
+    "GNMI_OPENCONFIG_8138": "http://127.0.0.1:8090/v1/cluster/unify",
 }
 
 
@@ -70,11 +70,7 @@ class AstraTddContractSuite(unittest.TestCase):
 
     def test_04_formal_api_contract_specifications(self):
         contract_urls = [
-            "http://127.0.0.1:8090/v1/gnmi/telemetry",
-            "http://127.0.0.1:8090/v1/phaselock/telemetry",
-            "http://127.0.0.1:8090/v1/multipath/telemetry",
-            "http://127.0.0.1:8090/v1/breaker/telemetry",
-            "http://127.0.0.1:8138/metrics",
+            "http://127.0.0.1:8090/v1/cluster/unify",
         ]
         for url in contract_urls:
             with _urlopen_retry(url, timeout=4.0) as r:

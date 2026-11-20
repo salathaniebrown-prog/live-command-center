@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-11-19T22:22:50Z",
+  "generated_utc": "2026-11-20T03:04:19Z",
   "workspace": "/data/data/com.termux/files/home",
   "verified_artifact_count": 127,
   "artifacts": [
@@ -66,12 +66,12 @@
     },
     {
       "file": "alstra_unified_8090_gateway.py",
-      "bytes": 11951,
-      "mtime_utc": "2026-11-19T21:43:15Z",
-      "sha256": "78558e14e43be7ce6add8fa6d8363cb951e0fa9d85dc802f3046a09379b74eca",
+      "bytes": 13760,
+      "mtime_utc": "2026-11-20T03:03:38Z",
+      "sha256": "464f5dbda6c1d348dce45f8bee07be3980e09dcbbc1a7e409c4bb6f56cdc36de",
       "status": "VERIFIED_EXECUTABLE_CODE",
-      "total_lines": 245,
-      "executable_lines": 227,
+      "total_lines": 271,
+      "executable_lines": 253,
       "classes": [
         "ThreadingReuseTCP",
         "UnifiedGatewayHandler"
@@ -89,6 +89,7 @@
         "http.server",
         "os",
         "pathlib",
+        "re",
         "socket",
         "socketserver",
         "subprocess",
@@ -413,7 +414,7 @@
     {
       "file": "alstra_save.sh",
       "bytes": 1074,
-      "mtime_utc": "2026-11-19T19:41:04Z",
+      "mtime_utc": "2026-11-20T03:02:49Z",
       "sha256": "1731f63cba46408b0bc0d229886e2a0d2e76e526b5f40aaebb746f4aa10a6474",
       "status": "VERIFIED_ASSET",
       "total_lines": 25
@@ -509,7 +510,7 @@
     {
       "file": "astra_alstra_dual_persona_8159.py",
       "bytes": 3271,
-      "mtime_utc": "2026-11-19T21:52:18Z",
+      "mtime_utc": "2026-11-20T03:03:36Z",
       "sha256": "a727c08d6030d51532887b7bcc81987b06cf7d869708d0a913c7d88137d4aec4",
       "status": "VERIFIED_EXECUTABLE_CODE",
       "total_lines": 88,
@@ -933,7 +934,7 @@
     {
       "file": "astra_github_watchdog_daemon.py",
       "bytes": 1056,
-      "mtime_utc": "2026-11-19T19:17:33Z",
+      "mtime_utc": "2026-11-20T02:59:26Z",
       "sha256": "7c35ab702a1854858bd4aa1142a12e911c6db0c204432445254bb20cde25aa7e",
       "status": "VERIFIED_EXECUTABLE_CODE",
       "total_lines": 30,
@@ -1036,7 +1037,7 @@
     {
       "file": "astra_grafana_v2_native_3000.py",
       "bytes": 11786,
-      "mtime_utc": "2026-11-19T22:08:34Z",
+      "mtime_utc": "2026-11-20T03:03:50Z",
       "sha256": "6be6216e67eb7efc0f8b9b888bb2738a641101d78ea342805d163790cc7355d7",
       "status": "VERIFIED_EXECUTABLE_CODE",
       "total_lines": 202,
@@ -1554,7 +1555,7 @@
     {
       "file": "astra_spatial_3d_server_8151.py",
       "bytes": 6344,
-      "mtime_utc": "2026-11-19T12:35:12Z",
+      "mtime_utc": "2026-11-19T23:24:01Z",
       "sha256": "9fbb2b923d795c9df371b731877b3242deac5aba3d1161754881f9033c9fcb52",
       "status": "VERIFIED_EXECUTABLE_CODE",
       "total_lines": 157,
@@ -1692,12 +1693,12 @@
     },
     {
       "file": "astra_tdd_guardrails.py",
-      "bytes": 4254,
-      "mtime_utc": "2026-11-19T19:29:33Z",
-      "sha256": "f9ec3b7e8ec3e744efc8c541cf928159d850c60320e0ad46abcfe6ec44790107",
+      "bytes": 4168,
+      "mtime_utc": "2026-11-20T03:02:10Z",
+      "sha256": "ba094c944309f2b0c21c8bddaff8ecdce20fac77e8f8cf8e095ef3a29d9c8940",
       "status": "VERIFIED_EXECUTABLE_CODE",
-      "total_lines": 93,
-      "executable_lines": 83,
+      "total_lines": 89,
+      "executable_lines": 79,
       "classes": [
         "AstraTddContractSuite"
       ],
@@ -2813,9 +2814,9 @@
   "sqlite_databases": [
     {
       "db_name": ".astra_local_brain.db",
-      "size_bytes": 7114752,
+      "size_bytes": 11317248,
       "journal_mode": "wal",
-      "sha256": "dc6a599f8bbe3681c8755eb12a231af6537d939ff460318e4bb72cb07393cb6d",
+      "sha256": "7062021fe515dd0406132d393650beebbe3be8bc7b6c8b39e057a6d88a95ffc7",
       "tables": {
         "local_records": 424
       }
@@ -2831,15 +2832,15 @@
     }
   ],
   "git_commits": [
+    "2755503a9b292fb16baec6839980dbd78b011866|2026-11-19T18:55:01-05:00|salathaniebrown-prog|fix(bashrc-8090): repair line 45 if/fi block & lock ALSTRA avatar + 3D spatial engine [v2026.20261119-235454]",
+    "210790775e607f7d7a21c9193ac0c1bb6295d969|2026-11-19T18:45:07-05:00|salathaniebrown-prog|feat(8090-top-dock-ci): pin ALSTRA avatar dock to top of 8090 & wire live CI logs [v2026.20261119-234500]",
+    "2770bff94f70c0b036a1d4f69fd0028ca5d4010c|2026-11-19T18:37:37-05:00|salathaniebrown-prog|feat(alstra-ui-3d): lock ALSTRA cybernetic avatar & live /v1/spatial/physics 3D engine [v2026.20261119-233733]",
+    "ce8187033d737b8cc34a8e2c965997e62a791a5a|2026-11-19T18:28:04-05:00|salathaniebrown-prog|feat(alstra-ui-3d): lock ALSTRA cybernetic avatar & live /v1/spatial/physics 3D engine [v2026.20261119-232800]",
+    "321230ea89bd308955992e98c899818b0dbdba07|2026-11-19T18:20:17-05:00|salathaniebrown-prog|fix(8090-clean): safe addon injection & 4/4 GREEN_PASS verification [v2026.20261119-232013]",
+    "a5e09f7aaf049b971658b69009d94727e82b1e86|2026-11-19T17:55:03-05:00|salathaniebrown-prog|feat(alstra-avatar-live): lock ALSTRA cybernetic avatar & 200 OK dual-persona endpoints [v2026.20261119-225454]",
+    "166427dc84b651bc6939bfb0b1fce588fee5e865|2026-11-19T17:34:13-05:00|salathaniebrown-prog|feat(alstra-avatar-live): lock ALSTRA cybernetic avatar & 200 OK dual-persona endpoints [v2026.20261119-223402]",
     "491c8237c950f3fa1962a06782a11fa8bc1f3798|2026-11-19T16:53:00-05:00|salathaniebrown-prog|fix(stability-ram): restore 8090 avatar/quick routes & guard System UI RAM on 3.4GB tablet [v2026.20261119-215227]",
     "863ccfc9743296fdc25e4ca3bee89424388ce358|2026-11-19T16:51:50-05:00|salathaniebrown-prog|fix(stability-ram): restore 8090 avatar/quick routes & guard System UI RAM on 3.4GB tablet [v2026.20261119-215134]",
-    "1ed3d5b6db14a738664304c3987d90f4f184eddd|2026-11-19T16:43:31-05:00|salathaniebrown-prog|feat(dual-avatar-dock): embed ALSTRA cybernetic portrait & zero-typing one-tap dock in 8090 UI [v2026.20261119-214318]",
-    "5058070e45f3db359e6636aeb891c006820ee569|2026-11-19T16:41:43-05:00|salathaniebrown-prog|feat(dual-persona-8159): lock ASTRA female + ALSTRA half-human/half-robot cybernetic model router & zero-typing tablet macros [v2026.20261119-214135]",
-    "602f26f82b33b605d87966e0dcddac6abf42295c|2026-11-19T14:43:42-05:00|salathaniebrown-prog|chore(ci): force-track action-gh-release v3 workflow for immutable release archives",
-    "d494ffd90c2d9d911e8dca9e025eed1cdba4f2c2|2026-11-19T14:41:11-05:00|salathaniebrown-prog|feat(permanent-vault): lock 34-port unified fabric, 5x2 Cyber-Neon matrix & boot persistence [v2026.20261119-194105]",
-    "42006d685a74a67f447fc69b2812af7cb69c761f|2026-11-19T14:35:44-05:00|salathaniebrown-prog|feat(cyber-neon-3000): deploy native 5x2 single-screen Cyber-Neon observation matrix on port 3000",
-    "be512d745362d988b40e84902cf98906c0036627|2026-11-19T14:29:37-05:00|salathaniebrown-prog|feat(unify-grafana-v2): pass 4/4 TDD contracts, unify 34-port fabric & add 5x2 Cyber-Neon Grafana v2 dashboard",
-    "90070c27ed8ad9b697f03a89bdf78028e561ecec|2026-11-19T12:56:40-05:00|salathaniebrown-prog|feat(unify-cluster): unify 34-port autonomous fabric, /v1/cluster/unify, 8095 HTTP/JSON spine & gNMI OpenConfig stack",
-    "1f59df23e1255fc43f04145968b4c6448ac744d3|2026-11-19T08:39:05-05:00|salathaniebrown-prog|feat(neuro-mps-merkle): deploy C zero-copy ring buffer, TCAD/SKCF spike encoder, MPS tensor-train compression & Merkle WAL spine (8157)"
+    "1ed3d5b6db14a738664304c3987d90f4f184eddd|2026-11-19T16:43:31-05:00|salathaniebrown-prog|feat(dual-avatar-dock): embed ALSTRA cybernetic portrait & zero-typing one-tap dock in 8090 UI [v2026.20261119-214318]"
   ]
 }

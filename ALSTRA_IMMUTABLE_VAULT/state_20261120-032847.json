@@ -1,0 +1,1 @@
+{"ok": true, "unified_cluster": "ALSTRA_JEV_SYSTEM_ONE", "online_count": 16, "total_ports": 34, "online_ports": [8088, 8090, 8095, 8099, 8108, 8109, 8111, 8113, 8115, 8119, 8121, 8127, 8129, 8131, 8141, 8151], "views": ["/", "/spatial", "/radial", "/metrics", "/forensic", "/docs"]}
