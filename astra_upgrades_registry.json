@@ -1,0 +1,34 @@
+[
+  {
+    "name": "rw-revenue-exec-8169",
+    "kind": "additive_rw_engine",
+    "port": 8169,
+    "entry": "/data/data/com.termux/files/home/astra_revenue_exec_8169.py",
+    "ts": 1795189142,
+    "additive_only": true
+  },
+  {
+    "name": "vision-recovery-8104",
+    "kind": "additive_vision_wal_engine",
+    "port": 8104,
+    "entry": "/data/data/com.termux/files/home/vision_recovery.py",
+    "ts": 1795191347,
+    "additive_only": true
+  },
+  {
+    "name": "sovereign-pr-8171",
+    "kind": "additive_telemetry_pr_engine",
+    "port": 8171,
+    "entry": "/data/data/com.termux/files/home/astra_sovereign_pr_engine.py",
+    "ts": 1795193845,
+    "additive_only": true
+  },
+  {
+    "name": "alstra-dual-model-8173",
+    "kind": "additive_dual_model_router",
+    "port": 8173,
+    "entry": "/data/data/com.termux/files/home/astra_dual_model_router_8173.py",
+    "ts": 1795194581,
+    "additive_only": true
+  }
+]

@@ -180,6 +180,89 @@ class UnifiedGatewayHandler(http.server.BaseHTTPRequestHandler):
                 "status": "SYNCHRONIZED", "latency_ms": 1.4, "events": 72
             })
             self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Connection", "close"); self.send_header("Content-Length", str(len(raw))); self.end_headers(); self.wfile.write(raw); return
+        if p == "/hud3d":
+            import pathlib as _pl
+            _html = (_pl.Path.home() / "astra_core3d_hud.html").read_bytes()
+            self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.send_header("Cache-Control", "no-store"); self.send_header("Connection", "close"); self.send_header("Content-Length", str(len(_html))); self.end_headers(); self.wfile.write(_html); return
+
+        if p == "/ws/bus3d":
+            import base64 as _b64, hashlib as _hl, struct as _st, sys as _sys, time as _tm, pathlib as _pl
+            if str(_pl.Path.home()) not in _sys.path:
+                _sys.path.insert(0, str(_pl.Path.home()))
+            from astra_shm_schema import open_shm, read_frame_lockfree
+            key = self.headers.get("Sec-WebSocket-Key", "")
+            accept = _b64.b64encode(_hl.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
+            self.wfile.write((
+                "HTTP/1.1 101 Switching Protocols\r\n"
+                "Upgrade: websocket\r\nConnection: Upgrade\r\n"
+                f"Sec-WebSocket-Accept: {accept}\r\n\r\n"
+            ).encode())
+            self.wfile.flush()
+            _mm = open_shm(create=False)
+            try:
+                while True:
+                    _f = read_frame_lockfree(_mm)
+                    payload = _st.pack(
+                        "<8f",
+                        float(_f.seq), _f.ram_pct_x10 / 10.0, float(_f.ram_avail_kb // 1024),
+                        _f.write_ns / 1000.0, float(_f.ingress_pkts), float(_f.ingress_val),
+                        _f.cpu_pct_x10 / 10.0, 32.0
+                    )
+                    # RFC 6455 Binary Frame (FIN=1, opcode=0x02, len=32)
+                    self.wfile.write(bytes([0x82, len(payload)]) + payload)
+                    self.wfile.flush()
+                    _tm.sleep(0.05)
+            except Exception:
+                pass
+            finally:
+                _mm.close()
+            return
+
+        if p == "/api/bus/replay":
+            import sys as _sys, json as _json, pathlib as _pl
+            if str(_pl.Path.home()) not in _sys.path:
+                _sys.path.insert(0, str(_pl.Path.home()))
+            from astra_shm_schema import read_ring_snapshot
+            _raw = _json.dumps(read_ring_snapshot(128)).encode("utf-8")
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Cache-Control", "no-store"); self.send_header("Connection", "close"); self.send_header("Content-Length", str(len(_raw))); self.end_headers(); self.wfile.write(_raw); return
+
+        if p == "/api/bus/raw" or p == "/api/bus/frame":
+            import sys as _sys, json as _json, pathlib as _pl
+            if str(_pl.Path.home()) not in _sys.path:
+                _sys.path.insert(0, str(_pl.Path.home()))
+            from astra_shm_schema import open_shm, read_frame_lockfree, FRAME_SIZE
+            try:
+                _mm = open_shm(create=False)
+                _f = read_frame_lockfree(_mm)
+                if p == "/api/bus/raw":
+                    _raw = bytes(_f)
+                    _mm.close()
+                    self.send_response(200); self.send_header("Content-Type", "application/octet-stream"); self.send_header("Cache-Control", "no-store"); self.send_header("Connection", "close"); self.send_header("Content-Length", str(len(_raw))); self.end_headers(); self.wfile.write(_raw); return
+                _payload = {
+                    "magic": hex(_f.magic), "seq": _f.seq, "ts_ns": _f.ts_ns,
+                    "cpu_pct": _f.cpu_pct_x10 / 10.0, "ram_pct": _f.ram_pct_x10 / 10.0,
+                    "ram_avail_mb": _f.ram_avail_kb // 1024,
+                    "net_rx_bytes": _f.net_rx_bytes, "net_tx_bytes": _f.net_tx_bytes,
+                    "ingress_pkts": _f.ingress_pkts, "ingress_val": _f.ingress_val,
+                    "write_us": round(_f.write_ns / 1000.0, 2), "frame_bytes": FRAME_SIZE
+                }
+                _mm.close()
+                _raw = _json.dumps(_payload).encode("utf-8")
+                self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Cache-Control", "no-store"); self.send_header("Connection", "close"); self.send_header("Content-Length", str(len(_raw))); self.end_headers(); self.wfile.write(_raw); return
+            except Exception as _e:
+                return self._send_json({"ok": False, "bus": "offline", "error": str(_e)}, 503)
+
+        if p == "/sentinel" or p.startswith("/api/sentinel"):
+            import urllib.request as _ur
+            target = "http://127.0.0.1:8165" + (p.replace("/api/sentinel", "/api", 1) if p.startswith("/api/sentinel") else "/")
+            try:
+                with _ur.urlopen(target, timeout=3) as _r:
+                    _raw = _r.read()
+                    _ct = _r.headers.get("Content-Type", "application/json")
+                self.send_response(200); self.send_header("Content-Type", _ct); self.send_header("Connection", "close"); self.send_header("Content-Length", str(len(_raw))); self.end_headers(); self.wfile.write(_raw); return
+            except Exception as _e:
+                return self._send_json({"ok": False, "sentinel": "offline", "error": str(_e)}, 503)
+
         if p == "/metrics":
             return "http://127.0.0.1:8138/metrics"
         if p == "/radial" or p.startswith("/radial/"):

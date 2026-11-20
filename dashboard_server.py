@@ -780,7 +780,7 @@ ROUTES = {
     "/api/pro/": 8108, "/api/auto/": 8109, "/api/telemetry/": 8110, "/api/jev/": 8111, "/api/mp/": 8113, "/v1/chat/completions": 8111
 }
 
-HTML = """<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+HTML = """<!DOCTYPE html><html><head><!-- ASTRA_OMNI_SHIM --><script>(function(){var h=location.hostname;if(h==='127.0.0.1'||h==='localhost'||h.indexOf('192.168.')===0)return;var rx=new RegExp('^https?://[^/:]+:([0-9]+)(/.*)?$');var wrx=new RegExp('^wss?://[^/:]+:([0-9]+)(/.*)?$');function rw(u){if(typeof u!=='string')return u;var m=u.match(rx);if(m&&m[1]!=='8088'&&m[1]!=='8080')return location.origin+'/p/'+m[1]+(m[2]||'/');return u;}var of=window.fetch;window.fetch=function(i,init){if(typeof i==='string')i=rw(i);else if(i&&i.url)i=new Request(rw(i.url),i);return of.call(this,i,init);};var ox=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){arguments[1]=rw(u);return ox.apply(this,arguments);};var ow=window.WebSocket;window.WebSocket=function(u,pr){if(typeof u==='string'){var m=u.match(wrx);if(m){var wp=location.protocol==='https:'?'wss://':'ws://';u=wp+location.host+'/p/'+m[1]+(m[2]||'/');}}return pr?new ow(u,pr):new ow(u);};})();</script><!-- /ASTRA_OMNI_SHIM --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ASTRA + ALSTRA // JEV SYSTEM ONE COMMAND CENTER</title>
 <style>
 *{box-sizing:border-box}body{margin:0;padding:10px;background:#03070d;color:#e6f9ff;font-family:monospace}
@@ -1292,7 +1292,7 @@ function initiateVoiceDataLink() {
 <span id="sec-st" style="color:#aaddff;">LONGCAT-2.5 READY</span>
 </div><script>
 async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=d.mode+': '+(d.threat||d.grade||d.hardened.length+' OK');}
-</script></body>
+</script><!-- ASTRA_VISION_8104_WIDGET --><div id='vis8104' style='position:fixed;bottom:12px;right:12px;z-index:99999;background:#061022;border:1px solid #a855f7;padding:8px;border-radius:6px;font-family:monospace;color:#00f0ff;font-size:11px;'><b>VISION 8104 // SEAL</b><br><input type='file' id='v8f' accept='image/*' style='font-size:10px;max-width:185px;'><pre id='v8o' style='max-height:95px;max-width:240px;overflow:auto;color:#34d399;margin:4px 0 0;'></pre><script>document.getElementById('v8f').onchange=function(e){var fl=e.target&&e.target.files;var f=fl&&fl[0];if(!f)return;var o=document.getElementById('v8o');o.textContent='Sealing...';var r=new FileReader();r.onload=function(){fetch('http://'+location.hostname+':8104/api/vision/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,image_base64:r.result})}).then(function(x){return x.json()}).then(function(j){o.textContent=JSON.stringify(j,null,2)}).catch(function(z){o.textContent='Err:'+z})};r.readAsDataURL(f)};</script></div><!-- /ASTRA_VISION_8104_WIDGET --></body>
 
 
 
@@ -1579,10 +1579,16 @@ async function triggerMeshConsensusRun() {
 
 class UnifiedHandler(BaseHTTPRequestHandler):
     def _proxy(self):
+        import re as _re
         H = ".".join(["127","0","0","1"])
-        port = next((p for k, p in ROUTES.items() if self.path.startswith(k)), None)
-        if not port: return False
-        sub = self.path.replace("/dealership", "", 1) or "/"
+        m = _re.match(r"^/p/(\d+)(/.*)?$", self.path)
+        if m:
+            port = int(m.group(1))
+            sub = m.group(2) or "/"
+        else:
+            port = next((p for k, p in ROUTES.items() if self.path.startswith(k)), None)
+            if not port: return False
+            sub = self.path.replace("/dealership", "", 1) or "/"
         ln = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(ln) if (self.command == "POST" and ln > 0) else (b"{}" if self.command == "POST" else None)
         rq = urllib.request.Request(f"http://{H}:{port}{sub}", data=body, method=self.command)
@@ -2836,7 +2842,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             import hashlib as _hl
             _cid = self.path.split("/api/certificate")[-1].strip("/") or "INV-VERIFIED"
             _sig = "0x" + _hl.sha256(_cid.encode("utf-8")).hexdigest()
-            _html = f"<!DOCTYPE html><html><body style=\"background:#05080f;color:#00f0ff;font-family:monospace;padding:24px\"><h2>ASTRA // JEV CRYPTOGRAPHIC CERTIFICATE</h2><p style=\"color:#00ff88\">STATUS: VERIFIED &amp; SETTLED</p><p>RECORD ID: {_cid}</p><p>SHA-256 ATTESTATION: {_sig}</p><p>ISSUER: JEV PRIMARY INTENT ROUTER (PORT 8111)</p></body></html>".encode("utf-8")
+            _html = f"<!DOCTYPE html><html><body style=\"background:#05080f;color:#00f0ff;font-family:monospace;padding:24px\"><h2>ASTRA // JEV CRYPTOGRAPHIC CERTIFICATE</h2><p style=\"color:#00ff88\">STATUS: VERIFIED &amp; SETTLED</p><p>RECORD ID: {_cid}</p><p>SHA-256 ATTESTATION: {_sig}</p><p>ISSUER: JEV PRIMARY INTENT ROUTER (PORT 8111)</p><!-- ASTRA_DUAL_8173_WIDGET --><div id='dual8173' style='position:fixed;bottom:12px;left:12px;z-index:99999;background:#061022;border:1px solid #38bdf8;padding:8px;border-radius:6px;font-family:monospace;color:#7dd3fc;font-size:11px;max-width:260px;'><b>DUAL MODEL // :8173</b><br><button type='button' onclick='astraRunDual8173()' style='margin-top:4px;background:#0284c7;color:#fff;border:0;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:10px;'>Run Dual Dispatch</button><pre id='d8o' style='max-height:85px;overflow:auto;color:#34d399;margin:4px 0 0;font-size:10px;'>Ready</pre><script>function astraRunDual8173(){{var o=document.getElementById('d8o');o.textContent='Dispatching dual...';fetch('http://'+location.hostname+':8173/api/dual/dispatch',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{preset:'alstra_core_dual',model_a:'alstra-core-primary',model_b:'alstra-vision-merkle',prompt:'UI_8088_DUAL_RUN'}})}}).then(function(r){{return r.json();}}).then(function(j){{o.textContent=JSON.stringify(j,null,2);}}).catch(function(e){{o.textContent='Err:'+e;}});}}</script></div><!-- /ASTRA_DUAL_8173_WIDGET --></body></html>".encode("utf-8")
             self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.send_header("Content-Length", str(len(_html))); self.end_headers(); self.wfile.write(_html)
             return
         if self.path in ("/", "/index.html"):

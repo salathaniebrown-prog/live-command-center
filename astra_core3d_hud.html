@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>ASTRA // CORE3D ELITE TELEMETRY COCKPIT</title>
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#02060d;font-family:monospace;color:#e0f2fe;touch-action:none}
+  canvas{display:block;width:100%;height:100%}
+  #hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:10;flex-wrap:wrap}
+  .panel{background:rgba(4,12,24,0.82);border:1px solid #38bdf855;border-radius:8px;padding:10px 12px;backdrop-filter:blur(6px);pointer-events:auto}
+  .title{font-size:11px;color:#38bdf8;letter-spacing:1.1px;font-weight:bold;margin-bottom:6px}
+  .grid{display:grid;grid-template-columns:repeat(3,auto);gap:5px 12px;font-size:11px}
+  .k{color:#94a3b8}.v{color:#00ff9d;font-weight:bold}
+  .btns{display:flex;gap:6px;flex-wrap:wrap}
+  button{background:#0b1c36;color:#38bdf8;border:1px solid #38bdf888;border-radius:6px;padding:6px 9px;font-family:monospace;font-size:10px;cursor:pointer}
+  button.on{background:#00ff9d;color:#02060d;border-color:#00ff9d}
+  #status{font-size:10px;color:#f59e0b;margin-top:4px}
+  #replayBar{position:fixed;bottom:12px;left:12px;right:12px;z-index:10;display:flex;align-items:center;gap:10px}
+  input[type=range]{flex:1;accent-color:#38bdf8}
+</style>
+</head>
+<body>
+<div id="hud">
+  <div class="panel">
+    <div class="title">ASTRA // CORE3D CLOSED-LOOP BUS (:8088 ↔ :8090)</div>
+    <div class="grid">
+      <div><span class="k">SEQ:</span> <span class="v" id="seq">0</span></div>
+      <div><span class="k">RAM:</span> <span class="v" id="ram">0%</span></div>
+      <div><span class="k">WRITE:</span> <span class="v" id="wus">0 µs</span></div>
+      <div><span class="k">PKTS:</span> <span class="v" id="pkts">0</span></div>
+      <div><span class="k">FFT PEAK:</span> <span class="v" id="fft">0.00</span></div>
+      <div><span class="k">FPS:</span> <span class="v" id="fps">60</span></div>
+    </div>
+    <div id="status">WS: CONNECTING... | COMPUTE: INIT</div>
+  </div>
+  <div class="panel btns">
+    <button id="audioBtn">AUDIO: OFF</button>
+    <button id="orbitBtn" class="on">ORBIT: ON</button>
+    <button id="fsBtn">FULLSCREEN</button>
+  </div>
+</div>
+
+<div id="replayBar" class="panel">
+  <button id="replayBtn">TIME-TRAVEL: LIVE</button>
+  <input id="scrubber" type="range" min="0" max="127" value="127" disabled>
+  <span id="replayInfo" style="font-size:10px;color:#94a3b8">RING: 512 SLOTS</span>
+</div>
+
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.169.0/build/three.module.js';
+
+// --- 1. WebGPU Compute Shader (64-Bin Real-Time FFT) with JS Fallback ---
+let computeMode = 'CPU-DFT';
+let gpuDevice = null, fftPipeline = null, inBuf = null, outBuf = null, readBuf = null;
+const FFT_N = 64;
+const jitterRing = new Float32Array(FFT_N);
+let jitterIdx = 0;
+
+async function initWebGPUFFT() {
+  if (!navigator.gpu) return;
+  try {
+    const adapter = await navigator.gpu.requestAdapter();
+    if (!adapter) return;
+    gpuDevice = await adapter.requestDevice();
+    const shader = gpuDevice.createShaderModule({ code: `
+      @group(0) @binding(0) var<storage, read> samples : array<f32>;
+      @group(0) @binding(1) var<storage, read_write> mags : array<f32>;
+      @compute @workgroup_size(64)
+      fn main(@builtin(global_invocation_id) id : vec3<u32>) {
+        let k = id.x;
+        if (k >= 64u) { return; }
+        var re: f32 = 0.0; var im: f32 = 0.0;
+        for (var n: u32 = 0u; n < 64u; n = n + 1u) {
+          let ang = -6.2831853 * f32(k * n) / 64.0;
+          re = re + samples[n] * cos(ang);
+          im = im + samples[n] * sin(ang);
+        }
+        mags[k] = sqrt(re * re + im * im) / 64.0;
+      }
+    `});
+    fftPipeline = gpuDevice.createComputePipeline({ layout: 'auto', compute: { module: shader, entryPoint: 'main' } });
+    inBuf   = gpuDevice.createBuffer({ size: FFT_N * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+    outBuf  = gpuDevice.createBuffer({ size: FFT_N * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    readBuf = gpuDevice.createBuffer({ size: FFT_N * 4, usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST });
+    computeMode = 'WebGPU-FFT';
+  } catch (_) {}
+}
+initWebGPUFFT();
+
+async function runFFTAnomaly() {
+  if (gpuDevice && fftPipeline && readBuf.mapState === 'unmapped') {
+    gpuDevice.queue.writeBuffer(inBuf, 0, jitterRing);
+    const bg = gpuDevice.createBindGroup({
+      layout: fftPipeline.getBindGroupLayout(0),
+      entries: [{ binding: 0, resource: { buffer: inBuf } }, { binding: 1, resource: { buffer: outBuf } }]
+    });
+    const enc = gpuDevice.createCommandEncoder();
+    const pass = enc.beginComputePass();
+    pass.setPipeline(fftPipeline); pass.setBindGroup(0, bg); pass.dispatchWorkgroups(1); pass.end();
+    enc.copyBufferToBuffer(outBuf, 0, readBuf, 0, FFT_N * 4);
+    gpuDevice.queue.submit([enc.finish()]);
+    await readBuf.mapAsync(GPUMapMode.READ);
+    const mags = new Float32Array(readBuf.getMappedRange());
+    let peak = 0; for (let i = 1; i < 32; i++) if (mags[i] > peak) peak = mags[i];
+    readBuf.unmap();
+    return peak;
+  }
+  let peak = 0;
+  for (let k = 1; k < 16; k++) {
+    let re = 0, im = 0;
+    for (let n = 0; n < FFT_N; n++) {
+      const a = -6.2831853 * k * n / FFT_N;
+      re += jitterRing[n] * Math.cos(a);
+      im += jitterRing[n] * Math.sin(a);
+    }
+    const m = Math.hypot(re, im) / FFT_N;
+    if (m > peak) peak = m;
+  }
+  return peak;
+}
+
+// --- 2. Spatial WebAudio Sonification ---
+let audioCtx = null, osc = null, gain = null, panner = null, audioOn = false;
+const audioBtn = document.getElementById('audioBtn');
+audioBtn.onclick = () => {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    osc = audioCtx.createOscillator(); gain = audioCtx.createGain(); panner = audioCtx.createPanner();
+    panner.panningModel = 'HRTF'; osc.type = 'sine'; osc.frequency.value = 220; gain.gain.value = 0.0;
+    osc.connect(gain).connect(panner).connect(audioCtx.destination); osc.start();
+  }
+  audioOn = !audioOn;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  gain.gain.setTargetAtTime(audioOn ? 0.04 : 0.0, audioCtx.currentTime, 0.05);
+  audioBtn.textContent = audioOn ? 'AUDIO: ON' : 'AUDIO: OFF';
+  audioBtn.classList.toggle('on', audioOn);
+};
+
+// --- 3. Three.js WebGL2 Instanced Cockpit + Native Touch/Mouse Orbit ---
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x02060d);
+scene.fog = new THREE.FogExp2(0x02060d, 0.018);
+
+const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 200);
+let yaw = 0, pitch = 0.55, radius = 32, autoRotate = true;
+let dragging = false, lastX = 0, lastY = 0, pinchDist = 0;
+
+renderer.domElement.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+window.addEventListener('pointerup', () => { dragging = false; });
+window.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  yaw -= (e.clientX - lastX) * 0.007;
+  pitch = Math.max(0.12, Math.min(1.45, pitch + (e.clientY - lastY) * 0.007));
+  lastX = e.clientX; lastY = e.clientY;
+});
+renderer.domElement.addEventListener('wheel', (e) => { radius = Math.max(10, Math.min(60, radius + e.deltaY * 0.02)); }, { passive: true });
+renderer.domElement.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2) {
+    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    if (pinchDist > 0) radius = Math.max(10, Math.min(60, radius - (d - pinchDist) * 0.08));
+    pinchDist = d;
+  }
+}, { passive: true });
+renderer.domElement.addEventListener('touchend', () => { pinchDist = 0; });
+
+const U = { uTime: { value: 0 }, uRam: { value: 0.8 }, uBurst: { value: 0.0 }, uAnomaly: { value: 0.0 } };
+
+const PORT_COUNT = 28, SWARM_COUNT = 2048, TOTAL_NODES = PORT_COUNT + SWARM_COUNT;
+const nodeGeo = new THREE.BoxGeometry(0.45, 1.0, 0.45);
+const aOffset = new Float32Array(TOTAL_NODES * 3), aMeta = new Float32Array(TOTAL_NODES * 3);
+for (let i = 0; i < TOTAL_NODES; i++) {
+  const isPort = i < PORT_COUNT;
+  const ang = isPort ? (i / PORT_COUNT) * Math.PI * 2 : ((i - PORT_COUNT) * 2.399963) % (Math.PI * 2);
+  const r = isPort ? 10.0 : 3.5 + Math.sqrt((i - PORT_COUNT) / SWARM_COUNT) * 14.5;
+  aOffset[i*3] = Math.cos(ang) * r; aOffset[i*3+1] = isPort ? 0 : -0.4; aOffset[i*3+2] = Math.sin(ang) * r;
+  aMeta[i*3] = isPort ? 1.0 : 0.0; aMeta[i*3+1] = ang; aMeta[i*3+2] = r;
+}
+nodeGeo.setAttribute('aOffset', new THREE.InstancedBufferAttribute(aOffset, 3));
+nodeGeo.setAttribute('aMeta',   new THREE.InstancedBufferAttribute(aMeta, 3));
+
+const nodeMat = new THREE.ShaderMaterial({
+  uniforms: U,
+  vertexShader: `
+    attribute vec3 aOffset; attribute vec3 aMeta;
+    uniform float uTime, uRam, uBurst, uAnomaly;
+    varying float vElev; varying float vIsPort;
+    void main() {
+      vIsPort = aMeta.x;
+      float wave = sin(aMeta.z * 0.65 - uTime * (2.6 + uBurst * 4.0) + aMeta.y) * 0.5 + 0.5;
+      float elev = mix(0.25 + wave * 1.4, 1.2 + uRam * 4.5 + wave * 1.6 + uBurst * 1.8 + uAnomaly * 1.5, vIsPort);
+      vElev = elev;
+      vec3 pos = position;
+      pos.x *= mix(0.35, 1.35, vIsPort); pos.z *= mix(0.35, 1.35, vIsPort);
+      pos.y = (pos.y + 0.5) * elev;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos + aOffset, 1.0);
+    }
+  `,
+  fragmentShader: `
+    varying float vElev; varying float vIsPort; uniform float uRam, uBurst;
+    void main() {
+      vec3 col = mix(vec3(0.0, 0.95, 0.65), vec3(0.22, 0.74, 0.97), smoothstep(0.0, 0.55, clamp(vElev/5.5,0.0,1.0)));
+      col = mix(col, vec3(0.96, 0.25, 0.37), smoothstep(0.55, 1.0, clamp(vElev/5.5,0.0,1.0)) * uRam);
+      col = mix(col, vec3(0.7, 1.0, 0.95), uBurst * 0.45 * vIsPort);
+      gl_FragColor = vec4(col * mix(0.55, 1.25, vIsPort), 1.0);
+    }
+  `
+});
+const mesh = new THREE.InstancedMesh(nodeGeo, nodeMat, TOTAL_NODES);
+mesh.frustumCulled = false; scene.add(mesh);
+
+// GPU Bézier Packet Arcs
+const ARC_COUNT = 28, SEGMENTS = 48;
+const arcGeo = new THREE.BufferGeometry();
+const arcT = new Float32Array(ARC_COUNT * SEGMENTS), arcId = new Float32Array(ARC_COUNT * SEGMENTS);
+for (let a = 0; a < ARC_COUNT; a++) for (let s = 0; s < SEGMENTS; s++) { arcT[a*SEGMENTS+s] = s/(SEGMENTS-1); arcId[a*SEGMENTS+s] = a; }
+arcGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(ARC_COUNT * SEGMENTS * 3), 3));
+arcGeo.setAttribute('aT', new THREE.BufferAttribute(arcT, 1));
+arcGeo.setAttribute('aId', new THREE.BufferAttribute(arcId, 1));
+scene.add(new THREE.Points(arcGeo, new THREE.ShaderMaterial({
+  uniforms: U, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  vertexShader: `
+    attribute float aT; attribute float aId; uniform float uTime, uRam, uBurst; varying float vPulse;
+    void main() {
+      float ang = (aId / 28.0) * 6.2831853;
+      vec3 p0 = vec3(cos(ang)*10.0, 1.4, sin(ang)*10.0);
+      vec3 p2 = vec3(0.0, 2.2 + uRam*2.5 + uBurst*1.5, 0.0);
+      vec3 p1 = vec3(cos(ang)*5.0, 7.5 + uBurst*3.0 + sin(aId+uTime)*1.2, sin(ang)*5.0);
+      float u = 1.0 - aT;
+      vec3 pos = u*u*p0 + 2.0*u*aT*p1 + aT*aT*p2;
+      float speed = (1.6 + mod(aId, 5.0)*0.25) * (1.0 + uBurst*3.5);
+      vPulse = smoothstep(0.68 - uBurst*0.2, 1.0, fract(aT - uTime*speed + aId*0.17));
+      gl_PointSize = mix(2.0, 7.5 + uBurst*4.5, vPulse);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    }
+  `,
+  fragmentShader: `
+    varying float vPulse; uniform float uBurst;
+    void main() {
+      vec3 col = mix(mix(vec3(0.1,0.55,0.95), vec3(0.0,1.0,0.72), vPulse), vec3(1.0,0.95,0.65), uBurst*vPulse);
+      gl_FragColor = vec4(col, 0.25 + vPulse * 0.75);
+    }
+  `
+})));
+
+// --- 4. Live WS + Time-Travel Replay Scrubber ---
+const statusEl = document.getElementById('status');
+const replayBtn = document.getElementById('replayBtn');
+const scrubber = document.getElementById('scrubber');
+const replayInfo = document.getElementById('replayInfo');
+let replayMode = false, replayFrames = [], lastPkts = -1;
+
+replayBtn.onclick = async () => {
+  replayMode = !replayMode;
+  if (replayMode) {
+    replayFrames = await (await fetch('/api/bus/replay')).json();
+    scrubber.max = Math.max(0, replayFrames.length - 1);
+    scrubber.value = scrubber.max; scrubber.disabled = false;
+    replayBtn.textContent = 'TIME-TRAVEL: REPLAY'; replayBtn.classList.add('on');
+    replayInfo.textContent = `LOADED ${replayFrames.length} FRAMES`;
+  } else {
+    scrubber.disabled = true; replayBtn.textContent = 'TIME-TRAVEL: LIVE';
+    replayBtn.classList.remove('on'); replayInfo.textContent = 'RING: 512 SLOTS';
+  }
+};
+scrubber.oninput = () => {
+  const f = replayFrames[parseInt(scrubber.value, 10)];
+  if (!f) return;
+  U.uRam.value = f.ram_pct / 100.0;
+  document.getElementById('seq').textContent = f.seq;
+  document.getElementById('ram').textContent = f.ram_pct.toFixed(1) + '%';
+  document.getElementById('wus').textContent = f.write_us.toFixed(0) + ' µs';
+  document.getElementById('pkts').textContent = f.pkts;
+  replayInfo.textContent = `SEQ ${f.seq} | CORE ${f.core} | ACT ${f.actuations}`;
+};
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+  const ws = new WebSocket(`${proto}${location.host}/ws/bus3d`);
+  ws.binaryType = 'arraybuffer';
+  ws.onopen = () => { statusEl.textContent = `WS: ZERO-COPY (32B) | COMPUTE: ${computeMode}`; statusEl.style.color = '#00ff9d'; };
+  ws.onmessage = async (ev) => {
+    if (replayMode) return;
+    const f = new Float32Array(ev.data);
+    U.uRam.value = f[1] / 100.0;
+    if (lastPkts >= 0 && f[4] > lastPkts) U.uBurst.value = 1.0;
+    lastPkts = f[4];
+    jitterRing[jitterIdx++ % FFT_N] = f[3];
+    document.getElementById('seq').textContent = Math.floor(f[0]);
+    document.getElementById('ram').textContent = f[1].toFixed(1) + '%';
+    document.getElementById('wus').textContent = f[3].toFixed(0) + ' µs';
+    document.getElementById('pkts').textContent = Math.floor(f[4]);
+    if (jitterIdx % 4 === 0) {
+      const peak = await runFFTAnomaly();
+      U.uAnomaly.value = Math.min(peak / 500.0, 1.0);
+      document.getElementById('fft').textContent = peak.toFixed(1);
+      if (audioOn && osc && panner) {
+        osc.frequency.setTargetAtTime(180 + Math.min(peak * 0.6, 660) + U.uBurst.value * 240, audioCtx.currentTime, 0.04);
+        panner.setPosition(Math.sin(U.uTime.value) * 3, 0, Math.cos(U.uTime.value) * 3);
+      }
+    }
+  };
+  ws.onclose = () => { statusEl.textContent = 'WS: RECONNECTING...'; statusEl.style.color = '#f59e0b'; setTimeout(connectWS, 1500); };
+}
+connectWS();
+
+const orbitBtn = document.getElementById('orbitBtn');
+orbitBtn.onclick = () => { autoRotate = !autoRotate; orbitBtn.textContent = autoRotate ? 'ORBIT: ON' : 'ORBIT: OFF'; orbitBtn.classList.toggle('on', autoRotate); };
+document.getElementById('fsBtn').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); };
+window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+
+let frames = 0, lastFps = performance.now();
+function animate(now) {
+  requestAnimationFrame(animate);
+  U.uTime.value = now * 0.001;
+  U.uBurst.value *= 0.94;
+  if (autoRotate && !dragging) yaw += 0.004;
+  camera.position.set(
+    Math.sin(yaw) * Math.cos(pitch) * radius,
+    Math.sin(pitch) * radius,
+    Math.cos(yaw) * Math.cos(pitch) * radius
+  );
+  camera.lookAt(0, 1.5, 0);
+  renderer.render(scene, camera);
+  frames++;
+  if (now - lastFps >= 1000) { document.getElementById('fps').textContent = frames; frames = 0; lastFps = now; }
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "created_at": 1795194583,
+  "runs": [
+    {
+      "id": "dual_66131fc543",
+      "ts": 1795194585,
+      "preset": "alstra_core_dual",
+      "prompt": "DUAL_MODEL_RUN",
+      "models": [
+        {
+          "model": "alstra-core-primary",
+          "role": "PRIMARY",
+          "digest": "65697c50cd5d3a36",
+          "status": "COMMITTED"
+        },
+        {
+          "model": "alstra-vision-merkle",
+          "role": "SECONDARY_PARALLEL",
+          "digest": "b3df63c51f363206",
+          "status": "COMMITTED"
+        }
+      ]
+    },
+    {
+      "id": "dual_7660284db6",
+      "ts": 1795194639,
+      "preset": "alstra_core_dual",
+      "prompt": "VERIFY_DUAL_UI_WIRE",
+      "models": [
+        {
+          "model": "alstra-core-primary",
+          "role": "PRIMARY",
+          "digest": "80feb84f4f27a4bb",
+          "status": "COMMITTED"
+        },
+        {
+          "model": "alstra-vision-merkle",
+          "role": "SECONDARY_PARALLEL",
+          "digest": "186a0b61d3ab21dd",
+          "status": "COMMITTED"
+        }
+      ]
+    }
+  ],
+  "updated_at": 1795194639
+}

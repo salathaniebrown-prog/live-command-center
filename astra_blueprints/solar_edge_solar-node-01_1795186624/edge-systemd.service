@@ -1,0 +1,10 @@
+[Unit]
+Description=ASTRA Solar Edge Telemetry & Actuator
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/astra/solar_controller.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

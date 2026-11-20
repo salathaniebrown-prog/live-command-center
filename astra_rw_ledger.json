@@ -1,0 +1,70 @@
+{
+  "created_at": 1795189145,
+  "balance_usd": 250000.0,
+  "total_calls": 2,
+  "keys": {
+    "ak_live_demo_001": {
+      "owner": "investor_sandbox",
+      "tier": "enterprise_unlimited",
+      "calls": 2,
+      "spend_usd": 0.1,
+      "active": true
+    }
+  },
+  "jobs": [
+    {
+      "id": "job_b4ec4aa28578",
+      "ts": 1795189147,
+      "api_key": "ak_live_demo_001",
+      "type": "hash_payload",
+      "cost_usd": 0.05,
+      "elapsed_ms": 0.097,
+      "result": {
+        "dispatched_type": "hash_payload",
+        "payload": {
+          "deal": "ASTRA_SERIES_A",
+          "stack": "36_PORTS_LIVE"
+        },
+        "sha256": "07a000108f205a7d619ce163b9f6fb2c5e3b97921c920884c59d10536f80cdab"
+      },
+      "status": "COMPLETED"
+    },
+    {
+      "id": "job_f7d334c63766",
+      "ts": 1795194696,
+      "api_key": "ak_live_demo_001",
+      "type": "agent_task",
+      "cost_usd": 0.05,
+      "elapsed_ms": 0.015,
+      "result": {
+        "dispatched_type": "agent_task",
+        "payload": {
+          "agent_port": 8145,
+          "action": "VERIFY_AGENT_LANE_OPEN"
+        }
+      },
+      "status": "COMPLETED"
+    }
+  ],
+  "events": [
+    {
+      "ts": 1795189147,
+      "type": "TOPUP_USD",
+      "amount_usd": 250000.0,
+      "balance_usd": 250000.0
+    },
+    {
+      "ts": 1795189147,
+      "type": "JOB_EXECUTED",
+      "job_id": "job_b4ec4aa28578",
+      "cost_usd": 0.05
+    },
+    {
+      "ts": 1795194696,
+      "type": "JOB_EXECUTED",
+      "job_id": "job_f7d334c63766",
+      "cost_usd": 0.05
+    }
+  ],
+  "updated_at": 1795194696
+}
