@@ -1,5 +1,5 @@
 fastapi>=0.115.6
-starlette>=0.41.3
+starlette>=1.7.0
 uvicorn>=0.32.1
 cryptography>=44.0.0
 httpx>=0.28.1
