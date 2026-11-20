@@ -1,0 +1,28 @@
+services:
+  astra-zero-trust-stack:
+    build: .
+    container_name: astra-orbital-stack
+    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.5"
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
+    volumes:
+      - astra_keys:/home/astra/.astra_keys
+      - astra_data:/home/astra/data
+    ports:
+      - "127.0.0.1:8088:8088"
+      - "127.0.0.1:8099:8099"
+      - "127.0.0.1:8101:8101"
+      - "127.0.0.1:8102:8102"
+volumes:
+  astra_keys:
+  astra_data:
