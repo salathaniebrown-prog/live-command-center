@@ -1,6 +1,6 @@
 import base64, hashlib, http.server, json, os, pathlib, socket, socketserver, subprocess, time, urllib.parse, urllib.request
 
-PORT = 8088
+PORT = 8089
 HOME = pathlib.Path.home()
 
 def probe_port(port, timeout=0.3):
@@ -78,6 +78,26 @@ def list_workspace(rel_path=""):
         pass
     parent = "" if target == HOME.resolve() else str(target.parent.relative_to(HOME))
     return {"type": "dir", "path": str(target.relative_to(HOME)) if target != HOME.resolve() else "", "parent": parent, "items": items[:120]}
+
+def write_workspace_file(rel_path, content):
+    target = (HOME / rel_path).resolve()
+    if not str(target).startswith(str(HOME.resolve())):
+        return {"ok": False, "error": "Path outside HOME"}
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(content, encoding="utf-8")
+    return {"ok": True, "path": str(target.relative_to(HOME)), "bytes": len(content.encode("utf-8"))}
+
+def proxy_provision(target, name="node"):
+    try:
+        req = urllib.request.Request(
+            "http://127.0.0.1:8143/api/provision",
+            data=json.dumps({"target": target, "name": name}).encode(),
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=3) as r:
+            return json.loads(r.read().decode())
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 
 def proxy_teleport(action, slot="default", state=None):
     try:
@@ -196,6 +216,13 @@ HTML = r'''<!doctype html>
       <button class="tp" onclick="teleport('push')">⬆ PUSH STATE (:8101)</button>
       <button class="tp" onclick="teleport('pull')">⬇ PULL STATE (:8101)</button>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px">
+      <button onclick="prov('gpu_datacenter')">GPU DC</button>
+      <button onclick="prov('supercomputer')">HPC</button>
+      <button onclick="prov('solar_edge')">SOLAR</button>
+      <button onclick="prov('pc_node')">PC</button>
+      <button onclick="prov('ai_agent')">AGENT</button>
+    </div>
     <div id="agentLog" class="scroll">Standing by for trigger or State Teleport...</div>
   </section>
 
@@ -290,6 +317,21 @@ async function teleport(action) {
   logStream(`[TELEPORT :8101] ${action.toUpperCase()} -> ${d.ok ? 'SYNCED' : d.error}`);
 }
 
+async function saveFile(path) {
+  const content = document.getElementById('fileEditor').value;
+  const r = await fetch('/api/fs/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ path, content }) });
+  const d = await r.json();
+  logStream(`[WRITE] ${d.ok ? 'SAVED ' + d.path + ' (' + d.bytes + 'B)' : 'ERR: ' + d.error}`);
+}
+async function prov(target) {
+  $('trigTarget').textContent = 'PROVISIONING...';
+  const r = await fetch('/api/provision', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ target, name: 'build' }) });
+  const d = await r.json();
+  $('trigTarget').textContent = d.ok ? 'BUILT' : 'ERR';
+  $('agentLog').textContent = JSON.stringify(d, null, 2);
+  logStream(`[PROVISION :8143] ${target} -> ${d.ok ? d.bundle_dir : d.error}`);
+  if (d.ok) loadDir('astra_blueprints');
+}
 async function loadDir(rel = '') {
   currentCwd = rel;
   const r = await fetch('/api/fs?path=' + encodeURIComponent(rel));
@@ -297,7 +339,14 @@ async function loadDir(rel = '') {
   $('cwdLabel').textContent = '~/' + (d.path || '');
   const box = $('fileList');
   if (d.type === 'file') {
-    box.innerHTML = `<div class="fitem dir" onclick="loadDir('${d.path.split('/').slice(0,-1).join('/')}')">⬅ BACK TO FOLDER</div><pre style="margin-top:6px;color:#00ff9d">${d.content.replace(/</g,'&lt;')}</pre>`;
+    const parentDir = d.path.split('/').slice(0,-1).join('/');
+    box.innerHTML = `
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <button onclick="loadDir('${parentDir}')">⬅ BACK</button>
+        <button class="tp" onclick="saveFile('${d.path}')">💾 SAVE TO DISK</button>
+      </div>
+      <textarea id="fileEditor" style="width:100%;height:calc(100% - 34px);resize:none;background:#02060d;color:#00ff9d;border:1px solid #38bdf866;border-radius:6px;padding:6px;font-family:monospace;font-size:11px"></textarea>`;
+    document.getElementById('fileEditor').value = d.content;
     return;
   }
   let html = d.path ? `<div class="fitem dir" onclick="loadDir('${d.parent}')">⬅ ..</div>` : '';
@@ -371,6 +420,10 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         n = int(self.headers.get("Content-Length", "0"))
         body = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+        if self.path == "/api/fs/save":
+            return self._send(200, "application/json", json.dumps(write_workspace_file(body.get("path", ""), body.get("content", ""))))
+        if self.path == "/api/provision":
+            return self._send(200, "application/json", json.dumps(proxy_provision(body.get("target", "gpu_datacenter"), body.get("name", "build"))))
         if self.path == "/api/trigger":
             return self._send(200, "application/json", json.dumps(run_trigger(body.get("kind", ""), body.get("code", ""))))
         if self.path == "/api/teleport":
