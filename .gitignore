@@ -27,3 +27,10 @@ astra-mediapipe-tasks/models/*.tflite
 *.db-wal
 *.db-shm
 *.bak
+*.db
+*.db-wal
+*.db-shm
+astra_rw_ledger.json
+ASTRA_IMMUTABLE_VAULT/
+.pm2/
+*.bak.*
