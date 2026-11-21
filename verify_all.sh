@@ -3,7 +3,7 @@ python3 - << 'PY'
 import http.client, json, os
 
 ports = [
-    (8088, "COMMAND_CENTER_DEALERSHIP_UI"),
+    (8098, "COMMAND_CENTER_DEALERSHIP_UI"),
     (8108, "STUDIO_PRO_ENGINE"),
     (8109, "AUTO_ASTRA_MODEL_ROUTER"),
     (8111, "JEV_INVOICE_AGENT"),
@@ -19,7 +19,7 @@ for port, label in ports:
         res = conn.getresponse()
         body = res.read().decode("utf-8", errors="ignore")
         extra = {}
-        if port == 8088:
+        if port == 8098:
             extra["dealership_ui_loaded"] = ("DEALERSLINK" in body or "DEALERSHIP" in body.upper())
             extra["webhook_ticker_loaded"] = ("astra-webhook-ticker" in body)
         results.append({"port": port, "service": label, "status": "ONLINE", "http": res.status, **extra})

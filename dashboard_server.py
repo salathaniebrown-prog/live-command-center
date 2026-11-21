@@ -1,3 +1,4 @@
+import os as _os
 
 def fetch_live_ci_telemetry():
     import json, os, subprocess, urllib.request
@@ -227,7 +228,7 @@ def get_live_kpis(force_rpc=False):
     import http.client, os, sqlite3, time
     t0 = time.time()
     online = 0
-    for port in (8088, 8108, 8109, 8111, 8113, 8115):
+    for port in (8098, 8108, 8109, 8111, 8113, 8115):
         try:
             c = http.client.HTTPConnection("127.0.0.1", port, timeout=1)
             c.request("GET", "/")
@@ -663,7 +664,7 @@ def get_live_kpis(force_rpc=False):
     import http.client, os, sqlite3, time
     t0 = time.time()
     online = 0
-    for port in (8088, 8108, 8109, 8111, 8113, 8115):
+    for port in (8098, 8108, 8109, 8111, 8113, 8115):
         try:
             c = http.client.HTTPConnection("127.0.0.1", port, timeout=1)
             c.request("GET", "/")
@@ -1298,7 +1299,7 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
 
 
 
-<div id="astra-ci-badge" style="position:fixed;top:46px;right:14px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(5,12,24,0.95);border:1px solid #00ff8088;padding:4px 8px;box-shadow:0 0 12px rgba(0,255,136,0.25);font-family:monospace;">
+<div id="astra-ci-badge" style="position:fixed;top:46px;right:14px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(5,12,24,0.95);border:1px solid #00ff8098;padding:4px 8px;box-shadow:0 0 12px rgba(0,255,136,0.25);font-family:monospace;">
   <button id="btn-run-mesh" onclick="openAndRunSupercomputerMesh()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🧠 RUN 4-GATE MESH</button>
   <button onclick="openCinemaMcpModal()" style="background:#00f0ff22;border:1px solid #00f0ff;color:#00f0ff;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🎬 CINEMA MCP</button>
   <button onclick="openTrustPortalModal()" style="background:#00ff8822;border:1px solid #00ff88;color:#00ff88;font-size:10px;font-weight:bold;padding:3px 7px;cursor:pointer;">🛡️ TRUST PORTAL</button>
@@ -2017,7 +2018,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             # === OMEGA_V10_SWARM_ENGINE ===
             _t0 = _tm.time()
             _home = _os.path.expanduser("~")
-            _ports = [8088, 8099, 8108, 8109, 8111, 8113, 8115, 8121, 8123, 8125, 8127, 8129, 8131]
+            _ports = [8098, 8099, 8108, 8109, 8111, 8113, 8115, 8121, 8123, 8125, 8127, 8129, 8131]
             _on = 0
             for _p in _ports:
                 _s = _sk.socket(); _s.settimeout(0.05)
@@ -2070,8 +2071,8 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                 # Seed core genius capabilities if empty
                 if _mc.execute("SELECT COUNT(*) FROM brain_skills").fetchone()[0] == 0:
                     _seeds = [
-                        ("mobile mechanic", "1) Dispatch Greensboro/Winston-Salem mobile mechanic route (8088) -> 2) Generate itemized repair invoice (8111) -> 3) Arm BASE_USDC escrow webhook (8115)."),
-                        ("lawn care", "1) Calculate commercial lot acreage & Triad corridor route (8088) -> 2) Schedule recurring SLA saga (8123) -> 3) Log invoice & WAL backup."),
+                        ("mobile mechanic", "1) Dispatch Greensboro/Winston-Salem mobile mechanic route (8098) -> 2) Generate itemized repair invoice (8111) -> 3) Arm BASE_USDC escrow webhook (8115)."),
+                        ("lawn care", "1) Calculate commercial lot acreage & Triad corridor route (8098) -> 2) Schedule recurring SLA saga (8123) -> 3) Log invoice & WAL backup."),
                         ("crypto arbitrage", "1) Poll live ETH/USD spot feed (8113) -> 2) Verify 4-Gate Supercomputer risk quorum (8119) -> 3) Record signed attestation in WAL ledger.")
                     ]
                     for _sk_k, _sk_v in _seeds:
@@ -2103,7 +2104,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                 _mem_count = 1
                 _skill_count = 3
 
-            _ports = [8088, 8099, 8108, 8109, 8111, 8113, 8115, 8121, 8123, 8125, 8127, 8129, 8131]
+            _ports = [8098, 8099, 8108, 8109, 8111, 8113, 8115, 8121, 8123, 8125, 8127, 8129, 8131]
             _on = 0
             for _p in _ports:
                 _s = _sk.socket(); _s.settimeout(0.05)
@@ -2192,7 +2193,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                 _jobs = len(_os.listdir(_lab_dir))
                 _reply = f"AI SUPERCOMPUTER TRAINING LAB: Gemini 2.5 Pro + Nano Banana 2 visual synthesis + local PyTorch/ONNX workstation pipeline active ({_jobs} training manifests in ~/astra_training_lab). Use 'Train model: <task>' to queue a run."
             elif any(w in _low for w in ["car purchase", "buy car", "vehicle", "dealership"]):
-                _reply = "CAR PURCHASE EXECUTION PIPELINE: 1) Pull live vehicle VIN & valuation on Port 8099 -> 2) Lock BASE_USDC/ETH escrow via Port 8115 -> 3) Generate binding Bill of Sale & Buyer Order on Invoice Agent (8111) -> 4) Dispatch Greensboro Triad transport (8088)."
+                _reply = "CAR PURCHASE EXECUTION PIPELINE: 1) Pull live vehicle VIN & valuation on Port 8099 -> 2) Lock BASE_USDC/ETH escrow via Port 8115 -> 3) Generate binding Bill of Sale & Buyer Order on Invoice Agent (8111) -> 4) Dispatch Greensboro Triad transport (8098)."
             elif any(w in _low for w in ["faceless", "streaming", "100,000", "100k", "youtube", "channel"]):
                 _reply = "$100K/MO FACELESS STREAMING ENGINE: Math = 3 high-retention long-form + 6 Shorts/day across 3 monetized channels @ $12-$18 RPM + digital product funnel (~6.2M monthly views). Pipeline: 1) Research viral hooks (Sec 8) -> 2) Generate Banana 2 visuals + TTS narration -> 3) Render 2.39:1 / 9:16 via Cinema MCP (8121)."
             elif any(w in _low for w in ["email", "smtp", "workstation", "server"]):
@@ -2235,7 +2236,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/mesh") or self.path.startswith("/api/4gate"):
             _b = _js.dumps({
                 "status": "GREEN_PASS",
-                "nodes_coordinated": ["8088", "8099", "8108", "8109", "8111", "8113", "8115", "8119", "8121", "8123", "8125", "8127", "8131"],
+                "nodes_coordinated": ["8098", "8099", "8108", "8109", "8111", "8113", "8115", "8119", "8121", "8123", "8125", "8127", "8131"],
                 "synthesized_output": "4-GATE SUPERCOMPUTER VALIDATOR: All 4 gates (Syntax, Quorum, WAL Ledger, Cryptographic Attestation) PASSED.",
                 "attestation_hash": "0x" + _hl.sha256(str(_tm.time()).encode()).hexdigest()[:32]
             }).encode("utf-8")
@@ -2281,7 +2282,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/studio/autopilot"):
             _c = _sp.getoutput("git -C ~/astra-enterprise-core rev-parse --short HEAD").strip() or "7dec523"
             _acts = [
-                "Verified 13/13 cluster ports (8088-8131) ONLINE",
+                "Verified 13/13 cluster ports (8098-8131) ONLINE",
                 f"Synchronized origin/main @ commit {_c}",
                 "Validated SQLite WAL ledgers & Telemetry Spine"
             ]
@@ -2428,7 +2429,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/polyglot/run"):
             _lang = (_data.get("lang") or _data.get("language") or "PYTHON").upper()
             _t0 = _tm.time()
-            _out = f"[{_lang} RUNTIME PROBE] Cluster nodes 8088-8131 verified | WAL SQLite ledgers healthy."
+            _out = f"[{_lang} RUNTIME PROBE] Cluster nodes 8098-8131 verified | WAL SQLite ledgers healthy."
             _ms = max(1, int((_tm.time() - _t0) * 1000) + 3)
             _b = _js.dumps({"status": "OK", "language": _lang, "exit_code": 0, "duration_ms": _ms, "output": _out}).encode("utf-8")
             self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(_b))); self.end_headers(); self.wfile.write(_b)
@@ -2453,7 +2454,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                 "python_version": "3.13.13",
                 "commit": _c,
                 "actions": [
-                    "Cluster Mesh Quorum: all core ports active (8088, 8099, 8108, 8109, 8111, 8113, 8115, 8121, 8123, 8125, 8127)",
+                    "Cluster Mesh Quorum: all core ports active (8098, 8099, 8108, 8109, 8111, 8113, 8115, 8121, 8123, 8125, 8127)",
                     f"GitHub Auto-Pilot synced on origin/main @ commit {_c}",
                     "SQLite WAL ledgers verified intact"
                 ]
@@ -2715,7 +2716,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         # === TELEMETRY_SPINE_CACHE_API_V1 ===
         import json as _js, time as _tm, socket as _sk, os as _os
         if self.path.startswith("/api/telemetry/spine"):
-            _ports = [8088, 8099, 8108, 8109, 8111, 8113, 8115, 8121, 8123, 8125, 8127, 8129, 8131]
+            _ports = [8098, 8099, 8108, 8109, 8111, 8113, 8115, 8121, 8123, 8125, 8127, 8129, 8131]
             _status = {}
             _online = 0
             for _p in _ports:
@@ -2836,7 +2837,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             import hashlib as _hl
             _cid = self.path.split("/api/certificate")[-1].strip("/") or "INV-VERIFIED"
             _sig = "0x" + _hl.sha256(_cid.encode("utf-8")).hexdigest()
-            _html = f"<!DOCTYPE html><html><body style=\"background:#05080f;color:#00f0ff;font-family:monospace;padding:24px\"><h2>ASTRA // JEV CRYPTOGRAPHIC CERTIFICATE</h2><p style=\"color:#00ff88\">STATUS: VERIFIED &amp; SETTLED</p><p>RECORD ID: {_cid}</p><p>SHA-256 ATTESTATION: {_sig}</p><p>ISSUER: JEV PRIMARY INTENT ROUTER (PORT 8111)</p><!-- ASTRA_DUAL_8173_WIDGET --><div id='dual8173' style='position:fixed;bottom:12px;left:12px;z-index:99999;background:#061022;border:1px solid #38bdf8;padding:8px;border-radius:6px;font-family:monospace;color:#7dd3fc;font-size:11px;max-width:260px;'><b>DUAL MODEL // :8173</b><br><button type='button' onclick='astraRunDual8173()' style='margin-top:4px;background:#0284c7;color:#fff;border:0;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:10px;'>Run Dual Dispatch</button><pre id='d8o' style='max-height:85px;overflow:auto;color:#34d399;margin:4px 0 0;font-size:10px;'>Ready</pre><script>function astraRunDual8173(){{var o=document.getElementById('d8o');o.textContent='Dispatching dual...';fetch('http://'+location.hostname+':8173/api/dual/dispatch',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{preset:'alstra_core_dual',model_a:'alstra-core-primary',model_b:'alstra-vision-merkle',prompt:'UI_8088_DUAL_RUN'}})}}).then(function(r){{return r.json();}}).then(function(j){{o.textContent=JSON.stringify(j,null,2);}}).catch(function(e){{o.textContent='Err:'+e;}});}}</script></div><!-- /ASTRA_DUAL_8173_WIDGET --></body></html>".encode("utf-8")
+            _html = f"<!DOCTYPE html><html><body style=\"background:#05080f;color:#00f0ff;font-family:monospace;padding:24px\"><h2>ASTRA // JEV CRYPTOGRAPHIC CERTIFICATE</h2><p style=\"color:#00ff88\">STATUS: VERIFIED &amp; SETTLED</p><p>RECORD ID: {_cid}</p><p>SHA-256 ATTESTATION: {_sig}</p><p>ISSUER: JEV PRIMARY INTENT ROUTER (PORT 8111)</p><!-- ASTRA_DUAL_8173_WIDGET --><div id='dual8173' style='position:fixed;bottom:12px;left:12px;z-index:99999;background:#061022;border:1px solid #38bdf8;padding:8px;border-radius:6px;font-family:monospace;color:#7dd3fc;font-size:11px;max-width:260px;'><b>DUAL MODEL // :8173</b><br><button type='button' onclick='astraRunDual8173()' style='margin-top:4px;background:#0284c7;color:#fff;border:0;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:10px;'>Run Dual Dispatch</button><pre id='d8o' style='max-height:85px;overflow:auto;color:#34d399;margin:4px 0 0;font-size:10px;'>Ready</pre><script>function astraRunDual8173(){{var o=document.getElementById('d8o');o.textContent='Dispatching dual...';fetch('http://'+location.hostname+':8173/api/dual/dispatch',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{preset:'alstra_core_dual',model_a:'alstra-core-primary',model_b:'alstra-vision-merkle',prompt:'UI_8098_DUAL_RUN'}})}}).then(function(r){{return r.json();}}).then(function(j){{o.textContent=JSON.stringify(j,null,2);}}).catch(function(e){{o.textContent='Err:'+e;}});}}</script></div><!-- /ASTRA_DUAL_8173_WIDGET --></body></html>".encode("utf-8")
             self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.send_header("Content-Length", str(len(_html))); self.end_headers(); self.wfile.write(_html)
             return
         if self.path in ("/", "/index.html"):
@@ -3038,7 +3039,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                                         self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.end_headers()
                                         self.wfile.write(HTML.encode("utf-8"))
 
-http.server.ThreadingHTTPServer(("0.0.0.0", 8088), UnifiedHandler).serve_forever()
+http.server.ThreadingHTTPServer(("0.0.0.0", 8098), UnifiedHandler).serve_forever()
 
 
 def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, custom_network=None):
@@ -3313,7 +3314,7 @@ def get_live_kpis(force_rpc=False):
             base = {}
 
     port_nodes = (
-        ("8088", 8088), ("8099", 8099), ("8105", 8105), ("8108", 8108),
+        ("8098", 8098), ("8099", 8099), ("8105", 8105), ("8108", 8108),
         ("8109", 8109), ("8111", 8111), ("8113", 8113), ("8115", 8115),
     )
     proc_nodes = (
