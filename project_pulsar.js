@@ -8,17 +8,24 @@ const path = require("path");
 
 const DIM = 10000;
 const POLL_MS = Number(process.env.PULSAR_POLL_MS || 1500);
+const MEM_HIGH_THRESHOLD = Number(process.env.PULSAR_MEM_HIGH || 0.90);
+const DRIFT_LEARN_THRESHOLD = Number(process.env.PULSAR_DRIFT_LEARN || 0.15);
 const WAL_LOG_URL = process.env.PULSAR_WAL_URL || "http://127.0.0.1:8182/log";
 const STATE_FILE =
   process.env.PULSAR_STATE_FILE ||
   path.join(os.homedir(), ".local", "share", "astra", "pulsar_hdc_state.json");
 
-const TARGETS = [
-  { name: "spine_8088", url: "http://127.0.0.1:8088/health" },
+const DEFAULT_TARGETS = [
   { name: "gateway_8090", url: "http://127.0.0.1:8090/" },
-  { name: "gpu_8134", url: "http://127.0.0.1:8134/health" },
   { name: "spine_8182", url: "http://127.0.0.1:8182/health" }
 ];
+let TARGETS = DEFAULT_TARGETS;
+if (process.env.PULSAR_TARGETS_JSON) {
+  try {
+    const parsed = JSON.parse(process.env.PULSAR_TARGETS_JSON);
+    if (Array.isArray(parsed) && parsed.length > 0) TARGETS = parsed;
+  } catch (_) {}
+}
 
 // Deterministic 64-bit splitmix64 seed generator -> 10,000-bit bipolar {-1, +1} vector
 function makeHypervector(seedStr) {
@@ -171,7 +178,7 @@ async function tick() {
     TARGETS.map(async (t) => ({ ...t, ...(await probeUrl(t.url)) }))
   );
   const memRatio = getMemRatio();
-  const memHigh = memRatio >= 0.88;
+  const memHigh = memRatio >= MEM_HIGH_THRESHOLD;
 
   const boundParts = results.map((r) =>
     bind(CHANNEL_VECS[r.name], r.ok ? STATE_ON_VECS[r.name] : STATE_OFF_VECS[r.name])
@@ -202,7 +209,7 @@ async function tick() {
     if (matchedIdx >= 0) {
       knownAnomaly = true;
       oneShotBank[matchedIdx].hits += 1;
-    } else if (dist > 0.12) {
+    } else if (dist > DRIFT_LEARN_THRESHOLD) {
       // One-shot learn this state vector
       oneShotBank.push({
         sig: signature,
