@@ -4,6 +4,7 @@ import sqlite3
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlparse
 
 HOST = os.environ.get("ASTRA_HOST", "127.0.0.1")
 PORT = int(os.environ.get("ASTRA_SVC_8182_PORT", "8182"))
@@ -65,6 +66,29 @@ def count_events() -> int:
             conn.close()
 
 
+def fetch_events(limit: int = 20) -> list[dict]:
+    safe_limit = max(1, min(int(limit), 200))
+    with DB_LOCK:
+        conn = sqlite3.connect(DB_PATH, timeout=10.0)
+        try:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute(
+                "SELECT id, ts, kind, detail FROM events ORDER BY id DESC LIMIT ?",
+                (safe_limit,),
+            ).fetchall()
+            return [
+                {
+                    "id": int(r["id"]),
+                    "ts": int(r["ts"]),
+                    "kind": str(r["kind"]),
+                    "detail": str(r["detail"]),
+                }
+                for r in rows
+            ]
+        finally:
+            conn.close()
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send_json(self, code: int, payload: dict) -> None:
         body = json.dumps(payload).encode("utf-8")
@@ -75,7 +99,11 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        if self.path in ("/health", "/"):
+        parsed = urlparse(self.path)
+        path = parsed.path
+        query = parse_qs(parsed.query)
+
+        if path in ("/health", "/"):
             event_id = log_event("health", f"GET {self.path}")
             self._send_json(
                 200,
@@ -88,11 +116,27 @@ class Handler(BaseHTTPRequestHandler):
                     "total_events": count_events(),
                 },
             )
+        elif path == "/events":
+            raw_limit = query.get("limit", ["20"])[0]
+            try:
+                limit = int(raw_limit)
+            except ValueError:
+                limit = 20
+            rows = fetch_events(limit=limit)
+            self._send_json(
+                200,
+                {
+                    "service": "astra-svc-8182",
+                    "count": len(rows),
+                    "events": rows,
+                },
+            )
         else:
             self._send_json(404, {"error": "not_found"})
 
     def do_POST(self):
-        if self.path == "/log":
+        path = urlparse(self.path).path
+        if path == "/log":
             length = int(self.headers.get("Content-Length", "0"))
             raw = self.rfile.read(length).decode("utf-8", errors="replace")
             event_id = log_event("custom", raw[:1000])
