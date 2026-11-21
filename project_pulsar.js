@@ -11,15 +11,15 @@ const POLL_MS = Number(process.env.PULSAR_POLL_MS || 1500);
 const MEM_HIGH_THRESHOLD = Number(process.env.PULSAR_MEM_HIGH || 0.90);
 const DRIFT_LEARN_THRESHOLD = Number(process.env.PULSAR_DRIFT_LEARN || 0.15);
 const WAL_LOG_URL = process.env.PULSAR_WAL_URL || "http://127.0.0.1:8182/log";
+const LOCATION_LABEL = process.env.ASTRA_LOCATION || "Greensboro, NC";
 const STATE_FILE =
   process.env.PULSAR_STATE_FILE ||
   path.join(os.homedir(), ".local", "share", "astra", "pulsar_hdc_state.json");
 
-const DEFAULT_TARGETS = [
+let TARGETS = [
   { name: "gateway_8090", url: "http://127.0.0.1:8090/" },
   { name: "spine_8182", url: "http://127.0.0.1:8182/health" }
 ];
-let TARGETS = DEFAULT_TARGETS;
 if (process.env.PULSAR_TARGETS_JSON) {
   try {
     const parsed = JSON.parse(process.env.PULSAR_TARGETS_JSON);
@@ -27,7 +27,6 @@ if (process.env.PULSAR_TARGETS_JSON) {
   } catch (_) {}
 }
 
-// Deterministic 64-bit splitmix64 seed generator -> 10,000-bit bipolar {-1, +1} vector
 function makeHypervector(seedStr) {
   let h = 2166136261n;
   for (let i = 0; i < seedStr.length; i++) {
@@ -47,7 +46,6 @@ function makeHypervector(seedStr) {
   return vec;
 }
 
-// Elementwise multiplication (binding in bipolar HDC)
 function bind(a, b) {
   const out = new Int8Array(DIM);
   for (let i = 0; i < DIM; i++) {
@@ -56,7 +54,6 @@ function bind(a, b) {
   return out;
 }
 
-// Superposition (bundling) of N bipolar vectors -> {-1, +1}
 function bundle(vectors) {
   const acc = new Int32Array(DIM);
   for (const v of vectors) {
@@ -71,7 +68,6 @@ function bundle(vectors) {
   return out;
 }
 
-// Normalized Hamming distance in [0, 1] for {-1, +1} vectors
 function hammingDistance(a, b) {
   let diff = 0;
   for (let i = 0; i < DIM; i++) {
@@ -106,7 +102,7 @@ function runTermux(cmd, args) {
 
 function postWalEvent(payload) {
   try {
-    const body = JSON.stringify(payload);
+    const body = JSON.stringify({ location: LOCATION_LABEL, ...payload });
     const u = new URL(WAL_LOG_URL);
     const req = http.request(
       {
@@ -128,7 +124,6 @@ function postWalEvent(payload) {
   } catch (_) {}
 }
 
-// Precompute channel + state codebooks
 const CHANNEL_VECS = {};
 const STATE_ON_VECS = {};
 const STATE_OFF_VECS = {};
@@ -140,7 +135,6 @@ for (const t of TARGETS) {
 const MEM_HIGH_VEC = makeHypervector("ram:high");
 const MEM_NORM_VEC = makeHypervector("ram:normal");
 
-// One-shot memory bank of observed anomaly vectors
 const oneShotBank = [];
 let baselineGlobal = null;
 let lastSignature = "";
@@ -154,21 +148,17 @@ function getMemRatio() {
 
 async function emitProprioception(dist, knownAnomaly, signature) {
   const now = Date.now();
-  // Rate-limit haptic motor to avoid Android vibrator queue saturation
   if (now - lastHapticAt < 650) return;
   lastHapticAt = now;
 
   if (knownAnomaly) {
-    // Double-tap sharp alert for a previously seen error signature
     await runTermux("termux-vibrate", ["-d", "95", "-f"]);
     setTimeout(() => runTermux("termux-vibrate", ["-d", "95", "-f"]), 180);
     await runTermux("termux-tts-speak", [`Known state shift: ${signature}`]);
   } else if (dist > 0.18) {
-    // Novel / high-distance anomaly ("unknown unknown" turbulence)
     await runTermux("termux-vibrate", ["-d", "140", "-f"]);
     await runTermux("termux-tts-speak", [`Anomaly distance ${dist.toFixed(2)}`]);
   } else {
-    // Subtle heartbeat micro-pulse
     await runTermux("termux-vibrate", ["-d", "28", "-f"]);
   }
 }
@@ -191,9 +181,10 @@ async function tick() {
   }
 
   const dist = hammingDistance(globalVec, baselineGlobal);
-  const signature = results.map((r) => `${r.name}:${r.ok ? "UP" : "DN"}`).join("|") + `|ram:${(memRatio * 100).toFixed(0)}%`;
+  const signature =
+    results.map((r) => `${r.name}:${r.ok ? "UP" : "DN"}`).join("|") +
+    `|ram:${(memRatio * 100).toFixed(0)}%`;
 
-  // Check one-shot memory (similarity >= 0.85 -> distance <= 0.15 to a stored anomaly)
   let matchedIdx = -1;
   for (let i = 0; i < oneShotBank.length; i++) {
     if (hammingDistance(globalVec, oneShotBank[i].vec) <= 0.15) {
@@ -210,7 +201,6 @@ async function tick() {
       knownAnomaly = true;
       oneShotBank[matchedIdx].hits += 1;
     } else if (dist > DRIFT_LEARN_THRESHOLD) {
-      // One-shot learn this state vector
       oneShotBank.push({
         sig: signature,
         dist: Number(dist.toFixed(4)),
@@ -236,6 +226,7 @@ async function tick() {
         JSON.stringify(
           {
             updated_at: Date.now(),
+            location: LOCATION_LABEL,
             dist: Number(dist.toFixed(4)),
             signature,
             one_shot_entries: oneShotBank.map(({ sig, dist: d, hits }) => ({ sig, dist: d, hits }))
@@ -256,7 +247,7 @@ async function tick() {
 }
 
 async function main() {
-  console.log(`Starting Project PULSAR (${DIM}-bit HDC) poll=${POLL_MS}ms -> ${WAL_LOG_URL}`);
+  console.log(`Starting Project PULSAR (${DIM}-bit HDC) poll=${POLL_MS}ms loc="${LOCATION_LABEL}" -> ${WAL_LOG_URL}`);
   await tick();
   setInterval(tick, POLL_MS);
 }
