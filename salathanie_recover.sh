@@ -38,7 +38,8 @@ ensure_pm2 "salathanie-wal-8182" "$REPO/astra_svc_8182.py" --interpreter python3
 ensure_pm2 "salathanie-pulsar-10k" "$REPO/project_pulsar.js"
 
 # 3. Quick Tunnel -> :8090
-ensure_pm2 "salathanie-tunnel" cloudflared -- tunnel --no-autoupdate --url http://127.0.0.1:8090
+GW_PORT=$(python3 "$REPO/hdc_shm_bus.py" --get-port salathanie-gw-8090 --default 8090)
+ensure_pm2 "salathanie-tunnel" cloudflared -- tunnel --no-autoupdate --url "http://127.0.0.1:${GW_PORT}"
 
 pm2 save --force >/dev/null 2>&1 || true
 sleep 3
