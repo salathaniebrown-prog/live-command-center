@@ -36,6 +36,7 @@ fi
 # 2. Core WAL Spine (:8182) & Project PULSAR (10k-bit HDC)
 ensure_pm2 "salathanie-wal-8182" "$REPO/astra_svc_8182.py" --interpreter python3
 ensure_pm2 "salathanie-pulsar-10k" "$REPO/project_pulsar.js"
+ensure_pm2 "salathanie-causal-shadow" "$REPO/causal_shadow.py" --interpreter python3
 
 # 3. Quick Tunnel -> :8090
 GW_PORT=$(python3 "$REPO/hdc_shm_bus.py" --get-port salathanie-gw-8090 --default 8090)
