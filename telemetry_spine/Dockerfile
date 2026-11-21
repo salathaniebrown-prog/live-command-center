@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY eagle_eyes_telemetry_spine.py .
+COPY salathanie_ai_telemetry_spine.py .
 COPY gpu_telemetry.py .
 COPY main.py .
 COPY signed_ingest.py .
