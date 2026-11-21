@@ -9,6 +9,7 @@ Salathanie A.I — Zero-Copy 10k-bit HDC Shared-Memory Ring Bus (86,080B)
 import argparse
 import glob
 import hashlib
+import hmac
 import mmap
 import os
 import socket
@@ -29,6 +30,30 @@ HV_ACTIVE_BYTES = 1250                             # 10,000 bits
 HV_PADDED_BYTES = 1280                             # 64B aligned
 SLOT_SIZE = SLOT_HDR_SIZE + HV_PADDED_BYTES        # 1344B
 RING_SIZE = GLOBAL_HDR_SIZE + (NUM_SLOTS * SLOT_SIZE)  # 86,080B
+
+
+HMAC_TAG_BYTES = 16
+HMAC_KEY_PATH = os.path.expanduser("~/.salathanie_hmac.key")
+
+
+def _load_or_create_hmac_key() -> bytes:
+    env_key = os.environ.get("SALATHANIE_HMAC_KEY")
+    if env_key:
+        return hashlib.sha256(env_key.encode("utf-8")).digest()
+    if os.path.exists(HMAC_KEY_PATH):
+        with open(HMAC_KEY_PATH, "rb") as f:
+            return f.read(32)
+    key = os.urandom(32)
+    fd = os.open(HMAC_KEY_PATH, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    try:
+        os.write(fd, key)
+    finally:
+        os.close(fd)
+    return key
+
+
+def sign_slot_hmac(key: bytes, hdr_bytes: bytes, hv_bytes: bytes | memoryview) -> bytes:
+    return hmac.new(key, hdr_bytes + bytes(hv_bytes), hashlib.sha256).digest()[:HMAC_TAG_BYTES]
 
 DEFAULT_SHM_PATH = os.environ.get(
     "SALATHANIE_SHM_PATH",
@@ -88,7 +113,7 @@ def sample_silicon_side_channel() -> dict:
         try:
             with open(tz, "r") as f:
                 t = int(f.read().strip())
-                if t > max_temp_mc:
+                if 0 < t < 105000 and t > max_temp_mc:
                     max_temp_mc = t
         except (OSError, ValueError):
             pass
@@ -141,6 +166,7 @@ class HDCSharedMemoryBus:
     def __init__(self, path: str = DEFAULT_SHM_PATH):
         self.path = path
         self._views: list[memoryview] = []
+        self._hmac_key = _load_or_create_hmac_key()
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
         init_needed = not os.path.exists(self.path) or os.path.getsize(self.path) != RING_SIZE
         self.fd = os.open(self.path, os.O_RDWR | os.O_CREAT, 0o660)
@@ -174,8 +200,12 @@ class HDCSharedMemoryBus:
         name_b = node_name.encode("utf-8")[:32].ljust(32, b"\x00")
         crc = zlib.crc32(hv_bytes) & 0xFFFFFFFF
 
-        struct.pack_into(SLOT_HDR_FMT, self.mm, offset, seq, ts_ns, pid, port, status, name_b, crc, b"\x00" * 4)
+        hdr_bytes = struct.pack(SLOT_HDR_FMT, seq, ts_ns, pid, port, status, name_b, crc, b"\x00" * 4)
+        tag = sign_slot_hmac(self._hmac_key, hdr_bytes, hv_bytes)
+        self.mv[offset : offset + SLOT_HDR_SIZE] = hdr_bytes
         self.mv[offset + SLOT_HDR_SIZE : offset + SLOT_HDR_SIZE + HV_ACTIVE_BYTES] = hv_bytes
+        tag_off = offset + SLOT_HDR_SIZE + HV_ACTIVE_BYTES
+        self.mv[tag_off : tag_off + HMAC_TAG_BYTES] = tag
         return seq
 
     @contextmanager
@@ -199,6 +229,10 @@ class HDCSharedMemoryBus:
                 "status": status,
                 "node": name_b.rstrip(b"\x00").decode("utf-8", errors="ignore"),
                 "crc_ok": (zlib.crc32(hv_view) & 0xFFFFFFFF) == crc,
+                "hmac_ok": hmac.compare_digest(
+                    bytes(self.mv[offset + SLOT_HDR_SIZE + HV_ACTIVE_BYTES : offset + SLOT_HDR_SIZE + HV_ACTIVE_BYTES + HMAC_TAG_BYTES]),
+                    sign_slot_hmac(self._hmac_key, bytes(self.mv[offset : offset + SLOT_HDR_SIZE]), hv_view),
+                ),
                 "hv_view": hv_view,
             }
         finally:
