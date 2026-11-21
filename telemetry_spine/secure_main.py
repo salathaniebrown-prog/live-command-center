@@ -22,7 +22,7 @@ SIGNED_TELEMETRY_HMAC_SECRET = os.getenv(
     "SIGNED_TELEMETRY_HMAC_SECRET", ""
 ).strip()
 SIGNED_TELEMETRY_DB_PATH = os.getenv(
-    "SIGNED_TELEMETRY_DB_PATH", "eagle_eyes_signed_telemetry.db"
+    "SIGNED_TELEMETRY_DB_PATH", "salathanie_ai_signed_telemetry.db"
 ).strip()
 SIGNED_TELEMETRY_MAX_CLOCK_SKEW_S = int(
     os.getenv("SIGNED_TELEMETRY_MAX_CLOCK_SKEW_S", "60")
@@ -52,7 +52,7 @@ class SecureTelemetryRuntime(base.AiohttpTelemetryRuntime):
                 "signed_ingest_configured": bool(
                     self.signed_secret and self.signed_ledger
                 ),
-                "signed_ingest_schema": "eagle-eyes.signed-telemetry.v1",
+                "signed_ingest_schema": "salathanie-ai.signed-telemetry.v1",
                 "signed_ingest_modes": sorted(ALLOWED_SOURCE_MODES),
                 "signed_live_publish_rule": (
                     "sourceMode=LIVE and simulated=false only"

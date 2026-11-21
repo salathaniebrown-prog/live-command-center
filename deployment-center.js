@@ -34,10 +34,10 @@ class MobileRegistry {
 
   ingest(raw, headers) {
     const fail = (status, error) => ({ status, error });
-    const timestamp = headers['x-eagle-eyes-timestamp'];
-    const nonce = headers['x-eagle-eyes-nonce'];
-    const signature = headers['x-eagle-eyes-signature'];
-    const deviceId = headers['x-eagle-eyes-device'];
+    const timestamp = headers['x-salathanie-ai-timestamp'];
+    const nonce = headers['x-salathanie-ai-nonce'];
+    const signature = headers['x-salathanie-ai-signature'];
+    const deviceId = headers['x-salathanie-ai-device'];
     const device = Object.hasOwn(this.devices, deviceId || '') ? this.devices[deviceId] : null;
     if (!Object.keys(this.devices).length) return fail(503, 'Mobile devices are not enrolled');
     if (!device || !/^\d{13}$/.test(timestamp || '') ||
@@ -106,7 +106,7 @@ class CsvLog {
 function createDeploymentCenter({ world, metrics, deployment, guard, env = process.env, fetchImpl = fetch, now = Date.now }) {
   const router = express.Router();
   const registry = new MobileRegistry({ devices: JSON.parse(env.MOBILE_DEVICES_JSON || '{}'), now });
-  const logger = new CsvLog(path.join(env.DEPLOYMENT_LOG_DIR || path.join(os.tmpdir(), 'eagle-eyes'), 'network_stats.csv'));
+  const logger = new CsvLog(path.join(env.DEPLOYMENT_LOG_DIR || path.join(os.tmpdir(), 'salathanie-ai'), 'network_stats.csv'));
   const subscribers = new Set();
   let cached = null;
   let inFlight = null;

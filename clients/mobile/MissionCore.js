@@ -38,7 +38,7 @@ const CORE_SECTIONS = [
     id: "max",
     label: "EXEC AI",
     title: "EXECUTIVE AI + COMMAND RAIL",
-    detail: "Executive Chief decision support and Eagle Eyes MAX command intelligence with existing access controls preserved."
+    detail: "Executive Chief decision support and Salathanie A.I MAX command intelligence with existing access controls preserved."
   }
 ];
 
@@ -73,7 +73,7 @@ export default function MissionCore({ baseUrl }) {
     <View style={styles.flex}>
       <View style={styles.header}>
         <View style={styles.headerCopy}>
-          <Text style={styles.eyebrow}>EAGLE EYES · MISSION CORE</Text>
+          <Text style={styles.eyebrow}>SALATHANIE A.I · MISSION CORE</Text>
           <Text style={styles.title}>RECOVERED MIDDLE STACK</Text>
           <Text style={styles.subtitle}>
             Map · satellites · verified intelligence · telemetry · Chronicle · Executive AI

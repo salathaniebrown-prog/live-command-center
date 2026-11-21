@@ -1,4 +1,4 @@
-# Eagle Eyes master build record
+# Salathanie A.I master build record
 
 ## 2026-09-09 Command One-Click Deployment Center
 
@@ -26,9 +26,9 @@ no physical-node count or deployment success is inferred from code tests.
 
 See DEPLOYMENT-CENTER.md for configuration and operational boundaries.
 
-Updated 2026-09-07. Canonical integration branch: `recovery/complete-eagle-eyes-20260907`, PR #40.
+Updated 2026-09-07. Canonical integration branch: `recovery/complete-salathanie-ai-20260907`, PR #40.
 
-User requirement: preserve updates from every Eagle Eyes conversation in one build. Reopening Eagle Eyes must not silently revert to an older or incomplete interface. Conversation summaries, saved code, passing tests, and deployed features are different evidence states.
+User requirement: preserve updates from every Salathanie A.I conversation in one build. Reopening Salathanie A.I must not silently revert to an older or incomplete interface. Conversation summaries, saved code, passing tests, and deployed features are different evidence states.
 
 ## Current integration
 
@@ -87,42 +87,42 @@ Snapshot before this integration commit. Ancestor means history is contained in 
 | Branch | Head SHA | History state |
 | --- | --- | --- |
 | `origin` | `936e2299174a7e4b77752a402f02164523ac62af` | Review |
-| `archive/eagle-eyes-telemetry-v2-pre-secure-ingest` | `37622636dd0a30635ade9807a5ad0b2c1f2a5032` | Ancestor |
+| `archive/salathanie-ai-telemetry-v2-pre-secure-ingest` | `37622636dd0a30635ade9807a5ad0b2c1f2a5032` | Ancestor |
 | `assm-phase1` | `d59715ad03d9fb7b8c69a83737ffb83ca4e633b3` | Ancestor |
 | `assm-phase2` | `41a9025868b025abd723654e3edc8f270f741222` | Ancestor |
-| `build/eagle-eyes-unified-v1` | `447bd38e8e854fa7369f1c74fb1174b1211aa998` | Ancestor |
-| `checkpoint/eagle-eyes-apk-working-20260902` | `420637210a702442b1e36db81f29e327f97f5a43` | Ancestor |
+| `build/salathanie-ai-unified-v1` | `447bd38e8e854fa7369f1c74fb1174b1211aa998` | Ancestor |
+| `checkpoint/salathanie-ai-apk-working-20260902` | `420637210a702442b1e36db81f29e327f97f5a43` | Ancestor |
 | `crypto/base-usdc-sandbox-20260907` | `7d6c9f7b3ff637ac2207e5f44825a16164792d9a` | Ancestor |
-| `eagle-eyes-world-command-os` | `69fe4f885f665a538d74bc96e93c0902515bf412` | Ancestor |
+| `salathanie-ai-world-command-os` | `69fe4f885f665a538d74bc96e93c0902515bf412` | Ancestor |
 | `experiment/hyper-velocity-observation-stack` | `bdc01e1110d500f052a38f0014bc008749dce27c` | Review |
 | `feat/free-command-mode` | `b38485e45eb8f71b6c8b117a5c675fd2657b9453` | Ancestor |
-| `feature/eagle-eyes-agent-guardrails` | `68f67d0be9a0801f2438b91d8c812d5aa42bfb69` | Ancestor |
-| `feature/eagle-eyes-command-center-v2` | `8e6e4af20fd9c047b453ceeaa178f07933df0574` | Ancestor |
-| `feature/eagle-eyes-data-spine-v1` | `3550a10fc668797ac4444b19157da990541c0a2a` | Ancestor |
-| `feature/eagle-eyes-executive-brief` | `1fb8726d8362365cf2381ddd940a4d2022f2880a` | Ancestor |
-| `feature/eagle-eyes-live-operations-map-v1` | `714e5438e4cbda11fdc15f805f144eb11bcd4243` | Ancestor |
-| `feature/eagle-eyes-ops-intelligence` | `2cc5441ab62ed28f473e5421872483870e11ec7c` | Ancestor |
-| `feature/eagle-eyes-px4-telemetry-spine-v1` | `5f3e9cde0fc1ac996e258152bcd4b2cc9c57a99f` | Ancestor |
-| `feature/eagle-eyes-telemetry-spine-v2` | `d86b5e65588bdd5c65b873d77319c6007019e41d` | Ancestor |
+| `feature/salathanie-ai-agent-guardrails` | `68f67d0be9a0801f2438b91d8c812d5aa42bfb69` | Ancestor |
+| `feature/salathanie-ai-command-center-v2` | `8e6e4af20fd9c047b453ceeaa178f07933df0574` | Ancestor |
+| `feature/salathanie-ai-data-spine-v1` | `3550a10fc668797ac4444b19157da990541c0a2a` | Ancestor |
+| `feature/salathanie-ai-executive-brief` | `1fb8726d8362365cf2381ddd940a4d2022f2880a` | Ancestor |
+| `feature/salathanie-ai-live-operations-map-v1` | `714e5438e4cbda11fdc15f805f144eb11bcd4243` | Ancestor |
+| `feature/salathanie-ai-ops-intelligence` | `2cc5441ab62ed28f473e5421872483870e11ec7c` | Ancestor |
+| `feature/salathanie-ai-px4-telemetry-spine-v1` | `5f3e9cde0fc1ac996e258152bcd4b2cc9c57a99f` | Ancestor |
+| `feature/salathanie-ai-telemetry-spine-v2` | `d86b5e65588bdd5c65b873d77319c6007019e41d` | Ancestor |
 | `feature/live-nvidia-telemetry` | `2b30ab41012f0bc28cfe296575f319a85dda16e5` | Ancestor |
 | `feature/provider-health-manifest` | `d5c2a90f810d851d4656b94caebb4055ea8f2097` | Ancestor |
-| `finish/eagle-eyes-airspace` | `ca46033605125788e2b96fc52ff6ced1c4b32aa8` | Review |
+| `finish/salathanie-ai-airspace` | `ca46033605125788e2b96fc52ff6ced1c4b32aa8` | Review |
 | `fix/free-world-knowledge-routing` | `f379180fd5768cd7db08825bae588d680bc6ff0a` | Ancestor |
 | `fix/payments-webhooks-tests` | `c5f8ea993ee2b43004db4c2ffff7182c32350e49` | Ancestor |
 | `fix/world-os-weather-units-docs` | `ca4794a2b29bc53408f2fffcc925a8acdb45baf7` | Ancestor |
-| `integration/eagle-eyes-unified-20260904` | `59a108fad7655bbdc8b3fcb71d03b681aa1464e8` | Review |
+| `integration/salathanie-ai-unified-20260904` | `59a108fad7655bbdc8b3fcb71d03b681aa1464e8` | Review |
 | `main` | `936e2299174a7e4b77752a402f02164523ac62af` | Review |
 | `power-blueprint-v1` | `c40aafd2c1626308a5ffca6d84b8847a91674734` | Ancestor |
 | `railway/code-change-haVBMM` | `a05366c78efaf6715a261ba0a4ccd750be74f5e9` | Review |
 | `reality-engine-phase1` | `c787e8f0247050d15a83fdfc6d0709cc3812c9b0` | Ancestor |
-| `recover/eagle-eyes-vr-baseline-v1` | `a31a36ccc2ffa3da5a6b379419cf58aad1bd762a` | Ancestor |
+| `recover/salathanie-ai-vr-baseline-v1` | `a31a36ccc2ffa3da5a6b379419cf58aad1bd762a` | Ancestor |
 | `recover/world-data-workers-20260902` | `2a00a1ba162f5efdba394336c289a8159c8e6868` | Ancestor |
 | `recovery/android-standalone-release-20260904` | `ec5d37cd8875ec3e4b495a21ace8aa9584dc5af3` | Ancestor |
 | `recovery/android-world-data-build-env-20260904` | `82ce1ca99cd459f201ae3d404275a2aa25891e4f` | Ancestor |
-| `recovery/complete-eagle-eyes-20260907` | `601624ff0e0f0e0ec4cadc28ce3f0f3c18940b0b` | Ancestor |
-| `recovery/eagle-eyes-ai-first-core` | `765ae41757ca624ae966d565696def66abd27ee3` | Review |
-| `recovery/eagle-eyes-launch-polish-20260902` | `59c0831f6fc4b494662a0652016a54bbc14f8333` | Review |
-| `recovery/eagle-eyes-unified-20260902` | `bfcfb642d5e3d66decbb0171f240b52c7f8ddda8` | Ancestor |
+| `recovery/complete-salathanie-ai-20260907` | `601624ff0e0f0e0ec4cadc28ce3f0f3c18940b0b` | Ancestor |
+| `recovery/salathanie-ai-ai-first-core` | `765ae41757ca624ae966d565696def66abd27ee3` | Review |
+| `recovery/salathanie-ai-launch-polish-20260902` | `59c0831f6fc4b494662a0652016a54bbc14f8333` | Review |
+| `recovery/salathanie-ai-unified-20260902` | `bfcfb642d5e3d66decbb0171f240b52c7f8ddda8` | Ancestor |
 | `recovery/fresh-full-apk-2026-09-02` | `44bf83cef831d1a5f1aff9b3b21b5baf0138513e` | Review |
 | `recovery/full-live-data-20260904` | `6c4784feabebd211779f7b058a7ccecb6c3bd032` | Ancestor |
 | `recovery/install-debug-signed-20260903` | `e1c151e51ff5b0c426eb9047a390d1927d4f32ce` | Review |
@@ -136,7 +136,7 @@ Snapshot before this integration commit. Ancestor means history is contained in 
 | `recovery/persistent-satellite-state-20260904` | `b34a4ed4e779f5c004e74cb2a3f7b5b3d999a166` | Ancestor |
 | `recovery/restore-real-satellites-20260903` | `e92c0f81bc623c63c83474d8e5f60a864c866c2f` | Ancestor |
 | `recovery/validate-full-live-data-20260904` | `ab551c51edc889444a79c5d830b0d94472f5a313` | Ancestor |
-| `release/eagle-eyes-airspace-stable` | `e73a49c0c8b23f1fed001f64224000349b119a77` | Ancestor |
+| `release/salathanie-ai-airspace-stable` | `e73a49c0c8b23f1fed001f64224000349b119a77` | Ancestor |
 | `safety/command-rail-observation-gate` | `e358ce3ec1d61eb48e3c5d1ba06024eb496e1f53` | Review |
 | `salathaniebrown-prog-patch-1` | `b67df16d5727c193e1ed885fca3a9c2e0f7914bb` | Ancestor |
 | `salathaniebrown-prog-patch-2` | `6894058bf10c60437ff22a761a1321186d313316` | Ancestor |

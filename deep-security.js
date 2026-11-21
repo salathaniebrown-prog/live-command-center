@@ -410,7 +410,7 @@ class DeepSecurityClient {
     const scheduledTask = {
       name:
         String(name || "").trim() ||
-        `Eagle Eyes ${definition.type} ${new Date().toISOString()}`,
+        `Salathanie A.I ${definition.type} ${new Date().toISOString()}`,
       type:
         definition.type,
       enabled: true,

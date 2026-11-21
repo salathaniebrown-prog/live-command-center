@@ -123,7 +123,7 @@ test("CAPI dispatch uses server-only authorization and documented event payload"
 
   const body = JSON.parse(calls[0].options.body);
   assert.equal(body.validate_only, true);
-  assert.equal(body.integration_source, "eagle_eyes_live_command_center");
+  assert.equal(body.integration_source, "salathanie_ai_live_command_center");
   assert.equal(body.events[0].id, "lead_456");
   assert.equal(body.events[0].type, "lead_created");
   assert.equal(body.events[0].data.type, "customer_action");

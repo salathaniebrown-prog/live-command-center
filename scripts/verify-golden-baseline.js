@@ -39,12 +39,12 @@ for (const capability of manifest.capabilities || []) {
 }
 
 if (failures.length) {
-  console.error("EAGLE EYES GOLDEN BASELINE: FAIL");
+  console.error("SALATHANIE A.I GOLDEN BASELINE: FAIL");
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
 
-console.log("EAGLE EYES GOLDEN BASELINE: PASS");
+console.log("SALATHANIE A.I GOLDEN BASELINE: PASS");
 console.log(`Protected capabilities: ${(manifest.capabilities || []).filter((x) => x.status === "required").length}`);
 
 const targets = manifest.recoveryTargets || [];

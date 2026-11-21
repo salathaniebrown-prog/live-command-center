@@ -11,7 +11,7 @@ from aiohttp import web
 import websockets
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
-from eagle_eyes_telemetry_spine import (
+from salathanie_ai_telemetry_spine import (
     FRAME_FORMAT,
     FRAME_SIZE,
     KAFKA_BROKER,
@@ -28,7 +28,7 @@ PX4_TELEMETRY_TOPIC = os.getenv(
     "eagle.eyes.px4.telemetry",
 )
 TELEMETRY_RELAY_TOKEN = os.getenv("TELEMETRY_RELAY_TOKEN", "").strip()
-PX4_SCHEMA_VERSION = "eagle-eyes.px4-telemetry.v1"
+PX4_SCHEMA_VERSION = "salathanie-ai.px4-telemetry.v1"
 
 DASHBOARD_HTML = r"""<!doctype html>
 <html lang="en">
@@ -36,7 +36,7 @@ DASHBOARD_HTML = r"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#070706">
-<title>Eagle Eyes • Live Telemetry</title>
+<title>Salathanie A.I • Live Telemetry</title>
 <style>
 :root{color-scheme:dark;--bg:#070706;--panel:#11100d;--line:#4b3a20;--gold:#f2c66d;--text:#f7f1e7;--muted:#9f9789;--green:#73e58c;--red:#ff6f71}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,system-ui,sans-serif;color:var(--text);background:radial-gradient(circle at 50% -10%,#3a2a0f55,transparent 32rem),linear-gradient(#0c0b09,#050505)}
@@ -57,7 +57,7 @@ h1{font-size:clamp(24px,5vw,48px);margin:7px 0}.sub{color:var(--muted);font-size
 <body>
 <main>
   <div class="top">
-    <div><div class="eyebrow">Eagle Eyes • Telemetry Spine V2</div><h1>Live Digital Twin Feed</h1><div class="sub">Redpanda → spatial processor → secure WebSocket → this interface</div></div>
+    <div><div class="eyebrow">Salathanie A.I • Telemetry Spine V2</div><h1>Live Digital Twin Feed</h1><div class="sub">Redpanda → spatial processor → secure WebSocket → this interface</div></div>
     <div class="badge"><span id="dot" class="dot"></span><span id="state">CONNECTING</span></div>
   </div>
   <section class="grid">
@@ -180,7 +180,7 @@ class AiohttpTelemetryRuntime:
             px4_assignment = [str(item) for item in self.px4_consumer.assignment()]
         return web.json_response({
             "ok": True,
-            "service": "eagle-eyes-telemetry-v2",
+            "service": "salathanie-ai-telemetry-v2",
             "kafka_connected": self.server.consumer is not None,
             "assigned_partitions": assignment,
             "topic": TELEMETRY_TOPIC,
@@ -276,7 +276,7 @@ class AiohttpTelemetryRuntime:
         self.px4_consumer = AIOKafkaConsumer(
             PX4_TELEMETRY_TOPIC,
             bootstrap_servers=KAFKA_BROKER,
-            group_id="eagle_eyes_px4_spine_v1",
+            group_id="salathanie_ai_px4_spine_v1",
             enable_auto_commit=True,
             auto_offset_reset="latest",
         )

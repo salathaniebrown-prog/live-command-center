@@ -13,8 +13,8 @@ const devices = { field12: { slot: 12, secret } };
 function signed(body = '{"device_id":"field12", "target_cluster_slot":12,"status_flag":"PASS"}', timestamp = clock, nonce = 'a'.repeat(32)) {
   const raw = Buffer.from(body);
   return { raw, headers: {
-    'x-eagle-eyes-device': 'field12', 'x-eagle-eyes-timestamp': String(timestamp), 'x-eagle-eyes-nonce': nonce,
-    'x-eagle-eyes-signature': crypto.createHmac('sha256', secret).update(`${timestamp}.${nonce}.`).update(raw).digest('hex')
+    'x-salathanie-ai-device': 'field12', 'x-salathanie-ai-timestamp': String(timestamp), 'x-salathanie-ai-nonce': nonce,
+    'x-salathanie-ai-signature': crypto.createHmac('sha256', secret).update(`${timestamp}.${nonce}.`).update(raw).digest('hex')
   } };
 }
 test('unobserved slots stay waiting; signed PASS becomes stale after timeout', () => {
@@ -35,7 +35,7 @@ test('mobile verification preserves exact JSON bytes and rejects replay, tamperi
   const expired = signed(undefined, clock - 60001); assert.equal(store.ingest(expired.raw, expired.headers).status, 401);
   const wrongSlot = signed('{"device_id":"field12","target_cluster_slot":13,"status_flag":"PASS"}', clock, 'c'.repeat(32));
   assert.equal(store.ingest(wrongSlot.raw, wrongSlot.headers).status, 400);
-  assert.equal(store.ingest(valid.raw, { ...valid.headers, 'x-eagle-eyes-device': '__proto__' }).status, 401);
+  assert.equal(store.ingest(valid.raw, { ...valid.headers, 'x-salathanie-ai-device': '__proto__' }).status, 401);
 });
 test('duplicate assignments, placeholder secrets and unenrolled devices fail closed', () => {
   assert.throws(() => new MobileRegistry({ devices: { ...devices, another: { slot: 12, secret } } }));

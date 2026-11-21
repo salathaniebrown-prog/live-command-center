@@ -1,6 +1,6 @@
 "use strict";
 
-const SCHEMA_VERSION = "eagle-eyes.px4-telemetry.v1";
+const SCHEMA_VERSION = "salathanie-ai.px4-telemetry.v1";
 const DEFAULT_STALE_AFTER_MS = 15000;
 const TELEMETRY_RELAY_URL = String(process.env.TELEMETRY_RELAY_URL || "").trim();
 const TELEMETRY_RELAY_TOKEN = String(process.env.TELEMETRY_RELAY_TOKEN || "").trim();
@@ -103,7 +103,7 @@ function queuePx4Relay(snapshot) {
     ).slice(0, 160);
 
     console.error(
-      `[eagle-eyes] PX4 telemetry relay failed: ${relayState.lastError}`
+      `[salathanie-ai] PX4 telemetry relay failed: ${relayState.lastError}`
     );
   });
 }
@@ -658,7 +658,7 @@ function formatPx4Telemetry(status) {
   const t = status?.telemetry;
 
   const lines = [
-    "EAGLE EYES PX4 TELEMETRY",
+    "SALATHANIE A.I PX4 TELEMETRY",
     `State: ${status?.state || "N/A"}`,
     `Configured: ${status?.configured ? "YES" : "NO"}`,
     "Simulation: OFF"

@@ -1,6 +1,6 @@
-# Eagle Eyes VR Baseline v1
+# Salathanie A.I VR Baseline v1
 
-This directory freezes the recovered Eagle Eyes VR baseline without changing production `main` behavior.
+This directory freezes the recovered Salathanie A.I VR baseline without changing production `main` behavior.
 
 ## Baseline truth policy
 
@@ -47,6 +47,6 @@ Prefer a stable `/dev/serial/by-id/...` path over `/dev/ttyUSB0` or `/dev/ttyACM
 
 ## Acceptance target
 
-> Eagle Eyes VR shows real live telemetry in a genuine headset-rendered HUD without breaking desktop fallback.
+> Salathanie A.I VR shows real live telemetry in a genuine headset-rendered HUD without breaking desktop fallback.
 
 The first native-XR smoke test should prove only that target. Do not add BCI, control authority, synthetic telemetry, or additional actuation into this baseline.

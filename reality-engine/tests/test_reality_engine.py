@@ -13,7 +13,7 @@ def frame(index, x, y, depth=None, simulated=False):
     if depth is not None:
         track["depthM"] = depth
     return {
-        "schemaVersion": "eagle-eyes.reality-frame.v1",
+        "schemaVersion": "salathanie-ai.reality-frame.v1",
         "simulated": simulated,
         "sourceType": "camera",
         "cameraId": "physical-camera-1",

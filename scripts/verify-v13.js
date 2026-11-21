@@ -19,16 +19,16 @@ requireText("LAB", "LAB navigation");
 requireText("INTEL", "INTEL navigation");
 requireText("LINKS", "LINKS navigation");
 requireText("MAX", "MAX navigation");
-requireText("EAGLE EYES MAX", "MAX command rail");
+requireText("SALATHANIE A.I MAX", "MAX command rail");
 requireText("PX4 OBSERVATION", "PX4 observation panel");
 requireText("NO FLIGHT AUTHORITY", "observation-only UI boundary");
-requireText("/api/eagle-eyes/satellites?limit=120", "120-satellite dashboard request");
+requireText("/api/salathanie-ai/satellites?limit=120", "120-satellite dashboard request");
 
 const hasStaticWorldLimits = ["nws", "usgs", "eonet"].every((source) =>
   dashboard.includes(`source=${source}&limit=50`)
 );
 const hasDynamicWorldLimit = dashboard.includes(
-  "const url='/api/eagle-eyes/events?source='+src+'&limit=50';"
+  "const url='/api/salathanie-ai/events?source='+src+'&limit=50';"
 );
 
 if (!hasStaticWorldLimits && !hasDynamicWorldLimit) {

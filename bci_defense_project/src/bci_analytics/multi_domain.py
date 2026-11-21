@@ -1,4 +1,4 @@
-"""Deterministic, observation-only multi-domain analytics for Eagle Eyes.
+"""Deterministic, observation-only multi-domain analytics for Salathanie A.I.
 
 The algorithms in this module are provenance-neutral: callers may supply test
 fixtures or verified observations. A result must not be labeled LIVE or

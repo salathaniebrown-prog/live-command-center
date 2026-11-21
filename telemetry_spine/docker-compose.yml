@@ -1,7 +1,7 @@
 services:
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v26.2.2
-    container_name: eagle_eyes_broker
+    container_name: salathanie_ai_broker
     command:
       - redpanda
       - start
@@ -31,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: eagle_eyes_telemetry_spine
+    container_name: salathanie_ai_telemetry_spine
     environment:
       KAFKA_BROKER: redpanda:9092
       TELEMETRY_TOPIC: eagle.eyes.field.telemetry
@@ -61,7 +61,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: eagle_eyes_gpu_telemetry
+    container_name: salathanie_ai_gpu_telemetry
     command: ["python", "-u", "gpu_telemetry.py"]
     environment:
       EAGLE_EYES_METRICS_FILE: /app/live-metrics/live-metrics.json

@@ -71,16 +71,16 @@ insertBefore(
 );
 
 insertBefore(
-  'app.get(\n  "/api/eagle-eyes/events",',
-  'app.get(\n  "/api/eagle-eyes/chains",\n  async (req, res) => {\n    try {\n      res.json(\n        await queryEvmChains({\n          query: req.query.q || req.query.query || "",\n          limit: req.query.limit\n        })\n      );\n    } catch (error) {\n      res.status(502).json({\n        ok: false,\n        source: CHAIN_SOURCE_URL,\n        observationOnly: true,\n        simulated: false,\n        error: error.message,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n);\n\n',
-  '"/api/eagle-eyes/chains"',
+  'app.get(\n  "/api/salathanie-ai/events",',
+  'app.get(\n  "/api/salathanie-ai/chains",\n  async (req, res) => {\n    try {\n      res.json(\n        await queryEvmChains({\n          query: req.query.q || req.query.query || "",\n          limit: req.query.limit\n        })\n      );\n    } catch (error) {\n      res.status(502).json({\n        ok: false,\n        source: CHAIN_SOURCE_URL,\n        observationOnly: true,\n        simulated: false,\n        error: error.message,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n);\n\n',
+  '"/api/salathanie-ai/chains"',
   "EVM API route"
 );
 
 const current = fs.readFileSync(serverPath, "utf8");
 if (next !== current) {
   fs.writeFileSync(serverPath, next);
-  console.log("Eagle Eyes read-only EVM chain registry enabled.");
+  console.log("Salathanie A.I read-only EVM chain registry enabled.");
 } else {
-  console.log("Eagle Eyes read-only EVM chain registry already enabled.");
+  console.log("Salathanie A.I read-only EVM chain registry already enabled.");
 }

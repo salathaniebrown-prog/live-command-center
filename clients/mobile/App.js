@@ -55,7 +55,7 @@ function WorldOS({ section = "overview" }) {
       thirdPartyCookiesEnabled
       setSupportMultipleWindows={false}
       startInLoadingState
-      renderLoading={() => <LoadingView label="Opening full Eagle Eyes World OS…" />}
+      renderLoading={() => <LoadingView label="Opening full Salathanie A.I World OS…" />}
     />
   );
 }
@@ -64,7 +64,7 @@ function WorldData() {
   if (!WORLD_DATA_URL) {
     return (
       <ScrollView style={styles.status} contentContainerStyle={styles.statusContent}>
-        <Text style={styles.eyebrow}>EAGLE EYES</Text>
+        <Text style={styles.eyebrow}>SALATHANIE A.I</Text>
         <Text style={styles.title}>WORLD DATA V2</Text>
         <Text style={styles.subtitle}>
           Recovered Cloudflare World Data layer · direct verified public sources
@@ -89,7 +89,7 @@ function WorldData() {
       javaScriptEnabled
       domStorageEnabled
       startInLoadingState
-      renderLoading={() => <LoadingView label="Opening Eagle Eyes World Data V2…" />}
+      renderLoading={() => <LoadingView label="Opening Salathanie A.I World Data V2…" />}
     />
   );
 }
@@ -194,9 +194,9 @@ function LiveStatus() {
       getJson("/api/metrics"),
       getJson("/api/deployment"),
       getJson("/api/assistant/status"),
-      getJson("/api/eagle-eyes/future-command-lab"),
-      getJson("/api/eagle-eyes/bci/status"),
-      getJson("/api/eagle-eyes/crypto/status")
+      getJson("/api/salathanie-ai/future-command-lab"),
+      getJson("/api/salathanie-ai/bci/status"),
+      getJson("/api/salathanie-ai/crypto/status")
     ]);
 
     if (results[0].status === "fulfilled") setStatus(results[0].value);
@@ -225,7 +225,7 @@ function LiveStatus() {
 
   return (
     <ScrollView style={styles.status} contentContainerStyle={styles.statusContent}>
-      <Text style={styles.eyebrow}>EAGLE EYES</Text>
+      <Text style={styles.eyebrow}>SALATHANIE A.I</Text>
       <Text style={styles.title}>FULL SYSTEM STATUS</Text>
       <Text style={styles.subtitle}>Production backend · live sources · no demo telemetry</Text>
 
@@ -300,9 +300,9 @@ function LiveStatus() {
 
       <Text style={styles.section}>RESTORED FULL CAPABILITY SET</Text>
       <View style={styles.capabilityCard}>
-        <Text style={styles.capability}>• Eagle Eyes World Command Operating System</Text>
+        <Text style={styles.capability}>• Salathanie A.I World Command Operating System</Text>
         <Text style={styles.capability}>• Executive Mission Brief / operational snapshot</Text>
-        <Text style={styles.capability}>• Protected Eagle Eyes Command Rail</Text>
+        <Text style={styles.capability}>• Protected Salathanie A.I Command Rail</Text>
         <Text style={styles.capability}>• GPT-5.6 tool routing when API access is active</Text>
         <Text style={styles.capability}>• Free command mode when API credits are unavailable</Text>
         <Text style={styles.capability}>• Real Railway runtime and deployment telemetry</Text>
@@ -339,7 +339,7 @@ export default function App() {
       <StatusBar style="light" />
       <View style={styles.header}>
         <View>
-          <Text style={styles.brand}>EAGLE EYES</Text>
+          <Text style={styles.brand}>SALATHANIE A.I</Text>
           <Text style={styles.brandSub}>WORLD COMMAND MOBILE · FULL SYSTEM</Text>
         </View>
         <View style={styles.livePill}>

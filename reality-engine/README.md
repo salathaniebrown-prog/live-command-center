@@ -1,10 +1,10 @@
-# Eagle Eyes Reality Engine — Phase 1
+# Salathanie A.I Reality Engine — Phase 1
 
-Real-world motion/spatial bridge for Eagle Eyes.
+Real-world motion/spatial bridge for Salathanie A.I.
 
 ## Truth boundary
 
-This phase does **not** claim a camera is connected. It defines and validates the data contract that a real camera/tracker must satisfy before Eagle Eyes accepts motion state.
+This phase does **not** claim a camera is connected. It defines and validates the data contract that a real camera/tracker must satisfy before Salathanie A.I accepts motion state.
 
 - Real capture only: `simulated` must be exactly `false`.
 - Source type must be `camera`.
@@ -32,7 +32,7 @@ Reality Frame Contract
 XR-ready Reality Envelope
         |
         v
-Eagle Eyes VR / OpenXR
+Salathanie A.I VR / OpenXR
 ```
 
 ## Phase 1 modules
@@ -48,4 +48,4 @@ Without calibrated depth, X/Y remain normalized camera-image coordinates. The en
 
 ## Next hardware milestone
 
-Bind one physical camera or depth camera, emit `eagle-eyes.reality-frame.v1` frames, and prove live motion from a person/object in front of that camera. Only after that passes should OpenXR rendering consume the stream.
+Bind one physical camera or depth camera, emit `salathanie-ai.reality-frame.v1` frames, and prove live motion from a person/object in front of that camera. Only after that passes should OpenXR rendering consume the stream.

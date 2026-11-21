@@ -28,7 +28,7 @@ function addMessage(role, text, meta = "") {
 
   const roleNode = document.createElement("span");
   roleNode.className = "role";
-  roleNode.textContent = role === "user" ? "YOU" : "EAGLE EYES";
+  roleNode.textContent = role === "user" ? "YOU" : "SALATHANIE A.I";
 
   const textNode = document.createElement("span");
   textNode.textContent = text;
@@ -97,7 +97,7 @@ function sessionPrompt(currentMessage) {
   if (!assistantConfigured || turns.length === 0) return currentMessage;
 
   const header = [
-    "Continue this Eagle Eyes browser session using the prior turns below only as conversational context.",
+    "Continue this Salathanie A.I browser session using the prior turns below only as conversational context.",
     "Do not claim these turns came from the user's ChatGPT account, saved memory, or any session outside this page.",
     "PRIOR SESSION:"
   ].join("\n");
@@ -168,7 +168,7 @@ async function sendMessage() {
       assistantNode.textNode.textContent = assistantText;
       messages.scrollTop = messages.scrollHeight;
     } else if (event === "tool_call") {
-      assistantNode.metaNode.textContent = `TOOL · ${data?.name || "EAGLE EYES"}`;
+      assistantNode.metaNode.textContent = `TOOL · ${data?.name || "SALATHANIE A.I"}`;
     } else if (event === "done") {
       completed = true;
       assistantNode.metaNode.textContent = `${data?.model || "GPT"} · COMPLETE`;

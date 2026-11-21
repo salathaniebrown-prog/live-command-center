@@ -28,7 +28,7 @@ export default function ProtectionConsole({ baseUrl }) {
     setError("");
 
     const results = await Promise.allSettled([
-      fetch(baseUrl + "/api/eagle-eyes/shell-catcher/health", {
+      fetch(baseUrl + "/api/salathanie-ai/shell-catcher/health", {
         headers: { Accept: "application/json" },
         cache: "no-store"
       }).then(async (response) => {
@@ -70,7 +70,7 @@ export default function ProtectionConsole({ baseUrl }) {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.eyebrow}>EAGLE EYES · PROTECTION</Text>
+      <Text style={styles.eyebrow}>SALATHANIE A.I · PROTECTION</Text>
       <Text style={styles.title}>SHELL CATCHER</Text>
       <Text style={styles.subtitle}>
         Defensive observation layer for command, API, environmental, and system signals.

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-SCHEMA_VERSION = "eagle-eyes.signed-telemetry.v1"
+SCHEMA_VERSION = "salathanie-ai.signed-telemetry.v1"
 ALLOWED_SOURCE_MODES = frozenset({"LIVE", "TEST", "REPLAY"})
 
 

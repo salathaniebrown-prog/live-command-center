@@ -153,7 +153,7 @@ test(
           computerID: 9
         },
         name:
-          "Eagle Eyes protect node 9"
+          "Salathanie A.I protect node 9"
       });
 
     assert.equal(

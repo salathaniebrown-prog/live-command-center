@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "name": "Eagle Eyes Golden Baseline",
-  "policy": "Preserve first. Expand second. No expansion may silently remove an established Eagle Eyes capability.",
+  "name": "Salathanie A.I Golden Baseline",
+  "policy": "Preserve first. Expand second. No expansion may silently remove an established Salathanie A.I capability.",
   "branchPolicy": {
     "productionMainProtected": true,
-    "recoveryBranch": "recovery/complete-eagle-eyes-20260907"
+    "recoveryBranch": "recovery/complete-salathanie-ai-20260907"
   },
   "capabilities": [
     {
@@ -17,7 +17,7 @@
       "id": "max-assistant",
       "status": "required",
       "evidence": ["server.js", "public/index.html"],
-      "requiredText": ["OPENAI_URL", "Eagle Eyes"]
+      "requiredText": ["OPENAI_URL", "Salathanie A.I"]
     },
     {
       "id": "live-world-data",
@@ -29,7 +29,7 @@
       "id": "airspace-orbits",
       "status": "required",
       "evidence": ["satellites.js", "server.js", "public/index.html"],
-      "requiredText": ["get_weather_satellites", "CelesTrak", "LIVE EARTH + ORBITAL OPERATIONS", "/api/eagle-eyes/satellites?limit=120"]
+      "requiredText": ["get_weather_satellites", "CelesTrak", "LIVE EARTH + ORBITAL OPERATIONS", "/api/salathanie-ai/satellites?limit=120"]
     },
     {
       "id": "chronicle-lab-v13",
@@ -62,7 +62,7 @@
     {
       "id": "mobile-apk",
       "status": "required",
-      "evidence": ["clients/mobile/package.json", ".github/workflows/eagle-eyes-android-apk.yml"]
+      "evidence": ["clients/mobile/package.json", ".github/workflows/salathanie-ai-android-apk.yml"]
     },
     {
       "id": "mcp",
@@ -77,7 +77,7 @@
     {
       "id": "reality-engine-xr",
       "status": "required",
-      "evidence": ["reality-engine/reality_engine/xr.py", "vr/eagle_eyes_vr_baseline_v1.py"]
+      "evidence": ["reality-engine/reality_engine/xr.py", "vr/salathanie_ai_vr_baseline_v1.py"]
     },
     {
       "id": "power-blueprint",
@@ -95,14 +95,14 @@
       "id": "bci-telemetry",
       "status": "required",
       "evidence": ["bci-telemetry.js", "test/bci-telemetry.test.js", "server.js"],
-      "requiredText": ["bciTelemetryStatus", "/api/eagle-eyes/bci/status", "single-self-candidate"],
+      "requiredText": ["bciTelemetryStatus", "/api/salathanie-ai/bci/status", "single-self-candidate"],
       "safety": "Read-only BCI telemetry lane only; no diagnosis, treatment, control output, or command authority."
     },
     {
       "id": "future-command-lab",
       "status": "required",
       "evidence": ["future-command-lab.js", "test/future-command-lab.test.js", "server.js", "public/index.html"],
-      "requiredText": ["PROJECT FUTURE COMMAND LAB", "/api/eagle-eyes/future-command-lab", "liveExecution", "EAGLE EYES PLANNING LANE", "supercomputer-nexusbrown-command-center"],
+      "requiredText": ["PROJECT FUTURE COMMAND LAB", "/api/salathanie-ai/future-command-lab", "liveExecution", "SALATHANIE A.I PLANNING LANE", "supercomputer-nexusbrown-command-center"],
       "safety": "Planning and roadmap surface only; no live execution, production mutation, or command authority."
     }
   ],
@@ -110,7 +110,7 @@
     {
       "id": "project-builder",
       "status": "missing-action-layer",
-      "description": "Create/edit/run/test projects from Eagle Eyes with authenticated, auditable actions."
+      "description": "Create/edit/run/test projects from Salathanie A.I with authenticated, auditable actions."
     },
     {
       "id": "github-operator",

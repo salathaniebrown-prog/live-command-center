@@ -1,6 +1,6 @@
 "use strict";
 
-const SCHEMA_VERSION = "eagle-eyes.data-spine.v1";
+const SCHEMA_VERSION = "salathanie-ai.data-spine.v1";
 
 function finite(value) {
   return Number.isFinite(value) ? value : null;

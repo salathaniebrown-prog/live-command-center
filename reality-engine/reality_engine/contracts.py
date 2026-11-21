@@ -1,11 +1,11 @@
-"""Strict real-camera data contract for Eagle Eyes Reality Engine."""
+"""Strict real-camera data contract for Salathanie A.I Reality Engine."""
 
 from __future__ import annotations
 
 import math
 from typing import Any, Dict
 
-REALITY_SCHEMA_VERSION = "eagle-eyes.reality-frame.v1"
+REALITY_SCHEMA_VERSION = "salathanie-ai.reality-frame.v1"
 _ALLOWED_KINDS = {"person", "object", "unknown"}
 
 

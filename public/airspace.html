@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Eagle Eyes Airspace</title>
+  <title>Salathanie A.I Airspace</title>
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.7.0/dist/maplibre-gl.css" />
   <style>
     :root { color-scheme: dark; }
@@ -41,7 +41,7 @@
     <div id="cross-v"></div>
     <div id="cross-h"></div>
     <section id="control" class="panel">
-      <h1>EAGLE EYES AIRSPACE</h1>
+      <h1>SALATHANIE A.I AIRSPACE</h1>
       <div class="line"><span class="label">EARTH IMAGERY</span><span class="value">NASA GIBS TRUE COLOR</span></div>
       <div class="line"><span class="label">IMAGERY DATE</span><span class="value" id="imagery-date">LOADING</span></div>
       <div class="line"><span class="label">ORBIT SOURCE</span><span class="value">CELESTRAK / SGP4</span></div>
@@ -147,7 +147,7 @@
 
     async function refreshSatellites() {
       try {
-        const response = await fetch('/api/eagle-eyes/satellites?limit=30', { cache: 'no-store' });
+        const response = await fetch('/api/salathanie-ai/satellites?limit=30', { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         const satellites = Array.isArray(data.satellites) ? data.satellites : [];

@@ -34,16 +34,16 @@ if (!server.includes(integrityRequire)) {
   );
 }
 
-const routeMarker = '"/api/eagle-eyes/telemetry-integrity"';
+const routeMarker = '"/api/salathanie-ai/telemetry-integrity"';
 if (!server.includes(routeMarker)) {
-  const px4Route = 'app.get(\n  "/api/eagle-eyes/px4",';
+  const px4Route = 'app.get(\n  "/api/salathanie-ai/px4",';
   if (!server.includes(px4Route)) {
     throw new Error("Telemetry integrity patch refused: PX4 route anchor not found");
   }
 
   const route = [
     "app.get(",
-    '  "/api/eagle-eyes/telemetry-integrity",',
+    '  "/api/salathanie-ai/telemetry-integrity",',
     "  async (_req, res) => {",
     '    res.set("cache-control", "no-store");',
     "    res.json(await getTelemetryIntegrity());",

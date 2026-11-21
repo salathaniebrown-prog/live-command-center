@@ -1,6 +1,6 @@
 # Command Deployment Center
 
-Open `/deployment-center.html` from the existing Eagle Eyes workspace. Chronicle
+Open `/deployment-center.html` from the existing Salathanie A.I workspace. Chronicle
 Lab V13, executive council, Scribe, MAX, Shell Catcher and the existing startup
 transformations remain part of the same application.
 

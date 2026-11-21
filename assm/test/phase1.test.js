@@ -29,7 +29,7 @@ function sampleRecord() {
   };
 }
 
-test("ASSM adapter reuses Eagle Eyes deterministic 10-D state embedding", () => {
+test("ASSM adapter reuses Salathanie A.I deterministic 10-D state embedding", () => {
   const first = toStateEnvelope(sampleRecord());
   const second = toStateEnvelope(sampleRecord());
 

@@ -16,7 +16,7 @@ test("Render chat entry points exist and keep secrets server-side", () => {
   const nestedEntry = read("public/chat/index.html");
   const client = read("public/chat/chat.js");
 
-  assert.match(rootEntry, /EAGLE EYES · OPENAI/);
+  assert.match(rootEntry, /SALATHANIE A.I · OPENAI/);
   assert.match(rootEntry, /<script src="\/chat\/chat\.js" defer><\/script>/);
   assert.match(nestedEntry, /Direct Chat Bridge/);
   assert.match(client, /\/api\/assistant\/stream/);

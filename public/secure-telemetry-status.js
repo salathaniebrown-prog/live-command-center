@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const ENDPOINT = "/api/eagle-eyes/telemetry-integrity";
+  const ENDPOINT = "/api/salathanie-ai/telemetry-integrity";
 
   function ensurePill() {
     const host = document.querySelector(".topPills");

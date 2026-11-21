@@ -1,6 +1,6 @@
-# Eagle Eyes World Data Workers Recovery
+# Salathanie A.I World Data Workers Recovery
 
-This recovery branch preserves three Cloudflare Worker layers recovered from prior Eagle Eyes work.
+This recovery branch preserves three Cloudflare Worker layers recovered from prior Salathanie A.I work.
 
 - `workers/world-data-edge/worker.mjs`: original edge Worker. Proxies Railway metrics plus USGS, NASA EONET, and NOAA/NWS.
 - `workers/world-data-v2-legacy-proxy/worker.mjs`: intermediate normalized V2 that depends on the V1 edge Worker.

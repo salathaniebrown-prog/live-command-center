@@ -1,5 +1,5 @@
 """
-EAGLE EYES TELEMETRY CORE — ISOLATED TELEMETRY SPINE
+SALATHANIE A.I TELEMETRY CORE — ISOLATED TELEMETRY SPINE
 Kafka/Redpanda ingestion -> WGS84 voxel projection -> spatial analysis -> WebSocket broadcast.
 
 This service is intentionally isolated from the existing Node command center.
@@ -201,7 +201,7 @@ class TelemetrySpineServer:
             consumer = AIOKafkaConsumer(
                 TELEMETRY_TOPIC,
                 bootstrap_servers=KAFKA_BROKER,
-                group_id="eagle_eyes_spine_processor_v2",
+                group_id="salathanie_ai_spine_processor_v2",
                 enable_auto_commit=True,
                 auto_offset_reset="latest",
             )

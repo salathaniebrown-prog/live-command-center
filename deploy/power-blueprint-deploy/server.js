@@ -9,7 +9,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const client = mqtt.connect(process.env.MQTT_URL || 'mqtt://mqtt:1883');
 app.disable('x-powered-by');
 app.use(express.json({limit:'256kb'}));
-client.on('connect', () => client.subscribe('eagle-eyes/telemetry/+'));
+client.on('connect', () => client.subscribe('salathanie-ai/telemetry/+'));
 client.on('message', async (topic, buf) => {
   try {
     const p = JSON.parse(buf.toString());
@@ -32,6 +32,6 @@ app.get('/api/telemetry/latest', async (_req,res) => {
 app.post('/api/telemetry/:nodeId', (req,res) => {
   const nodeId=String(req.params.nodeId).replace(/[^a-zA-Z0-9_.-]/g,'');
   if(!nodeId) return res.status(400).json({ok:false,error:'invalid node id'});
-  client.publish(`eagle-eyes/telemetry/${nodeId}`, JSON.stringify({...req.body,time:req.body.time||new Date().toISOString()}), {qos:1}, err => err ? res.status(503).json({ok:false}) : res.status(202).json({ok:true,nodeId}));
+  client.publish(`salathanie-ai/telemetry/${nodeId}`, JSON.stringify({...req.body,time:req.body.time||new Date().toISOString()}), {qos:1}, err => err ? res.status(503).json({ok:false}) : res.status(202).json({ok:true,nodeId}));
 });
 app.listen(PORT,'0.0.0.0',()=>console.log(`Power Blueprint listening on ${PORT}`));

@@ -13,10 +13,10 @@ import {
 import { fetch as expoFetch } from "expo/fetch";
 
 const STARTER_TASKS = [
-  "Give me an Eagle Eyes mission brief and tell me what matters now.",
-  "Audit the current Eagle Eyes system and prepare the next safest upgrades.",
+  "Give me an Salathanie A.I mission brief and tell me what matters now.",
+  "Audit the current Salathanie A.I system and prepare the next safest upgrades.",
   "Investigate the latest error I describe, find the root cause, and prepare the fix.",
-  "Prepare a build plan for my next project using Eagle Eyes capabilities."
+  "Prepare a build plan for my next project using Salathanie A.I capabilities."
 ];
 
 function parseSseBlock(block) {
@@ -44,7 +44,7 @@ function Message({ item }) {
   const assistant = item.role === "assistant";
   return (
     <View style={[styles.message, assistant ? styles.assistantMessage : styles.userMessage]}>
-      <Text style={styles.messageRole}>{assistant ? "CHATGPT · EAGLE EYES" : "YOU"}</Text>
+      <Text style={styles.messageRole}>{assistant ? "CHATGPT · SALATHANIE A.I" : "YOU"}</Text>
       <Text style={styles.messageText}>{item.text}</Text>
       {item.meta ? <Text style={styles.messageMeta}>{item.meta}</Text> : null}
     </View>
@@ -59,7 +59,7 @@ export default function ChatConsole({ baseUrl }) {
       id: "welcome",
       role: "assistant",
       text:
-        "Eagle Eyes ChatGPT command console ready. Connect your Command Center access token, then give me a task. I can stream answers while the backend routes GPT-5.6, web search, and Eagle Eyes tools without placing the OpenAI API key inside this APK.",
+        "Salathanie A.I ChatGPT command console ready. Connect your Command Center access token, then give me a task. I can stream answers while the backend routes GPT-5.6, web search, and Salathanie A.I tools without placing the OpenAI API key inside this APK.",
       meta: "SERVER-SIDE AI · STREAMING · TOOL ROUTING"
     }
   ]);
@@ -157,7 +157,7 @@ export default function ChatConsole({ baseUrl }) {
 
     if (!token) {
       appendAssistantError(
-        "Command Center access is locked. Enter the COMMAND_CENTER_ACCESS_TOKEN for your Eagle Eyes backend. It stays in this running app session and is not compiled into the APK."
+        "Command Center access is locked. Enter the COMMAND_CENTER_ACCESS_TOKEN for your Salathanie A.I backend. It stays in this running app session and is not compiled into the APK."
       );
       return;
     }
@@ -194,7 +194,7 @@ export default function ChatConsole({ baseUrl }) {
         setStreamState("STREAMING");
         updateAssistantMessage(assistantId, (item) => ({ text: item.text + data.text }));
       } else if (event === "tool_call") {
-        const name = data?.name || "Eagle Eyes tool";
+        const name = data?.name || "Salathanie A.I tool";
         setActiveTool(name);
         updateAssistantMessage(assistantId, (item) => ({
           meta: `${item.meta || "GPT"} · TOOL ${name}`
@@ -306,7 +306,7 @@ export default function ChatConsole({ baseUrl }) {
     >
       <View style={styles.commandHeader}>
         <View style={styles.headerCopy}>
-          <Text style={styles.eyebrow}>EAGLE EYES · CHATGPT</Text>
+          <Text style={styles.eyebrow}>SALATHANIE A.I · CHATGPT</Text>
           <Text style={styles.title}>STREAMING COMMAND CORE</Text>
           <Text style={styles.subtitle}>
             {configured ? `${model} API online` : "GPT API status not active"} · tool routing · live web search · free fallback
@@ -354,7 +354,7 @@ export default function ChatConsole({ baseUrl }) {
         {streamState === "CONNECTING" ? (
           <View style={styles.thinkingRow}>
             <ActivityIndicator size="small" />
-            <Text style={styles.thinkingText}>Connecting to Eagle Eyes ChatGPT…</Text>
+            <Text style={styles.thinkingText}>Connecting to Salathanie A.I ChatGPT…</Text>
           </View>
         ) : null}
         {activeTool ? <Text style={styles.toolText}>TOOL ACTIVE · {activeTool}</Text> : null}

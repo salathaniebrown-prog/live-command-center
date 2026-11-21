@@ -1,7 +1,7 @@
-# Eagle Eyes Mobile
+# Salathanie A.I Mobile
 
-Recovered from the original `eagle-eyes-mobile` repository into the unified
-Eagle Eyes repository.
+Recovered from the original `salathanie-ai-mobile` repository into the unified
+Salathanie A.I repository.
 
 ## Live backend
 
@@ -11,7 +11,7 @@ By default the app uses:
 https://live-command-center-production-31ed.up.railway.app
 ```
 
-To point a development build at another real Eagle Eyes server:
+To point a development build at another real Salathanie A.I server:
 
 ```bash
 EXPO_PUBLIC_EAGLE_EYES_BASE_URL=https://your-host.example npx expo start
@@ -27,7 +27,7 @@ npx expo start
 
 ## Build an APK
 
-The repository includes `.github/workflows/eagle-eyes-android-apk.yml`. It
+The repository includes `.github/workflows/salathanie-ai-android-apk.yml`. It
 prebuilds the Expo Android project and runs Gradle `assembleRelease`, then
 uploads the installable APK as the `Eagle-Eyes-Android-Standalone` workflow
 artifact.

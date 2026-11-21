@@ -240,7 +240,7 @@ function formatEvmChains(data) {
     "EVM CHAIN REGISTRY — READ ONLY",
     `Matches: ${data.count} • Registry chains: ${data.totalRegistryChains}`,
     ...(lines.length ? lines : ["No matching chain found."]),
-    "RPC URLs and explorers are metadata only; Eagle Eyes does not sign or submit transactions.",
+    "RPC URLs and explorers are metadata only; Salathanie A.I does not sign or submit transactions.",
     `Source: ${data.source}`,
     `Checked: ${data.timestamp}`
   ].join("\n");

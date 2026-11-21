@@ -24,7 +24,7 @@ REAL_LOG = os.path.expanduser("~/telemetry-spine/REAL.log")
 
 OPERATOR_EXPERT_PROFILE = {
     "role": "Chief Architect & Sovereign Operator",
-    "core_drivers": ["Alstra", "Astra Infinite Brain", "Deepspace Ledgers", "Eagle Eyes"],
+    "core_drivers": ["Alstra", "Astra Infinite Brain", "Deepspace Ledgers", "Salathanie A.I"],
     "non_negotiables": [
         "Zero-trust security: verify cryptographic proof before settlement",
         "Real live data & persistent SQLite WAL storage across restarts",

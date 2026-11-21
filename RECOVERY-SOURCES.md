@@ -1,6 +1,6 @@
-# Eagle Eyes Unified Recovery
+# Salathanie A.I Unified Recovery
 
-Recovery branch: `recovery/eagle-eyes-unified-20260902`
+Recovery branch: `recovery/salathanie-ai-unified-20260902`
 
 The recovery rule is **real inputs only**. Old code is not imported just because
 it existed.
@@ -14,13 +14,13 @@ Spine, Live Global Operations Map, and PX4 Telemetry Spine.
 
 ## Recovered from older repositories
 
-### `eagle-eyes-mobile`
+### `salathanie-ai-mobile`
 
 Recovered into `clients/mobile/` as the Android/Expo client. It keeps the live
 Railway backend, live status, World OS, web-search surface, and EAS project
 configuration. Backend command-mode status wiring was corrected during import.
 
-### `eagle-eyes-telemetry`
+### `salathanie-ai-telemetry`
 
 The useful part was the real MAVLink/PX4 reader. The old automatic simulation
 fallback was intentionally **not** imported. The recovered bridge is
@@ -37,7 +37,7 @@ checks the real health endpoint before reporting success.
 
 - `real-time`: separate Next.js/v0 application; no NWS/USGS/EONET/Railway
   telemetry implementation was found to improve the current production backend.
-- `botdefense`: unrelated bot-defense code, not part of Eagle Eyes runtime.
+- `botdefense`: unrelated bot-defense code, not part of Salathanie A.I runtime.
 - `ddp-security-fixes`: no runtime implementation to merge.
 - `cfworker`: separate Cloudflare Worker project; not required by the current
   Railway/Expo architecture.

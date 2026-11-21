@@ -1,11 +1,11 @@
-# Eagle Eyes ASSM Mesh — Phase 1
+# Salathanie A.I ASSM Mesh — Phase 1
 
-ASSM is an additive accelerator layer for Eagle Eyes. Phase 1 consumes Eagle Eyes state records, reuses the existing deterministic 16-feature → 10-D embedding engine, evaluates Hamming-distance variance, and reports metrics without writing back to Eagle Eyes.
+ASSM is an additive accelerator layer for Salathanie A.I. Phase 1 consumes Salathanie A.I state records, reuses the existing deterministic 16-feature → 10-D embedding engine, evaluates Hamming-distance variance, and reports metrics without writing back to Salathanie A.I.
 
 ## Safety boundary
 
-- Eagle Eyes V13 is upstream and read-only.
-- ASSM must not overwrite root Eagle Eyes files.
+- Salathanie A.I V13 is upstream and read-only.
+- ASSM must not overwrite root Salathanie A.I files.
 - Phase 1 performs no financial execution, blockchain signing, production mutation, or autonomous deployment.
 - The current router reads newline-delimited JSON from stdin and emits JSON to stdout.
 - Scaling to 4/32 workers happens only after single-worker validation.
@@ -13,7 +13,7 @@ ASSM is an additive accelerator layer for Eagle Eyes. Phase 1 consumes Eagle Eye
 ## Phase 1 flow
 
 ```text
-Eagle Eyes normalized spine record
+Salathanie A.I normalized spine record
           |
           v
      state-adapter
@@ -40,7 +40,7 @@ npm run ci
 node src/ingest-router.js
 ```
 
-Then send one normalized Eagle Eyes spine record per line. The first valid record becomes the in-process observation baseline for that run; later records are compared with Hamming distance. No data is persisted.
+Then send one normalized Salathanie A.I spine record per line. The first valid record becomes the in-process observation baseline for that run; later records are compared with Hamming distance. No data is persisted.
 
 ## Promotion gates
 

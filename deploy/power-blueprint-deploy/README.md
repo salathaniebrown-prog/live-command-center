@@ -1,20 +1,20 @@
 # Power Blueprint V1 Deployment Tool
 
-This directory is the isolated Power Blueprint deployment baseline for Eagle Eyes.
+This directory is the isolated Power Blueprint deployment baseline for Salathanie A.I.
 
 ## Purpose
 
 - Prepare the persistent physical-server deployment path.
 - Keep Power Blueprint work isolated from production `main`.
 - Validate changes through GitHub Actions before merging.
-- Preserve the existing Eagle Eyes telemetry spine and production services.
+- Preserve the existing Salathanie A.I telemetry spine and production services.
 
 ## Target stack
 
 - Docker-based persistent compute
 - PostgreSQL/PostGIS data layer
 - MQTT telemetry transport
-- Eagle Eyes application service
+- Salathanie A.I application service
 - Future physical Power Blueprint server deployment
 
 ## Operator tool

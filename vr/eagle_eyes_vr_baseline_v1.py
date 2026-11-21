@@ -49,7 +49,7 @@ SYSTEM_STATE = {
     "network_throttled": "NOMINAL"
 }
 
-DB_PATH = "eagle_eyes_baseline.db"
+DB_PATH = "salathanie_ai_baseline.db"
 LOCK = threading.Lock()
 STOP_EVENT = threading.Event()
 
@@ -307,7 +307,7 @@ def live_telemetry_pipeline_spine():
 # ==============================================================================
 class EagleEyesVRBaseline:
     """
-    Desktop-safe Eagle Eyes HUD.
+    Desktop-safe Salathanie A.I HUD.
 
     OpenXR is detected but native XR rendering is not falsely claimed unless a
     valid graphics binding/session lifecycle is established. This baseline
@@ -332,7 +332,7 @@ class EagleEyesVRBaseline:
         self.window = pyglet.window.Window(
             width=1150,
             height=850,
-            caption="Eagle Eyes VR Baseline v1",
+            caption="Salathanie A.I VR Baseline v1",
             resizable=True
         )
 
@@ -413,7 +413,7 @@ class EagleEyesVRBaseline:
         glClear(GL_COLOR_BUFFER_BIT)
 
         self.lbl_headline.text = (
-            "EAGLE EYES // VR BASELINE v1 // OBSERVATION-ONLY"
+            "SALATHANIE A.I // VR BASELINE v1 // OBSERVATION-ONLY"
         )
 
         self.lbl_telemetry.text = (
@@ -454,7 +454,7 @@ def main():
     telemetry_thread = threading.Thread(
         target=live_telemetry_pipeline_spine,
         daemon=True,
-        name="eagle-eyes-telemetry"
+        name="salathanie-ai-telemetry"
     )
     telemetry_thread.start()
 

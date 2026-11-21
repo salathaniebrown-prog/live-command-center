@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Eagle Eyes PX4/MAVLink observation-only bridge.
+"""Salathanie A.I PX4/MAVLink observation-only bridge.
 
 Reads telemetry from a local/protected MAVLink endpoint and forwards validated
-snapshots over HTTPS to the Eagle Eyes PX4 ingest API. It contains no simulation
+snapshots over HTTPS to the Salathanie A.I PX4 ingest API. It contains no simulation
 mode and sends no vehicle-control commands.
 """
 
@@ -17,11 +17,11 @@ from urllib import request, error
 from pymavlink import mavutil
 
 
-BRIDGE_VERSION = "eagle-eyes-mavlink-bridge/1.0"
+BRIDGE_VERSION = "salathanie-ai-mavlink-bridge/1.0"
 MAVLINK_ENDPOINT = os.getenv("MAVLINK_ENDPOINT", "").strip()
 INGEST_URL = os.getenv(
     "EAGLE_EYES_INGEST_URL",
-    "https://live-command-center-production-31ed.up.railway.app/api/eagle-eyes/px4/ingest",
+    "https://live-command-center-production-31ed.up.railway.app/api/salathanie-ai/px4/ingest",
 ).strip()
 INGEST_TOKEN = os.getenv("PX4_TELEMETRY_INGEST_TOKEN", "").strip()
 VEHICLE_ID = os.getenv("PX4_VEHICLE_ID", "").strip()
@@ -89,7 +89,7 @@ def main():
     if not INGEST_URL.startswith(("https://", "http://localhost", "http://127.0.0.1")):
         sys.exit("EAGLE_EYES_INGEST_URL must use HTTPS except for localhost testing.")
 
-    print(f"[eagle-eyes] opening MAVLink telemetry at {MAVLINK_ENDPOINT}", flush=True)
+    print(f"[salathanie-ai] opening MAVLink telemetry at {MAVLINK_ENDPOINT}", flush=True)
     connection = mavutil.mavlink_connection(MAVLINK_ENDPOINT)
     heartbeat = connection.wait_heartbeat(timeout=30)
     if heartbeat is None:
@@ -102,7 +102,7 @@ def main():
     last_message = 0.0
 
     print(
-        f"[eagle-eyes] telemetry source connected: system={system_id} component={component_id}",
+        f"[salathanie-ai] telemetry source connected: system={system_id} component={component_id}",
         flush=True,
     )
 
@@ -112,7 +112,7 @@ def main():
 
         if msg is None:
             if last_message and now - last_message > 5:
-                print("[eagle-eyes] telemetry stream waiting; no synthetic data emitted", flush=True)
+                print("[salathanie-ai] telemetry stream waiting; no synthetic data emitted", flush=True)
             continue
 
         kind = msg.get_type()
@@ -208,15 +208,15 @@ def main():
             post_snapshot(payload)
             last_post = now
             print(
-                f"[eagle-eyes] telemetry accepted for {payload['vehicleId']} at {payload['observedAt']}",
+                f"[salathanie-ai] telemetry accepted for {payload['vehicleId']} at {payload['observedAt']}",
                 flush=True,
             )
         except error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
-            print(f"[eagle-eyes] ingest HTTP {exc.code}: {detail}", file=sys.stderr, flush=True)
+            print(f"[salathanie-ai] ingest HTTP {exc.code}: {detail}", file=sys.stderr, flush=True)
             time.sleep(2)
         except Exception as exc:
-            print(f"[eagle-eyes] ingest error: {exc}", file=sys.stderr, flush=True)
+            print(f"[salathanie-ai] ingest error: {exc}", file=sys.stderr, flush=True)
             time.sleep(2)
 
 

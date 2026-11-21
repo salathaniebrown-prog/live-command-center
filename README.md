@@ -1,8 +1,8 @@
-# Eagle Eyes Live Command Center
+# Salathanie A.I Live Command Center
 
-Eagle Eyes is a live, read-only command rail and World Command Operating System running on Railway.
+Salathanie A.I is a live, read-only command rail and World Command Operating System running on Railway.
 
-Project identity: Eagle Eyes Command OS by Salathaniel Brown Sr, used here with
+Project identity: Salathanie A.I Command OS by Salathaniel Brown Sr, used here with
 explicit project permission.
 
 ## What is live
@@ -20,7 +20,7 @@ No demo or simulated telemetry is substituted for unavailable values.
 
 ## World intelligence sources
 
-Eagle Eyes reads current public data from:
+Salathanie A.I reads current public data from:
 
 - NOAA / NWS active weather alerts
 - USGS earthquake feeds
@@ -33,7 +33,7 @@ The API marks these results as non-simulated and returns an error instead of inv
 
 ## EVM chain registry
 
-The EVM registry is observation-only. Eagle Eyes reads the aggregated `https://chainid.network/chains.json` dataset and exposes chain identity and network metadata without connecting a wallet, signing payloads, or submitting transactions.
+The EVM registry is observation-only. Salathanie A.I reads the aggregated `https://chainid.network/chains.json` dataset and exposes chain identity and network metadata without connecting a wallet, signing payloads, or submitting transactions.
 
 Returned metadata can include:
 
@@ -45,7 +45,7 @@ Returned metadata can include:
 - parent/L2 relationships and bridge URLs when supplied upstream
 - upstream red flags such as reused chain-ID warnings
 
-The upstream source repository maintains individual chain records under `_data/chains` and icon metadata under `_data/icons`. Eagle Eyes consumes the automatically aggregated registry and does not modify upstream chain records.
+The upstream source repository maintains individual chain records under `_data/chains` and icon metadata under `_data/icons`. Salathanie A.I consumes the automatically aggregated registry and does not modify upstream chain records.
 
 ## Command modes
 
@@ -75,7 +75,7 @@ API keys, private keys, wallet secrets, or live execution authority in the repo.
 
 ## PX4 telemetry spine
 
-PX4 telemetry is an optional observation-only integration. Eagle Eyes accepts validated snapshots from a companion bridge, keeps unavailable fields as `N/A`, and never substitutes simulated vehicle data.
+PX4 telemetry is an optional observation-only integration. Salathanie A.I accepts validated snapshots from a companion bridge, keeps unavailable fields as `N/A`, and never substitutes simulated vehicle data.
 
 The companion ingest uses a credential that is separate from Command Rail access:
 
@@ -95,7 +95,7 @@ The Command Rail exposes PX4 telemetry only as a read-only tool. It has no arm, 
 
 ## BCI telemetry lane
 
-Eagle Eyes now reserves a read-only BCI telemetry lane for future validated
+Salathanie A.I now reserves a read-only BCI telemetry lane for future validated
 observations. It is scoped to single self-candidate mode for Salathaniel Brown
 Sr and is not open enrollment. It starts as `UNCONFIGURED` until
 `BCI_TELEMETRY_INGEST_TOKEN` is set, then reports `WAITING` until real
@@ -104,7 +104,7 @@ or treat anything, and has no control output or command authority.
 
 ## Project Future Command Lab
 
-Project Future Command Lab tracks the next Eagle Eyes action layers without
+Project Future Command Lab tracks the next Salathanie A.I action layers without
 mixing them into the live observation system. It keeps project-builder,
 GitHub-operator, deployment-operator, BCI telemetry, and Supercomputer
 NexusBrown Command Center work visible as planned or registered capabilities
@@ -120,27 +120,27 @@ Public runtime/dashboard endpoints:
 - `GET /api/workloads`
 - `GET /api/deployment`
 - `GET /api/health`
-- `GET /api/eagle-eyes/sources`
-- `GET /api/eagle-eyes/events?source=usgs|nws|eonet&limit=10`
-- `GET /api/eagle-eyes/chains?q=ethereum&limit=10`
-- `GET /api/eagle-eyes/bci/status`
-- `GET /api/eagle-eyes/future-command-lab`
+- `GET /api/salathanie-ai/sources`
+- `GET /api/salathanie-ai/events?source=usgs|nws|eonet&limit=10`
+- `GET /api/salathanie-ai/chains?q=ethereum&limit=10`
+- `GET /api/salathanie-ai/bci/status`
+- `GET /api/salathanie-ai/future-command-lab`
 - `GET /api/assistant/status`
 
 Protected command endpoints require `Authorization: Bearer <COMMAND_CENTER_ACCESS_TOKEN>`:
 
-- `GET /api/eagle-eyes/snapshot`
-- `GET /api/eagle-eyes/world-os`
-- `GET /api/eagle-eyes/knowledge?q=...`
-- `GET /api/eagle-eyes/weather?location=...`
-- `GET /api/eagle-eyes/px4`
+- `GET /api/salathanie-ai/snapshot`
+- `GET /api/salathanie-ai/world-os`
+- `GET /api/salathanie-ai/knowledge?q=...`
+- `GET /api/salathanie-ai/weather?location=...`
+- `GET /api/salathanie-ai/px4`
 - `GET /api/assistant/auth-check`
 - `POST /api/assistant`
 - `POST /api/assistant/stream`
 
 PX4 companion ingest requires `Authorization: Bearer <PX4_TELEMETRY_INGEST_TOKEN>`:
 
-- `POST /api/eagle-eyes/px4/ingest`
+- `POST /api/salathanie-ai/px4/ingest`
 
 ## Run locally
 
@@ -194,7 +194,7 @@ Railway health response does not establish that a new Git revision is deployed.
 
 ## MCP / UDP supercomputer hub
 
-Eagle Eyes now has an isolated local MCP control plane for cluster observation and
+Salathanie A.I now has an isolated local MCP control plane for cluster observation and
 guarded UDP backplane tuning. It is intentionally separate from the production web
 command rail.
 

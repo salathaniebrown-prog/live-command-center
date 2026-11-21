@@ -7,10 +7,10 @@ const dashboardPath = path.join(__dirname, "..", "public", "index.html");
 let dashboard = fs.readFileSync(dashboardPath, "utf8");
 
 const replacements = [
-  ["/api/eagle-eyes/events?source=nws&limit=12", "/api/eagle-eyes/events?source=nws&limit=50"],
-  ["/api/eagle-eyes/events?source=usgs&limit=12", "/api/eagle-eyes/events?source=usgs&limit=50"],
-  ["/api/eagle-eyes/events?source=eonet&limit=12", "/api/eagle-eyes/events?source=eonet&limit=50"],
-  ["/api/eagle-eyes/satellites?limit=30", "/api/eagle-eyes/satellites?limit=120"]
+  ["/api/salathanie-ai/events?source=nws&limit=12", "/api/salathanie-ai/events?source=nws&limit=50"],
+  ["/api/salathanie-ai/events?source=usgs&limit=12", "/api/salathanie-ai/events?source=usgs&limit=50"],
+  ["/api/salathanie-ai/events?source=eonet&limit=12", "/api/salathanie-ai/events?source=eonet&limit=50"],
+  ["/api/salathanie-ai/satellites?limit=30", "/api/salathanie-ai/satellites?limit=120"]
 ];
 
 for (const [from, to] of replacements) {
@@ -28,4 +28,4 @@ for (const [, expected] of replacements) {
 }
 
 fs.writeFileSync(dashboardPath, dashboard, "utf8");
-console.log("Eagle Eyes dashboard recovery limits aligned: NWS/USGS/EONET=50, satellites=120.");
+console.log("Salathanie A.I dashboard recovery limits aligned: NWS/USGS/EONET=50, satellites=120.");

@@ -1,4 +1,4 @@
-"""XR-ready observation envelope for Eagle Eyes Reality Engine."""
+"""XR-ready observation envelope for Salathanie A.I Reality Engine."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def to_xr_envelope(motion_state: Dict[str, Any]) -> Dict[str, Any]:
         })
 
     return {
-        "schemaVersion": "eagle-eyes.reality-xr.v1",
+        "schemaVersion": "salathanie-ai.reality-xr.v1",
         "simulated": False,
         "observationOnly": True,
         "sourceType": "physical-camera",

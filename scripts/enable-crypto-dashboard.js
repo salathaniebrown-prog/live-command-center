@@ -9,7 +9,7 @@ let next = fs.readFileSync(pagePath, "utf8");
 const MARKER = 'id="crypto"';
 
 if (next.includes(MARKER)) {
-  console.log("Eagle Eyes crypto dashboard already enabled.");
+  console.log("Salathanie A.I crypto dashboard already enabled.");
   process.exit(0);
 }
 
@@ -45,10 +45,10 @@ insertBefore(
 
 const cryptoJs = `
 function cryptoToken(){return sessionStorage.getItem('eagleEyesToken')||($('token')?.value||'').trim()}
-async function loadCryptoStatus(){try{const {r,j}=await getj('/api/eagle-eyes/crypto/status');if(!r.ok)throw new Error(j?.error||('HTTP '+r.status));$('cryptoState').textContent=j?.configured?'SANDBOX READY':'SANDBOX • ADDRESS NOT CONFIGURED';$('cryptoNetwork').textContent=j?.network?.name||'Base Sepolia';$('cryptoMode').textContent=(j?.mode||'sandbox').toUpperCase();$('cryptoAsset').textContent=(j?.asset?.symbol||'USDC')+' • CHAIN '+(j?.network?.chainId??'84532');$('cryptoMainnet').textContent=j?.mainnetLocked===false&&j?.network?.mainnet?'ENABLED':'LOCKED';if(!j?.configured)$('cryptoOutput').textContent='Crypto rail is present and safe, but CRYPTO_RECEIVE_ADDRESS is not configured in this deployment. Base Sepolia remains the default and mainnet remains locked.'}catch(e){$('cryptoState').textContent='UNAVAILABLE';$('cryptoOutput').textContent='Crypto status unavailable: '+e.message}}
+async function loadCryptoStatus(){try{const {r,j}=await getj('/api/salathanie-ai/crypto/status');if(!r.ok)throw new Error(j?.error||('HTTP '+r.status));$('cryptoState').textContent=j?.configured?'SANDBOX READY':'SANDBOX • ADDRESS NOT CONFIGURED';$('cryptoNetwork').textContent=j?.network?.name||'Base Sepolia';$('cryptoMode').textContent=(j?.mode||'sandbox').toUpperCase();$('cryptoAsset').textContent=(j?.asset?.symbol||'USDC')+' • CHAIN '+(j?.network?.chainId??'84532');$('cryptoMainnet').textContent=j?.mainnetLocked===false&&j?.network?.mainnet?'ENABLED':'LOCKED';if(!j?.configured)$('cryptoOutput').textContent='Crypto rail is present and safe, but CRYPTO_RECEIVE_ADDRESS is not configured in this deployment. Base Sepolia remains the default and mainnet remains locked.'}catch(e){$('cryptoState').textContent='UNAVAILABLE';$('cryptoOutput').textContent='Crypto status unavailable: '+e.message}}
 async function cryptoPost(route,body){const token=cryptoToken();if(!token){$('cryptoOutput').textContent='Command Rail access token required for crypto request preparation. No wallet credentials belong here.';return null}const {r,j}=await getj(route,{method:'POST',headers:{'content-type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body)});if(!r.ok){$('cryptoOutput').textContent='Crypto request rejected: '+(j?.error||('HTTP '+r.status));return null}$('cryptoOutput').textContent=JSON.stringify(j,null,2);return j}
-async function createCryptoReceive(){const amount=($('cryptoReceiveAmount').value||'').trim(),memo=($('cryptoReceiveMemo').value||'').trim();if(!amount){$('cryptoOutput').textContent='Enter a USDC amount for the receive request.';return}await cryptoPost('/api/eagle-eyes/crypto/payment-request',{amountUsdc:amount,memo})}
-async function prepareCryptoSend(){const toAddress=($('cryptoSendTo').value||'').trim(),amount=($('cryptoSendAmount').value||'').trim(),memo=($('cryptoSendMemo').value||'').trim();if(!toAddress||!amount){$('cryptoOutput').textContent='Enter a recipient address and USDC amount. The server will prepare only an unsigned request.';return}await cryptoPost('/api/eagle-eyes/crypto/transfer-request',{toAddress,amountUsdc:amount,memo})}
+async function createCryptoReceive(){const amount=($('cryptoReceiveAmount').value||'').trim(),memo=($('cryptoReceiveMemo').value||'').trim();if(!amount){$('cryptoOutput').textContent='Enter a USDC amount for the receive request.';return}await cryptoPost('/api/salathanie-ai/crypto/payment-request',{amountUsdc:amount,memo})}
+async function prepareCryptoSend(){const toAddress=($('cryptoSendTo').value||'').trim(),amount=($('cryptoSendAmount').value||'').trim(),memo=($('cryptoSendMemo').value||'').trim();if(!toAddress||!amount){$('cryptoOutput').textContent='Enter a recipient address and USDC amount. The server will prepare only an unsigned request.';return}await cryptoPost('/api/salathanie-ai/crypto/transfer-request',{toAddress,amountUsdc:amount,memo})}
 `;
 insertBefore("function saveToken(){", cryptoJs, "saveToken function");
 insertBefore(
@@ -58,4 +58,4 @@ insertBefore(
 );
 
 fs.writeFileSync(pagePath, next);
-console.log("Eagle Eyes Chronicle V13 crypto dashboard enabled.");
+console.log("Salathanie A.I Chronicle V13 crypto dashboard enabled.");

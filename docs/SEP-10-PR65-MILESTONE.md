@@ -1,6 +1,6 @@
-# Eagle Eyes — September 10 PR #65 Milestone
+# Salathanie A.I — September 10 PR #65 Milestone
 
-This milestone records the September 10, 2026 Eagle Eyes promotion state without changing production runtime behavior.
+This milestone records the September 10, 2026 Salathanie A.I promotion state without changing production runtime behavior.
 
 ## Baseline
 

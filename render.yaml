@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: eagle-eyes-global
+    name: salathanie-ai-global
     runtime: static
     buildCommand: node scripts/verify-global-static.js
     staticPublishPath: public

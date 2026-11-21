@@ -198,7 +198,7 @@ class ShellCatcher {
   status({ ingestConfigured = false } = {}) {
     return {
       ok: true,
-      service: "eagle-eyes-shell-catcher",
+      service: "salathanie-ai-shell-catcher",
       mode: "LIVE_DEFENSIVE_OBSERVATION",
       operational: true,
       ingestConfigured: Boolean(ingestConfigured),
@@ -318,12 +318,12 @@ function registerShellCatcher(app, { readGuard } = {}) {
     return next();
   }
 
-  app.get("/api/eagle-eyes/shell-catcher/health", (_req, res) => {
+  app.get("/api/salathanie-ai/shell-catcher/health", (_req, res) => {
     res.set("cache-control", "no-store");
     res.json(catcher.status({ ingestConfigured: Boolean(ingestToken) }));
   });
 
-  app.get("/api/eagle-eyes/shell-catcher/status", guard, (_req, res) => {
+  app.get("/api/salathanie-ai/shell-catcher/status", guard, (_req, res) => {
     res.set("cache-control", "no-store");
     res.json({
       ...catcher.status({ ingestConfigured: Boolean(ingestToken) }),
@@ -331,12 +331,12 @@ function registerShellCatcher(app, { readGuard } = {}) {
     });
   });
 
-  app.get("/api/eagle-eyes/shell-catcher/events", guard, (req, res) => {
+  app.get("/api/salathanie-ai/shell-catcher/events", guard, (req, res) => {
     res.set("cache-control", "no-store");
     res.json({ ok: true, events: catcher.recent(req.query.limit), timestamp: new Date().toISOString() });
   });
 
-  app.post("/api/eagle-eyes/shell-catcher/ingest", requireIngest, (req, res) => {
+  app.post("/api/salathanie-ai/shell-catcher/ingest", requireIngest, (req, res) => {
     try {
       const record = catcher.ingest(req.body);
       return res.status(202).json({ ok: true, accepted: true, record, rawPayloadStored: false });
@@ -350,7 +350,7 @@ function registerShellCatcher(app, { readGuard } = {}) {
     }
   });
 
-  app.post("/api/eagle-eyes/shell-catcher/self-test", guard, (_req, res) => {
+  app.post("/api/salathanie-ai/shell-catcher/self-test", guard, (_req, res) => {
     res.set("cache-control", "no-store");
     res.json(runShellCatcherSelfTest());
   });

@@ -63,7 +63,7 @@ app.get(['/', '/v13', '/dashboard'], (req, res) => {
   res.send(`<!DOCTYPE html>
 <html>
 <head>
-  <title>Astra Sovereign & Eagle Eyes Command Center</title>
+  <title>Astra Sovereign & Salathanie A.I Command Center</title>
   <style>
     body { background: #06070c; color: #00ff88; font-family: monospace; padding: 20px; margin: 0; }
     h1 { color: #00ffff; border-bottom: 2px solid #00ff88; padding-bottom: 8px; }
@@ -77,7 +77,7 @@ app.get(['/', '/v13', '/dashboard'], (req, res) => {
   </style>
 </head>
 <body>
-  <h1>ASTRA SOVEREIGN // EAGLE EYES COMMAND CENTER</h1>
+  <h1>ASTRA SOVEREIGN // SALATHANIE A.I COMMAND CENTER</h1>
   <div class="grid">
     <div class="card">
       <h3>Root Architect Telemetry</h3>
@@ -95,7 +95,7 @@ app.get(['/', '/v13', '/dashboard'], (req, res) => {
 
   <div class="card">
     <h3>Unified Command Core (/api/fast)</h3>
-    <div id="console">Eagle Eyes Datacenter Core Online. Enter directive below...</div><br/>
+    <div id="console">Salathanie A.I Datacenter Core Online. Enter directive below...</div><br/>
     <input type="text" id="cmd" placeholder="Type command (e.g. status, evolve vector, ls)..." />
     <button onclick="send()">EXECUTE</button>
   </div>

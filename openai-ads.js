@@ -3,7 +3,7 @@
 const crypto = require("crypto");
 
 const ADS_ENDPOINT = "https://bzr.openai.com/v1/events";
-const INTEGRATION_SOURCE = "eagle_eyes_live_command_center";
+const INTEGRATION_SOURCE = "salathanie_ai_live_command_center";
 
 function enabledFromEnv(env = process.env) {
   return String(env.OPENAI_ADS_MEASUREMENT_ENABLED || "").toLowerCase() === "true";

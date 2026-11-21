@@ -49,7 +49,7 @@ test("USDC amount parsing preserves six decimal minor units", () => {
 test("payment request creates an ERC-681 transfer URI without creating a transaction", () => {
   const result = createPaymentRequest({
     amountUsdc: "4.25",
-    memo: "Eagle Eyes test invoice",
+    memo: "Salathanie A.I test invoice",
     env: {
       CRYPTO_RECEIVE_ADDRESS: RECEIVE_ADDRESS,
       CRYPTO_NETWORK: "base-sepolia"

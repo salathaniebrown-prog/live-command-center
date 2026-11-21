@@ -19,7 +19,7 @@ from telemetry_spine.signed_ingest import (
 
 def make_payload(**overrides):
     payload = {
-        "schemaVersion": "eagle-eyes.signed-telemetry.v1",
+        "schemaVersion": "salathanie-ai.signed-telemetry.v1",
         "sourceMode": "LIVE",
         "simulated": False,
         "sourceId": "sensor-alpha",

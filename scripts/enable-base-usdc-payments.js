@@ -21,16 +21,16 @@ insertBefore(
 );
 
 insertBefore(
-  'app.get(\n  "/api/eagle-eyes/events",',
-  'app.get(\n  "/api/eagle-eyes/crypto/status",\n  (req, res) => {\n    res.json(getCryptoStatus());\n  }\n);\n\napp.post(\n  "/api/eagle-eyes/crypto/payment-request",\n  requireAssistantAccess,\n  (req, res) => {\n    try {\n      res.json(\n        createPaymentRequest({\n          amountUsdc: req.body?.amountUsdc,\n          memo: req.body?.memo\n        })\n      );\n    } catch (error) {\n      const configurationError = /CRYPTO_RECEIVE_ADDRESS|mainnet is locked/.test(\n        error.message\n      );\n\n      res.status(configurationError ? 503 : 400).json({\n        ok: false,\n        error: error.message,\n        transactionCreated: false,\n        transactionSigned: false,\n        transactionSubmitted: false,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n);\n\napp.post(\n  "/api/eagle-eyes/crypto/transfer-request",\n  requireAssistantAccess,\n  (req, res) => {\n    try {\n      res.json(\n        createTransferRequest({\n          fromAddress: req.body?.fromAddress,\n          toAddress: req.body?.toAddress,\n          amountUsdc: req.body?.amountUsdc,\n          memo: req.body?.memo\n        })\n      );\n    } catch (error) {\n      const configurationError = /mainnet is locked/.test(error.message);\n\n      res.status(configurationError ? 503 : 400).json({\n        ok: false,\n        error: error.message,\n        transactionPrepared: false,\n        walletApprovalRequired: true,\n        transactionSigned: false,\n        transactionSubmitted: false,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n);\n\n',
-  '"/api/eagle-eyes/crypto/transfer-request"',
+  'app.get(\n  "/api/salathanie-ai/events",',
+  'app.get(\n  "/api/salathanie-ai/crypto/status",\n  (req, res) => {\n    res.json(getCryptoStatus());\n  }\n);\n\napp.post(\n  "/api/salathanie-ai/crypto/payment-request",\n  requireAssistantAccess,\n  (req, res) => {\n    try {\n      res.json(\n        createPaymentRequest({\n          amountUsdc: req.body?.amountUsdc,\n          memo: req.body?.memo\n        })\n      );\n    } catch (error) {\n      const configurationError = /CRYPTO_RECEIVE_ADDRESS|mainnet is locked/.test(\n        error.message\n      );\n\n      res.status(configurationError ? 503 : 400).json({\n        ok: false,\n        error: error.message,\n        transactionCreated: false,\n        transactionSigned: false,\n        transactionSubmitted: false,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n);\n\napp.post(\n  "/api/salathanie-ai/crypto/transfer-request",\n  requireAssistantAccess,\n  (req, res) => {\n    try {\n      res.json(\n        createTransferRequest({\n          fromAddress: req.body?.fromAddress,\n          toAddress: req.body?.toAddress,\n          amountUsdc: req.body?.amountUsdc,\n          memo: req.body?.memo\n        })\n      );\n    } catch (error) {\n      const configurationError = /mainnet is locked/.test(error.message);\n\n      res.status(configurationError ? 503 : 400).json({\n        ok: false,\n        error: error.message,\n        transactionPrepared: false,\n        walletApprovalRequired: true,\n        transactionSigned: false,\n        transactionSubmitted: false,\n        timestamp: new Date().toISOString()\n      });\n    }\n  }\n);\n\n',
+  '"/api/salathanie-ai/crypto/transfer-request"',
   "crypto payments API routes"
 );
 
 const current = fs.readFileSync(serverPath, "utf8");
 if (next !== current) {
   fs.writeFileSync(serverPath, next);
-  console.log("Eagle Eyes Base USDC receive + wallet-approved send routes enabled.");
+  console.log("Salathanie A.I Base USDC receive + wallet-approved send routes enabled.");
 } else {
-  console.log("Eagle Eyes Base USDC payment routes already enabled.");
+  console.log("Salathanie A.I Base USDC payment routes already enabled.");
 }

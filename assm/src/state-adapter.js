@@ -11,7 +11,7 @@ function isObject(value) {
 
 function validateSpineRecord(record) {
   if (!isObject(record)) {
-    throw new TypeError("ASSM expected an Eagle Eyes spine record object");
+    throw new TypeError("ASSM expected an Salathanie A.I spine record object");
   }
   return record;
 }
@@ -19,7 +19,7 @@ function validateSpineRecord(record) {
 function toStateEnvelope(record) {
   const spine = validateSpineRecord(record);
   return {
-    source: "eagle-eyes",
+    source: "salathanie-ai",
     readOnly: true,
     persisted: false,
     observedAt: new Date().toISOString(),

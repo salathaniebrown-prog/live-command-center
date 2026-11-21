@@ -6,7 +6,7 @@ const { compileSystemPerformanceMetrics } = require("./src/database/analytics");
 const { McpToolFirewall } = require("./src/security/mcpFirewall");
 
 const SERVER_INFO = {
-  name: "eagle-eyes-supercomputer-hub",
+  name: "salathanie-ai-supercomputer-hub",
   version: "2.0.0"
 };
 const PROTOCOL_VERSION = "2025-06-18";
@@ -35,7 +35,7 @@ const TOOLS = [
   {
     name: "tune_udp_backplane",
     description:
-      "Adjusts the local Eagle Eyes UDP processing throttle. Requests are firewall-limited to 0-250ms, rate-limited, sent to loopback only, and require an acknowledgement from the UDP control daemon.",
+      "Adjusts the local Salathanie A.I UDP processing throttle. Requests are firewall-limited to 0-250ms, rate-limited, sent to loopback only, and require an acknowledgement from the UDP control daemon.",
     inputSchema: {
       type: "object",
       properties: {

@@ -53,7 +53,7 @@ test("keeps last-good CelesTrak elements in memory during a short upstream outag
 
 test("recovers persisted CelesTrak elements when the live source is unavailable", async (t) => {
   const dir = await fs.mkdtemp(
-    path.join(os.tmpdir(), "eagle-eyes-satellite-state-")
+    path.join(os.tmpdir(), "salathanie-ai-satellite-state-")
   );
   const statePath = path.join(dir, "weather-elements.json");
 

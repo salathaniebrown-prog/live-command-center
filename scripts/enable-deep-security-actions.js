@@ -319,13 +319,13 @@ insertBefore(
 const routesAnchor =
   [
     'app.get(',
-    '  "/api/eagle-eyes/events",'
+    '  "/api/salathanie-ai/events",'
   ].join("\n");
 
 const deepSecurityRoutes =
   [
     'app.get(',
-    '  "/api/eagle-eyes/deep-security/status",',
+    '  "/api/salathanie-ai/deep-security/status",',
     '  requireAssistantAccess,',
     '  (_req, res) =>',
     '    res.json(',
@@ -334,7 +334,7 @@ const deepSecurityRoutes =
     ');',
     '',
     'app.post(',
-    '  "/api/eagle-eyes/deep-security/action",',
+    '  "/api/salathanie-ai/deep-security/action",',
     '  requireAssistantAccess,',
     '  async (req, res) => {',
     '    try {',
@@ -427,7 +427,7 @@ const deepSecurityRoutes =
 insertBefore(
   routesAnchor,
   deepSecurityRoutes,
-  '"/api/eagle-eyes/deep-security/action"',
+  '"/api/salathanie-ai/deep-security/action"',
   "HTTP action routes"
 );
 
@@ -504,5 +504,5 @@ if (
 }
 
 console.log(
-  "Eagle Eyes Deep Security action layer enabled and syntax-validated."
+  "Salathanie A.I Deep Security action layer enabled and syntax-validated."
 );

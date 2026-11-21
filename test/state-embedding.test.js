@@ -15,7 +15,7 @@ const {
 
 function sampleSpine(overrides = {}) {
   return {
-    schemaVersion: "eagle-eyes.data-spine.v1",
+    schemaVersion: "salathanie-ai.data-spine.v1",
     source: "usgs",
     sourceId: "us123",
     eventType: "earthquake",

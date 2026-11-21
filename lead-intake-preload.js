@@ -115,7 +115,7 @@ async function ensureSchema() {
   if (!schemaReady) {
     schemaReady = db
       .query(`
-        CREATE TABLE IF NOT EXISTS eagle_eyes_deployment_leads (
+        CREATE TABLE IF NOT EXISTS salathanie_ai_deployment_leads (
           id UUID PRIMARY KEY,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           name TEXT NOT NULL,
@@ -125,11 +125,11 @@ async function ensureSchema() {
           deployment_package TEXT NOT NULL,
           timeline TEXT NOT NULL DEFAULT '',
           message TEXT NOT NULL,
-          source TEXT NOT NULL DEFAULT 'eagle-eyes-business',
+          source TEXT NOT NULL DEFAULT 'salathanie-ai-business',
           user_agent TEXT NOT NULL DEFAULT ''
         );
-        CREATE INDEX IF NOT EXISTS eagle_eyes_deployment_leads_created_at_idx
-          ON eagle_eyes_deployment_leads (created_at DESC);
+        CREATE INDEX IF NOT EXISTS salathanie_ai_deployment_leads_created_at_idx
+          ON salathanie_ai_deployment_leads (created_at DESC);
       `)
       .catch((error) => {
         schemaReady = null;
@@ -168,7 +168,7 @@ function validateLead(lead) {
   if (lead.name.length < 2) return { error: "Name is required" };
   if (!validEmail(lead.email)) return { error: "A valid email is required" };
   if (lead.message.length < 10) {
-    return { error: "Tell us briefly what you want Eagle Eyes to monitor" };
+    return { error: "Tell us briefly what you want Salathanie A.I to monitor" };
   }
   return {};
 }
@@ -224,7 +224,7 @@ function registerLeadIntake(app) {
       const leadId = crypto.randomUUID();
 
       await db.query(
-        `INSERT INTO eagle_eyes_deployment_leads
+        `INSERT INTO salathanie_ai_deployment_leads
           (id, name, email, phone, company, deployment_package, timeline, message, source, user_agent)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
         [
@@ -236,7 +236,7 @@ function registerLeadIntake(app) {
           lead.deploymentPackage,
           lead.timeline,
           lead.message,
-          "eagle-eyes-business",
+          "salathanie-ai-business",
           clean(req.get("user-agent"), 500)
         ]
       );
@@ -281,7 +281,7 @@ function registerLeadIntake(app) {
       const result = await db.query(
         `SELECT id, created_at, name, email, phone, company,
                 deployment_package, timeline, message, source
-           FROM eagle_eyes_deployment_leads
+           FROM salathanie_ai_deployment_leads
           ORDER BY created_at DESC
           LIMIT $1`,
         [limit]

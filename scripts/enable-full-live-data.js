@@ -37,7 +37,7 @@ replaceExact(
   "satellite backend ceiling"
 );
 
-// GPT tools: let Eagle Eyes reason across substantially larger live datasets.
+// GPT tools: let Salathanie A.I reason across substantially larger live datasets.
 replaceExact(
   "server",
   '"Get up to 30 real weather-satellite positions propagated from current CelesTrak NORAD GP orbital elements. Never simulate missing orbital data.",',
@@ -68,15 +68,15 @@ replaceExact(
 // sample size; unavailable upstream data is never simulated.
 const chronicleDynamicWorldLimit =
   next.dashboard.includes(
-    "const url='/api/eagle-eyes/events?source='+src+'&limit=50';"
+    "const url='/api/salathanie-ai/events?source='+src+'&limit=50';"
   );
 
 if (!chronicleDynamicWorldLimit) {
   for (const source of ["nws", "usgs", "eonet"]) {
     replaceExact(
       "dashboard",
-      `/api/eagle-eyes/events?source=${source}&limit=12`,
-      `/api/eagle-eyes/events?source=${source}&limit=50`,
+      `/api/salathanie-ai/events?source=${source}&limit=12`,
+      `/api/salathanie-ai/events?source=${source}&limit=50`,
       `${source} dashboard sample limit`
     );
   }
@@ -84,8 +84,8 @@ if (!chronicleDynamicWorldLimit) {
 
 replaceExact(
   "dashboard",
-  "/api/eagle-eyes/satellites?limit=30",
-  "/api/eagle-eyes/satellites?limit=120",
+  "/api/salathanie-ai/satellites?limit=30",
+  "/api/salathanie-ai/satellites?limit=120",
   "satellite dashboard sample limit"
 );
 
@@ -113,7 +113,7 @@ const staticWorldLimits =
   next.dashboard.includes("source=eonet&limit=50");
 const dynamicWorldLimits =
   next.dashboard.includes(
-    "const url='/api/eagle-eyes/events?source='+src+'&limit=50';"
+    "const url='/api/salathanie-ai/events?source='+src+'&limit=50';"
   );
 const dashboardOk =
   (staticWorldLimits || dynamicWorldLimits) &&
@@ -134,10 +134,10 @@ if (failed || !dashboardOk) {
 }
 
 if (!changed.length) {
-  console.log("Eagle Eyes full live-data limits already enabled and validated.");
+  console.log("Salathanie A.I full live-data limits already enabled and validated.");
   process.exit(0);
 }
 
 console.log(
-  "Eagle Eyes full live-data limits enabled: AI world events up to 250, satellites up to 512, dashboard samples 50/50/50 + 120 satellites."
+  "Salathanie A.I full live-data limits enabled: AI world events up to 250, satellites up to 512, dashboard samples 50/50/50 + 120 satellites."
 );

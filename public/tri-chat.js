@@ -30,7 +30,7 @@ function addMessage(role, text, meta = "") {
 
   const roleNode = document.createElement("span");
   roleNode.className = "role";
-  roleNode.textContent = role === "user" ? "YOU" : "EAGLE EYES";
+  roleNode.textContent = role === "user" ? "YOU" : "SALATHANIE A.I";
 
   const textNode = document.createElement("span");
   textNode.textContent = text;
@@ -150,8 +150,8 @@ async function tripleConsensus(currentMessage, token, signal, assistantNode) {
 
   assistantNode.metaNode.textContent = "TRI 1/3 · ANALYST";
   const analyst = await assistantRequest([
-    "EAGLE EYES TRIPLE CONSENSUS — PASS 1 OF 3: ANALYST.",
-    "Produce a concise candidate answer. Use live Eagle Eyes tools when current facts are required. Separate verified facts from assumptions and unknowns. Do not provide private chain-of-thought.",
+    "SALATHANIE A.I TRIPLE CONSENSUS — PASS 1 OF 3: ANALYST.",
+    "Produce a concise candidate answer. Use live Salathanie A.I tools when current facts are required. Separate verified facts from assumptions and unknowns. Do not provide private chain-of-thought.",
     context
   ].join("\n\n"), token, signal);
 
@@ -159,7 +159,7 @@ async function tripleConsensus(currentMessage, token, signal, assistantNode) {
 
   assistantNode.metaNode.textContent = "TRI 2/3 · CHALLENGER";
   const challenger = await assistantRequest([
-    "EAGLE EYES TRIPLE CONSENSUS — PASS 2 OF 3: CHALLENGER.",
+    "SALATHANIE A.I TRIPLE CONSENSUS — PASS 2 OF 3: CHALLENGER.",
     "Audit the candidate for unsupported claims, stale facts, contradictions, missing caveats, unsafe assumptions, and weak next actions. Return concise audit findings only; do not provide private chain-of-thought.",
     `ORIGINAL USER MESSAGE:\n${clip(currentMessage, 4000)}`,
     `CANDIDATE:\n${clip(analyst.text, 3000)}`
@@ -169,8 +169,8 @@ async function tripleConsensus(currentMessage, token, signal, assistantNode) {
 
   assistantNode.metaNode.textContent = "TRI 3/3 · ARBITER";
   const arbiter = await assistantRequest([
-    "EAGLE EYES TRIPLE CONSENSUS — PASS 3 OF 3: ARBITER.",
-    "Deliver the final answer to the user. Resolve valid audit findings, preserve only supported claims, distinguish uncertainty, and choose the smallest safe useful next action. Re-check live facts with Eagle Eyes tools if necessary. Do not mention hidden reasoning or fabricate tool results.",
+    "SALATHANIE A.I TRIPLE CONSENSUS — PASS 3 OF 3: ARBITER.",
+    "Deliver the final answer to the user. Resolve valid audit findings, preserve only supported claims, distinguish uncertainty, and choose the smallest safe useful next action. Re-check live facts with Salathanie A.I tools if necessary. Do not mention hidden reasoning or fabricate tool results.",
     `ORIGINAL USER MESSAGE:\n${clip(currentMessage, 3500)}`,
     `ANALYST CANDIDATE:\n${clip(analyst.text, 2200)}`,
     `CHALLENGER AUDIT:\n${clip(challenger.text, 2200)}`
@@ -212,7 +212,7 @@ async function sendMessage() {
     }
 
     assistantNode.textNode.textContent = result.text;
-    assistantNode.metaNode.textContent = `${result.model || "EAGLE EYES"} · ${triMode && assistantConfigured ? "TRI COMPLETE" : "FAST COMPLETE"}`;
+    assistantNode.metaNode.textContent = `${result.model || "SALATHANIE A.I"} · ${triMode && assistantConfigured ? "TRI COMPLETE" : "FAST COMPLETE"}`;
     turns.push({ role: "user", text: currentMessage });
     turns.push({ role: "assistant", text: result.text });
     turns = turns.slice(-10);

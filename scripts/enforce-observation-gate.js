@@ -40,7 +40,7 @@ if (!next.includes(assertion)) {
 }
 
 if (next === original) {
-  console.log("Eagle Eyes observation gate already enforced.");
+  console.log("Salathanie A.I observation gate already enforced.");
   process.exit(0);
 }
 
@@ -57,4 +57,4 @@ if (check.status !== 0) {
   process.exit(1);
 }
 
-console.log("Eagle Eyes observation gate injected and syntax-validated.");
+console.log("Salathanie A.I observation gate injected and syntax-validated.");

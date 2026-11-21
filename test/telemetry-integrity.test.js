@@ -33,7 +33,7 @@ test("sanitized health exposes integrity facts but not raw infrastructure detail
     kafka_connected: true,
     assigned_partitions: ["secret-topic:0"],
     signed_ingest_configured: true,
-    signed_ingest_schema: "eagle-eyes.signed-telemetry.v1",
+    signed_ingest_schema: "salathanie-ai.signed-telemetry.v1",
     signed_live_publish_rule: "sourceMode=LIVE and simulated=false only",
     signed_replay_protection: "sourceId+nonce unique ledger key",
     signed_ledger_wal: true,

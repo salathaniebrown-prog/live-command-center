@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "public", "chat", "index.html");
 const jsPath = path.join(root, "public", "chat", "chat.js");
 
-test("Eagle Eyes web chat bridge is syntax-valid and keeps secrets server-side", () => {
+test("Salathanie A.I web chat bridge is syntax-valid and keeps secrets server-side", () => {
   assert.equal(fs.existsSync(htmlPath), true);
   assert.equal(fs.existsSync(jsPath), true);
 

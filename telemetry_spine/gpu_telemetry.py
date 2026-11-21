@@ -1,4 +1,4 @@
-"""LIVE NVIDIA GPU telemetry collector for Eagle Eyes.
+"""LIVE NVIDIA GPU telemetry collector for Salathanie A.I.
 
 Observation-only: reads hardware state with nvidia-smi and writes the latest
 snapshot atomically to EAGLE_EYES_METRICS_FILE. No simulated values are emitted.

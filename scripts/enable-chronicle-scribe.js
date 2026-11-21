@@ -154,13 +154,13 @@ if (!server.includes(runToolMarker)) {
   server = server.replace(anchor, block + anchor);
 }
 
-const routeMarker = '"/api/eagle-eyes/chronicle/scribe"';
+const routeMarker = '"/api/salathanie-ai/chronicle/scribe"';
 if (!server.includes(routeMarker)) {
-  const anchor = 'app.get(\n  "/api/eagle-eyes/satellites",';
+  const anchor = 'app.get(\n  "/api/salathanie-ai/satellites",';
   requireAnchor(server, anchor, "satellite route");
   const route = [
     "app.get(",
-    '  "/api/eagle-eyes/chronicle/scribe",',
+    '  "/api/salathanie-ai/chronicle/scribe",',
     "  async (_req, res) => {",
     "    try {",
     '      res.set("cache-control", "no-store");',
@@ -216,7 +216,7 @@ if (!dashboard.includes(loadScribeMarker)) {
   const anchor = "async function loadCore(){";
   requireAnchor(dashboard, anchor, "loadCore function");
   const fn = [
-    "async function loadScribe(){try{const {r,j}=await getj('/api/eagle-eyes/chronicle/scribe');if(!r.ok)throw new Error(j?.error||'HTTP '+r.status);S.scribe=j||{};const total=Number(j?.changes?.total||0);$('scribeState').textContent=j?.changeState==='DELTA'?(total?total+' SOURCE DELTAS':'NO MATERIAL DELTA'):'BASELINE ESTABLISHED';$('scribe').textContent=j?.text||'Chronicle Scribe returned no narrative.'}catch(e){S.scribe=null;$('scribeState').textContent='UNAVAILABLE';$('scribe').textContent='Chronicle Scribe unavailable: '+e.message+'\\nNo simulated data was substituted.'}}",
+    "async function loadScribe(){try{const {r,j}=await getj('/api/salathanie-ai/chronicle/scribe');if(!r.ok)throw new Error(j?.error||'HTTP '+r.status);S.scribe=j||{};const total=Number(j?.changes?.total||0);$('scribeState').textContent=j?.changeState==='DELTA'?(total?total+' SOURCE DELTAS':'NO MATERIAL DELTA'):'BASELINE ESTABLISHED';$('scribe').textContent=j?.text||'Chronicle Scribe returned no narrative.'}catch(e){S.scribe=null;$('scribeState').textContent='UNAVAILABLE';$('scribe').textContent='Chronicle Scribe unavailable: '+e.message+'\\nNo simulated data was substituted.'}}",
     ""
   ].join("\n");
   dashboard = dashboard.replace(anchor, fn + anchor);

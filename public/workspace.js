@@ -6,7 +6,7 @@
     ['Earth & satellites', '#live', 'Public observations', 'CelesTrak orbital positions and world events.'],
     ['Chronicle Lab & Scribe', '#lab', 'Source synthesis', 'USGS, NOAA/NWS and NASA EONET event records.'],
     ['Executive council', '#intel', 'Decision support', 'CEO, President, CFO and CTO alongside the mission brief.'],
-    ['Eagle Eyes MAX', '#max', 'Access required', 'World knowledge, weather, AI and free command tools.'],
+    ['Salathanie A.I MAX', '#max', 'Access required', 'World knowledge, weather, AI and free command tools.'],
     ['NexusBrown compute', '#compute', 'Runtime telemetry', 'CPU, memory, storage and available NVIDIA GPU readings.'],
     ['BCI observations', '#bci', 'Device setup required', 'Registered observation lane; no connected-device claim.'],
     ['EVM chains', '#chains', 'Registry lookup', 'Find networks by name or chain ID.'],
@@ -47,7 +47,7 @@
   async function refresh() {
     byId('refreshBci').disabled = true;
     try {
-      const data = await read('/api/eagle-eyes/bci/status');
+      const data = await read('/api/salathanie-ai/bci/status');
       byId('bciState').textContent = data.status || 'UNKNOWN';
       byId('bciDetail').textContent = (data.message || 'No observation received.') + ' Device profile: ' + (data.deviceProfile || 'unconfigured');
     } catch (error) {
@@ -64,7 +64,7 @@
     const button = event.currentTarget.querySelector('button'); button.disabled = true;
     const output = byId('chainResults'); output.textContent = 'Searching registry…';
     try {
-      const data = await read('/api/eagle-eyes/chains?limit=10&q='+encodeURIComponent(byId('chainQuery').value.trim()));
+      const data = await read('/api/salathanie-ai/chains?limit=10&q='+encodeURIComponent(byId('chainQuery').value.trim()));
       output.replaceChildren();
       for (const chain of data.chains || []) {
         const row = document.createElement('p');

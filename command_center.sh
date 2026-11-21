@@ -44,7 +44,7 @@ show_header() {
 }
 
 validate_stack() {
-  echo; echo '🧪 Running Eagle Eyes validation gate...'; separator
+  echo; echo '🧪 Running Salathanie A.I validation gate...'; separator
   require_file "$COMPOSE_FILE" || return
   have node || { echo '❌ Node.js is required.'; return 1; }
   have npm || { echo '❌ npm is required.'; return 1; }
@@ -61,13 +61,13 @@ deploy_stack() {
 }
 
 show_status() {
-  echo; echo '📦 Active Eagle Eyes container state'; separator
+  echo; echo '📦 Active Salathanie A.I container state'; separator
   require_docker || return
   docker compose -f "$COMPOSE_FILE" ps
 }
 
 probe_health() {
-  echo; echo '🩺 Local Eagle Eyes health matrix'; separator
+  echo; echo '🩺 Local Salathanie A.I health matrix'; separator
   have curl || { echo '❌ curl is required for API health probing.'; return 1; }
 
   local health deployment center
@@ -104,7 +104,7 @@ verify_revision() {
 }
 
 build_mobile() {
-  echo; echo '📱 Building Eagle Eyes standalone Android release APK...'; separator
+  echo; echo '📱 Building Salathanie A.I standalone Android release APK...'; separator
   local mobile_dir="${TARGET_DIR}/clients/mobile"
   require_file "${mobile_dir}/package.json" || return
   have npm || { echo '❌ npm is required.'; return 1; }
@@ -131,7 +131,7 @@ stream_logs() {
 }
 
 halt_stack() {
-  echo; echo '⚠️ Stop Eagle Eyes local Compose stack'; separator
+  echo; echo '⚠️ Stop Salathanie A.I local Compose stack'; separator
   require_docker || return
   read -r -p 'Stop command-hub and remove its Compose network? Volumes stay intact [y/N]: ' confirm
   case "$confirm" in
@@ -155,7 +155,7 @@ while true; do
     6) build_mobile; pause_deck ;;
     7) stream_logs; pause_deck ;;
     8) halt_stack; pause_deck ;;
-    9) echo; echo '🦅 Eagle Eyes Command Center disconnected.'; exit 0 ;;
+    9) echo; echo '🦅 Salathanie A.I Command Center disconnected.'; exit 0 ;;
     *) echo; echo "❌ Invalid operational route: '$choice'"; sleep 1 ;;
   esac
 done

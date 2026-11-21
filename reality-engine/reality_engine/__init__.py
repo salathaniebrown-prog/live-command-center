@@ -1,4 +1,4 @@
-"""Eagle Eyes Reality Engine Phase 1."""
+"""Salathanie A.I Reality Engine Phase 1."""
 
 from .contracts import REALITY_SCHEMA_VERSION, validate_reality_frame
 from .motion import MotionTracker

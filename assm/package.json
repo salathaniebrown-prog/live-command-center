@@ -1,8 +1,8 @@
 {
-  "name": "eagle-eyes-assm-mesh",
+  "name": "salathanie-ai-assm-mesh",
   "version": "0.2.0",
   "private": true,
-  "description": "Read-only accelerator layer for Eagle Eyes deterministic state telemetry",
+  "description": "Read-only accelerator layer for Salathanie A.I deterministic state telemetry",
   "main": "src/ingest-router.js",
   "scripts": {
     "start": "node src/ingest-router.js",

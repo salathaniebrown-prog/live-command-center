@@ -1,4 +1,4 @@
-# Eagle Eyes continuity
+# Salathanie A.I continuity
 
 Read MASTER-BUILD.md and RECOVERY-STATUS.md before editing. Fetch current refs and inspect the working tree before changes because other sessions may advance this project.
 

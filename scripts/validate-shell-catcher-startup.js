@@ -4,7 +4,7 @@ const { runShellCatcherSelfTest } = require("../shell-catcher");
 
 const result = runShellCatcherSelfTest();
 const summary = {
-  service: "eagle-eyes-shell-catcher",
+  service: "salathanie-ai-shell-catcher",
   check: "startup-self-test",
   ok: result.ok,
   passed: result.passed,

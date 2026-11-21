@@ -182,7 +182,7 @@ async function globalWeather(location) {
 
 function formatKnowledge(data) {
   const lines = [
-    "EAGLE EYES WORLD KNOWLEDGE",
+    "SALATHANIE A.I WORLD KNOWLEDGE",
     `Query: ${data.query}`,
     `Source: ${data.source}`,
     ""
@@ -209,7 +209,7 @@ function formatKnowledge(data) {
 function formatWeather(data) {
   if (!data.ok) {
     return [
-      "EAGLE EYES GLOBAL WEATHER",
+      "SALATHANIE A.I GLOBAL WEATHER",
       `Location: ${data.location}`,
       `Status: ${data.error || "Unavailable"}`,
       "No simulated data was substituted.",
@@ -228,7 +228,7 @@ function formatWeather(data) {
   const c = data.current || {};
 
   return [
-    "EAGLE EYES GLOBAL WEATHER",
+    "SALATHANIE A.I GLOBAL WEATHER",
     `Location: ${place || "N/A"}`,
     `Conditions: ${c.conditions || "N/A"}`,
     `Temperature: ${Number.isFinite(c.temperatureF) ? `${c.temperatureF}°F` : "N/A"}`,
@@ -258,7 +258,7 @@ function shouldUseFreeKnowledge(message, openAIConfigured) {
 function worldOSStatus() {
   return {
     ok: true,
-    name: "EAGLE EYES WORLD COMMAND OPERATING SYSTEM",
+    name: "SALATHANIE A.I WORLD COMMAND OPERATING SYSTEM",
     version: "1.0",
     mode: "read-only intelligence",
     simulated: false,

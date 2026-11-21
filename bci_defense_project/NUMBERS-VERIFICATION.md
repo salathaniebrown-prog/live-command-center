@@ -1,4 +1,4 @@
-# Eagle Eyes / BCI Analytics Numeric Verification
+# Salathanie A.I / BCI Analytics Numeric Verification
 
 Repository: `salathaniebrown-prog/live-command-center`
 Branch: `feature/production-spine-e2e`

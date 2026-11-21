@@ -44,7 +44,7 @@ if (failed) {
 }
 
 if (next === original) {
-  console.log("Eagle Eyes Shell Catcher already enabled.");
+  console.log("Salathanie A.I Shell Catcher already enabled.");
 } else {
-  console.log("Eagle Eyes Shell Catcher enabled and syntax validated.");
+  console.log("Salathanie A.I Shell Catcher enabled and syntax validated.");
 }

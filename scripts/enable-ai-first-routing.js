@@ -113,7 +113,7 @@ insertFallback(
   "AI-FIRST-STREAM-FALLBACK: keep the command rail useful if GPT fails."
 );
 
-// Add OpenAI's hosted web-search tool alongside Eagle Eyes' read-only
+// Add OpenAI's hosted web-search tool alongside Salathanie A.I' read-only
 // function tools. This does not replace the dedicated NWS/USGS/EONET,
 // Open-Meteo, CelesTrak, or PX4 sources.
 const toolsEndAnchor = "];\n\nconst INSTRUCTIONS = [";
@@ -139,7 +139,7 @@ const instructionAnchor =
   '  "For general factual questions that benefit from reference knowledge, call search_world_knowledge. For current weather by place, call get_global_weather.",';
 
 const webInstruction =
-  '  "Use the hosted web_search tool for current, recent, or internet-specific questions that are not fully answered by the dedicated Eagle Eyes live feeds. Prefer the dedicated live feeds for NWS, USGS, NASA EONET, Open-Meteo weather, CelesTrak satellites, and PX4 telemetry.",';
+  '  "Use the hosted web_search tool for current, recent, or internet-specific questions that are not fully answered by the dedicated Salathanie A.I live feeds. Prefer the dedicated live feeds for NWS, USGS, NASA EONET, Open-Meteo weather, CelesTrak satellites, and PX4 telemetry.",';
 
 if (!next.includes("Use the hosted web_search tool for current, recent")) {
   if (!next.includes(instructionAnchor)) {
@@ -192,7 +192,7 @@ if (!next.includes("      hostedTools:")) {
 }
 
 if (next === original) {
-  console.log("Eagle Eyes AI-first routing and web search already enabled.");
+  console.log("Salathanie A.I AI-first routing and web search already enabled.");
   process.exit(0);
 }
 
@@ -210,4 +210,4 @@ if (check.status !== 0) {
   process.exit(0);
 }
 
-console.log("Eagle Eyes AI-first routing + OpenAI web search enabled and syntax-validated.");
+console.log("Salathanie A.I AI-first routing + OpenAI web search enabled and syntax-validated.");

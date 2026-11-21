@@ -1,6 +1,6 @@
 "use strict";
 
-const STATE_EMBEDDING_VERSION = "eagle-eyes.state-embedding.v1";
+const STATE_EMBEDDING_VERSION = "salathanie-ai.state-embedding.v1";
 const FEATURE_DIM = 16;
 const EMBEDDING_DIM = 10;
 

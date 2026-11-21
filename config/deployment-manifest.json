@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "system": "Eagle Eyes Command Rail",
+  "system": "Salathanie A.I Command Rail",
   "policy": {
     "previewBeforeProduction": true,
     "observationByDefault": true,
