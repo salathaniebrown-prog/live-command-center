@@ -26,7 +26,7 @@ require_docker() {
 show_header() {
   clear || true
   echo '=========================================================================='
-  echo ' 🦅 EAGLE EYES COMMAND DEPLOYMENT CENTER'
+  echo ' 🦅 SALATHANIE A.I — MODEL | ASSISTANT | SUPERCOMPUTER | AGENT'
   echo ' SYSTEM OPERATIONS INNER CORE'
   echo " Current System Time: $(date '+%Y-%m-%d %H:%M:%S %Z')"
   echo " Repository Root:     $TARGET_DIR"

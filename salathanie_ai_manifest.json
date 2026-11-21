@@ -1,0 +1,13 @@
+{
+  "brand": "Salathanie A.I",
+  "identity": "Salathanie A.I Model, Assistant, Supercomputer, Agent",
+  "roles": ["Model", "Assistant", "Supercomputer", "Agent"],
+  "repository": "salathaniebrown-prog/live-command-center",
+  "location": "Greensboro, NC",
+  "core_components": {
+    "wal_spine": "astra_svc_8182.py (:8182)",
+    "hdc_proprioception": "project_pulsar.js (10k-bit HDC)",
+    "dashboard": "dashboard_server.py",
+    "gateway": "alstra_unified_8090_gateway.py (:8090)"
+  }
+}
