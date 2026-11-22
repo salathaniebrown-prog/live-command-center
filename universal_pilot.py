@@ -15,6 +15,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from hdc_shm_bus import HDCSharedMemoryBus, deterministic_hv
+import infra_sre_engine as infra
 
 PREFERRED_PORT = 8125
 ACTIVE_PORT = PREFERRED_PORT
@@ -138,6 +139,7 @@ a{color:#58a6ff}
   <button class="alt" onclick="dispatch('edge recover')">Self-Heal Stack</button>
   <a href="/agents"><button class="purp">18-Agent Studio</button></a>
   <a href="/trader"><button style="background:#d29922;color:#0b0f14">Web Trader / OMS</button></a>
+  <a href="/infra"><button style="background:#0ea5e9;color:#0b0f14">Infra / SRE</button></a>
   <div id="summary" style="margin-top:10px;line-height:1.6">Loading...</div>
 </div>
 
@@ -241,6 +243,27 @@ class PilotHandler(BaseHTTPRequestHandler):
                     return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
             except Exception as e:
                 return self._send(502, f"Agents offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path == "/infra":
+            return self._send(200, infra.INFRA_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/metrics":
+            bb = probe_http("https://1.1.1.1/cdn-cgi/trace", timeout=2.0)
+            body = infra.prometheus_metrics(get_mem_avail_mb(), bb.get("latency_ms", 0.0))
+            return self._send(200, body.encode("utf-8"), "text/plain; version=0.0.4; charset=utf-8")
+        if parsed.path == "/api/infra/osi":
+            return self._send(200, json.dumps(infra.osi_tcpip_diagnostics()).encode("utf-8"))
+        if parsed.path == "/api/infra/errors":
+            return self._send(200, json.dumps(infra.self_analyze_errors()).encode("utf-8"))
+        if parsed.path == "/api/infra/blueprint":
+            qs = urllib.parse.parse_qs(parsed.query)
+            return self._send(200, json.dumps(infra.generate_blueprint(qs.get("stack", ["observability_stack"])[0])).encode("utf-8"))
+        if parsed.path == "/api/infra/copilot":
+            qs = urllib.parse.parse_qs(parsed.query)
+            return self._send(200, json.dumps(infra.linux_ai_copilot(qs.get("q", ["status"])[0])).encode("utf-8"))
+        if parsed.path == "/api/infra/validate":
+            qs = urllib.parse.parse_qs(parsed.query)
+            return self._send(200, json.dumps(infra.validate_code_zero_error(qs.get("lang", ["bash"])[0], qs.get("code", [""])[0])).encode("utf-8"))
+        if parsed.path == "/api/infra/learning":
+            return self._send(200, json.dumps(infra.LEARNING_HUB).encode("utf-8"))
         if parsed.path == "/trader":
             try:
                 with urllib.request.urlopen(f"{get_agents_base()}/trader", timeout=6) as resp:
