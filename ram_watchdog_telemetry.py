@@ -16,8 +16,8 @@ from pathlib import Path
 REPO = Path("/data/data/com.termux/files/home/live-command-center")
 WAL_DB = REPO / "alstra_flight_ledger.db"
 
-WARN_PCT = 82.0
-CRIT_PCT = 87.0
+WARN_PCT = 80.0
+CRIT_PCT = 84.5
 PROTECTED_EXACT = {
     "salathanie-pilot",
     "salathanie-guard",
@@ -142,7 +142,7 @@ def tick_watchdog(enforce: bool = True) -> dict:
             if mem["severity"] == "SAFE":
                 break
             # In ELEVATED, stop heavy workers (> 25MB); in CRITICAL, stop any non-core worker (> 10MB)
-            min_rss = 10.0 if mem["severity"] == "CRITICAL" else 25.0
+            min_rss = 15.0 if mem["severity"] == "CRITICAL" else 40.0
             if cand["mem_mb"] >= min_rss:
                 rc = subprocess.run(["pm2", "stop", cand["name"]], capture_output=True, text=True, timeout=6)
                 if rc.returncode == 0:
