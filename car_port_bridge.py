@@ -233,7 +233,7 @@ def sync_vehicle_bus(step_overrides: dict | None = None, recover: bool = True) -
         alt = float(gps.get("alt_m", 0.0))
 
         flight_mode = "JET-CRUISE" if alt > 15.0 else ("EV-GROUND" if spd > 2.0 else "STANDBY-READY")
-        solar_snap = solar_sc.sample_solar_supercomputer() if solar_sc else {}
+        solar_snap = (solar_sc.auto_balance_solar_compute() if (solar_sc and hasattr(solar_sc, 'auto_balance_solar_compute')) else (solar_sc.sample_solar_supercomputer() if solar_sc else {}))
         sig = hashlib.sha256(
             f"vbus|{ts}|{len(online_ports)}|{bat_v}|{soc}|{ram_pct}".encode("utf-8")
         ).hexdigest()[:24].upper()
@@ -380,6 +380,11 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
         except Exception:
             payload = {}
 
+        if path == "/api/solar/inverter" and solar_sc:
+            p = payload if isinstance(payload, dict) else {}
+            solar_sc.update_solar_feed(p)
+            res = solar_sc.auto_balance_solar_compute() if "supercomputer_w" not in p and hasattr(solar_sc, "auto_balance_solar_compute") else solar_sc.sample_solar_supercomputer()
+            return self._send_json(200, res)
         if path == "/api/solar/feed" and solar_sc:
             return self._send_json(200, solar_sc.sample_solar_supercomputer(payload if isinstance(payload, dict) else {}))
         if path in ("/api/flying-car/step", "/api/bus/sensors"):
