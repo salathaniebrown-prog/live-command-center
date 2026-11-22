@@ -221,12 +221,13 @@ def run_closed_loop_cycle(force_external_sync: bool = False) -> dict:
 
     # Atomic state update preserving user overrides
     ledger.atomic_write_state(
-        {"active_gen": next_gen, "fitness": win_fitness, "genome": win_genome, "code_path": code_path, "last_hmac": sig},
+        {"model": "SalathanieAI", "active_gen": next_gen, "fitness": win_fitness, "genome": win_genome, "code_path": code_path, "last_hmac": sig},
         preserve_overrides=True,
     )
 
     telem_rec = {
         "ts": ts,
+        "model": "SalathanieAI",
         "gen_id": next_gen,
         "new_fitness": win_fitness,
         "promoted": promoted,
