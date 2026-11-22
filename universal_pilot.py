@@ -530,3 +530,32 @@ if __name__ == "__main__":
         bus.publish("salathanie-universal-pilot", ACTIVE_PORT, 200, deterministic_hv(f"pilot:{ACTIVE_PORT}:UP"))
     print(f"[OK] Universal Pilot + Trinity UI live on http://{get_lan_ip()}:{ACTIVE_PORT}", flush=True)
     ThreadingHTTPServer(("0.0.0.0", ACTIVE_PORT), PilotHandler).serve_forever()
+
+
+# _FC_MISSION_LIVERY_WIRED
+def _enrich_flying_car_step(payload: dict, base_resp: dict) -> dict:
+    if not isinstance(base_resp, dict):
+        base_resp = {"ok": True, "state": base_resp}
+    if any(k in payload for k in ("waypoint_name", "target_alt_m")):
+        try:
+            mp = fcar.plan_mission_profile(
+                payload.get("waypoint_name", "KGSO-TRIAD-CORRIDOR"),
+                float(payload.get("target_alt_m", 180.0)),
+                float(payload.get("jet_thrust_pct", base_resp.get("jet_thrust_pct", 72.0))),
+            )
+            if isinstance(mp, dict) and "mission_plan" in mp:
+                base_resp["mission_plan"] = mp["mission_plan"]
+        except Exception:
+            pass
+    if any(k in payload for k in ("exterior_theme", "interior_theme", "accent_color")):
+        try:
+            lv = fcar.set_custom_livery(
+                payload.get("exterior_theme", "CYBER-CYAN-EMERALD"),
+                payload.get("interior_theme", "COCKPIT-AVATAR-HUD"),
+                payload.get("accent_color", "#22d3ee"),
+            )
+            if isinstance(lv, dict) and "customization" in lv:
+                base_resp["customization"] = lv["customization"]
+        except Exception:
+            pass
+    return base_resp
