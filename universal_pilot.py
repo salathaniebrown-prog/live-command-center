@@ -20,6 +20,7 @@ import salathanie_v3_suite as v3
 import creative_production_studio as creative
 import astra_jet_engine as jet
 import astra_jet_hud as jet3d
+import salathanie_mesh_studio as mesh
 
 PREFERRED_PORT = 8125
 ACTIVE_PORT = PREFERRED_PORT
@@ -157,6 +158,9 @@ a{color:#58a6ff}
   <a href="/creative"><button style="background:#f97316;color:#080c14">Creative Studio</button></a>
   <a href="/astra-jet"><button style="background:#38bdf8;color:#060a12">Astra Jet AI</button></a>
   <a href="/jet-3d"><button style="background:#39ff14;color:#030812">3D Jet HUD</button></a>
+  <a href="/mesh-hub"><button style="background:#10b981;color:#050912">Mesh &amp; Offline Wiki</button></a>
+  <a href="/broadcast"><button style="background:#ec4899">iPad Broadcast Studio</button></a>
+  <a href="/scrintal"><button style="background:#a855f7">AI Scrintal</button></a>
   <div id="summary" style="margin-top:10px;line-height:1.6">Loading...</div>
 </div>
 
@@ -260,6 +264,21 @@ class PilotHandler(BaseHTTPRequestHandler):
                     return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
             except Exception as e:
                 return self._send(502, f"Agents offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path == "/mesh-hub":
+            return self._send(200, mesh.MESH_HUB_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/broadcast":
+            return self._send(200, mesh.BROADCAST_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/scrintal":
+            return self._send(200, mesh.SCRINTAL_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/mesh/diag":
+            return self._send(200, json.dumps(mesh.mesh_diagnostics()).encode("utf-8"))
+        if parsed.path == "/api/mesh/wiki/search":
+            qs = urllib.parse.parse_qs(parsed.query)
+            return self._send(200, json.dumps(mesh.wiki_search(qs.get("q", [""])[0])).encode("utf-8"))
+        if parsed.path == "/api/mesh/lessons":
+            return self._send(200, json.dumps(mesh.list_lessons()).encode("utf-8"))
+        if parsed.path == "/api/scrintal/state":
+            return self._send(200, json.dumps(mesh.scrintal_state()).encode("utf-8"))
         if parsed.path == "/jet-3d":
             return self._send(200, jet3d.PAGE, "text/html; charset=utf-8")
         if parsed.path == "/api/hud":
@@ -345,6 +364,28 @@ class PilotHandler(BaseHTTPRequestHandler):
             body = json.loads(raw) if raw.strip() else {}
         except Exception:
             body = {}
+        if self.path == "/api/mesh/wiki/import":
+            return self._send(200, json.dumps(mesh.wiki_import_online(body.get("topic", ""), body.get("category", "Wikipedia"))).encode("utf-8"))
+        if self.path == "/api/mesh/wiki/add":
+            return self._send(200, json.dumps(mesh.wiki_add_manual(body.get("title", ""), body.get("category", "FieldNote"), body.get("body", ""))).encode("utf-8"))
+        if self.path == "/api/mesh/pi5-script":
+            return self._send(200, json.dumps(mesh.generate_pi5_mesh_script(body.get("ssid", "Salathanie-Mesh-Edu"), body.get("mesh_id", "salathanie-mesh"), body.get("channel", 6))).encode("utf-8"))
+        if self.path == "/api/mesh/reconnect-script":
+            return self._send(200, json.dumps(mesh.generate_termux_reconnect_script()).encode("utf-8"))
+        if self.path == "/api/mesh/lesson/create":
+            return self._send(200, json.dumps(mesh.create_lesson(body.get("topic", ""), body.get("level", "Beginner"))).encode("utf-8"))
+        if self.path == "/api/broadcast/profile":
+            return self._send(200, json.dumps(mesh.save_broadcast_profile(body.get("title", ""), body.get("ticker", ""), body.get("rtmp_url", ""))).encode("utf-8"))
+        if self.path == "/api/scrintal/card":
+            return self._send(200, json.dumps(mesh.scrintal_upsert_card(body.get("card_id", ""), body.get("title", ""), body.get("body", ""), body.get("tag", "Note"), body.get("x", 80), body.get("y", 80), body.get("color", "#38bdf8"))).encode("utf-8"))
+        if self.path == "/api/scrintal/move":
+            return self._send(200, json.dumps(mesh.scrintal_move_card(body.get("card_id", ""), body.get("x", 80), body.get("y", 80))).encode("utf-8"))
+        if self.path == "/api/scrintal/delete":
+            return self._send(200, json.dumps(mesh.scrintal_delete_card(body.get("card_id", ""))).encode("utf-8"))
+        if self.path == "/api/scrintal/link":
+            return self._send(200, json.dumps(mesh.scrintal_link_cards(body.get("src", ""), body.get("dst", ""), body.get("label", "links"))).encode("utf-8"))
+        if self.path == "/api/scrintal/ai-expand":
+            return self._send(200, json.dumps(mesh.scrintal_ai_expand(body.get("card_id", ""))).encode("utf-8"))
         if self.path in ("/api/mode", "/api/pods", "/api/pilot"):
             return self._send(200, json.dumps(jet3d.update_hud_state(self.path, body)).encode("utf-8"))
         if self.path == "/api/jet/mutate":
