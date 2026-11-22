@@ -11,6 +11,7 @@ import self_ram_telemetry as ram_tel
 import ram_watchdog_telemetry as rwatch
 import self_ram_controller as rctrl
 import compute_nodes_online as cnodes
+import solar_supercomputer_telemetry as solar_sc
 import os
 import re
 import socket
@@ -306,6 +307,8 @@ class PilotHandler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(cisco_gis.collect_cisco_mdt()).encode("utf-8"))
         if parsed.path == "/tunnel-gis":
             return self._send(200, cisco_gis.TUNNEL_GIS_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/solar/supercomputer":
+            return self._send(200, json.dumps(solar_sc.sample_solar_supercomputer()).encode("utf-8"))
         if parsed.path == "/api/compute/nodes":
             return self._send(200, json.dumps(cnodes.sync_compute_nodes()).encode("utf-8"))
         if parsed.path == "/api/ram/self-control":
