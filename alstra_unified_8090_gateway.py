@@ -78,6 +78,43 @@ poll(); setInterval(poll, 3000);
 </script></body></html>""".encode("utf-8")
 
 
+
+# _DIRECT_8090_FLYING_CAR_STEP
+def _handle_8090_flying_car_step(handler, method: str = "GET", body: bytes = b"") -> bool:
+    raw_p = getattr(handler, "path", "") or ""
+    p = raw_p.split("?", 1)[0]
+    if p != "/api/flying-car/step":
+        return False
+    out = None
+    try:
+        import urllib.request
+        req = urllib.request.Request(
+            "http://127.0.0.1:8132/api/flying-car/step",
+            data=(body if method == "POST" else None),
+            method=method,
+            headers={"Content-Type": "application/json"} if method == "POST" else {},
+        )
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            out = resp.read()
+    except Exception:
+        pass
+    if not out:
+        try:
+            import json, car_port_bridge as _cb
+            ov = json.loads(body.decode("utf-8") or "{}") if (method == "POST" and body) else None
+            out = json.dumps(_cb.get_step_feed(ov if isinstance(ov, dict) else None)).encode("utf-8")
+        except Exception:
+            out = b'{"ok":false,"gateway":8090,"endpoint":"/api/flying-car/step"}'
+    try:
+        handler.send_response(200)
+        handler.send_header("Content-Type", "application/json; charset=utf-8")
+        handler.send_header("Content-Length", str(len(out)))
+        handler.end_headers()
+        handler.wfile.write(out)
+    except Exception:
+        pass
+    return True
+
 class Server(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
@@ -90,6 +127,8 @@ class H(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if _handle_8090_flying_car_step(self, 'GET'):
+            return
         p = self.path.split("?")[0]
         if p == "/":
             return self._send(200, "text/html; charset=utf-8", GW_HTML)
@@ -119,6 +158,10 @@ class H(http.server.BaseHTTPRequestHandler):
         return self._send(c, ct, data)
 
     def do_POST(self):
+        _ln = int(self.headers.get('Content-Length') or '0')
+        _bd = self.rfile.read(_ln) if _ln > 0 else b'{}'
+        if _handle_8090_flying_car_step(self, 'POST', _bd):
+            return
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(min(length, 65536)) if length else b"{}"
         p = self.path.split("?")[0]
