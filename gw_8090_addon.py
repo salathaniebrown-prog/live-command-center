@@ -6,6 +6,8 @@ import time
 import urllib.request
 
 import astra_flight_ledger as ledger
+import self_ram_telemetry as ram_tel
+_SELF_RAM_IMPORTED = True
 
 
 def _port_up(port: int) -> bool:
