@@ -34,3 +34,10 @@ astra_rw_ledger.json
 ASTRA_IMMUTABLE_VAULT/
 .pm2/
 *.bak.*
+
+builds/
+infra_blueprints/
+*.db
+*.db-wal
+*.db-shm
+causal_deltas.jsonl

@@ -109,7 +109,7 @@ def self_analyze_errors() -> dict:
         (r"SyntaxError|IndentationError", "CODE_SYNTAX_ERROR", "Run python3 -m py_compile <file> before restarting PM2"),
         (r"BufferError", "MMAP_VIEW_LEAK", "Release memoryview inside a context manager before bus.close()"),
         (r"OOM|MemoryError|Killed", "RAM_PRESSURE", "Enforce max_memory_restart in ecosystem.config.js and keep host RAM <85%"),
-        (r"403|404|502|530|connection refused", "UPSTREAM_OR_TUNNEL", "Check salathanie_ports.json and verify target port is listening"),
+        (r"(?:HTTP/[0-9.]+\s+|status[=:\s]+)(?:403|404|502|530)\b|connection refused|\bERR\b.*tunnel", "UPSTREAM_OR_TUNNEL", "Check salathanie_ports.json and verify target port is listening"),
     ]
     findings = []
     log_files = sorted(glob.glob(os.path.expanduser("~/.pm2/logs/salathanie-*-error.log")))
