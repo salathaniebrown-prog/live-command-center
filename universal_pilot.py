@@ -69,6 +69,15 @@ def probe_http(url: str, timeout: float = 4.0) -> dict:
         return {"ok": False, "url": url, "status": 0, "latency_ms": ms, "error": str(e)[:120]}
 
 
+def get_agents_base() -> str:
+    try:
+        with HDCSharedMemoryBus() as bus:
+            port = bus.get_active_port("salathanie-agents", 8127)
+            return f"http://127.0.0.1:{port}"
+    except Exception:
+        return "http://127.0.0.1:8127"
+
+
 def proxy_json(url: str, timeout: float = 12.0) -> tuple[int, dict]:
     try:
         with urllib.request.urlopen(url, timeout=timeout) as resp:
@@ -126,6 +135,7 @@ a{color:#58a6ff}
 <div class="card">
   <button onclick="refreshAll()">Refresh All</button>
   <button class="alt" onclick="dispatch('edge recover')">Self-Heal Stack</button>
+  <a href="/agents"><button class="purp">11-Agent Studio</button></a>
   <div id="summary" style="margin-top:10px;line-height:1.6">Loading...</div>
 </div>
 
@@ -222,6 +232,15 @@ class PilotHandler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(probe_http(target)).encode("utf-8"))
         if parsed.path == "/api/pilot/trinity/vr-frame":
             code, data = proxy_json(f"{TRINITY_BASE}/api/trinity/vr-frame")
+            return self._send(code, json.dumps(data).encode("utf-8"))
+        if parsed.path == "/agents":
+            try:
+                with urllib.request.urlopen(f"{get_agents_base()}/", timeout=6) as resp:
+                    return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
+            except Exception as e:
+                return self._send(502, f"Agents offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path == "/api/agents/run":
+            code, data = proxy_json(f"{get_agents_base()}/api/agents/run?{parsed.query}", timeout=15)
             return self._send(code, json.dumps(data).encode("utf-8"))
         if parsed.path == "/api/pilot/trinity/dispatch":
             code, data = proxy_json(f"{TRINITY_BASE}/api/trinity/dispatch?{parsed.query}")
