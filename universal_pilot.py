@@ -71,11 +71,12 @@ def probe_http(url: str, timeout: float = 4.0) -> dict:
 
 def get_agents_base() -> str:
     try:
-        with HDCSharedMemoryBus() as bus:
-            port = bus.get_active_port("salathanie-agents", 8127)
-            return f"http://127.0.0.1:{port}"
+        reg = json.loads(open("/data/data/com.termux/files/usr/tmp/salathanie_ports.json").read())
+        if "salathanie-agents" in reg:
+            return f"http://127.0.0.1:{reg['salathanie-agents']['port']}"
     except Exception:
-        return "http://127.0.0.1:8127"
+        pass
+    return "http://127.0.0.1:8128"
 
 
 def proxy_json(url: str, timeout: float = 12.0) -> tuple[int, dict]:
@@ -135,7 +136,8 @@ a{color:#58a6ff}
 <div class="card">
   <button onclick="refreshAll()">Refresh All</button>
   <button class="alt" onclick="dispatch('edge recover')">Self-Heal Stack</button>
-  <a href="/agents"><button class="purp">11-Agent Studio</button></a>
+  <a href="/agents"><button class="purp">18-Agent Studio</button></a>
+  <a href="/trader"><button style="background:#d29922;color:#0b0f14">Web Trader / OMS</button></a>
   <div id="summary" style="margin-top:10px;line-height:1.6">Loading...</div>
 </div>
 
@@ -239,6 +241,16 @@ class PilotHandler(BaseHTTPRequestHandler):
                     return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
             except Exception as e:
                 return self._send(502, f"Agents offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path == "/trader":
+            try:
+                with urllib.request.urlopen(f"{get_agents_base()}/trader", timeout=6) as resp:
+                    return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
+            except Exception as e:
+                return self._send(502, f"Trader offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path.startswith("/api/oms/"):
+            q = f"?{parsed.query}" if parsed.query else ""
+            code, data = proxy_json(f"{get_agents_base()}{parsed.path}{q}", timeout=10)
+            return self._send(code, json.dumps(data).encode("utf-8"))
         if parsed.path == "/api/agents/run":
             code, data = proxy_json(f"{get_agents_base()}/api/agents/run?{parsed.query}", timeout=15)
             return self._send(code, json.dumps(data).encode("utf-8"))
