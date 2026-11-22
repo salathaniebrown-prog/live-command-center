@@ -92,6 +92,27 @@ def _bus_ci_payload(path_str: str) -> dict:
     }
 
 
+
+# _CAR_BRIDGE_8090_PROXY
+def _proxy_car_bridge_step(method: str = "GET", raw_body: bytes = b"") -> tuple[int, bytes]:
+    import urllib.request
+    import urllib.error
+    req = urllib.request.Request(
+        "http://127.0.0.1:8132/api/flying-car/step",
+        data=(raw_body if method == "POST" else None),
+        method=method,
+        headers={"Content-Type": "application/json"} if method == "POST" else {},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=2.5) as r:
+            return int(r.status), r.read()
+    except urllib.error.HTTPError as e:
+        return int(e.code), e.read()
+    except Exception as exc:
+        import json
+        return 200, json.dumps({"ok": False, "bridge_error": str(exc), "endpoint": "/api/flying-car/step"}).encode("utf-8")
+
+
 def attach_additive_routes(handler_cls, skip_paths: set[str] | None = None):
     skip = skip_paths or set()
     orig_get = getattr(handler_cls, "do_GET", None)
