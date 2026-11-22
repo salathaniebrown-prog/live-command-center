@@ -18,6 +18,7 @@ from hdc_shm_bus import HDCSharedMemoryBus, deterministic_hv
 import infra_sre_engine as infra
 import salathanie_v3_suite as v3
 import creative_production_studio as creative
+import astra_jet_engine as jet
 
 PREFERRED_PORT = 8125
 ACTIVE_PORT = PREFERRED_PORT
@@ -153,6 +154,7 @@ a{color:#58a6ff}
   <a href="/codes"><button style="background:#db2777">50 Codes</button></a>
   <a href="/artifacts"><button style="background:#4f46e5">Artifacts</button></a>
   <a href="/creative"><button style="background:#f97316;color:#080c14">Creative Studio</button></a>
+  <a href="/astra-jet"><button style="background:#38bdf8;color:#060a12">Astra Jet AI</button></a>
   <div id="summary" style="margin-top:10px;line-height:1.6">Loading...</div>
 </div>
 
@@ -256,6 +258,13 @@ class PilotHandler(BaseHTTPRequestHandler):
                     return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
             except Exception as e:
                 return self._send(502, f"Agents offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path == "/astra-jet":
+            return self._send(200, jet.JET_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/jet/telemetry":
+            qs = urllib.parse.parse_qs(parsed.query)
+            return self._send(200, json.dumps(jet.step_telemetry(qs.get("fault", ["none"])[0])).encode("utf-8"))
+        if parsed.path == "/api/jet/lineage":
+            return self._send(200, json.dumps(jet.get_lineage()).encode("utf-8"))
         if parsed.path == "/creative":
             return self._send(200, creative.CREATIVE_HTML.encode("utf-8"), "text/html; charset=utf-8")
         if parsed.path == "/api/creative/catalog":
@@ -330,6 +339,12 @@ class PilotHandler(BaseHTTPRequestHandler):
             body = json.loads(raw) if raw.strip() else {}
         except Exception:
             body = {}
+        if self.path == "/api/jet/mutate":
+            res = jet.supercompute_mutate(int(body.get("cycles", 3)), body.get("fault", "turbulence"))
+            return self._send(200, json.dumps(res).encode("utf-8"))
+        if self.path == "/api/jet/rollback":
+            res = jet.rollback_generation(body.get("gen_id", "GEN-000"))
+            return self._send(200, json.dumps(res).encode("utf-8"))
         if self.path == "/api/creative/build":
             res = creative.aviator_build_workflow(body.get("brief", ""), body.get("style", "Cinematic 8K"), body.get("duration_s", 5), body.get("models"))
             return self._send(200, json.dumps(res).encode("utf-8"))
