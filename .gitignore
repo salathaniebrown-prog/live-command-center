@@ -47,3 +47,7 @@ autopilot_guard.log
 *.db
 *.db-wal
 *.db-shm
+boot_restore.log
+*.db
+*.db-wal
+*.db-shm

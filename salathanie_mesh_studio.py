@@ -545,11 +545,11 @@ pre{background:#070d18;padding:8px;border-radius:6px;font-size:11px;overflow:aut
 # =====================================================================
 # CONSOLE 1: /mesh-hub (Digital Divide, DIY Mesh, Offline Wiki, Pi 5, Teaching)
 # =====================================================================
-MESH_HUB_HTML = f"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+MESH_HUB_HTML = r"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Salathanie A.I — Digital Divide, DIY Mesh, Offline Wikipedia &amp; Pi 5 Lab</title>
-<style>{BASE_CSS}</style></head><body>
+<style>__BASE_CSS__</style></head><body>
 <h2 style="color:#10b981;margin:2px 0">DIGITAL DIVIDE // DIY MESH, OFFLINE WIKIPEDIA &amp; PI 5 TEACHING HUB</h2>
-{UNIFIED_NAV}
+__UNIFIED_NAV__
 
 <div class="card">
   <b>Accessibility &amp; Zero-Data Classroom Bar</b>
@@ -614,76 +614,76 @@ async function loadDiag(){
   const d=await(await fetch('/api/mesh/diag')).json();
   const pUp=Object.entries(d.mesh_ports).filter(([,v])=>v).map(([k])=>k).join(', ');
   document.getElementById('diagBox').innerHTML=
-    `<span class="badge">${{d.mode}}</span> LAN: <b>${{d.lan_ip}}:8125</b> | Uplink: <b>${{d.internet_uplink?'ONLINE':'OFFLINE SAFE'}}</b> | Active Ports: ${{pUp}}<br>`+
-    `Offline Wiki Articles: <b>${{d.wiki_articles_offline}}</b> | Lessons: <b>${{d.teaching_lessons}}</b> | Scrintal Cards: <b>${{d.scrintal_cards}}</b> | Kiwix .zim: <b>${{d.kiwix_zims_found.length}}</b><br>`+
-    `iPad Broadcast URL: <b>${{d.ipad_studio_url}}</b> | Student LAN Hub: <b>${{d.classroom_lan_url}}</b>`;
+    `<span class="badge">${d.mode}</span> LAN: <b>${d.lan_ip}:8125</b> | Uplink: <b>${d.internet_uplink?'ONLINE':'OFFLINE SAFE'}</b> | Active Ports: ${pUp}<br>`+
+    `Offline Wiki Articles: <b>${d.wiki_articles_offline}</b> | Lessons: <b>${d.teaching_lessons}</b> | Scrintal Cards: <b>${d.scrintal_cards}</b> | Kiwix .zim: <b>${d.kiwix_zims_found.length}</b><br>`+
+    `iPad Broadcast URL: <b>${d.ipad_studio_url}</b> | Student LAN Hub: <b>${d.classroom_lan_url}</b>`;
 }
 async function searchWiki(){
   const q=encodeURIComponent(document.getElementById('wq').value||'');
   const d=await(await fetch('/api/mesh/wiki/search?q='+q)).json();
   document.getElementById('wikiList').innerHTML=(d.articles||[]).map(a=>
-    `<div class="item"><b>${{a.title}}</b> <span class="badge">${{a.category}}</span> `+
-    `<button style="padding:2px 6px;font-size:10px" onclick="speakText(this.dataset.t)" data-t="${{a.title.replace(/"/g,'')}}. ${{a.body.replace(/"/g,'').slice(0,400)}}">Read</button> `+
-    `<button class="purp" style="padding:2px 6px;font-size:10px" onclick="sendToScrintal(this.dataset.ti,this.dataset.bo)" data-ti="${{a.title.replace(/"/g,'')}}" data-bo="${{a.body.replace(/"/g,'').slice(0,260)}}">Pin to Scrintal</button>`+
-    `<div style="font-size:11px;color:#cbd5e1;margin-top:4px">${{a.body}}</div></div>`
+    `<div class="item"><b>${a.title}</b> <span class="badge">${a.category}</span> `+
+    `<button style="padding:2px 6px;font-size:10px" onclick="speakText(this.dataset.t)" data-t="${a.title.replace(/"/g,'')}. ${a.body.replace(/"/g,'').slice(0,400)}">Read</button> `+
+    `<button class="purp" style="padding:2px 6px;font-size:10px" onclick="sendToScrintal(this.dataset.ti,this.dataset.bo)" data-ti="${a.title.replace(/"/g,'')}" data-bo="${a.body.replace(/"/g,'').slice(0,260)}">Pin to Scrintal</button>`+
+    `<div style="font-size:11px;color:#cbd5e1;margin-top:4px">${a.body}</div></div>`
   ).join('')||'No offline matches.';
 }
 async function importWiki(){
   const topic=document.getElementById('wimp').value.trim(); if(!topic)return;
   document.getElementById('wikiStatus').textContent='Fetching from Wikipedia and indexing into local FTS5...';
-  const d=await(await fetch('/api/mesh/wiki/import',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{topic}})}})).json();
-  document.getElementById('wikiStatus').textContent=d.ok?`[SAVED OFFLINE] ${{d.title}} (${{d.chars_saved}} chars indexed)`:d.error;
+  const d=await(await fetch('/api/mesh/wiki/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic})})).json();
+  document.getElementById('wikiStatus').textContent=d.ok?`[SAVED OFFLINE] ${d.title} (${d.chars_saved} chars indexed)`:d.error;
   searchWiki(); loadDiag();
 }
 async function sendToScrintal(title,body){
-  await fetch('/api/scrintal/card',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{title,body,tag:'Wiki',x:80+Math.random()*240,y:80+Math.random()*180,color:'#10b981'}})}});
-  document.getElementById('wikiStatus').textContent=`Pinned "${{title}}" onto AI Scrintal board.`;
+  await fetch('/api/scrintal/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,body,tag:'Wiki',x:80+Math.random()*240,y:80+Math.random()*180,color:'#10b981'})});
+  document.getElementById('wikiStatus').textContent=`Pinned "${title}" onto AI Scrintal board.`;
 }
 async function genPi5(){
-  const d=await(await fetch('/api/mesh/pi5-script',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{ssid:document.getElementById('piSsid').value,mesh_id:document.getElementById('piMesh').value}})}})).json();
+  const d=await(await fetch('/api/mesh/pi5-script',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid:document.getElementById('piSsid').value,mesh_id:document.getElementById('piMesh').value})})).json();
   LAST_SCRIPT=d.script; LAST_NAME='pi5_community_mesh.sh';
-  document.getElementById('scriptOut').textContent=`# Saved to ${{d.path}}\n`+d.script;
+  document.getElementById('scriptOut').textContent=`# Saved to ${d.path}\n`+d.script;
 }
 async function genReconnect(){
-  const d=await(await fetch('/api/mesh/reconnect-script',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:'{{}}'}})).json();
+  const d=await(await fetch('/api/mesh/reconnect-script',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).json();
   LAST_SCRIPT=d.script; LAST_NAME='termux_self_reconnect.sh';
-  document.getElementById('scriptOut').textContent=`# Saved to ${{d.path}}\n`+d.script;
+  document.getElementById('scriptOut').textContent=`# Saved to ${d.path}\n`+d.script;
 }
 function dlScript(){
   if(!LAST_SCRIPT)return;
   const a=document.createElement('a'); a.download=LAST_NAME;
-  a.href=URL.createObjectURL(new Blob([LAST_SCRIPT],{{type:'text/x-shellscript'}})); a.click();
+  a.href=URL.createObjectURL(new Blob([LAST_SCRIPT],{type:'text/x-shellscript'})); a.click();
 }
 async function loadLessons(){
   const d=await(await fetch('/api/mesh/lessons')).json();
   document.getElementById('lessonList').innerHTML=(d.lessons||[]).map(l=>
-    `<div class="item"><b>${{l.title}}</b> <span class="badge">${{l.level}}</span>`+
-    `<pre style="margin-top:4px">${{l.body}}</pre>`+
-    `<div style="font-size:11px;color:#fbbf24">${{(l.quiz||[]).map(x=>'Q: '+x.q+' -> '+x.a).join(' | ')}}</div></div>`
+    `<div class="item"><b>${l.title}</b> <span class="badge">${l.level}</span>`+
+    `<pre style="margin-top:4px">${l.body}</pre>`+
+    `<div style="font-size:11px;color:#fbbf24">${(l.quiz||[]).map(x=>'Q: '+x.q+' -> '+x.a).join(' | ')}</div></div>`
   ).join('');
 }
 async function addLesson(){
   const topic=document.getElementById('lTopic').value.trim(); if(!topic)return;
-  await fetch('/api/mesh/lesson/create',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{topic,level:document.getElementById('lLvl').value}})}});
+  await fetch('/api/mesh/lesson/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,level:document.getElementById('lLvl').value})});
   document.getElementById('lTopic').value=''; loadLessons(); loadDiag();
 }
 loadDiag(); searchWiki(); loadLessons();
-</script></body></html>"""
+</script></body></html>""".replace("__BASE_CSS__", BASE_CSS).replace("__UNIFIED_NAV__", UNIFIED_NAV)
 
 # =====================================================================
 # CONSOLE 2: /broadcast (iPad as a Broadcast Studio)
 # =====================================================================
-BROADCAST_HTML = f"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+BROADCAST_HTML = r"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Salathanie A.I — iPad Broadcast Studio</title>
-<style>{BASE_CSS}
-.studio-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:10px}}
-canvas#prog{{width:100%;aspect-ratio:16/9;background:#02060f;border:2px solid #ec4899;border-radius:8px}}
-.vu-wrap{{height:14px;background:#070d18;border:1px solid #30363d;border-radius:4px;overflow:hidden;margin:6px 0}}
-.vu-bar{{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444);transition:width 60ms}}
-#prompter{{height:110px;overflow:auto;background:#02060f;border:1px solid #38bdf8;border-radius:6px;padding:10px;font-size:16px;line-height:1.5;color:#fef08a}}
+<style>__BASE_CSS__
+.studio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:10px}
+canvas#prog{width:100%;aspect-ratio:16/9;background:#02060f;border:2px solid #ec4899;border-radius:8px}
+.vu-wrap{height:14px;background:#070d18;border:1px solid #30363d;border-radius:4px;overflow:hidden;margin:6px 0}
+.vu-bar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444);transition:width 60ms}
+#prompter{height:110px;overflow:auto;background:#02060f;border:1px solid #38bdf8;border-radius:6px;padding:10px;font-size:16px;line-height:1.5;color:#fef08a}
 </style></head><body>
 <h2 style="color:#ec4899;margin:2px 0">IPAD BROADCAST STUDIO // LIVE SWITCHER, CHYRON, VU &amp; RECORDER</h2>
-{UNIFIED_NAV}
+__UNIFIED_NAV__
 
 <div class="studio-grid">
   <div class="card">
@@ -729,7 +729,7 @@ let STREAM=null,ACTX=null,ANALYSER=null,REC=null,CHUNKS=[],SCENE='CAM',SHOW_CHYR
 async function startCam(facing){
   try{
     if(STREAM)STREAM.getTracks().forEach(t=>t.stop());
-    STREAM=await navigator.mediaDevices.getUserMedia({{video:{{facingMode:facing,width:{{ideal:1280}},height:{{ideal:720}}}},audio:true}});
+    STREAM=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:true});
     vid.srcObject=STREAM; await vid.play();
     setupAudio(STREAM);
     document.getElementById('recStat').textContent='Camera + Mic LIVE ('+facing+').';
@@ -738,7 +738,7 @@ async function startCam(facing){
 async function startScreen(){
   try{
     if(STREAM)STREAM.getTracks().forEach(t=>t.stop());
-    STREAM=await navigator.mediaDevices.getDisplayMedia({{video:true,audio:true}});
+    STREAM=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
     vid.srcObject=STREAM; await vid.play();
     setupAudio(STREAM);
     document.getElementById('recStat').textContent='Screen Capture LIVE.';
@@ -801,46 +801,46 @@ function toggleRecord(){
   if(STREAM) tracks.push(...STREAM.getAudioTracks());
   const mimes=['video/mp4','video/webm;codecs=vp9','video/webm'];
   const mime=mimes.find(m=>MediaRecorder.isTypeSupported(m))||'';
-  REC=mime?new MediaRecorder(new MediaStream(tracks),{{mimeType:mime}}):new MediaRecorder(new MediaStream(tracks));
+  REC=mime?new MediaRecorder(new MediaStream(tracks),{mimeType:mime}):new MediaRecorder(new MediaStream(tracks));
   CHUNKS=[]; REC_START=Date.now();
-  REC.ondataavailable=e=>{{if(e.data && e.data.size>0)CHUNKS.push(e.data);}};
-  REC.onstop=()=>{{
+  REC.ondataavailable=e=>{if(e.data && e.data.size>0)CHUNKS.push(e.data);};
+  REC.onstop=()=>{
     const ext=mime.includes('mp4')?'mp4':'webm';
-    const blob=new Blob(CHUNKS,{{type:mime||'video/webm'}});
+    const blob=new Blob(CHUNKS,{type:mime||'video/webm'});
     const dl=document.getElementById('recDl');
     dl.href=URL.createObjectURL(blob); dl.download='salathanie_broadcast.'+ext;
-    dl.style.display='inline-block'; dl.textContent=`Download Broadcast .${{ext.toUpperCase()}} (${{Math.round(blob.size/1024)}} KB)`;
+    dl.style.display='inline-block'; dl.textContent=`Download Broadcast .${ext.toUpperCase()} (${Math.round(blob.size/1024)} KB)`;
     st.textContent='Broadcast recorded and ready.';
-  }};
+  };
   REC.start(); btn.textContent='STOP REC'; st.textContent='Recording live broadcast...';
 }
 function snapFrame(){
   const a=document.createElement('a'); a.download='salathanie_studio_frame.png'; a.href=cv.toDataURL('image/png'); a.click();
 }
 async function saveProfile(){
-  const d=await(await fetch('/api/broadcast/profile',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{title:document.getElementById('showTitle').value,ticker:document.getElementById('showTicker').value}})}})).json();
+  const d=await(await fetch('/api/broadcast/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:document.getElementById('showTitle').value,ticker:document.getElementById('showTicker').value})})).json();
   document.getElementById('profOut').textContent=JSON.stringify(d.profile,null,2);
 }
 drawProgram();
-</script></body></html>"""
+</script></body></html>""".replace("__BASE_CSS__", BASE_CSS).replace("__UNIFIED_NAV__", UNIFIED_NAV)
 
 # =====================================================================
 # CONSOLE 3: /scrintal (AI-Powered Scrintal Visual Knowledge Canvas)
 # =====================================================================
-SCRINTAL_HTML = f"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+SCRINTAL_HTML = r"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Salathanie A.I — AI-Powered Scrintal Visual Canvas</title>
-<style>{BASE_CSS}
-#boardWrap{{position:relative;width:100%;height:520px;background:#040812;border:1px solid #30363d;border-radius:10px;overflow:auto;touch-action:none}}
-#board{{position:relative;width:1100px;height:700px;background-image:radial-gradient(#1e293b 1px,transparent 1px);background-size:24px 24px}}
-svg#edges{{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}}
-.scard{{position:absolute;width:215px;background:#0f172a;border:2px solid #38bdf8;border-radius:8px;padding:8px;box-shadow:0 4px 14px rgba(0,0,0,0.45);cursor:grab}}
-.scard-head{{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:bold;margin-bottom:4px;border-bottom:1px solid #1e2d45;padding-bottom:3px}}
-.scard-body{{font-size:10px;color:#cbd5e1;white-space:pre-wrap;max-height:95px;overflow:auto}}
-.scard-act{{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap}}
-.scard-act button{{padding:2px 6px;font-size:9px;margin:0}}
+<style>__BASE_CSS__
+#boardWrap{position:relative;width:100%;height:520px;background:#040812;border:1px solid #30363d;border-radius:10px;overflow:auto;touch-action:none}
+#board{position:relative;width:1100px;height:700px;background-image:radial-gradient(#1e293b 1px,transparent 1px);background-size:24px 24px}
+svg#edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.scard{position:absolute;width:215px;background:#0f172a;border:2px solid #38bdf8;border-radius:8px;padding:8px;box-shadow:0 4px 14px rgba(0,0,0,0.45);cursor:grab}
+.scard-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:bold;margin-bottom:4px;border-bottom:1px solid #1e2d45;padding-bottom:3px}
+.scard-body{font-size:10px;color:#cbd5e1;white-space:pre-wrap;max-height:95px;overflow:auto}
+.scard-act{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap}
+.scard-act button{padding:2px 6px;font-size:9px;margin:0}
 </style></head><body>
 <h2 style="color:#a855f7;margin:2px 0">AI-POWERED SCRINTAL // VISUAL SPATIAL RESEARCH CANVAS</h2>
-{UNIFIED_NAV}
+__UNIFIED_NAV__
 
 <div class="card">
   <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -861,84 +861,84 @@ svg#edges{{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 </div>
 
 <script>
-let STATE={{cards:[],links:[]}}, LINK_SRC=null, DRAG=null;
-async function loadBoard(){{
+let STATE={cards:[],links:[]}, LINK_SRC=null, DRAG=null;
+async function loadBoard(){
   STATE=await(await fetch('/api/scrintal/state')).json();
   renderBoard();
-}}
-function renderEdges(){{
+}
+function renderEdges(){
   const svg=document.getElementById('edges');
   const map=Object.fromEntries((STATE.cards||[]).map(c=>[c.card_id,c]));
-  svg.innerHTML=(STATE.links||[]).map(l=>{{
+  svg.innerHTML=(STATE.links||[]).map(l=>{
     const a=map[l.src], b=map[l.dst]; if(!a||!b)return '';
     const x1=a.x+107,y1=a.y+48,x2=b.x+107,y2=b.y+48;
-    return `<line x1="${{x1}}" y1="${{y1}}" x2="${{x2}}" y2="${{y2}}" stroke="#a855f7" stroke-width="2" stroke-dasharray="4 3"/>`+
-           `<text x="${{(x1+x2)/2}}" y="${{(y1+y2)/2-4}}" fill="#e9d5ff" font-size="10" text-anchor="middle">${{l.label}}</text>`;
-  }}).join('');
-}}
-function renderBoard(){{
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#a855f7" stroke-width="2" stroke-dasharray="4 3"/>`+
+           `<text x="${(x1+x2)/2}" y="${(y1+y2)/2-4}" fill="#e9d5ff" font-size="10" text-anchor="middle">${l.label}</text>`;
+  }).join('');
+}
+function renderBoard(){
   const board=document.getElementById('board');
   board.querySelectorAll('.scard').forEach(el=>el.remove());
-  (STATE.cards||[]).forEach(c=>{{
+  (STATE.cards||[]).forEach(c=>{
     const el=document.createElement('div');
     el.className='scard'; el.style.left=c.x+'px'; el.style.top=c.y+'px'; el.style.borderColor=c.color||'#38bdf8';
-    el.innerHTML=`<div class="scard-head"><span style="color:${{c.color||'#38bdf8'}}">${{c.title}}</span><span class="badge">${{c.tag}}</span></div>`+
-      `<div class="scard-body">${{c.body}}</div>`+
+    el.innerHTML=`<div class="scard-head"><span style="color:${c.color||'#38bdf8'}">${c.title}</span><span class="badge">${c.tag}</span></div>`+
+      `<div class="scard-body">${c.body}</div>`+
       `<div class="scard-act">`+
-      `<button class="purp" onclick="aiExpand('${{c.card_id}}')">AI Expand</button>`+
-      `<button class="alt" onclick="pickLink('${{c.card_id}}')">${{LINK_SRC===c.card_id?'Select Target...':'Link'}}</button>`+
-      `<button class="red" onclick="delCard('${{c.card_id}}')">Del</button></div>`;
-    el.addEventListener('pointerdown',e=>{{
+      `<button class="purp" onclick="aiExpand('${c.card_id}')">AI Expand</button>`+
+      `<button class="alt" onclick="pickLink('${c.card_id}')">${LINK_SRC===c.card_id?'Select Target...':'Link'}</button>`+
+      `<button class="red" onclick="delCard('${c.card_id}')">Del</button></div>`;
+    el.addEventListener('pointerdown',e=>{
       if(e.target.tagName==='BUTTON')return;
-      DRAG={{id:c.card_id,el,card:c,sx:e.clientX,sy:e.clientY,ox:c.x,oy:c.y}};
+      DRAG={id:c.card_id,el,card:c,sx:e.clientX,sy:e.clientY,ox:c.x,oy:c.y};
       el.setPointerCapture(e.pointerId);
-    }});
-    el.addEventListener('pointermove',e=>{{
+    });
+    el.addEventListener('pointermove',e=>{
       if(!DRAG||DRAG.id!==c.card_id)return;
       c.x=Math.max(8,Math.min(860,DRAG.ox+(e.clientX-DRAG.sx)));
       c.y=Math.max(8,Math.min(560,DRAG.oy+(e.clientY-DRAG.sy)));
       el.style.left=c.x+'px'; el.style.top=c.y+'px';
       renderEdges();
-    }});
-    el.addEventListener('pointerup',async ()=>{{
+    });
+    el.addEventListener('pointerup',async ()=>{
       if(!DRAG||DRAG.id!==c.card_id)return;
       DRAG=null;
-      await fetch('/api/scrintal/move',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{card_id:c.card_id,x:c.x,y:c.y}})}});
-    }});
+      await fetch('/api/scrintal/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({card_id:c.card_id,x:c.x,y:c.y})});
+    });
     board.appendChild(el);
-  }});
+  });
   renderEdges();
-}}
-async function addCard(){{
+}
+async function addCard(){
   const title=document.getElementById('cTitle').value.trim(); if(!title)return;
-  await fetch('/api/scrintal/card',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{
+  await fetch('/api/scrintal/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
     title, body:document.getElementById('cBody').value, tag:document.getElementById('cTag').value,
     color:document.getElementById('cCol').value, x:60+Math.random()*380, y:60+Math.random()*240
-  }})}});
+  })});
   document.getElementById('cTitle').value=''; document.getElementById('cBody').value='';
   loadBoard();
-}}
-async function pickLink(id){{
-  if(!LINK_SRC){{LINK_SRC=id; document.getElementById('sStat').textContent='Link source selected — tap Link on target card.'; renderBoard(); return;}}
-  if(LINK_SRC===id){{LINK_SRC=null; renderBoard(); return;}}
-  await fetch('/api/scrintal/link',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{src:LINK_SRC,dst:id,label:'connects'}})}});
+}
+async function pickLink(id){
+  if(!LINK_SRC){LINK_SRC=id; document.getElementById('sStat').textContent='Link source selected — tap Link on target card.'; renderBoard(); return;}
+  if(LINK_SRC===id){LINK_SRC=null; renderBoard(); return;}
+  await fetch('/api/scrintal/link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({src:LINK_SRC,dst:id,label:'connects'})});
   LINK_SRC=null; document.getElementById('sStat').textContent='Cards linked.'; loadBoard();
-}}
-async function aiExpand(id){{
+}
+async function aiExpand(id){
   document.getElementById('sStat').textContent='AI synthesizing linked card...';
-  const d=await(await fetch('/api/scrintal/ai-expand',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{card_id:id}})}})).json();
-  document.getElementById('sStat').textContent=d.ok?`Created AI card ${{d.child_id}}`:d.error;
+  const d=await(await fetch('/api/scrintal/ai-expand',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({card_id:id})})).json();
+  document.getElementById('sStat').textContent=d.ok?`Created AI card ${d.child_id}`:d.error;
   loadBoard();
-}}
-async function delCard(id){{
-  await fetch('/api/scrintal/delete',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{card_id:id}})}});
+}
+async function delCard(id){
+  await fetch('/api/scrintal/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({card_id:id})});
   loadBoard();
-}}
-function exportMD(){{
+}
+function exportMD(){
   let md='# Salathanie A.I — Scrintal Knowledge Board\\n\\n';
-  (STATE.cards||[]).forEach(c=>{{md+=`## ${{c.title}} [${{c.tag}}]\\n${{c.body}}\\n\\n`;}});
+  (STATE.cards||[]).forEach(c=>{md+=`## ${c.title} [${c.tag}]\\n${c.body}\\n\\n`;});
   const a=document.createElement('a'); a.download='salathanie_scrintal_board.md';
-  a.href=URL.createObjectURL(new Blob([md],{{type:'text/markdown'}})); a.click();
-}}
+  a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown'})); a.click();
+}
 loadBoard();
-</script></body></html>"""
+</script></body></html>""".replace("__BASE_CSS__", BASE_CSS).replace("__UNIFIED_NAV__", UNIFIED_NAV)
