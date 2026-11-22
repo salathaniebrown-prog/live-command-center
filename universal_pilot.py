@@ -9,6 +9,7 @@ import cisco_mdt_tunnel_gis_otel as cisco_gis
 import astra_alstra_flying_car as fcar
 import self_ram_telemetry as ram_tel
 import ram_watchdog_telemetry as rwatch
+import self_ram_controller as rctrl
 import os
 import re
 import socket
@@ -304,6 +305,8 @@ class PilotHandler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(cisco_gis.collect_cisco_mdt()).encode("utf-8"))
         if parsed.path == "/tunnel-gis":
             return self._send(200, cisco_gis.TUNNEL_GIS_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/ram/self-control":
+            return self._send(200, json.dumps(rctrl.enforce_self_control()).encode("utf-8"))
         if parsed.path == "/api/ram/watchdog":
             return self._send(200, json.dumps(rwatch.watchdog_status(15)).encode("utf-8"))
         if parsed.path == "/api/ram/telemetry":
