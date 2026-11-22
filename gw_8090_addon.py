@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Additive-only route wrapper for original alstra_unified_8090_gateway.py."""
+"""Strictly additive routes layered onto original alstra_unified_8090_gateway.py without replacing existing handlers."""
 import json
 import socket
 import time
@@ -28,7 +28,7 @@ def _proxy_try(targets: list[str], method: str = "GET", body: bytes = b"") -> tu
     return 502, "application/json", json.dumps({"error": "upstream_unreachable", "tried": targets}).encode("utf-8")
 
 
-def _write_resp(handler, code: int, ct: str, data: bytes):
+def _write(handler, code: int, ct: str, data: bytes):
     handler.send_response(code)
     handler.send_header("Content-Type", ct)
     handler.send_header("Content-Length", str(len(data)))
@@ -36,13 +36,14 @@ def _write_resp(handler, code: int, ct: str, data: bytes):
     handler.wfile.write(data)
 
 
-def attach_additive_routes(handler_cls):
+def attach_additive_routes(handler_cls, skip_paths: set[str] | None = None):
+    skip = skip_paths or set()
     orig_get = getattr(handler_cls, "do_GET", None)
     orig_post = getattr(handler_cls, "do_POST", None)
 
     def wrapped_get(self):
         p = self.path.split("?")[0]
-        if p == "/api/gw/status":
+        if p == "/api/gw/status" and p not in skip:
             st = {
                 "ok": True, "port": 8090, "ts": int(time.time()),
                 "routes": {
@@ -52,25 +53,25 @@ def attach_additive_routes(handler_cls):
                     "8125_PILOT": {"up": _port_up(8125), "target": "127.0.0.1:8125"},
                 },
             }
-            return _write_resp(self, 200, "application/json", json.dumps(st).encode("utf-8"))
-        if p == "/api/ledger":
-            return _write_resp(self, 200, "application/json", json.dumps(ledger.get_ledger_snapshot(15)).encode("utf-8"))
-        if p in ("/jet", "/jet/", "/8095"):
+            return _write(self, 200, "application/json", json.dumps(st).encode("utf-8"))
+        if p == "/api/ledger" and p not in skip:
+            return _write(self, 200, "application/json", json.dumps(ledger.get_ledger_snapshot(15)).encode("utf-8"))
+        if p in ("/jet", "/jet/", "/8095") and "/jet" not in skip:
             c, ct, data = _proxy_try(["http://127.0.0.1:8095/", "http://127.0.0.1:8125/jet-3d"])
-            return _write_resp(self, c, ct, data)
-        if p in ("/ingress", "/ingress/", "/8088"):
+            return _write(self, c, ct, data)
+        if p in ("/ingress", "/ingress/", "/8088") and "/ingress" not in skip:
             c, ct, data = _proxy_try(["http://127.0.0.1:8088/", "http://127.0.0.1:8125/"])
-            return _write_resp(self, c, ct, data)
+            return _write(self, c, ct, data)
         if orig_get:
             return orig_get(self)
 
     def wrapped_post(self):
         p = self.path.split("?")[0]
-        if p == "/api/px4":
+        if p == "/api/px4" and p not in skip:
             length = int(self.headers.get("Content-Length", "0"))
             raw = self.rfile.read(min(length, 65536)) if length else b"{}"
             body = json.loads(raw.decode("utf-8", errors="ignore") or "{}")
-            return _write_resp(self, 200, "application/json", json.dumps({"ok": True, "px4": ledger.record_px4(body, "px4_gw_8090")}).encode("utf-8"))
+            return _write(self, 200, "application/json", json.dumps({"ok": True, "px4": ledger.record_px4(body, "px4_gw_8090")}).encode("utf-8"))
         if orig_post:
             return orig_post(self)
 

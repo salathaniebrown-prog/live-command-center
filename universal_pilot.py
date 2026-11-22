@@ -266,6 +266,8 @@ class PilotHandler(BaseHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path in ("/", "/ui"):
             return self._send(200, UI_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/pilot/nasa-jet":
+            return self._send(200, json.dumps(sync_nasa_to_jet()).encode("utf-8"))
         if parsed.path == "/api/pilot/status":
             return self._send(200, json.dumps(collect_telemetry()).encode("utf-8"))
         if parsed.path == "/api/pilot/probe":
@@ -410,6 +412,8 @@ class PilotHandler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(jbridge.run_closed_loop_cycle(bool(body.get("sync_ext")))).encode("utf-8"))
         if self.path == "/v1/chat/completions":
             return self._send(200, json.dumps(v1shim.handle_v1_chat_completions(body, deck.salathanie_ai_infer)).encode("utf-8"))
+        if self.path == "/api/pilot/nasa-jet":
+            return self._send(200, json.dumps(sync_nasa_to_jet()).encode("utf-8"))
         if self.path == "/api/memory/snapshot":
             return self._send(200, json.dumps(memspine.take_snapshot(body.get("reason", "api"))).encode("utf-8"))
         if self.path == "/api/memory/restore":
@@ -462,6 +466,38 @@ class PilotHandler(BaseHTTPRequestHandler):
             res = v3.run_secret_code(body.get("code", "/action plan"), body.get("topic", ""))
             return self._send(200, json.dumps(res).encode("utf-8"))
         return self._send(404, json.dumps({"error": "not_found"}).encode("utf-8"))
+
+
+
+def sync_nasa_to_jet() -> dict:
+    """Pull NASA EONET/orbital telemetry and fuse it into flight ledger & jet state."""
+    import json, time, urllib.request
+    import astra_flight_ledger as _fl
+    ts = int(time.time())
+    events = []
+    try:
+        url = "https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=5"
+        req = urllib.request.Request(url, headers={"User-Agent": "SalathanieAI-Pilot-NASA/1.0"})
+        with urllib.request.urlopen(req, timeout=5.0) as r:
+            raw = json.loads(r.read().decode("utf-8", errors="ignore"))
+        for ev in (raw.get("events") or [])[:5]:
+            geoms = ev.get("geometry") or []
+            g0 = geoms[-1] if geoms else {}
+            coords = g0.get("coordinates") if isinstance(g0.get("coordinates"), list) else [0.0, 0.0]
+            lon = float(coords[0]) if len(coords) >= 2 and isinstance(coords[0], (int, float)) else 0.0
+            lat = float(coords[1]) if len(coords) >= 2 and isinstance(coords[1], (int, float)) else 0.0
+            title = f"NASA: {ev.get('title', 'Orbital/Earth Event')}"[:140]
+            events.append({"id": str(ev.get("id", ts)), "title": title, "lat": lat, "lon": lon})
+            with _fl.db_conn() as c:
+                c.execute(
+                    "INSERT OR REPLACE INTO external_feeds (ts,source,event_id,title,severity,lat,lon,raw_json) VALUES (?,?,?,?,?,?,?,?)",
+                    (ts, "NASA_EONET", f"nasa-{ev.get('id', ts)}", title, "NASA_TELEM", lat, lon, json.dumps({"date": g0.get("date")})),
+                )
+    except Exception:
+        pass
+    hz = _fl.external_hazard_score()
+    st = _fl.atomic_write_state({"nasa_jet_sync_ts": ts, "nasa_hazard_score": hz, "nasa_events_count": len(events)}, preserve_overrides=True)
+    return {"ok": True, "ts": ts, "nasa_events": len(events), "hazard_score": hz, "jet_state_ts": st.get("updated_ts"), "sample": events[:2]}
 
 
 if __name__ == "__main__":
