@@ -421,9 +421,18 @@ button{background:#238636;border:none;font-weight:bold;cursor:pointer;padding:10
 pre{white-space:pre-wrap;word-break:break-all;font-size:12px;background:#0d1117;padding:10px;border-radius:6px;max-height:360px;overflow:auto}
 </style></head><body>
 <h2>Salathanie A.I — 18-Agent Enterprise Studio</h2>
-<div class="nav" style="margin-bottom:10px">
-  <a href="/">Universal Pilot</a>
-  <a href="/trader" style="background:#8957e5">Web Trader + OMS + FIX/FAST</a>
+<div class="nav" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px">
+  <a href="/">Pilot</a>
+  <a href="/agents" style="background:#8957e5">18-Agents</a>
+  <a href="/trader" style="background:#d29922;color:#050912">Trader/OMS</a>
+  <a href="/infra" style="background:#0ea5e9;color:#050912">Infra/SRE</a>
+  <a href="/dealership" style="background:#238636">Dealership</a>
+  <a href="/eagle-eyes" style="background:#0891b2">Eagle Eyes</a>
+  <a href="/codes" style="background:#db2777">50 Codes</a>
+  <a href="/artifacts" style="background:#4f46e5">Artifacts</a>
+  <a href="/creative" style="background:#f97316;color:#050912">Creative Studio</a>
+  <a href="/astra-jet" style="background:#38bdf8;color:#050912">Astra Jet AI</a>
+  <a href="/jet-3d" style="background:#39ff14;color:#050912">3D Jet HUD</a>
 </div>
 <div class="card">
   <label>Select Agent / Engine:</label>
@@ -485,9 +494,18 @@ th,td{border-bottom:1px solid #30363d;padding:6px;text-align:left}
 pre{background:#0d1117;padding:8px;border-radius:6px;font-size:11px;overflow:auto;max-height:200px}
 </style></head><body>
 <h2>Salathanie Web Trader // OMS & FIX 4.4 / FAST</h2>
-<div class="nav" style="margin-bottom:10px">
-  <a href="/">Universal Pilot</a>
-  <a href="/agents" style="background:#238636">18-Agent Studio</a>
+<div class="nav" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px">
+  <a href="/">Pilot</a>
+  <a href="/agents" style="background:#8957e5">18-Agents</a>
+  <a href="/trader" style="background:#d29922;color:#050912">Trader/OMS</a>
+  <a href="/infra" style="background:#0ea5e9;color:#050912">Infra/SRE</a>
+  <a href="/dealership" style="background:#238636">Dealership</a>
+  <a href="/eagle-eyes" style="background:#0891b2">Eagle Eyes</a>
+  <a href="/codes" style="background:#db2777">50 Codes</a>
+  <a href="/artifacts" style="background:#4f46e5">Artifacts</a>
+  <a href="/creative" style="background:#f97316;color:#050912">Creative Studio</a>
+  <a href="/astra-jet" style="background:#38bdf8;color:#050912">Astra Jet AI</a>
+  <a href="/jet-3d" style="background:#39ff14;color:#050912">3D Jet HUD</a>
 </div>
 <div class="card">
   <b>Order Ticket (OMS + FIX 4.4 + FAST Wire)</b>

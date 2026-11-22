@@ -386,13 +386,18 @@ pre{background:#090d16;padding:8px;border-radius:6px;font-size:11px;overflow:aut
 .ok{color:#3fb950}.bad{color:#f85149}
 </style></head><body>
 <h2 style="color:#38bdf8;margin:4px 0">VIRTUAL ASTRA JET // AI SUPERCOMPUTING SELF-MUTATING TELEMETRY</h2>
-<div class="nav">
+<div class="nav" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px">
   <a href="/">Pilot</a>
   <a href="/agents" style="background:#8957e5">18-Agents</a>
-  <a href="/trader" style="background:#d29922;color:#060a12">Trader/OMS</a>
-  <a href="/infra" style="background:#0ea5e9;color:#060a12">Infra/SRE</a>
+  <a href="/trader" style="background:#d29922;color:#050912">Trader/OMS</a>
+  <a href="/infra" style="background:#0ea5e9;color:#050912">Infra/SRE</a>
+  <a href="/dealership" style="background:#238636">Dealership</a>
   <a href="/eagle-eyes" style="background:#0891b2">Eagle Eyes</a>
-  <a href="/creative" style="background:#f97316;color:#060a12">Creative Studio</a>
+  <a href="/codes" style="background:#db2777">50 Codes</a>
+  <a href="/artifacts" style="background:#4f46e5">Artifacts</a>
+  <a href="/creative" style="background:#f97316;color:#050912">Creative Studio</a>
+  <a href="/astra-jet" style="background:#38bdf8;color:#050912">Astra Jet AI</a>
+  <a href="/jet-3d" style="background:#39ff14;color:#050912">3D Jet HUD</a>
 </div>
 
 <div class="card">

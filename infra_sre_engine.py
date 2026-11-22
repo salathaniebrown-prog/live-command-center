@@ -346,11 +346,18 @@ pre{background:#0d1117;padding:8px;border-radius:6px;font-size:11px;overflow:aut
 a{color:#58a6ff}
 </style></head><body>
 <h2>Salathanie A.I — Telemetry Backend, SRE & IaC Center</h2>
-<div class="nav" style="margin-bottom:10px">
-  <a href="/">Universal Pilot</a>
-  <a href="/agents" style="background:#8957e5">18-Agent Studio</a>
-  <a href="/trader" style="background:#d29922;color:#0b0f14">Web Trader / OMS</a>
-  <a href="/metrics" style="background:#238636">Live /metrics</a>
+<div class="nav" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px">
+  <a href="/">Pilot</a>
+  <a href="/agents" style="background:#8957e5">18-Agents</a>
+  <a href="/trader" style="background:#d29922;color:#050912">Trader/OMS</a>
+  <a href="/infra" style="background:#0ea5e9;color:#050912">Infra/SRE</a>
+  <a href="/dealership" style="background:#238636">Dealership</a>
+  <a href="/eagle-eyes" style="background:#0891b2">Eagle Eyes</a>
+  <a href="/codes" style="background:#db2777">50 Codes</a>
+  <a href="/artifacts" style="background:#4f46e5">Artifacts</a>
+  <a href="/creative" style="background:#f97316;color:#050912">Creative Studio</a>
+  <a href="/astra-jet" style="background:#38bdf8;color:#050912">Astra Jet AI</a>
+  <a href="/jet-3d" style="background:#39ff14;color:#050912">3D Jet HUD</a>
 </div>
 
 <div class="card">
