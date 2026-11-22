@@ -21,6 +21,7 @@ from pathlib import Path
 
 try:
     import solar_supercomputer_telemetry as solar_sc
+import top25_pc_telemetry as top25_pc
 except Exception:
     solar_sc = None
 
@@ -366,6 +367,20 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
             return self._send_html(200, HUD_HTML)
         if path == "/api/flying-car/step":
             return self._send_json(200, get_step_feed())
+        if path == "/api/pc/top25/tune" and top25_pc:
+            return self._send_json(200, top25_pc.tune_physical_build_specs(
+                giant_scale=1.25,
+                bus_v=800,
+                battery_kwh=118.0,
+                ev_drive_peak_kw=320.0,
+                vectored_lift_cruise_kw=410.0,
+                onboard_compute_budget_w=1650.0,
+                solar_roof_array_kw=7.2,
+                cooling_loop_flow_lpm=11.5,
+                target_dry_mass_kg=1140.0,
+            ))
+        if path == "/api/pc/top25":
+            return self._send_json(200, top25_pc.get_top25_pc_telemetry(1.25))
         if path == "/api/bus/sensors":
             with _LOCK:
                 return self._send_json(200, {"ok": True, "sensors": dict(_CUSTOM_SENSORS)})
@@ -387,6 +402,10 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
             return self._send_json(200, res)
         if path == "/api/solar/feed" and solar_sc:
             return self._send_json(200, solar_sc.sample_solar_supercomputer(payload if isinstance(payload, dict) else {}))
+        if path == "/api/pc/top25/tune" and top25_pc:
+            kw = payload if isinstance(payload, dict) else {}
+            allowed = {"giant_scale","bus_v","battery_kwh","ev_drive_peak_kw","vectored_lift_cruise_kw","onboard_compute_budget_w","solar_roof_array_kw","cooling_loop_flow_lpm","target_dry_mass_kg"}
+            return self._send_json(200, top25_pc.tune_physical_build_specs(**{k:v for k,v in kw.items() if k in allowed}))
         if path in ("/api/flying-car/step", "/api/bus/sensors"):
             return self._send_json(200, get_step_feed(payload if isinstance(payload, dict) else {}))
         return self._send_json(404, {"ok": False, "error": "not_found", "path": path})
