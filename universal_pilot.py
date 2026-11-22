@@ -5,6 +5,8 @@ Serves on 0.0.0.0:8125 (proxied by salathanie-tunnel) with RAM Safe-Mode Guard.
 """
 import glob
 import json
+import cisco_mdt_tunnel_gis_otel as cisco_gis
+import astra_alstra_flying_car as fcar
 import os
 import re
 import socket
@@ -296,6 +298,12 @@ class PilotHandler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(v1shim.handle_v1_models()).encode("utf-8"))
         if parsed.path == "/api/salathanie-ai/neural":
             return self._send(200, json.dumps(v1shim.get_neural_state()).encode("utf-8"))
+        if parsed.path == "/api/cisco-mdt/collect":
+            return self._send(200, json.dumps(cisco_gis.collect_cisco_mdt()).encode("utf-8"))
+        if parsed.path == "/flying-car":
+            return self._send(200, fcar.FLYING_CAR_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/flying-car/status":
+            return self._send(200, json.dumps(fcar.flying_car_status()).encode("utf-8"))
         if parsed.path == "/memory":
             return self._send(200, memspine.MEMORY_HTML.encode("utf-8"), "text/html; charset=utf-8")
         if parsed.path == "/api/memory/status":
@@ -414,6 +422,8 @@ class PilotHandler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(v1shim.handle_v1_chat_completions(body, deck.salathanie_ai_infer)).encode("utf-8"))
         if self.path == "/api/pilot/nasa-jet":
             return self._send(200, json.dumps(sync_nasa_to_jet()).encode("utf-8"))
+        if self.path == "/api/flying-car/step":
+            return self._send(200, json.dumps(fcar.step_flying_car(body if isinstance(body, dict) else {})).encode("utf-8"))
         if self.path == "/api/memory/snapshot":
             return self._send(200, json.dumps(memspine.take_snapshot(body.get("reason", "api"))).encode("utf-8"))
         if self.path == "/api/memory/restore":
