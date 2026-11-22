@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Additive-only route wrapper for original alstra_unified_8090_gateway.py."""
+import json
+import socket
+import time
+import urllib.request
+
+import astra_flight_ledger as ledger
+
+
+def _port_up(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.15)
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
+def _proxy_try(targets: list[str], method: str = "GET", body: bytes = b"") -> tuple[int, str, bytes]:
+    for url in targets:
+        try:
+            headers = {"User-Agent": "Salathanie-GW-Addon/1.0"}
+            if method == "POST":
+                headers["Content-Type"] = "application/json"
+            req = urllib.request.Request(url, data=(body if method == "POST" else None), headers=headers, method=method)
+            with urllib.request.urlopen(req, timeout=4.0) as r:
+                return r.status, r.headers.get("Content-Type", "text/html; charset=utf-8"), r.read()
+        except Exception:
+            continue
+    return 502, "application/json", json.dumps({"error": "upstream_unreachable", "tried": targets}).encode("utf-8")
+
+
+def _write_resp(handler, code: int, ct: str, data: bytes):
+    handler.send_response(code)
+    handler.send_header("Content-Type", ct)
+    handler.send_header("Content-Length", str(len(data)))
+    handler.end_headers()
+    handler.wfile.write(data)
+
+
+def attach_additive_routes(handler_cls):
+    orig_get = getattr(handler_cls, "do_GET", None)
+    orig_post = getattr(handler_cls, "do_POST", None)
+
+    def wrapped_get(self):
+        p = self.path.split("?")[0]
+        if p == "/api/gw/status":
+            st = {
+                "ok": True, "port": 8090, "ts": int(time.time()),
+                "routes": {
+                    "8095_JET_HUD": {"up": _port_up(8095), "target": "/jet -> 8095 | 8125/jet-3d"},
+                    "8088_INGRESS": {"up": _port_up(8088), "target": "/ingress -> 8088 | 8125/"},
+                    "8099_DECK": {"up": _port_up(8099), "target": "127.0.0.1:8099"},
+                    "8125_PILOT": {"up": _port_up(8125), "target": "127.0.0.1:8125"},
+                },
+            }
+            return _write_resp(self, 200, "application/json", json.dumps(st).encode("utf-8"))
+        if p == "/api/ledger":
+            return _write_resp(self, 200, "application/json", json.dumps(ledger.get_ledger_snapshot(15)).encode("utf-8"))
+        if p in ("/jet", "/jet/", "/8095"):
+            c, ct, data = _proxy_try(["http://127.0.0.1:8095/", "http://127.0.0.1:8125/jet-3d"])
+            return _write_resp(self, c, ct, data)
+        if p in ("/ingress", "/ingress/", "/8088"):
+            c, ct, data = _proxy_try(["http://127.0.0.1:8088/", "http://127.0.0.1:8125/"])
+            return _write_resp(self, c, ct, data)
+        if orig_get:
+            return orig_get(self)
+
+    def wrapped_post(self):
+        p = self.path.split("?")[0]
+        if p == "/api/px4":
+            length = int(self.headers.get("Content-Length", "0"))
+            raw = self.rfile.read(min(length, 65536)) if length else b"{}"
+            body = json.loads(raw.decode("utf-8", errors="ignore") or "{}")
+            return _write_resp(self, 200, "application/json", json.dumps({"ok": True, "px4": ledger.record_px4(body, "px4_gw_8090")}).encode("utf-8"))
+        if orig_post:
+            return orig_post(self)
+
+    handler_cls.do_GET = wrapped_get
+    handler_cls.do_POST = wrapped_post
+    return handler_cls

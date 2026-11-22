@@ -156,11 +156,7 @@ def guard_cycle(tick: int):
         status = env.get("status", "")
         restarts = int(env.get("restart_time", 0))
 
-        # 1. Quarantine any returning legacy astra-* zombies
-        if name.startswith("astra-") and status == "online":
-            subprocess.run(["pm2", "delete", name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            actions.append(f"deleted_zombie:{name}")
-            continue
+        # Preserve all user astra-* services (additive-only policy)
 
         if status == "online":
             online_names.add(name)
@@ -182,6 +178,11 @@ def guard_cycle(tick: int):
 
     # 4. Periodic SQLite WAL checkpoint every ~10 minutes (40 ticks * 15s)
     if tick % 40 == 0:
+        try:
+            import astra_memory_spine as _spine
+            _spine.take_snapshot(reason='autopilot_periodic', save_pm2_dump=False)
+        except Exception:
+            pass
         dbs = checkpoint_all_sqlite()
         if dbs and tick == 0:
             actions.append(f"wal_checkpoint:{len(dbs)}dbs")

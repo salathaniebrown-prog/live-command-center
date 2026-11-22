@@ -321,10 +321,13 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self._send(200, "application/json", json.dumps(ledger.get_ledger_snapshot(20)).encode("utf-8"))
             if p == "/api/salathanie-ai/status":
                 return self._send(200, "application/json", json.dumps({"ok": True, "model": MODEL_NAME, "endpoint": "/api/salathanie-ai/infer", "spine": spine.spine_status()}).encode("utf-8"))
-            if p == "/proxy/jet":
+            if p in ("/proxy/jet", "/jet", "/jet/", "/8095"):
                 c, ct, data = _proxy(["http://127.0.0.1:8095/", "http://127.0.0.1:8125/jet-3d"])
                 return self._send(c, ct, data)
-            if p == "/proxy/8090":
+            if p in ("/sentinel", "/hud3d", "/metrics"):
+                c, ct, data = _proxy([f"http://127.0.0.1:8090{p}"])
+                return self._send(c, ct, data)
+            if p in ("/proxy/8090", "/8090"):
                 c, ct, data = _proxy(["http://127.0.0.1:8090/"])
                 return self._send(c, ct, data)
             if p == "/proxy/8088":
