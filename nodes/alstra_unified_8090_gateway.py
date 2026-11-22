@@ -1,3 +1,4 @@
+import sys, pathlib; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 # --- SALATHANIE HDC DYNAMIC PORT HOOK ---
 import sys as _sal_sys
 if "/data/data/com.termux/files/home/live-command-center" not in _sal_sys.path:

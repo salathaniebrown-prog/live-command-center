@@ -269,11 +269,7 @@ def take_snapshot(reason: str = "manual", save_pm2_dump: bool = True) -> dict:
             "INSERT INTO session_events(ts,event_type,detail,git_head,hmac_sig) VALUES (?,?,?,?,?)",
             (ts, f"SNAPSHOT:{reason}", json.dumps({"online": online_cnt, "total": len(procs), "code": code_stats, "mirrored": mirrored}), head, sig),
         )
-        conn.commit()
-        try:
-            conn.execute("PRAGMA wal_checkpoint(PASSIVE);")
-        except sqlite3.OperationalError:
-            pass
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
 
     _pub_ring(f"snap:{reason}:{online_cnt}/{len(procs)}")
     return {

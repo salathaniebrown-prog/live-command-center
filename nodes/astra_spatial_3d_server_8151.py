@@ -1,3 +1,4 @@
+import sys, pathlib; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #!/usr/bin/env python3
 """
 Alstra Spatial 3D Pop-Out & WebXR Artifact Server (127.0.0.1:8151)

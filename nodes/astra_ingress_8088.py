@@ -1,3 +1,4 @@
+import sys, pathlib; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import ctypes, gc, os, socketserver, struct, subprocess, threading, time
 from astra_shm_schema import AstraBusFrame, FRAME_SIZE, MAGIC, RING_SLOTS, open_shm, open_ring
 
