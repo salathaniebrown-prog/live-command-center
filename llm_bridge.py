@@ -113,7 +113,14 @@ def _call_openai_compat(base_url: str, key: str, model: str, sys_prompt: str, us
 
 
 def enhance_with_llm(agent: str, user_text: str, base_out: dict) -> dict:
+    from model_guard_autopilot import check_model_gate
     cfg = load_cfg()
+    if cfg.get('provider', 'offline_stdlib') != 'offline_stdlib':
+        ok_gate, gate_msg = check_model_gate('llm', 0.0)
+        if not ok_gate:
+            base_out['llm_backend'] = 'guarded_offline_fallback'
+            base_out['model_guard'] = gate_msg
+            return base_out
     prov = cfg.get("provider", "offline_stdlib")
     sys_prompt = SYSTEM_PROMPTS.get(agent, f"You are the {agent} specialist inside Salathanie A.I. Respond concisely.")
     t0 = time.perf_counter()

@@ -298,6 +298,13 @@ def aviator_build_workflow(brief: str, style: str = "Cinematic Luxury 8K", durat
 
 def execute_workflow(wf_id: str, live: bool = False, start_image_url: str = "") -> dict:
     """Execute workflow nodes: live API submission if provider key is set, else zero-cost dry-run simulation."""
+    if live:
+        from model_guard_autopilot import check_model_gate
+        with db_conn() as _c:
+            _est = _c.execute('SELECT est_cost_usd FROM creative_workflows WHERE wf_id=?', (wf_id,)).fetchone()
+        ok_gate, gate_msg = check_model_gate('creative', float(_est[0]) if _est else 0.5)
+        if not ok_gate:
+            return {'ok': False, 'blocked_by_guard': True, 'reason': gate_msg}
     with db_conn() as c:
         row = c.execute("SELECT brief, style, duration_s, nodes_json FROM creative_workflows WHERE wf_id=?", (wf_id,)).fetchone()
     if not row:

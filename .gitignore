@@ -43,3 +43,4 @@ infra_blueprints/
 causal_deltas.jsonl
 *.key
 *.pem
+autopilot_guard.log
