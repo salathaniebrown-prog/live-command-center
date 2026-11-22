@@ -59,7 +59,7 @@ def _db() -> sqlite3.Connection:
     return conn
 
 
-def _probe_port(port: int, timeout_s: float = 0.35) -> dict:
+def _probe_port(port: int, timeout_s: float = 0.15) -> dict:
     t0 = time.monotonic()
     alive = False
     http_code = None
@@ -72,7 +72,7 @@ def _probe_port(port: int, timeout_s: float = 0.35) -> dict:
     if alive:
         try:
             req = urllib.request.Request(f"http://127.0.0.1:{port}/", method="GET")
-            with urllib.request.urlopen(req, timeout=0.6) as resp:
+            with urllib.request.urlopen(req, timeout=0.25) as resp:
                 http_code = int(resp.status)
         except urllib.error.HTTPError as e:
             http_code = int(e.code)
@@ -189,17 +189,33 @@ def _load_persisted_fallback() -> dict:
     return {}
 
 
+
+_SWEEP_CACHE = {"ts": 0.0, "ports": [], "pm2": []}
+_SWEEP_TTL_S = 2.5
+
+
+def _cached_sweep_and_pm2() -> tuple[list[dict], list[dict]]:
+    now = time.monotonic()
+    if (now - _SWEEP_CACHE["ts"]) < _SWEEP_TTL_S and _SWEEP_CACHE["ports"]:
+        return list(_SWEEP_CACHE["ports"]), list(_SWEEP_CACHE["pm2"])
+    ports = [_probe_port(p, timeout_s=0.15) for p in TARGET_PORTS]
+    pm2_rows = _read_pm2_brief()
+    _SWEEP_CACHE["ts"] = now
+    _SWEEP_CACHE["ports"] = ports
+    _SWEEP_CACHE["pm2"] = pm2_rows
+    return ports, pm2_rows
+
+
 def sync_vehicle_bus(step_overrides: dict | None = None, recover: bool = True) -> dict:
     with _LOCK:
         if isinstance(step_overrides, dict) and step_overrides:
             update_custom_sensors(step_overrides)
 
-        pm2_rows = _read_pm2_brief()
+        ports, pm2_rows = _cached_sweep_and_pm2()
         recovered = _recover_dropped_critical(pm2_rows) if recover else []
         if recovered:
-            pm2_rows = _read_pm2_brief()
-
-        ports = [_probe_port(p) for p in TARGET_PORTS]
+            _SWEEP_CACHE["ts"] = 0.0
+            ports, pm2_rows = _cached_sweep_and_pm2()
         online_ports = [p["port"] for p in ports if p["online"]]
         ram_pct = _read_ram_pct()
         ts = int(time.time())
