@@ -21,6 +21,11 @@ import creative_production_studio as creative
 import astra_jet_engine as jet
 import astra_jet_hud as jet3d
 import salathanie_mesh_studio as mesh
+import astra_memory_spine as memspine
+import salathanie_v1_shim as v1shim
+import astra_unified_deck as deck
+import astra_flight_ledger as fledger
+import astra_alstra_jet_bridge as jbridge
 
 PREFERRED_PORT = 8125
 ACTIVE_PORT = PREFERRED_PORT
@@ -161,6 +166,8 @@ a{color:#58a6ff}
   <a href="/mesh-hub"><button style="background:#10b981;color:#050912">Mesh &amp; Offline Wiki</button></a>
   <a href="/broadcast"><button style="background:#ec4899">iPad Broadcast Studio</button></a>
   <a href="/scrintal"><button style="background:#a855f7">AI Scrintal</button></a>
+  <a href="/memory"><button style="background:#06b6d4;color:#050912">Memory Spine</button></a>
+  <a href="/deck"><button style="background:#c084fc;color:#050912">SalathanieAI Deck</button></a>
   <div id="summary" style="margin-top:10px;line-height:1.6">Loading...</div>
 </div>
 
@@ -239,11 +246,21 @@ class PilotHandler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
         self.wfile.write(body)
 
     def log_message(self, fmt, *args):
         pass
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.end_headers()
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -264,6 +281,23 @@ class PilotHandler(BaseHTTPRequestHandler):
                     return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
             except Exception as e:
                 return self._send(502, f"Agents offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path == "/deck":
+            return self._send(200, deck.DECK_HTML, "text/html; charset=utf-8")
+        if parsed.path == "/api/ledger":
+            return self._send(200, json.dumps(fledger.get_ledger_snapshot(20)).encode("utf-8"))
+        if parsed.path == "/proxy/jet":
+            return self._send(200, jet3d.PAGE, "text/html; charset=utf-8")
+        if parsed.path == "/proxy/8090":
+            c, ct, data = deck._proxy(["http://127.0.0.1:8090/"])
+            return self._send(c, ct, data)
+        if parsed.path == "/v1/models":
+            return self._send(200, json.dumps(v1shim.handle_v1_models()).encode("utf-8"))
+        if parsed.path == "/api/salathanie-ai/neural":
+            return self._send(200, json.dumps(v1shim.get_neural_state()).encode("utf-8"))
+        if parsed.path == "/memory":
+            return self._send(200, memspine.MEMORY_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/memory/status":
+            return self._send(200, json.dumps(memspine.spine_status()).encode("utf-8"))
         if parsed.path == "/mesh-hub":
             return self._send(200, mesh.MESH_HUB_HTML.encode("utf-8"), "text/html; charset=utf-8")
         if parsed.path == "/broadcast":
@@ -364,6 +398,24 @@ class PilotHandler(BaseHTTPRequestHandler):
             body = json.loads(raw) if raw.strip() else {}
         except Exception:
             body = {}
+        if self.path == "/api/salathanie-ai/infer":
+            return self._send(200, json.dumps(deck.salathanie_ai_infer(body)).encode("utf-8"))
+        if self.path == "/api/px4":
+            return self._send(200, json.dumps({"ok": True, "px4": fledger.record_px4(body, "px4_pilot_8125")}).encode("utf-8"))
+        if self.path == "/api/external/sync":
+            return self._send(200, json.dumps(fledger.sync_external_feeds()).encode("utf-8"))
+        if self.path == "/api/wal/checkpoint":
+            return self._send(200, json.dumps(fledger.wal_checkpoint()).encode("utf-8"))
+        if self.path == "/api/bridge/cycle":
+            return self._send(200, json.dumps(jbridge.run_closed_loop_cycle(bool(body.get("sync_ext")))).encode("utf-8"))
+        if self.path == "/v1/chat/completions":
+            return self._send(200, json.dumps(v1shim.handle_v1_chat_completions(body, deck.salathanie_ai_infer)).encode("utf-8"))
+        if self.path == "/api/memory/snapshot":
+            return self._send(200, json.dumps(memspine.take_snapshot(body.get("reason", "api"))).encode("utf-8"))
+        if self.path == "/api/memory/restore":
+            return self._send(200, json.dumps(memspine.restore_session(revive_pm2=not bool(body.get("dry_run")), dry_run=bool(body.get("dry_run")))).encode("utf-8"))
+        if self.path == "/api/memory/rollback":
+            return self._send(200, json.dumps(memspine.rollback_code_file(body.get("file", ""), body.get("version_id"))).encode("utf-8"))
         if self.path == "/api/mesh/wiki/import":
             return self._send(200, json.dumps(mesh.wiki_import_online(body.get("topic", ""), body.get("category", "Wikipedia"))).encode("utf-8"))
         if self.path == "/api/mesh/wiki/add":

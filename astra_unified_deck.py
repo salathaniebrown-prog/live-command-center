@@ -16,6 +16,7 @@ import urllib.request
 import astra_alstra_jet_bridge as bridge
 import astra_flight_ledger as ledger
 import astra_memory_spine as spine
+import salathanie_v1_shim as v1shim
 from hdc_shm_bus import HDCSharedMemoryBus, deterministic_hv
 
 PORT = 8099
@@ -221,6 +222,8 @@ input{background:#02060f;color:#e6f7ff;border:1px solid #2b4568;border-radius:3p
     <div class="pane">
       <div class="phead"><span>4. SALATHANIE AI INFER (/api/salathanie-ai/infer)</span><span class="badge b-ai">RANKED</span></div>
       <div class="pbody">
+        <canvas id="neuralCv" width="320" height="68" style="width:100%;height:68px;background:#030814;border:1px solid #a855f766;border-radius:5px;margin-bottom:4px;display:block"></canvas>
+        <div id="kgsoLine" style="font-size:9px;color:#7dd3fc;margin-bottom:4px">KGSO ATMOS: SYNCING... | /v1/chat/completions READY</div>
         <div class="inf-in">
           <input id="aiPrompt" value="Stabilize jet, protect RAM, and lock best ledger genome">
           <button class="pur" onclick="runInfer(false)">INFER</button>
@@ -297,6 +300,62 @@ async function pushPX4(){
   })});
   refreshDeck();
 }
+
+let NEURAL={synapse_load:0.55,fitness:98.0,pods_mask:'1111',kgso:{temp_c:0,wind_kmh:0,pressure_hpa:1013,condition:'--'},stats:{v1_requests:0,exec_runs:0}};
+let NT=0;
+const NNODES=[[28,18],[28,50],[105,12],[105,34],[105,56],[205,16],[205,52],[290,34]];
+const NEDGES=[[0,2],[0,3],[1,3],[1,4],[2,5],[3,5],[3,6],[4,6],[5,7],[6,7]];
+async function syncNeural(){
+  try{
+    NEURAL=await(await fetch('/api/salathanie-ai/neural')).json();
+    const k=NEURAL.kgso||{}, st=NEURAL.stats||{};
+    const kl=document.getElementById('kgsoLine');
+    if(kl) kl.textContent=`KGSO: ${k.temp_c}C | Wind ${k.wind_kmh}km/h | ${k.pressure_hpa}hPa (${k.condition}) | /v1 Reqs: ${st.v1_requests||0}`;
+  }catch(e){}
+}
+function drawNeuralViz(){
+  const cv=document.getElementById('neuralCv');
+  if(cv){
+    const cx=cv.getContext('2d'), w=cv.width, h=cv.height;
+    cx.fillStyle='rgba(3,8,20,0.45)'; cx.fillRect(0,0,w,h);
+    const load=NEURAL.synapse_load||0.5;
+    const mask=String(NEURAL.pods_mask||'1111');
+    // Atmospheric wave driven by KGSO wind & synapse load
+    cx.beginPath();
+    for(let x=0;x<w;x+=4){
+      const y=h/2+Math.sin(x*0.045+NT*(2.2+load*3))*(8+load*14)*Math.cos(x*0.012-NT);
+      if(x===0) cx.moveTo(x,y); else cx.lineTo(x,y);
+    }
+    cx.strokeStyle='rgba(56,189,248,0.35)'; cx.lineWidth=1.4; cx.stroke();
+    // Glowing neural edges
+    NEDGES.forEach(([a,b],i)=>{
+      const p1=NNODES[a], p2=NNODES[b];
+      const pulse=0.3+0.7*Math.abs(Math.sin(NT*2.4+i*0.7));
+      cx.strokeStyle=`rgba(192,132,252,${(0.22+pulse*0.55).toFixed(2)})`;
+      cx.lineWidth=1.2; cx.beginPath(); cx.moveTo(p1[0],p1[1]); cx.lineTo(p2[0],p2[1]); cx.stroke();
+      const px=p1[0]+(p2[0]-p1[0])*((NT*0.9+i*0.17)%1);
+      const py=p1[1]+(p2[1]-p1[1])*((NT*0.9+i*0.17)%1);
+      cx.fillStyle='#39ff14'; cx.beginPath(); cx.arc(px,py,1.9,0,7); cx.fill();
+    });
+    // Synaptic nodes
+    NNODES.forEach((n,i)=>{
+      const podOn=i<4?(mask[i]!=='0'):true;
+      const col=i===7?'#39ff14':(podOn?'#00f0ff':'#ef4444');
+      const r=3.5+Math.sin(NT*4+i)*1.1;
+      const g=cx.createRadialGradient(n[0],n[1],1,n[0],n[1],r*3.2);
+      g.addColorStop(0,'#fff'); g.addColorStop(0.4,col); g.addColorStop(1,'transparent');
+      cx.fillStyle=g; cx.beginPath(); cx.arc(n[0],n[1],r*3.2,0,7); cx.fill();
+    });
+    cx.fillStyle='#e9d5ff'; cx.font='bold 9px monospace';
+    cx.fillText('SALATHANIE AI // NEURAL CORE',8,11);
+    cx.fillStyle='#39ff14';
+    cx.fillText(`FIT ${Number(NEURAL.fitness||0).toFixed(1)}`,w-58,11);
+  }
+  NT+=0.032;
+  requestAnimationFrame(drawNeuralViz);
+}
+syncNeural(); setInterval(syncNeural, 4000); drawNeuralViz();
+
 refreshDeck(); runInfer(false); setInterval(refreshDeck, 3000);
 </script></body></html>""".encode("utf-8")
 
@@ -307,6 +366,13 @@ class Server(socketserver.ThreadingTCPServer):
 
 
 class H(http.server.BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.end_headers()
+
     def do_HEAD(self):
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -319,6 +385,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self._send(200, "text/html; charset=utf-8", DECK_HTML)
             if p == "/api/ledger":
                 return self._send(200, "application/json", json.dumps(ledger.get_ledger_snapshot(20)).encode("utf-8"))
+            if p == "/v1/models":
+                return self._send(200, "application/json", json.dumps(v1shim.handle_v1_models()).encode("utf-8"))
+            if p == "/api/salathanie-ai/neural":
+                return self._send(200, "application/json", json.dumps(v1shim.get_neural_state()).encode("utf-8"))
             if p == "/api/salathanie-ai/status":
                 return self._send(200, "application/json", json.dumps({"ok": True, "model": MODEL_NAME, "endpoint": "/api/salathanie-ai/infer", "spine": spine.spine_status()}).encode("utf-8"))
             if p in ("/proxy/jet", "/jet", "/jet/", "/8095"):
@@ -347,6 +417,8 @@ class H(http.server.BaseHTTPRequestHandler):
             raw = self.rfile.read(min(length, 65536)) if length else b"{}"
             p = self.path.split("?")[0]
             body = json.loads(raw.decode("utf-8", errors="ignore") or "{}")
+            if p == "/v1/chat/completions":
+                return self._send(200, "application/json", json.dumps(v1shim.handle_v1_chat_completions(body, salathanie_ai_infer)).encode("utf-8"))
             if p == "/api/salathanie-ai/infer":
                 return self._send(200, "application/json", json.dumps(salathanie_ai_infer(body)).encode("utf-8"))
             if p == "/api/px4":
@@ -367,6 +439,9 @@ class H(http.server.BaseHTTPRequestHandler):
     def _send(self, code, ct, data):
         self.send_response(code)
         self.send_header("Content-Type", ct)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
