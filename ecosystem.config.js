@@ -29,6 +29,15 @@ module.exports = {
       max_memory_restart: "64M"
     },
     {
+      name: "salathanie-trinity",
+      script: "/data/data/com.termux/files/home/live-command-center/trinity_core.py",
+      interpreter: "python3",
+      max_restarts: 5,
+      min_uptime: "10s",
+      restart_delay: 5000,
+      max_memory_restart: "64M"
+    },
+    {
       name: "salathanie-tunnel",
       script: "cloudflared",
       args: "tunnel --no-autoupdate --url http://127.0.0.1:8125",
