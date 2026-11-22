@@ -44,3 +44,6 @@ causal_deltas.jsonl
 *.key
 *.pem
 autopilot_guard.log
+*.db
+*.db-wal
+*.db-shm

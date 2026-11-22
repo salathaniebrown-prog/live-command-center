@@ -113,6 +113,14 @@ def _call_openai_compat(base_url: str, key: str, model: str, sys_prompt: str, us
 
 
 def enhance_with_llm(agent: str, user_text: str, base_out: dict) -> dict:
+    try:
+        from offline_wiki_rag import build_grounded_context
+        _rag = build_grounded_context(user_text)
+        if _rag.get('hits', 0) > 0:
+            base_out['offline_wiki_grounding'] = {'hits': _rag['hits'], 'keywords': _rag['keywords']}
+            user_text = user_text + '\n\n[OFFLINE WIKIPEDIA/ZIM GROUNDING]\n' + _rag['context']
+    except Exception:
+        pass
     from model_guard_autopilot import check_model_gate
     cfg = load_cfg()
     if cfg.get('provider', 'offline_stdlib') != 'offline_stdlib':
