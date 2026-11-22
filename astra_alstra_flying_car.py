@@ -224,6 +224,39 @@ def step_flying_car(cmd: dict | None = None) -> dict:
     return snapshot
 
 
+
+def set_custom_livery(exterior_theme: str = "CYBER-CYAN-EMERALD", interior_theme: str = "COCKPIT-AVATAR-HUD", accent_color: str = "#22d3ee") -> dict:
+    snap = step_flying_car({"avatar_screen_active": True})
+    snap["customization"] = {
+        "exterior_theme": exterior_theme,
+        "interior_theme": interior_theme,
+        "accent_color": accent_color,
+    }
+    return snap
+
+
+
+def plan_mission_profile(waypoint_name: str = "KGSO-TRIAD-CORRIDOR", target_alt_m: float = 180.0, jet_thrust_pct: float = 72.0) -> dict:
+    snap = step_flying_car({
+        "mode": "JET-CRUISE" if target_alt_m > 10.0 else "EV-GROUND",
+        "jet_thrust_pct": float(jet_thrust_pct),
+    })
+    env = compute_power_envelope(
+        snap.get("mode", "JET-CRUISE"),
+        float(snap.get("wheel_speed_kmh", 0.0)),
+        float(snap.get("wheel_torque_nm", 0.0)),
+        float(snap.get("regen_kw", 0.0)),
+        float(jet_thrust_pct),
+    )
+    snap["mission_plan"] = {
+        "waypoint": waypoint_name,
+        "target_alt_m": round(float(target_alt_m), 1),
+        "jet_thrust_pct": round(float(jet_thrust_pct), 1),
+        "power_envelope": env,
+    }
+    return snap
+
+
 def flying_car_status(limit: int = 10) -> dict:
     with _db() as c:
         total = c.execute("SELECT COUNT(*) FROM flying_car_telemetry").fetchone()[0]

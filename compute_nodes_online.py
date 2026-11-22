@@ -62,7 +62,8 @@ def sync_compute_nodes() -> dict:
         elif n["port"] == 8090:
             p = pm2_map.get("salathanie-gw-8090")
             status = "ONLINE" if (p and p["status"] == "online") else "STANDBY"
-        active_nodes.append({**n, "status": status})
+        pm2_item = pm2_map.get("salathanie-pilot" if n["port"] == 8125 else ("salathanie-gw-8090" if n["port"] == 8090 else ("salathanie-ram-watch" if n["node_id"] == "node-ram-guard" else "")))
+        active_nodes.append({**n, "status": status, "pm2_rss_mb": (pm2_item["mem_mb"] if pm2_item else None)})
 
     online_count = sum(1 for x in active_nodes if x["status"] == "ONLINE")
     sig = hashlib.sha256(f"cnode|{ts}|{online_count}|{mem['ram_pct']}".encode("utf-8")).hexdigest()[:24].upper()
