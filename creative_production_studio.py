@@ -315,27 +315,57 @@ def execute_workflow(wf_id: str, live: bool = False, start_image_url: str = "") 
         mode = "SIMULATED_PREVIEW"
         res = {"status": "PREVIEW_READY", "note": f"Add {prov.upper()} API key in ~/.salathanie_creative_keys.json for live cloud render."}
 
-        if live and prov == "fal" and keys.get("FAL_KEY"):
-            mode = "LIVE_FAL_QUEUE"
-            payload = {"prompt": n["prompt"]}
-            if mkey == "kling_v4_i2v":
-                if start_image_url:
-                    payload.update({"start_image_url": start_image_url, "duration": dur, "resolution": "1080p"})
-                else:
-                    n["endpoint"] = "kling/v4/text-to-video"
-                    payload.update({"duration": dur, "resolution": "1080p"})
-            elif mkey == "meshy_7_1" and start_image_url:
-                payload = {"image_urls": [start_image_url], "enable_pbr": True}
+        def _post_json(url: str, headers: dict, body: dict) -> dict:
             try:
-                req = urllib.request.Request(
-                    f"https://queue.fal.run/{n['endpoint']}",
-                    data=json.dumps(payload).encode("utf-8"),
-                    headers={"Authorization": f"Key {keys['FAL_KEY']}", "Content-Type": "application/json"},
-                )
-                with urllib.request.urlopen(req, timeout=15) as resp:
-                    res = json.loads(resp.read().decode("utf-8"))
+                req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers={"Content-Type": "application/json", **headers})
+                with urllib.request.urlopen(req, timeout=18) as resp:
+                    return json.loads(resp.read().decode("utf-8"))
             except Exception as e:
-                res = {"status": "API_ERROR", "error": str(e)[:180]}
+                return {"status": "API_ERROR", "error": str(e)[:180]}
+
+        if live:
+            if mkey == "meshy_7_1" and keys.get("MESHY_API_KEY"):
+                mode = "LIVE_MESHY_DIRECT"
+                res = _post_json(
+                    "https://api.meshy.ai/openapi/v2/text-to-3d",
+                    {"Authorization": f"Bearer {keys['MESHY_API_KEY']}"},
+                    {"mode": "preview", "prompt": n["prompt"][:600], "art_style": "realistic"},
+                )
+            elif mkey == "minimax_h3" and keys.get("MINIMAX_API_KEY"):
+                mode = "LIVE_MINIMAX_DIRECT"
+                res = _post_json(
+                    "https://api.minimax.io/v1/video_generation",
+                    {"Authorization": f"Bearer {keys['MINIMAX_API_KEY']}"},
+                    {"model": "MiniMax-H3", "prompt": n["prompt"][:1000], "duration": dur, "resolution": "768P"},
+                )
+            elif mkey == "pruna_p_video_2_pro" and keys.get("PRUNA_API_KEY"):
+                mode = "LIVE_PRUNA_DIRECT"
+                pruna_url = keys.get("PRUNA_API_URL", "https://api.pruna.ai/v1/predictions")
+                res = _post_json(
+                    pruna_url,
+                    {"Authorization": f"Bearer {keys['PRUNA_API_KEY']}"},
+                    {"model": "p-video-2-pro", "input": {"prompt": n["prompt"][:1000], "duration": dur, "mode": "speed"}},
+                )
+            elif mkey == "scenario_style" and keys.get("SCENARIO_API_KEY"):
+                mode = "LIVE_SCENARIO_DIRECT"
+                auth = f"Basic {keys['SCENARIO_API_KEY']}" if not keys["SCENARIO_API_KEY"].startswith(("Basic ", "Bearer ")) else keys["SCENARIO_API_KEY"]
+                res = _post_json(
+                    "https://api.cloud.scenario.com/v1/txt2img",
+                    {"Authorization": auth},
+                    {"prompt": n["prompt"][:800], "numSamples": 1},
+                )
+            elif prov == "fal" and keys.get("FAL_KEY"):
+                mode = "LIVE_FAL_QUEUE"
+                payload = {"prompt": n["prompt"]}
+                if mkey == "kling_v4_i2v":
+                    if start_image_url:
+                        payload.update({"start_image_url": start_image_url, "duration": dur, "resolution": "1080p"})
+                    else:
+                        n["endpoint"] = "kling/v4/text-to-video"
+                        payload.update({"duration": dur, "resolution": "1080p"})
+                elif mkey == "meshy_7_1" and start_image_url:
+                    payload = {"image_urls": [start_image_url], "enable_pbr": True}
+                res = _post_json(f"https://queue.fal.run/{n['endpoint']}", {"Authorization": f"Key {keys['FAL_KEY']}"}, payload)
 
         with db_conn() as c:
             c.execute(
