@@ -19,6 +19,7 @@ import infra_sre_engine as infra
 import salathanie_v3_suite as v3
 import creative_production_studio as creative
 import astra_jet_engine as jet
+import astra_jet_hud as jet3d
 
 PREFERRED_PORT = 8125
 ACTIVE_PORT = PREFERRED_PORT
@@ -155,6 +156,7 @@ a{color:#58a6ff}
   <a href="/artifacts"><button style="background:#4f46e5">Artifacts</button></a>
   <a href="/creative"><button style="background:#f97316;color:#080c14">Creative Studio</button></a>
   <a href="/astra-jet"><button style="background:#38bdf8;color:#060a12">Astra Jet AI</button></a>
+  <a href="/jet-3d"><button style="background:#39ff14;color:#030812">3D Jet HUD</button></a>
   <div id="summary" style="margin-top:10px;line-height:1.6">Loading...</div>
 </div>
 
@@ -258,6 +260,10 @@ class PilotHandler(BaseHTTPRequestHandler):
                     return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
             except Exception as e:
                 return self._send(502, f"Agents offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path == "/jet-3d":
+            return self._send(200, jet3d.PAGE, "text/html; charset=utf-8")
+        if parsed.path == "/api/hud":
+            return self._send(200, json.dumps(jet3d.read_hud_payload()).encode("utf-8"))
         if parsed.path == "/astra-jet":
             return self._send(200, jet.JET_HTML.encode("utf-8"), "text/html; charset=utf-8")
         if parsed.path == "/api/jet/telemetry":
@@ -339,6 +345,8 @@ class PilotHandler(BaseHTTPRequestHandler):
             body = json.loads(raw) if raw.strip() else {}
         except Exception:
             body = {}
+        if self.path in ("/api/mode", "/api/pods", "/api/pilot"):
+            return self._send(200, json.dumps(jet3d.update_hud_state(self.path, body)).encode("utf-8"))
         if self.path == "/api/jet/mutate":
             res = jet.supercompute_mutate(int(body.get("cycles", 3)), body.get("fault", "turbulence"))
             return self._send(200, json.dumps(res).encode("utf-8"))
