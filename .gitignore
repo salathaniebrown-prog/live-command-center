@@ -41,3 +41,5 @@ infra_blueprints/
 *.db-wal
 *.db-shm
 causal_deltas.jsonl
+*.key
+*.pem

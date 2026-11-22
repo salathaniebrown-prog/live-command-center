@@ -94,6 +94,9 @@ def collect_telemetry() -> dict:
     broadband = probe_http("https://1.1.1.1/cdn-cgi/trace", timeout=3.0)
     wal = probe_http("http://127.0.0.1:8182/health", timeout=2.0)
     trinity = probe_http(f"{TRINITY_BASE}/health", timeout=2.0)
+    ingress_8088 = probe_http("http://127.0.0.1:8088/", timeout=1.5)
+    gateway_8090 = probe_http("http://127.0.0.1:8090/", timeout=1.5)
+    spatial_8151 = probe_http("http://127.0.0.1:8151/", timeout=1.5)
     tunnel_url = get_live_tunnel_url()
 
     ring_info = {"attested": False, "seq": 0, "node": "none"}
@@ -115,6 +118,9 @@ def collect_telemetry() -> dict:
         "broadband": broadband,
         "local_wal": wal,
         "trinity": trinity,
+        "ingress_8088": ingress_8088,
+        "gateway_8090": gateway_8090,
+        "spatial_8151": spatial_8151,
         "hdc_ring": ring_info,
     }
 
@@ -178,7 +184,7 @@ async function loadStatus(){
     'Tunnel: '+tun+'<br>'+
     'Broadband: '+bb+' | WAL 8182: '+(d.local_wal.ok?'<span class="ok">UP</span>':'<span class="bad">DOWN</span>')+
     ' | Trinity 8126: '+(d.trinity.ok?'<span class="ok">UP</span>':'<span class="bad">DOWN</span>')+
-    ' | HDC HMAC: '+(d.hdc_ring.attested?'<span class="ok">VERIFIED</span>':'<span class="warn">WAIT</span>');
+    ' | HDC HMAC: '+(d.hdc_ring.attested?'<span class="ok">VERIFIED</span>':'<span class="warn">WAIT</span>')+'<br>'+'Mesh Nodes -> 8088: '+(d.ingress_8088&&d.ingress_8088.ok?'<span class="ok">UP</span>':'<span class="warn">IDLE</span>')+' | 8090: '+(d.gateway_8090&&d.gateway_8090.ok?'<span class="ok">UP</span>':'<span class="warn">IDLE</span>')+' | 8151: '+(d.spatial_8151&&d.spatial_8151.ok?'<span class="ok">UP</span>':'<span class="warn">IDLE</span>');
 }
 async function loadVR(){
   const r = await fetch('/api/pilot/trinity/vr-frame'); const d = await r.json();
