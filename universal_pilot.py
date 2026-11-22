@@ -17,6 +17,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from hdc_shm_bus import HDCSharedMemoryBus, deterministic_hv
 import infra_sre_engine as infra
 import salathanie_v3_suite as v3
+import creative_production_studio as creative
 
 PREFERRED_PORT = 8125
 ACTIVE_PORT = PREFERRED_PORT
@@ -151,6 +152,7 @@ a{color:#58a6ff}
   <a href="/eagle-eyes"><button style="background:#0891b2">Eagle Eyes</button></a>
   <a href="/codes"><button style="background:#db2777">50 Codes</button></a>
   <a href="/artifacts"><button style="background:#4f46e5">Artifacts</button></a>
+  <a href="/creative"><button style="background:#f97316;color:#080c14">Creative Studio</button></a>
   <div id="summary" style="margin-top:10px;line-height:1.6">Loading...</div>
 </div>
 
@@ -254,6 +256,10 @@ class PilotHandler(BaseHTTPRequestHandler):
                     return self._send(resp.status, resp.read(), "text/html; charset=utf-8")
             except Exception as e:
                 return self._send(502, f"Agents offline: {e}".encode("utf-8"), "text/plain")
+        if parsed.path == "/creative":
+            return self._send(200, creative.CREATIVE_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/creative/catalog":
+            return self._send(200, json.dumps(creative.list_workflows()).encode("utf-8"))
         if parsed.path == "/dealership":
             return self._send(200, v3.DEALERSHIP_HTML.encode("utf-8"), "text/html; charset=utf-8")
         if parsed.path == "/eagle-eyes":
@@ -324,6 +330,12 @@ class PilotHandler(BaseHTTPRequestHandler):
             body = json.loads(raw) if raw.strip() else {}
         except Exception:
             body = {}
+        if self.path == "/api/creative/build":
+            res = creative.aviator_build_workflow(body.get("brief", ""), body.get("style", "Cinematic 8K"), body.get("duration_s", 5), body.get("models"))
+            return self._send(200, json.dumps(res).encode("utf-8"))
+        if self.path == "/api/creative/execute":
+            res = creative.execute_workflow(body.get("wf_id", ""), bool(body.get("live", False)), body.get("start_image_url", ""))
+            return self._send(200, json.dumps(res).encode("utf-8"))
         if self.path == "/api/v3/dealership/acquire":
             res = v3.dealership_acquire(body.get("vehicle_id", ""), body.get("card_alias", "SALATHANIE_VCARD"), body.get("card_last4", "8842"), body.get("mopar_tier", "MAX_CARE"))
             return self._send(200, json.dumps(res).encode("utf-8"))
