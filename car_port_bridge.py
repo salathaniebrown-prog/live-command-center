@@ -19,6 +19,11 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+try:
+    import solar_supercomputer_telemetry as solar_sc
+except Exception:
+    solar_sc = None
+
 REPO = Path("/data/data/com.termux/files/home/live-command-center")
 WAL_DB = REPO / "alstra_flight_ledger.db"
 STATE_JSON = REPO / "car_port_bridge_state.json"
@@ -228,6 +233,7 @@ def sync_vehicle_bus(step_overrides: dict | None = None, recover: bool = True) -
         alt = float(gps.get("alt_m", 0.0))
 
         flight_mode = "JET-CRUISE" if alt > 15.0 else ("EV-GROUND" if spd > 2.0 else "STANDBY-READY")
+        solar_snap = solar_sc.sample_solar_supercomputer() if solar_sc else {}
         sig = hashlib.sha256(
             f"vbus|{ts}|{len(online_ports)}|{bat_v}|{soc}|{ram_pct}".encode("utf-8")
         ).hexdigest()[:24].upper()
@@ -239,6 +245,7 @@ def sync_vehicle_bus(step_overrides: dict | None = None, recover: bool = True) -
             "mode": flight_mode,
             "avatars": ["SalathanieAI", "ASTRA CORE v10", "SIMLI TRINITY-2"],
             "host_ram_pct": ram_pct,
+            "solar": solar_snap,
             "online_ports": online_ports,
             "ports": ports,
             "sensors": {
@@ -293,9 +300,10 @@ HUD_HTML = """<!doctype html>
     <div><span class="badge">SALATHANIEAI // ASTRA + ALSTRA</span> &nbsp;LIVE PORT-TO-COCKPIT HUD</div>
     <div id="mode" class="emerald">SYNCING...</div>
   </div>
-  <div class="grid">
+  <div class="grid" style="grid-template-columns:repeat(4,1fr);">
     <div class="card"><div class="title">EV Power &amp; Sensors</div><div id="bat" class="val">-- V</div><div id="gps" class="meta"></div><div id="wifi" class="meta"></div></div>
     <div class="card"><div class="title">Active Local Ports</div><div id="ports_cnt" class="val">--/--</div><div id="ports_list" class="meta"></div></div>
+    <div class="card"><div class="title">Solar &amp; Supercomputer</div><div id="solar_val" class="val">-- W</div><div id="solar_meta" class="meta"></div></div>
     <div class="card"><div class="title">Host RAM &amp; Avatars</div><div id="ram" class="val">--%</div><div id="avatars" class="meta"></div><div id="rec" class="meta"></div></div>
   </div>
   <div class="foot"><span id="sig">HMAC: --</span><span>ENDPOINT: /api/flying-car/step</span></div>
@@ -318,6 +326,9 @@ async function refreshHud(){
     document.getElementById('ram').textContent = (d.host_ram_pct ?? '--') + '% RAM';
     document.getElementById('avatars').textContent = 'Avatars: ' + (d.avatars || []).join(' · ');
     document.getElementById('rec').textContent = 'Recovered: ' + ((d.recovered_workers || []).join(', ') || 'none');
+    const sl = (d.solar && d.solar.solar) || {}; const sc = (d.solar && d.solar.supercomputer) || {};
+    document.getElementById('solar_val').textContent = (sl.solar_w ?? '--') + 'W / ' + (sc.supercomputer_w ?? '--') + 'W';
+    document.getElementById('solar_meta').textContent = 'NET: ' + (sc.net_charge_w ?? '--') + 'W | ' + (d.solar && d.solar.power_mode || '');
     document.getElementById('sig').textContent = 'HMAC: ' + (d.hmac_sig || '--');
   }catch(e){}
 }
@@ -369,6 +380,8 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
         except Exception:
             payload = {}
 
+        if path == "/api/solar/feed" and solar_sc:
+            return self._send_json(200, solar_sc.sample_solar_supercomputer(payload if isinstance(payload, dict) else {}))
         if path in ("/api/flying-car/step", "/api/bus/sensors"):
             return self._send_json(200, get_step_feed(payload if isinstance(payload, dict) else {}))
         return self._send_json(404, {"ok": False, "error": "not_found", "path": path})
