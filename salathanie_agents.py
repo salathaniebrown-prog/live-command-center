@@ -16,6 +16,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from hdc_shm_bus import HDCSharedMemoryBus, deterministic_hv
+from llm_bridge import enhance_with_llm, llm_status
 
 REPO = Path("/data/data/com.termux/files/home/live-command-center")
 DB_PATH = REPO / "salathanie_agents.db"
@@ -402,6 +403,8 @@ def run_agent(agent: str, text: str, mode: str = "default") -> dict:
     else:
         out = {"error": f"Unknown agent '{a}'"}
 
+    if a not in ("oms_order", "oms", "trade", "fix_fast_gateway", "fix", "fast", "supercomputer", "swarm") and "error" not in out:
+        out = enhance_with_llm(a, t, out)
     publish_ring(f"{a}:{ts}")
     return out
 
@@ -542,6 +545,8 @@ class AgentHandler(BaseHTTPRequestHandler):
             return self._send(200, TRADER_HTML.encode("utf-8"), "text/html; charset=utf-8")
         if parsed.path == "/health":
             return self._send(200, json.dumps({"status": "ok", "service": "salathanie-agents", "port": ACTIVE_PORT}).encode("utf-8"))
+        if parsed.path == "/api/agents/llm":
+            return self._send(200, json.dumps(llm_status()).encode("utf-8"))
         if parsed.path == "/api/agents/run":
             return self._send(200, json.dumps(run_agent(qs.get("agent", ["devexa_ceo_seo"])[0], qs.get("q", ["Salathanie A.I"])[0], qs.get("mode", ["default"])[0])).encode("utf-8"))
         if parsed.path == "/api/oms/state":
