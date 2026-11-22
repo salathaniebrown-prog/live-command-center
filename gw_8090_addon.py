@@ -113,12 +113,46 @@ def _proxy_car_bridge_step(method: str = "GET", raw_body: bytes = b"") -> tuple[
         return 200, json.dumps({"ok": False, "bridge_error": str(exc), "endpoint": "/api/flying-car/step"}).encode("utf-8")
 
 
+
+# _DIRECT_8090_STEP_INTERCEPT
+def _serve_8090_step_direct(handler) -> bool:
+    raw_path = getattr(handler, "path", "") or ""
+    path = raw_path.split("?", 1)[0]
+    if path != "/api/flying-car/step":
+        return False
+    body = None
+    try:
+        import urllib.request
+        with urllib.request.urlopen("http://127.0.0.1:8132/api/flying-car/step", timeout=1.5) as r:
+            body = r.read()
+    except Exception:
+        pass
+    if not body:
+        try:
+            import json
+            import car_port_bridge as _cb
+            body = json.dumps(_cb.get_step_feed()).encode("utf-8")
+        except Exception:
+            body = b'{"ok":false,"source":"8090-direct"}'
+    try:
+        handler.send_response(200)
+        handler.send_header("Content-Type", "application/json; charset=utf-8")
+        handler.send_header("Content-Length", str(len(body)))
+        handler.end_headers()
+        handler.wfile.write(body)
+    except Exception:
+        pass
+    return True
+
+
 def attach_additive_routes(handler_cls, skip_paths: set[str] | None = None):
     skip = skip_paths or set()
     orig_get = getattr(handler_cls, "do_GET", None)
     orig_post = getattr(handler_cls, "do_POST", None)
 
     def wrapped_get(self):
+    if _serve_8090_step_direct(self):
+        return
         p = self.path.split("?")[0]
         if p == "/api/gw/status" and p not in skip:
             st = {
