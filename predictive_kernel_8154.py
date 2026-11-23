@@ -1,6 +1,42 @@
 import hashlib, http.client, json, os, sqlite3, subprocess, time, uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+def _analyze_spine_drift() -> dict:
+    import json, os, sqlite3
+    db = os.path.join(os.path.dirname(os.path.abspath(__file__)), "astra_flight_ledger.db")
+    if not os.path.exists(db):
+        return {"ok": True, "status": "NO_LEDGER", "samples": 0, "anomalies": []}
+    conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    rows = conn.execute("SELECT id, ts, craft_id, altitude_ft, airspeed_kts, battery_pct, rotor_rpm FROM telemetry_frames ORDER BY id DESC LIMIT 25").fetchall()
+    conn.close()
+    if not rows:
+        return {"ok": True, "status": "EMPTY", "samples": 0, "anomalies": []}
+    latest = rows[0]
+    oldest = rows[-1]
+    bat_drop = round(oldest[5] - latest[5], 2)
+    rpms = [r[6] for r in rows if r[6] > 0]
+    rpm_spread = (max(rpms) - min(rpms)) if len(rpms) > 1 else 0
+    anomalies = []
+    if latest[5] < 20.0:
+        anomalies.append("LOW_BATTERY_RESERVE")
+    if bat_drop > 3.5:
+        anomalies.append("HIGH_BATTERY_SAG")
+    if rpm_spread > 900:
+        anomalies.append("ROTOR_RPM_VARIANCE")
+    return {
+        "ok": True,
+        "service": "predictive-kernel",
+        "port": 8154,
+        "status": "WARNING" if anomalies else "NOMINAL",
+        "samples": len(rows),
+        "craft_id": latest[2],
+        "latest_battery_pct": latest[5],
+        "window_battery_drop_pct": bat_drop,
+        "rotor_rpm_spread": rpm_spread,
+        "anomalies": anomalies,
+    }
+
+
 HOME = os.path.expanduser("~")
 DB_PATH = os.path.join(HOME, "astra_ai_memory.db")
 
@@ -58,6 +94,15 @@ class PredictiveKernelHandler(BaseHTTPRequestHandler):
             pass
 
     def do_GET(self):
+        if (self.path or "").split("?", 1)[0] in ("/api/predictive/drift", "/api/kernel/telemetry"):
+            import json
+            b = json.dumps(_analyze_spine_drift()).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
         active_ports = [8088, 8090, 8095, 8099, 8101, 8102, 8125, 8132, 8140, 8150, 8152]
         live = [p for p in active_ports if probe(p)]
         self._json(200, {

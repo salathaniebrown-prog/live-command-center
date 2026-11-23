@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 from spine_client import push_spine_frame
+
+def _fetch_cockpit_hud() -> dict:
+    import http.client, json
+    out = {"ok": True, "service": "cockpit-bridge", "port": 8132, "spine": None, "predictive": None}
+    for key, port, path in (("spine", 8159, "/api/telemetry/spine"), ("predictive", 8154, "/api/predictive/drift")):
+        try:
+            c = http.client.HTTPConnection("127.0.0.1", port, timeout=0.8)
+            c.request("GET", path)
+            out[key] = json.loads(c.getresponse().read().decode("utf-8"))
+            c.close()
+        except Exception as e:
+            out[key] = {"ok": False, "error": type(e).__name__}
+    return out
+
 """
 SalathanieAI — Unified Vehicle Telemetry Aggregator & Port Bridge (car_port_bridge.py)
 Sweeps local microservice sockets, checks PM2 worker health, binds custom sensor feeds
@@ -381,6 +395,15 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(raw)
 
     def do_GET(self):
+        if (self.path or "").split("?", 1)[0] in ("/api/cockpit/telemetry", "/api/hud/telemetry"):
+            import json
+            b = json.dumps(_fetch_cockpit_hud()).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
         path = self.path.split("?", 1)[0]
         if path in ("/", "/hud", "/flying-car"):
             return self._send_html(200, HUD_HTML)

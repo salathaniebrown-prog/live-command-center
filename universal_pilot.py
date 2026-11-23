@@ -1,5 +1,54 @@
 #!/usr/bin/env python3
 from spine_client import push_spine_frame
+
+FLIGHT_STATE = {
+    "craft_id": "S-ZERO-PLUS-01",
+    "mode": "CRUISE",
+    "altitude_ft": 450.0,
+    "airspeed_kts": 72.0,
+    "battery_pct": 95.0,
+    "rotor_rpm": 3180,
+    "steps": 0,
+}
+
+def _step_evtol_physics(cmd_data: dict) -> dict:
+    mode = str(cmd_data.get("mode") or cmd_data.get("cmd") or FLIGHT_STATE["mode"]).upper()
+    throttle = float(cmd_data.get("throttle", 0.65))
+    dt = max(0.1, min(float(cmd_data.get("dt", 1.0)), 5.0))
+    if "CLIMB" in mode:
+        FLIGHT_STATE["altitude_ft"] = round(min(5000.0, FLIGHT_STATE["altitude_ft"] + 18.5 * throttle * dt), 2)
+        FLIGHT_STATE["airspeed_kts"] = round(min(135.0, FLIGHT_STATE["airspeed_kts"] + 3.2 * throttle * dt), 2)
+        FLIGHT_STATE["rotor_rpm"] = int(3100 + 450 * throttle)
+        drain = 0.08 * dt
+    elif "HOVER" in mode:
+        FLIGHT_STATE["airspeed_kts"] = round(max(0.0, FLIGHT_STATE["airspeed_kts"] - 6.0 * dt), 2)
+        FLIGHT_STATE["rotor_rpm"] = int(2950 + 250 * throttle)
+        drain = 0.06 * dt
+    elif "LAND" in mode or "DESCEND" in mode:
+        FLIGHT_STATE["altitude_ft"] = round(max(0.0, FLIGHT_STATE["altitude_ft"] - 15.0 * dt), 2)
+        FLIGHT_STATE["airspeed_kts"] = round(max(0.0, FLIGHT_STATE["airspeed_kts"] - 4.5 * dt), 2)
+        FLIGHT_STATE["rotor_rpm"] = 2400 if FLIGHT_STATE["altitude_ft"] > 0 else 0
+        drain = 0.03 * dt
+    else:
+        FLIGHT_STATE["airspeed_kts"] = round(min(145.0, max(45.0, 60.0 + 80.0 * throttle)), 2)
+        FLIGHT_STATE["rotor_rpm"] = int(2850 + 380 * throttle)
+        drain = 0.05 * dt
+    FLIGHT_STATE["mode"] = mode
+    FLIGHT_STATE["battery_pct"] = round(max(5.0, FLIGHT_STATE["battery_pct"] - drain), 2)
+    FLIGHT_STATE["steps"] += 1
+    try:
+        push_spine_frame(
+            craft_id=FLIGHT_STATE["craft_id"],
+            altitude_ft=FLIGHT_STATE["altitude_ft"],
+            airspeed_kts=FLIGHT_STATE["airspeed_kts"],
+            battery_pct=FLIGHT_STATE["battery_pct"],
+            rotor_rpm=FLIGHT_STATE["rotor_rpm"],
+            extra={"mode": mode, "steps": FLIGHT_STATE["steps"]},
+        )
+    except Exception:
+        pass
+    return {"ok": True, **FLIGHT_STATE}
+
 """
 Salathanie A.I — Universal Pilot + Trinity Control Plane + VR Data Circle
 Serves on 0.0.0.0:8125 (proxied by salathanie-tunnel) with RAM Safe-Mode Guard.
@@ -426,6 +475,22 @@ class PilotHandler(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
+        p = (self.path or '/').split('?', 1)[0]
+        if p in ("/api/evtol/szero-plus", "/api/flying-car/step"):
+            cl = int(self.headers.get("Content-Length", "0"))
+            raw_b = self.rfile.read(min(cl, 4096)) if cl > 0 else b"{}"
+            try:
+                cdata = json.loads(raw_b.decode("utf-8") or "{}")
+            except Exception:
+                cdata = {}
+            res = _step_evtol_physics(cdata)
+            out_b = json.dumps(res).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(out_b)))
+            self.end_headers()
+            self.wfile.write(out_b)
+            return
         try:
             push_spine_frame(craft_id="S-ZERO-PLUS-01", altitude_ft=float(globals().get("ALTITUDE_FT", 450.0)), airspeed_kts=float(globals().get("AIRSPEED_KTS", 72.0)), battery_pct=float(globals().get("BATTERY_PCT", 95.0)), rotor_rpm=int(globals().get("ROTOR_RPM", 3180)))
         except Exception:
