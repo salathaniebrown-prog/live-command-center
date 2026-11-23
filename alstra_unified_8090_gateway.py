@@ -115,6 +115,43 @@ def _handle_8090_flying_car_step(handler, method: str = "GET", body: bytes = b""
         pass
     return True
 
+
+# _DIRECT_8090_HUB_ROUTES
+def _handle_8090_hub_routes(handler) -> bool:
+    import urllib.request
+    from pathlib import Path as _P
+    p = (getattr(handler, "path", "") or "").split("?", 1)[0]
+    targets = {
+        "/flying-car": ("http://127.0.0.1:8101/", "text/html; charset=utf-8"),
+        "/avatars": ("http://127.0.0.1:8102/", "text/html; charset=utf-8"),
+        "/api/hub/state": ("http://127.0.0.1:8101/api/hub/state", "application/json; charset=utf-8"),
+        "/api/flying-car/step": ("http://127.0.0.1:8132/api/flying-car/step", "application/json; charset=utf-8"),
+    }
+    if p not in targets:
+        return False
+    url, ctype = targets[p]
+    body = None
+    try:
+        with urllib.request.urlopen(url, timeout=0.9) as r:
+            body = r.read()
+    except Exception:
+        if p == "/api/flying-car/step":
+            sf = _P("/data/data/com.termux/files/home/live-command-center/car_port_bridge_state.json")
+            if sf.exists():
+                body = sf.read_bytes()
+    if not body:
+        body = b'{"ok":true,"fallback":true,"source":"8090-direct"}'
+        ctype = "application/json; charset=utf-8"
+    try:
+        handler.send_response(200)
+        handler.send_header("Content-Type", ctype)
+        handler.send_header("Content-Length", str(len(body)))
+        handler.end_headers()
+        handler.wfile.write(body)
+    except Exception:
+        pass
+    return True
+
 class Server(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
@@ -127,6 +164,8 @@ class H(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if _handle_8090_hub_routes(self):
+            return
         if _handle_8090_flying_car_step(self, 'GET'):
             return
         p = self.path.split("?")[0]
