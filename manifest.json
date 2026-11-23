@@ -104,7 +104,7 @@
       "tier": "core"
     }
   ],
-  "updated_at": "2026-11-23T21:20:37Z",
+  "updated_at": "2026-11-23T23:27:52Z",
   "upgrade_history": [
     {
       "version": "2026.11.23-r2",
@@ -155,6 +155,11 @@
       "version": "2026.11.23-r5",
       "title": "Add bounded-RAM SQLite WAL telemetry data spine (:8159) with 500-frame ring cap",
       "ts": 1795468837
+    },
+    {
+      "version": "2026.11.23-r5",
+      "title": "Add bounded-RAM SQLite WAL telemetry data spine (:8159) with 500-frame ring cap",
+      "ts": 1795476472
     }
   ]
 }
