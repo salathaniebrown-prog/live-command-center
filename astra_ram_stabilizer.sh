@@ -27,7 +27,7 @@ STATE
 
 cleanup() {
     save_state
-    tput cnorm
+    printf "\033[?25h"
     echo -e "\n[ASTRA STABILIZER] State persisted to $STATE_FILE. Exiting cleanly."
     exit 0
 }
@@ -72,6 +72,17 @@ stabilize_nodes() {
         fi
     done
 
+    # 3. Fallback: pause non-core PM2 workers if 8096-8100 stubs are already hibernating
+    if [ "$mode" == "CRITICAL" ] && command -v pm2 >/dev/null 2>&1; then
+        for app in salathanie-game-8150 salathanie-twin-flight-8152 astra-8108-studio astra-8121-studio; do
+            if pm2 pid "$app" 2>/dev/null | grep -vqE "^0$|^$"; then
+                pm2 stop "$app" >/dev/null 2>&1
+                action_log="$action_log [PM2-SHED:$app]"
+                break
+            fi
+        done
+    fi
+
     sleep 0.5
     get_mem_stats
     local reclaimed=$((MEM_AVAIL_MB - before_mb))
@@ -94,7 +105,7 @@ draw_bar() {
     printf "%${empty}s" | tr ' ' '░'
 }
 
-tput civis
+printf "\033[?25l"
 while true; do
     get_mem_stats
 

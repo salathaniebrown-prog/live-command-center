@@ -51,3 +51,4 @@ boot_restore.log
 *.db
 *.db-wal
 *.db-shm
+*_state.json
