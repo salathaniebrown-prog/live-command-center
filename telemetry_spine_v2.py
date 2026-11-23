@@ -85,6 +85,10 @@ class SpineHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         p = (self.path or "/").split("?", 1)[0]
+        if p == "/api/manifest":
+            mpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "manifest.json")
+            with open(mpath, "r", encoding="utf-8") as mf:
+                return self._send(200, json.load(mf))
         if p in ("/", "/health", "/api/telemetry/spine", "/api/evtol/spine"):
             row = CONN.execute(
                 "SELECT id, ts, craft_id, altitude_ft, airspeed_kts, battery_pct, rotor_rpm FROM telemetry_frames ORDER BY id DESC LIMIT 1"
