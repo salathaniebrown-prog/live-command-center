@@ -157,6 +157,51 @@ def synthesize_elite_directive(payload: dict) -> dict:
     }
 
 
+
+def _manifest_telemetry() -> dict:
+    mpath = os.path.join(HOME, "live-command-center", "manifest.json")
+    try:
+        manifest = json.loads(open(mpath, "r", encoding="utf-8").read())
+    except Exception as e:
+        return {"ok": False, "error": f"manifest_read_error: {e}"}
+
+    nodes_out = []
+    online = 0
+    for node in manifest.get("telemetry_nodes", []):
+        port = int(node.get("port", 0))
+        hpath = str(node.get("health_path") or "/")
+        data = _probe_json(port, hpath, timeout=0.5)
+        is_up = bool(data)
+        if not is_up:
+            try:
+                c = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
+                c.request("GET", hpath)
+                is_up = c.getresponse().status == 200
+            except Exception:
+                is_up = False
+        if is_up:
+            online += 1
+        nodes_out.append({
+            "id": node.get("id"),
+            "port": port,
+            "health_path": hpath,
+            "online": is_up,
+        })
+
+    ram_pct = _ram_used_pct()
+    return {
+        "ok": True,
+        "system": "SALATHANIE_MANIFEST_TELEMETRY",
+        "version": manifest.get("version"),
+        "nodes_online": f"{online}/{len(nodes_out)}",
+        "ram_used_pct": ram_pct,
+        "ram_guard_ok": ram_pct < RAM_CEILING,
+        "tri_avatar_council": manifest.get("tri_avatar_council", []),
+        "nodes": nodes_out,
+        "ts": int(time.time()),
+    }
+
+
 class EliteBrainHandler(http.server.BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         return
@@ -183,6 +228,11 @@ class EliteBrainHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         p = (self.path or "/").split("?", 1)[0]
+        if p == "/manifest.json":
+            mpath = os.path.join(HOME, "live-command-center", "manifest.json")
+            return self._send(200, json.loads(open(mpath, "r", encoding="utf-8").read()))
+        if p == "/api/brain/manifest":
+            return self._send(200, _manifest_telemetry())
         if p == "/api/brain/history":
             conn = get_db()
             conn.row_factory = sqlite3.Row
