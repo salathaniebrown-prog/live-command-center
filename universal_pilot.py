@@ -1,6 +1,35 @@
 #!/usr/bin/env python3
 from spine_client import push_spine_frame
 
+def _neuro_merkle_payload() -> dict:
+    import hashlib, http.client, json, time
+    hub_data = {}
+    for port in (8101, 8102):
+        try:
+            c = http.client.HTTPConnection("127.0.0.1", port, timeout=0.6)
+            c.request("GET", "/")
+            raw = c.getresponse().read().decode("utf-8", errors="ignore")
+            c.close()
+            hub_data[str(port)] = {"online": True, "bytes": len(raw)}
+        except Exception as e:
+            hub_data[str(port)] = {"online": False, "error": type(e).__name__}
+    avatars = [
+        {"id": "astra", "name": "ASTRA", "role": "Flight & Telemetry Core", "port": 8101, "status": "ONLINE", "all_languages": True},
+        {"id": "alstra", "name": "ALSTRA", "role": "Tactical & Navigation Co-Pilot", "port": 8102, "status": "ONLINE", "all_languages": True},
+        {"id": "salathanie-ai", "name": "SALATHANIE-AI", "role": "Command Sovereign Avatar", "port": 8102, "status": "ONLINE", "all_languages": True},
+    ]
+    seed = json.dumps({"avatars": avatars, "hub": hub_data}, sort_keys=True).encode("utf-8")
+    merkle_root = hashlib.sha256(seed).hexdigest()
+    return {
+        "ok": True,
+        "ts": time.time(),
+        "auth_mode": "LOCAL_SOVEREIGN_ZERO_OAUTH",
+        "merkle_root": merkle_root,
+        "tri_avatar_hub": hub_data,
+        "avatars": avatars,
+    }
+
+
 FLIGHT_STATE = {
     "craft_id": "S-ZERO-PLUS-01",
     "mode": "CRUISE",
@@ -322,6 +351,14 @@ class PilotHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if (self.path or "").split("?", 1)[0] in ("/v1/neuro/merkle", "/api/neuro/merkle", "/api/avatars"):
+            b = json.dumps(_neuro_merkle_payload()).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path in ("/", "/ui"):
             return self._send(200, UI_HTML.encode("utf-8"), "text/html; charset=utf-8")

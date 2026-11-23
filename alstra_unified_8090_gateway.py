@@ -205,8 +205,8 @@ class H(http.server.BaseHTTPRequestHandler):
         if _handle_8090_flying_car_step(self, 'GET'):
             return
         p = self.path.split("?")[0]
-        if p in ("/api/cockpit/telemetry", "/api/hud/telemetry", "/api/predictive/drift"):
-            target_port = 8154 if p == "/api/predictive/drift" else 8132
+        if p in ("/api/cockpit/telemetry", "/api/hud/telemetry", "/api/predictive/drift", "/api/avatars", "/v1/neuro/merkle"):
+            target_port = 8154 if p == "/api/predictive/drift" else (8125 if p in ("/api/avatars", "/v1/neuro/merkle") else 8132)
             try:
                 c = http.client.HTTPConnection("127.0.0.1", target_port, timeout=1.5)
                 c.request("GET", p)
