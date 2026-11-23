@@ -59,6 +59,31 @@ def check_endpoints() -> list[str]:
     return failures
 
 
+
+def run_test_astra_suite() -> list[str]:
+    import subprocess
+    suite = HOME / "astra-termux-v1/test_astra.py"
+    if not suite.exists():
+        return ["[MISS-SUITE] ~/astra-termux-v1/test_astra.py not found"]
+    try:
+        res = subprocess.run(
+            ["python3", "-m", "unittest", "discover", "-s", str(suite.parent), "-p", "test_astra.py"],
+            capture_output=True, text=True, timeout=10
+        )
+        if res.returncode == 0:
+            return []
+        res2 = subprocess.run(
+            ["python3", str(suite)],
+            capture_output=True, text=True, timeout=10
+        )
+        if res2.returncode == 0:
+            return []
+        err = (res2.stderr or res2.stdout or res.stderr or "test_astra.py failed").strip().splitlines()[-1]
+        return [f"[TEST-ASTRA-FAIL] {err[:120]}"]
+    except Exception as e:
+        return [f"[TEST-ASTRA-ERR] {str(e)[:120]}"]
+
+
 def main() -> int:
     targets = [
         HOME / "dashboard_server.py",
@@ -71,9 +96,11 @@ def main() -> int:
         REPO / "szero_plus_evtol_telemetry.py",
         REPO / "main_head_router.py",
         REPO / "ecosystem_router.py",
+        HOME / "astra-termux-v1/test_astra.py",
     ]
     trap_issues = check_syntax_and_traps(targets)
     net_issues = check_endpoints()
+    suite_issues = run_test_astra_suite()
 
     print("=== TDD SYNTAX & ERROR-CODING AUDIT ===")
     if trap_issues:
@@ -82,6 +109,13 @@ def main() -> int:
     else:
         print("  [PASS] Zero syntax or top-level self.* traps across target files.")
 
+    print("=== TDD TEST_ASTRA SUITE ===")
+    if suite_issues:
+        for s in suite_issues:
+            print(" ", s)
+    else:
+        print("  [PASS] ~/astra-termux-v1/test_astra.py passed.")
+
     print("=== TDD LIVE ENDPOINT & CONTRACT ASSERTIONS ===")
     if net_issues:
         for n in net_issues:
@@ -89,7 +123,7 @@ def main() -> int:
     else:
         print("  [PASS] All core telemetry, hub, bridge, and Main Head endpoints passed.")
 
-    total_fail = len(trap_issues) + len(net_issues)
+    total_fail = len(trap_issues) + len(net_issues) + len(suite_issues)
     print(f"=== SUMMARY: {total_fail} issue(s) detected ===")
     return 1 if total_fail else 0
 
