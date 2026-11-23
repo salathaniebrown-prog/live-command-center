@@ -70,7 +70,8 @@ def run_test_astra_suite() -> list[str]:
             ["python3", "-m", "unittest", "discover", "-s", str(suite.parent), "-p", "test_astra.py"],
             capture_output=True, text=True, timeout=10
         )
-        if res.returncode == 0:
+        combined = (res.stdout or "") + (res.stderr or "")
+        if res.returncode == 0 and "Ran 0 tests" not in combined:
             return []
         res2 = subprocess.run(
             ["python3", str(suite)],
