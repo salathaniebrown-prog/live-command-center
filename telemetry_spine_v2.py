@@ -85,6 +85,8 @@ class SpineHandler(http.server.BaseHTTPRequestHandler):
             pass
 
     def do_GET(self):
+        if (self.path or "").split("?", 1)[0] in ("/telemetry", "/api/telemetry"):
+            self.path = "/api/telemetry/spine"
         if (self.path or "").split("?", 1)[0] == "/api/manifest/telemetry":
             body = json.dumps(probe_manifest(), separators=(",", ":")).encode("utf-8")
             self.send_response(200)
