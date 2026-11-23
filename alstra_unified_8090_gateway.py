@@ -1,3 +1,4 @@
+from cockpit_hud_ui import HUD_HTML
 from polyglot_router import detect_language, enrich_payload, POLYGLOT_SYSTEM_DIRECTIVE
 import ecosystem_router as _eco_router
 #!/usr/bin/env python3
@@ -190,6 +191,13 @@ class H(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if (self.path or "").split("?", 1)[0] in ("/", "/hud", "/cockpit"):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(HUD_HTML)))
+            self.end_headers()
+            self.wfile.write(HUD_HTML)
+            return
         if _eco_router.handle_get(self):
             return
         if _handle_8090_hub_routes(self):
