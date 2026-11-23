@@ -210,7 +210,7 @@ class H(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
-        if p in ("/api/manifest", "/api/telemetry/spine", "/api/evtol/spine"):
+        if p in ("/api/manifest", "/api/manifest/telemetry", "/api/telemetry/spine", "/api/evtol/spine"):
             c, ct, data = _proxy_try([f"http://127.0.0.1:8159{self.path}"])
             self.send_response(c)
             self.send_header("Content-Type", ct)
