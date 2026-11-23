@@ -1,0 +1,9 @@
+{
+  "nodes": [
+    {"id": "legal-8096", "role": "ai-studio-legal", "url": "http://127.0.0.1:8096", "tier": "ondemand"},
+    {"id": "ooda-8097", "role": "astra-ooda-os", "url": "http://127.0.0.1:8097", "tier": "ondemand"},
+    {"id": "bi-8098", "role": "astra-bi-engine", "url": "http://127.0.0.1:8098", "tier": "ondemand"},
+    {"id": "brain-dealership-8099", "role": "brain-and-dealership", "url": "http://127.0.0.1:8099", "tier": "core"},
+    {"id": "nexus-8100", "role": "astra-177b-nexus", "url": "http://127.0.0.1:8100", "tier": "ondemand"}
+  ]
+}

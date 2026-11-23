@@ -21,6 +21,7 @@ if r.returncode == 0 and r.stdout.strip().startswith("["):
             print(f"  [CLEANED] {nm} (status={st}, restarts={rst})")
 PY
 
+for old in astra-8088-main astra-8090-gw astra-8095-spine; do pm2 delete "$old" 2>/dev/null || true; done
 echo "[3/4] Starting RAM-safe Unified Core Tier..."
 pm2 startOrReload "$REPO/salathanie_unified_ecosystem.config.cjs" --update-env
 pm2 save --force

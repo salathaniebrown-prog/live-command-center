@@ -22,6 +22,7 @@ PROTECTED_EXACT = {
     "salathanie-pilot",
     "salathanie-guard",
     "salathanie-gw-8090",
+    "astra-8088-dashboard_server",
     "salathanie-self-heal",
     "salathanie-ram-watch",
     "salathanie-wal-8125",

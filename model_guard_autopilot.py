@@ -161,7 +161,7 @@ def guard_cycle(tick: int):
         if status == "online":
             online_names.add(name)
             # 2. Stop runaway crash-loopers (excluding self & pilot)
-            if restarts > int(pol["max_pm2_restarts"]) and name not in ("salathanie-guard", "salathanie-pilot"):
+            if restarts > int(pol["max_pm2_restarts"]) and name not in ("salathanie-guard", "salathanie-pilot", "salathanie-gw-8090", "astra-8088-dashboard_server", "salathanie-avatar-car-hub", "salathanie-car-bridge", "salathanie-jet-hud", "salathanie-main-head", "salathanie-ram-watch", "salathanie-szero-evtol", "cloudflared"):
                 subprocess.run(["pm2", "stop", name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 actions.append(f"circuit_tripped:{name}(restarts={restarts})")
 
