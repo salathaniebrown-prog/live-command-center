@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    {
+      "id": "manifest-telemetry-8156",
+      "role": "manifest-telemetry-router",
+      "url": "http://127.0.0.1:8156/api/brain/manifest",
+      "tier": "core"
+    }
+  ]
+}

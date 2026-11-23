@@ -1,0 +1,25 @@
+{
+  "name": "Astra + Alstra = SalathanieAI",
+  "short_name": "SalathanieAI",
+  "version": "2026.11.23",
+  "architecture": "SOVEREIGN_TRI_AVATAR_EV_OS",
+  "ram_ceiling_pct": 83.0,
+  "tri_avatar_council": [
+    { "id": "ASTRA", "role": "SOVEREIGN_FLIGHT_COMMANDER", "hub_port": 8102, "brain_port": 8156 },
+    { "id": "ALSTRA", "role": "DEEP_TELEMETRY_ENGINEER", "gateway_port": 8090, "brain_port": 8156 },
+    { "id": "SALATHANIE", "role": "EXECUTIVE_SYSTEM_ARCHITECT", "control_port": 8140, "brain_port": 8156 }
+  ],
+  "telemetry_nodes": [
+    { "id": "unified-gateway", "port": 8090, "health_path": "/api/flying-car/step", "tier": "core" },
+    { "id": "jet-hud-3d", "port": 8095, "health_path": "/", "tier": "core" },
+    { "id": "flying-car-core", "port": 8101, "health_path": "/", "tier": "core" },
+    { "id": "tri-avatar-hub", "port": 8102, "health_path": "/", "tier": "core" },
+    { "id": "universal-pilot", "port": 8125, "health_path": "/", "tier": "core" },
+    { "id": "cockpit-bridge", "port": 8132, "health_path": "/", "tier": "core" },
+    { "id": "main-head", "port": 8140, "health_path": "/health", "tier": "core" },
+    { "id": "game-system", "port": 8150, "health_path": "/api/game/state", "tier": "core" },
+    { "id": "twin-flight", "port": 8152, "health_path": "/api/twin-flight/state", "tier": "core" },
+    { "id": "predictive-kernel", "port": 8154, "health_path": "/", "tier": "core" },
+    { "id": "elite-avatar-ev-brain", "port": 8156, "health_path": "/api/brain/state", "tier": "core" }
+  ]
+}
