@@ -14,9 +14,6 @@ def idle_reaper():
             os._exit(0)
 
 class OnDemandNodeHandler(BaseHTTPRequestHandler):
-    def log_message(self, fmt, *args):
-        return
-
     def _json(self, code, payload):
         global LAST_HIT
         LAST_HIT = time.time()
