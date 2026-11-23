@@ -1,0 +1,193 @@
+{
+  "ok": true,
+  "ts": 1795402890,
+  "bridge_port": 8132,
+  "mode": "JET-CRUISE",
+  "avatars": [
+    "SalathanieAI",
+    "ASTRA CORE v10",
+    "SIMLI TRINITY-2"
+  ],
+  "host_ram_pct": 83.3,
+  "solar": {
+    "ok": true,
+    "ts": 1795402890,
+    "source": "SOLAR-PV-SUPERCOMPUTER",
+    "power_mode": "SOLAR-SURPLUS-SUPERCOMPUTE",
+    "solar": {
+      "array_capacity_kw": 6.4,
+      "solar_w": 3840.0,
+      "mppt_v": 412.0,
+      "mppt_a": 9.32
+    },
+    "supercomputer": {
+      "model": "SalathanieAI",
+      "avatars": [
+        "SalathanieAI",
+        "ASTRA CORE v10",
+        "SIMLI TRINITY-2"
+      ],
+      "supercomputer_w": 1480.0,
+      "avionics_bus_w": 420.0,
+      "total_load_w": 1900.0,
+      "net_charge_w": 1940.0,
+      "battery_soc_pct": 91.5
+    },
+    "host_ram": {
+      "ts": 1795402890,
+      "ram_pct": 83.31,
+      "total_mb": 3416,
+      "used_mb": 2846,
+      "avail_mb": 570,
+      "severity": "ELEVATED"
+    },
+    "hmac_sig": "9A44B2AE64BE611372E3AD4F"
+  },
+  "online_ports": [
+    8090,
+    8095,
+    8099,
+    8108,
+    8121,
+    8125,
+    8151,
+    8165
+  ],
+  "ports": [
+    {
+      "port": 8088,
+      "online": false,
+      "http_status": null,
+      "rtt_ms": 2.2
+    },
+    {
+      "port": 8090,
+      "online": true,
+      "http_status": 200,
+      "rtt_ms": 8.9
+    },
+    {
+      "port": 8095,
+      "online": true,
+      "http_status": 200,
+      "rtt_ms": 16.7
+    },
+    {
+      "port": 8099,
+      "online": true,
+      "http_status": 200,
+      "rtt_ms": 18.0
+    },
+    {
+      "port": 8108,
+      "online": true,
+      "http_status": 200,
+      "rtt_ms": 10.2
+    },
+    {
+      "port": 8121,
+      "online": true,
+      "http_status": 200,
+      "rtt_ms": 24.4
+    },
+    {
+      "port": 8125,
+      "online": true,
+      "http_status": 200,
+      "rtt_ms": 8.3
+    },
+    {
+      "port": 8151,
+      "online": true,
+      "http_status": 200,
+      "rtt_ms": 13.5
+    },
+    {
+      "port": 8165,
+      "online": true,
+      "http_status": 200,
+      "rtt_ms": 14.4
+    }
+  ],
+  "sensors": {
+    "battery_v": 402.4,
+    "battery_soc_pct": 88.0,
+    "gps": {
+      "lat": 36.0726,
+      "lon": -79.792,
+      "alt_m": 272.0,
+      "speed_kmh": 0.0,
+      "sats": 14
+    },
+    "wifi": {
+      "ssid": "SALATHANIE-LINK",
+      "rssi_dbm": -48,
+      "link_mbps": 866
+    }
+  },
+  "recovered_workers": [],
+  "pm2_summary": [
+    {
+      "name": "salathanie-wal-8182",
+      "status": "online",
+      "rss_mb": 7.72
+    },
+    {
+      "name": "salathanie-causal-shadow",
+      "status": "online",
+      "rss_mb": 5.72
+    },
+    {
+      "name": "salathanie-trinity",
+      "status": "online",
+      "rss_mb": 5.88
+    },
+    {
+      "name": "salathanie-agents",
+      "status": "online",
+      "rss_mb": 5.21
+    },
+    {
+      "name": "salathanie-pulsar-10k",
+      "status": "online",
+      "rss_mb": 36.79
+    },
+    {
+      "name": "salathanie-guard",
+      "status": "online",
+      "rss_mb": 5.4
+    },
+    {
+      "name": "salathanie-self-heal",
+      "status": "online",
+      "rss_mb": 11.8
+    },
+    {
+      "name": "astra-8099-brain",
+      "status": "online",
+      "rss_mb": 7.3
+    },
+    {
+      "name": "astra-8151-core",
+      "status": "online",
+      "rss_mb": 7.7
+    },
+    {
+      "name": "astra-8165-sentinel",
+      "status": "online",
+      "rss_mb": 8.12
+    },
+    {
+      "name": "salathanie-jet-hud",
+      "status": "online",
+      "rss_mb": 6.98
+    },
+    {
+      "name": "astra-8121-studio_cinema_mcp_8121",
+      "status": "online",
+      "rss_mb": 7.34
+    }
+  ],
+  "from_disk_cache": false,
+  "hmac_sig": "D096C821A55C70FD6AD46096"
+}

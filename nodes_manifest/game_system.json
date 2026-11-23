@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    {
+      "id": "game-system-8150",
+      "role": "new-game-system",
+      "url": "http://127.0.0.1:8150",
+      "tier": "ondemand"
+    }
+  ]
+}

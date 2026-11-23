@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    {
+      "id": "twin-flight-8152",
+      "role": "twin-flight",
+      "url": "http://127.0.0.1:8152",
+      "tier": "ondemand"
+    }
+  ]
+}

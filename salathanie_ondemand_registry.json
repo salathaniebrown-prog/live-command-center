@@ -1,0 +1,2950 @@
+{
+  "core_count": 8,
+  "core_names": [
+    "astra-8088-dashboard_server",
+    "salathanie-gw-8090",
+    "salathanie-avatar-car-hub",
+    "salathanie-pilot",
+    "salathanie-car-bridge",
+    "salathanie-szero-evtol",
+    "salathanie-ram-watch",
+    "salathanie-jet-hud"
+  ],
+  "folders": [
+    {
+      "folder": "__home__",
+      "path": "/data/data/com.termux/files/home",
+      "html_files": [
+        ".astra_locked_core_ui.html",
+        "ALSTRA_API_CONSOLE.html",
+        "ALSTRA_SPATIAL_3D_ENGINE.html",
+        "astra_command_center.html",
+        "astra_core3d_hud.html",
+        "command_center_full.html",
+        "dashboard.html",
+        "dual_stream_module.html",
+        "index.html"
+      ],
+      "db_files": [
+        ".astra_local_brain.db",
+        ".astra_multichain_assets.db",
+        ".astra_sentinel.db",
+        "alstra_enterprise_core.db",
+        "astra_agentic_mesh.db",
+        "astra_ai_memory.db",
+        "astra_brain_memory.db",
+        "astra_chronicles_vectors.db",
+        "astra_cinema_mcp.db",
+        "astra_dealership_ledger.db",
+        "astra_deepspace_ledger.db",
+        "astra_drone_telemetry.db",
+        "astra_future_tech.db",
+        "astra_governance_ledger.db",
+        "astra_invoice_ledger.db",
+        "astra_orbital_ledger.db",
+        "astra_planetary_ledger.db",
+        "astra_research_history.db",
+        "astra_saga_ledger.db",
+        "astra_sovereign_pr_wal.db",
+        "astra_space_memory.db",
+        "astra_spatial_ledger.db",
+        "astra_spine_health.db",
+        "astra_state.db",
+        "astra_telemetry.db",
+        "astra_trust_ledger.db",
+        "astra_vision_recovery_wal.db",
+        "astra_webhook_ledger.db",
+        "persistent_twin_state.db",
+        "salathanie_core.db"
+      ],
+      "services": [
+        {
+          "name": "eco---home---agentic-mesh-8119",
+          "folder": "__home__",
+          "file": "agentic_mesh_8119.py",
+          "script": "/data/data/com.termux/files/home/agentic_mesh_8119.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---alstra-autopilot",
+          "folder": "__home__",
+          "file": "alstra_autopilot.py",
+          "script": "/data/data/com.termux/files/home/alstra_autopilot.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---alstra-master-spine-",
+          "folder": "__home__",
+          "file": "alstra_master_spine_8095.py",
+          "script": "/data/data/com.termux/files/home/alstra_master_spine_8095.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-3stream",
+          "folder": "__home__",
+          "file": "astra_3stream.py",
+          "script": "/data/data/com.termux/files/home/astra_3stream.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-alstra-dual-pe",
+          "folder": "__home__",
+          "file": "astra_alstra_dual_persona_8159.py",
+          "script": "/data/data/com.termux/files/home/astra_alstra_dual_persona_8159.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-cinema-mcp",
+          "folder": "__home__",
+          "file": "astra_cinema_mcp.py",
+          "script": "/data/data/com.termux/files/home/astra_cinema_mcp.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-context-teleme",
+          "folder": "__home__",
+          "file": "astra_context_telemetry_monitor.py",
+          "script": "/data/data/com.termux/files/home/astra_context_telemetry_monitor.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-edge-ml",
+          "folder": "__home__",
+          "file": "astra_edge_ml.py",
+          "script": "/data/data/com.termux/files/home/astra_edge_ml.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-github-watchdo",
+          "folder": "__home__",
+          "file": "astra_github_watchdog_daemon.py",
+          "script": "/data/data/com.termux/files/home/astra_github_watchdog_daemon.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-ingress-8088",
+          "folder": "__home__",
+          "file": "astra_ingress_8088.py",
+          "script": "/data/data/com.termux/files/home/astra_ingress_8088.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-invoice-agent",
+          "folder": "__home__",
+          "file": "astra_invoice_agent.py",
+          "script": "/data/data/com.termux/files/home/astra_invoice_agent.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-omni-mux",
+          "folder": "__home__",
+          "file": "astra_omni_mux.py",
+          "script": "/data/data/com.termux/files/home/astra_omni_mux.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-openai-tool-pr",
+          "folder": "__home__",
+          "file": "astra_openai_tool_proxy.py",
+          "script": "/data/data/com.termux/files/home/astra_openai_tool_proxy.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-quantum-lattic",
+          "folder": "__home__",
+          "file": "astra_quantum_lattice.py",
+          "script": "/data/data/com.termux/files/home/astra_quantum_lattice.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-saga-gov-nodes",
+          "folder": "__home__",
+          "file": "astra_saga_gov_nodes.py",
+          "script": "/data/data/com.termux/files/home/astra_saga_gov_nodes.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-spatial-assist",
+          "folder": "__home__",
+          "file": "astra_spatial_assistant.py",
+          "script": "/data/data/com.termux/files/home/astra_spatial_assistant.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-supercomputer-",
+          "folder": "__home__",
+          "file": "astra_supercomputer_mesh.py",
+          "script": "/data/data/com.termux/files/home/astra_supercomputer_mesh.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-svc-8180",
+          "folder": "__home__",
+          "file": "astra_svc_8180.py",
+          "script": "/data/data/com.termux/files/home/astra_svc_8180.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-telemetry-hud",
+          "folder": "__home__",
+          "file": "astra_telemetry_hud.py",
+          "script": "/data/data/com.termux/files/home/astra_telemetry_hud.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-trust-center-8",
+          "folder": "__home__",
+          "file": "astra_trust_center_8117.py",
+          "script": "/data/data/com.termux/files/home/astra_trust_center_8117.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-unified-brain",
+          "folder": "__home__",
+          "file": "astra_unified_brain.py",
+          "script": "/data/data/com.termux/files/home/astra_unified_brain.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-webhook-listen",
+          "folder": "__home__",
+          "file": "astra_webhook_listener.py",
+          "script": "/data/data/com.termux/files/home/astra_webhook_listener.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---browser-agent",
+          "folder": "__home__",
+          "file": "browser_agent.py",
+          "script": "/data/data/com.termux/files/home/browser_agent.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---codex-engineer",
+          "folder": "__home__",
+          "file": "codex_engineer.py",
+          "script": "/data/data/com.termux/files/home/codex_engineer.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---core-engine",
+          "folder": "__home__",
+          "file": "core_engine.py",
+          "script": "/data/data/com.termux/files/home/core_engine.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---dealership-module",
+          "folder": "__home__",
+          "file": "dealership_module.py",
+          "script": "/data/data/com.termux/files/home/dealership_module.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---dual-stream-bridge",
+          "folder": "__home__",
+          "file": "dual_stream_bridge.py",
+          "script": "/data/data/com.termux/files/home/dual_stream_bridge.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---invoice-agent-8111",
+          "folder": "__home__",
+          "file": "invoice_agent_8111.py",
+          "script": "/data/data/com.termux/files/home/invoice_agent_8111.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---python-worker",
+          "folder": "__home__",
+          "file": "python_worker.py",
+          "script": "/data/data/com.termux/files/home/python_worker.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---salathanie-ai-node",
+          "folder": "__home__",
+          "file": "salathanie_ai_node.py",
+          "script": "/data/data/com.termux/files/home/salathanie_ai_node.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---studio-auto-engine",
+          "folder": "__home__",
+          "file": "studio_auto_engine.py",
+          "script": "/data/data/com.termux/files/home/studio_auto_engine.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---studio-cinema-mcp-81",
+          "folder": "__home__",
+          "file": "studio_cinema_mcp_8121.py",
+          "script": "/data/data/com.termux/files/home/studio_cinema_mcp_8121.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---telemetry-sentinel",
+          "folder": "__home__",
+          "file": "telemetry_sentinel.py",
+          "script": "/data/data/com.termux/files/home/telemetry_sentinel.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---trust-center-8117",
+          "folder": "__home__",
+          "file": "trust_center_8117.py",
+          "script": "/data/data/com.termux/files/home/trust_center_8117.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---webhook-listener-811",
+          "folder": "__home__",
+          "file": "webhook_listener_8115.py",
+          "script": "/data/data/com.termux/files/home/webhook_listener_8115.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---websocket-telemetry-",
+          "folder": "__home__",
+          "file": "websocket_telemetry_streamer.py",
+          "script": "/data/data/com.termux/files/home/websocket_telemetry_streamer.py",
+          "cwd": "/data/data/com.termux/files/home",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-alstra-dual-pe",
+          "folder": "__home__",
+          "file": "astra_alstra_dual_persona_8159.py",
+          "script": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source/astra_alstra_dual_persona_8159.py",
+          "cwd": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco---home---astra-telemetry-hud",
+          "folder": "__home__",
+          "file": "astra_telemetry_hud.py",
+          "script": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source/astra_telemetry_hud.py",
+          "cwd": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "ALSTRA_VERIFIED_EVIDENCE_BUNDLE",
+      "path": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE",
+      "html_files": [
+        "index.html"
+      ],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "aashoo-agent",
+      "path": "/data/data/com.termux/files/home/aashoo-agent",
+      "html_files": [
+        "google17c261b6628668a1.html",
+        "index.html"
+      ],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "ai-studio-dealership",
+      "path": "/data/data/com.termux/files/home/ai-studio-dealership",
+      "html_files": [
+        "index.html"
+      ],
+      "db_files": [
+        "dealership_ledger.db"
+      ],
+      "services": [
+        {
+          "name": "eco-ai-studio--dealership-core",
+          "folder": "ai-studio-dealership",
+          "file": "dealership_core.py",
+          "script": "/data/data/com.termux/files/home/ai-studio-dealership/dealership_core.py",
+          "cwd": "/data/data/com.termux/files/home/ai-studio-dealership",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "ai-studio-legal",
+      "path": "/data/data/com.termux/files/home/ai-studio-legal",
+      "html_files": [],
+      "db_files": [
+        "legal_doctrine.db"
+      ],
+      "services": [
+        {
+          "name": "eco-ai-studio--legal-brain",
+          "folder": "ai-studio-legal",
+          "file": "legal_brain.py",
+          "script": "/data/data/com.termux/files/home/ai-studio-legal/legal_brain.py",
+          "cwd": "/data/data/com.termux/files/home/ai-studio-legal",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "alstra-core",
+      "path": "/data/data/com.termux/files/home/alstra-core",
+      "html_files": [
+        "hud.html"
+      ],
+      "db_files": [
+        "alstra_core.db",
+        "deepspace_core.db",
+        "enterprise_jeti.db"
+      ],
+      "services": [
+        {
+          "name": "eco-alstra-cor-alstra-dashboard-vie",
+          "folder": "alstra-core",
+          "file": "alstra_dashboard_view.py",
+          "script": "/data/data/com.termux/files/home/alstra-core/alstra_dashboard_view.py",
+          "cwd": "/data/data/com.termux/files/home/alstra-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-alstra-cor-alstra-master-orches",
+          "folder": "alstra-core",
+          "file": "alstra_master_orchestrator.py",
+          "script": "/data/data/com.termux/files/home/alstra-core/alstra_master_orchestrator.py",
+          "cwd": "/data/data/com.termux/files/home/alstra-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-alstra-cor-alstra-monitor-panel",
+          "folder": "alstra-core",
+          "file": "alstra_monitor_panel.py",
+          "script": "/data/data/com.termux/files/home/alstra-core/alstra_monitor_panel.py",
+          "cwd": "/data/data/com.termux/files/home/alstra-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-alstra-cor-alstra-secure-receiv",
+          "folder": "alstra-core",
+          "file": "alstra_secure_receiver.py",
+          "script": "/data/data/com.termux/files/home/alstra-core/alstra_secure_receiver.py",
+          "cwd": "/data/data/com.termux/files/home/alstra-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-alstra-cor-deepspace-spine",
+          "folder": "alstra-core",
+          "file": "deepspace_spine.py",
+          "script": "/data/data/com.termux/files/home/alstra-core/deepspace_spine.py",
+          "cwd": "/data/data/com.termux/files/home/alstra-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-alstra-cor-unified-server",
+          "folder": "alstra-core",
+          "file": "unified_server.py",
+          "script": "/data/data/com.termux/files/home/alstra-core/unified_server.py",
+          "cwd": "/data/data/com.termux/files/home/alstra-core",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "alstra-workspace",
+      "path": "/data/data/com.termux/files/home/alstra-workspace",
+      "html_files": [],
+      "db_files": [
+        "astra_deepspace_ledger.db"
+      ],
+      "services": [
+        {
+          "name": "eco-alstra-wor-websocket-telemetry-",
+          "folder": "alstra-workspace",
+          "file": "websocket_telemetry_server.py",
+          "script": "/data/data/com.termux/files/home/alstra-workspace/websocket_telemetry_server.py",
+          "cwd": "/data/data/com.termux/files/home/alstra-workspace",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-177b-nexus",
+      "path": "/data/data/com.termux/files/home/astra-177b-nexus",
+      "html_files": [],
+      "db_files": [
+        "nexus_177b_brain.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-177b-astra-177b-nexus",
+          "folder": "astra-177b-nexus",
+          "file": "astra_177b_nexus.py",
+          "script": "/data/data/com.termux/files/home/astra-177b-nexus/astra_177b_nexus.py",
+          "cwd": "/data/data/com.termux/files/home/astra-177b-nexus",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-auto-router",
+      "path": "/data/data/com.termux/files/home/astra-auto-router",
+      "html_files": [],
+      "db_files": [
+        "auto_router.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-auto-auto-router",
+          "folder": "astra-auto-router",
+          "file": "auto_router.py",
+          "script": "/data/data/com.termux/files/home/astra-auto-router/auto_router.py",
+          "cwd": "/data/data/com.termux/files/home/astra-auto-router",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-bi-engine",
+      "path": "/data/data/com.termux/files/home/astra-bi-engine",
+      "html_files": [],
+      "db_files": [
+        "business_superintelligence.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-bi-e-bi-superintelligence",
+          "folder": "astra-bi-engine",
+          "file": "bi_superintelligence.py",
+          "script": "/data/data/com.termux/files/home/astra-bi-engine/bi_superintelligence.py",
+          "cwd": "/data/data/com.termux/files/home/astra-bi-engine",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-enterprise-core",
+      "path": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "html_files": [
+        "command_center_full.html",
+        "dashboard.html",
+        "dual_stream_module.html"
+      ],
+      "db_files": [
+        "alstra_stream_ledger.db",
+        "astra_ledger.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-ente-agentic-mesh-8119",
+          "folder": "astra-enterprise-core",
+          "file": "agentic_mesh_8119.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/agentic_mesh_8119.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-alstra-autopilot",
+          "folder": "astra-enterprise-core",
+          "file": "alstra_autopilot.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/alstra_autopilot.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-4agent-sandbox",
+          "folder": "astra-enterprise-core",
+          "file": "astra_4agent_sandbox.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_4agent_sandbox.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-ai-memory-heal",
+          "folder": "astra-enterprise-core",
+          "file": "astra_ai_memory_healer.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_ai_memory_healer.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-cinema-mcp",
+          "folder": "astra-enterprise-core",
+          "file": "astra_cinema_mcp.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_cinema_mcp.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-e2e-validator",
+          "folder": "astra-enterprise-core",
+          "file": "astra_e2e_validator.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_e2e_validator.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-edge-ml",
+          "folder": "astra-enterprise-core",
+          "file": "astra_edge_ml.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_edge_ml.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-elite-cinema-a",
+          "folder": "astra-enterprise-core",
+          "file": "astra_elite_cinema_autopilot.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_elite_cinema_autopilot.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-generator-eval",
+          "folder": "astra-enterprise-core",
+          "file": "astra_generator_evaluator_loop.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_generator_evaluator_loop.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-invoice-agent",
+          "folder": "astra-enterprise-core",
+          "file": "astra_invoice_agent.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_invoice_agent.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-quantum-lattic",
+          "folder": "astra-enterprise-core",
+          "file": "astra_quantum_lattice.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_quantum_lattice.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-spatial-assist",
+          "folder": "astra-enterprise-core",
+          "file": "astra_spatial_assistant.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_spatial_assistant.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-supercomputer-",
+          "folder": "astra-enterprise-core",
+          "file": "astra_supercomputer_mesh.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_supercomputer_mesh.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-tdd-guardrails",
+          "folder": "astra-enterprise-core",
+          "file": "astra_tdd_guardrails.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_tdd_guardrails.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-telemetry-hud",
+          "folder": "astra-enterprise-core",
+          "file": "astra_telemetry_hud.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_telemetry_hud.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-trust-center",
+          "folder": "astra-enterprise-core",
+          "file": "astra_trust_center.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_trust_center.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-unified-brain",
+          "folder": "astra-enterprise-core",
+          "file": "astra_unified_brain.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_unified_brain.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-astra-webhook-listen",
+          "folder": "astra-enterprise-core",
+          "file": "astra_webhook_listener.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_webhook_listener.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-browser-agent",
+          "folder": "astra-enterprise-core",
+          "file": "browser_agent.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/browser_agent.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-codex-engineer",
+          "folder": "astra-enterprise-core",
+          "file": "codex_engineer.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/codex_engineer.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-core-engine",
+          "folder": "astra-enterprise-core",
+          "file": "core_engine.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/core_engine.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-dashboard-server",
+          "folder": "astra-enterprise-core",
+          "file": "dashboard_server.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/dashboard_server.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-dealership-module",
+          "folder": "astra-enterprise-core",
+          "file": "dealership_module.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/dealership_module.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-dual-stream-bridge",
+          "folder": "astra-enterprise-core",
+          "file": "dual_stream_bridge.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/dual_stream_bridge.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-invoice-agent-8111",
+          "folder": "astra-enterprise-core",
+          "file": "invoice_agent_8111.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/invoice_agent_8111.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-python-worker",
+          "folder": "astra-enterprise-core",
+          "file": "python_worker.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/python_worker.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-studio-auto-engine",
+          "folder": "astra-enterprise-core",
+          "file": "studio_auto_engine.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/studio_auto_engine.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-studio-cinema-mcp-81",
+          "folder": "astra-enterprise-core",
+          "file": "studio_cinema_mcp_8121.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/studio_cinema_mcp_8121.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-telemetry-sentinel",
+          "folder": "astra-enterprise-core",
+          "file": "telemetry_sentinel.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/telemetry_sentinel.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-trust-center-8117",
+          "folder": "astra-enterprise-core",
+          "file": "trust_center_8117.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/trust_center_8117.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-webhook-listener-811",
+          "folder": "astra-enterprise-core",
+          "file": "webhook_listener_8115.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/webhook_listener_8115.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-ente-websocket-telemetry-",
+          "folder": "astra-enterprise-core",
+          "file": "websocket_telemetry_streamer.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-core/websocket_telemetry_streamer.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-enterprise-gov",
+      "path": "/data/data/com.termux/files/home/astra-enterprise-gov",
+      "html_files": [],
+      "db_files": [
+        "enterprise_gov.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-ente-enterprise-gov",
+          "folder": "astra-enterprise-gov",
+          "file": "enterprise_gov.py",
+          "script": "/data/data/com.termux/files/home/astra-enterprise-gov/enterprise_gov.py",
+          "cwd": "/data/data/com.termux/files/home/astra-enterprise-gov",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-jev-system1",
+      "path": "/data/data/com.termux/files/home/astra-jev-system1",
+      "html_files": [],
+      "db_files": [
+        "jev_system1.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-jev--jev-router",
+          "folder": "astra-jev-system1",
+          "file": "jev_router.py",
+          "script": "/data/data/com.termux/files/home/astra-jev-system1/jev_router.py",
+          "cwd": "/data/data/com.termux/files/home/astra-jev-system1",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-location-intel",
+      "path": "/data/data/com.termux/files/home/astra-location-intel",
+      "html_files": [],
+      "db_files": [
+        "location_intel.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-loca-location-intel-engin",
+          "folder": "astra-location-intel",
+          "file": "location_intel_engine.py",
+          "script": "/data/data/com.termux/files/home/astra-location-intel/location_intel_engine.py",
+          "cwd": "/data/data/com.termux/files/home/astra-location-intel",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-media-studio",
+      "path": "/data/data/com.termux/files/home/astra-media-studio",
+      "html_files": [],
+      "db_files": [
+        "media_studio.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-medi-media-engine",
+          "folder": "astra-media-studio",
+          "file": "media_engine.py",
+          "script": "/data/data/com.termux/files/home/astra-media-studio/media_engine.py",
+          "cwd": "/data/data/com.termux/files/home/astra-media-studio",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-mediapipe-tasks",
+      "path": "/data/data/com.termux/files/home/astra-mediapipe-tasks",
+      "html_files": [
+        "webgpu_runner.html"
+      ],
+      "db_files": [
+        "mediapipe_tasks.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-medi-mediapipe-edge-ml",
+          "folder": "astra-mediapipe-tasks",
+          "file": "mediapipe_edge_ml.py",
+          "script": "/data/data/com.termux/files/home/astra-mediapipe-tasks/mediapipe_edge_ml.py",
+          "cwd": "/data/data/com.termux/files/home/astra-mediapipe-tasks",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-memory-brain",
+      "path": "/data/data/com.termux/files/home/astra-memory-brain",
+      "html_files": [],
+      "db_files": [
+        "astra_45m_brain.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-memo-astra-brain",
+          "folder": "astra-memory-brain",
+          "file": "astra_brain.py",
+          "script": "/data/data/com.termux/files/home/astra-memory-brain/astra_brain.py",
+          "cwd": "/data/data/com.termux/files/home/astra-memory-brain",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-multimodal",
+      "path": "/data/data/com.termux/files/home/astra-multimodal",
+      "html_files": [],
+      "db_files": [
+        "multimodal.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-mult-multimodal-agent",
+          "folder": "astra-multimodal",
+          "file": "multimodal_agent.py",
+          "script": "/data/data/com.termux/files/home/astra-multimodal/multimodal_agent.py",
+          "cwd": "/data/data/com.termux/files/home/astra-multimodal",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-ooda-os",
+      "path": "/data/data/com.termux/files/home/astra-ooda-os",
+      "html_files": [],
+      "db_files": [
+        "infinite_brain_ooda.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-ooda-ooda-os-core",
+          "folder": "astra-ooda-os",
+          "file": "ooda_os_core.py",
+          "script": "/data/data/com.termux/files/home/astra-ooda-os/ooda_os_core.py",
+          "cwd": "/data/data/com.termux/files/home/astra-ooda-os",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-osint-harvester",
+      "path": "/data/data/com.termux/files/home/astra-osint-harvester",
+      "html_files": [],
+      "db_files": [
+        "world_knowledge.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-osin-osint-harvester",
+          "folder": "astra-osint-harvester",
+          "file": "osint_harvester.py",
+          "script": "/data/data/com.termux/files/home/astra-osint-harvester/osint_harvester.py",
+          "cwd": "/data/data/com.termux/files/home/astra-osint-harvester",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-reverse-supercomputer",
+      "path": "/data/data/com.termux/files/home/astra-reverse-supercomputer",
+      "html_files": [],
+      "db_files": [
+        "re_supercomputer.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-reve-re-anything-addon",
+          "folder": "astra-reverse-supercomputer",
+          "file": "re_anything_addon.py",
+          "script": "/data/data/com.termux/files/home/astra-reverse-supercomputer/re_anything_addon.py",
+          "cwd": "/data/data/com.termux/files/home/astra-reverse-supercomputer",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-reve-re-supercomputer",
+          "folder": "astra-reverse-supercomputer",
+          "file": "re_supercomputer.py",
+          "script": "/data/data/com.termux/files/home/astra-reverse-supercomputer/re_supercomputer.py",
+          "cwd": "/data/data/com.termux/files/home/astra-reverse-supercomputer",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-reve-telemetry-assistant",
+          "folder": "astra-reverse-supercomputer",
+          "file": "telemetry_assistant.py",
+          "script": "/data/data/com.termux/files/home/astra-reverse-supercomputer/telemetry_assistant.py",
+          "cwd": "/data/data/com.termux/files/home/astra-reverse-supercomputer",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-seo-franchise",
+      "path": "/data/data/com.termux/files/home/astra-seo-franchise",
+      "html_files": [],
+      "db_files": [
+        "seo_geo_franchise.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-seo--seo-geo-franchise",
+          "folder": "astra-seo-franchise",
+          "file": "seo_geo_franchise.py",
+          "script": "/data/data/com.termux/files/home/astra-seo-franchise/seo_geo_franchise.py",
+          "cwd": "/data/data/com.termux/files/home/astra-seo-franchise",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-studio-pro",
+      "path": "/data/data/com.termux/files/home/astra-studio-pro",
+      "html_files": [],
+      "db_files": [
+        "studio_pro.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-stud-studio-pro-engine",
+          "folder": "astra-studio-pro",
+          "file": "studio_pro_engine.py",
+          "script": "/data/data/com.termux/files/home/astra-studio-pro/studio_pro_engine.py",
+          "cwd": "/data/data/com.termux/files/home/astra-studio-pro",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-termux-v1",
+      "path": "/data/data/com.termux/files/home/astra-termux-v1",
+      "html_files": [],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "astra-unified-brain",
+      "path": "/data/data/com.termux/files/home/astra-unified-brain",
+      "html_files": [],
+      "db_files": [
+        "glass_box_brain.db"
+      ],
+      "services": [
+        {
+          "name": "eco-astra-unif-compute-router-8108-",
+          "folder": "astra-unified-brain",
+          "file": "compute_router_8108_8109.py",
+          "script": "/data/data/com.termux/files/home/astra-unified-brain/compute_router_8108_8109.py",
+          "cwd": "/data/data/com.termux/files/home/astra-unified-brain",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-astra-unif-unified-brain-os",
+          "folder": "astra-unified-brain",
+          "file": "unified_brain_os.py",
+          "script": "/data/data/com.termux/files/home/astra-unified-brain/unified_brain_os.py",
+          "cwd": "/data/data/com.termux/files/home/astra-unified-brain",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra-workflows",
+      "path": "/data/data/com.termux/files/home/astra-workflows",
+      "html_files": [],
+      "db_files": [],
+      "services": [
+        {
+          "name": "eco-astra-work-autonomous-workflows",
+          "folder": "astra-workflows",
+          "file": "autonomous_workflows_backup.py",
+          "script": "/data/data/com.termux/files/home/astra-workflows/autonomous_workflows_backup.py",
+          "cwd": "/data/data/com.termux/files/home/astra-workflows",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "astra_backups",
+      "path": "/data/data/com.termux/files/home/astra_backups",
+      "html_files": [],
+      "db_files": [
+        "20261115_171027_astra_brain_memory.db",
+        "20261115_171027_astra_dealership_ledger.db",
+        "20261115_171027_astra_invoice_ledger.db",
+        "20261115_171027_astra_webhook_ledger.db",
+        "20261115_171054_astra_brain_memory.db",
+        "20261115_171054_astra_dealership_ledger.db",
+        "20261115_171054_astra_invoice_ledger.db",
+        "20261115_171054_astra_webhook_ledger.db"
+      ],
+      "services": []
+    },
+    {
+      "folder": "astra_deploy_blueprint",
+      "path": "/data/data/com.termux/files/home/astra_deploy_blueprint",
+      "html_files": [],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "bci_defense_project",
+      "path": "/data/data/com.termux/files/home/bci_defense_project",
+      "html_files": [],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "bridges",
+      "path": "/data/data/com.termux/files/home/bridges",
+      "html_files": [],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "ccb-super-agent-20261021",
+      "path": "/data/data/com.termux/files/home/ccb-super-agent-20261021",
+      "html_files": [],
+      "db_files": [],
+      "services": [
+        {
+          "name": "eco-ccb-super--secure-lab",
+          "folder": "ccb-super-agent-20261021",
+          "file": "secure_lab.py",
+          "script": "/data/data/com.termux/files/home/ccb-super-agent-20261021/secure_lab.py",
+          "cwd": "/data/data/com.termux/files/home/ccb-super-agent-20261021",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-ccb-super--super-agent",
+          "folder": "ccb-super-agent-20261021",
+          "file": "super_agent.py",
+          "script": "/data/data/com.termux/files/home/ccb-super-agent-20261021/super_agent.py",
+          "cwd": "/data/data/com.termux/files/home/ccb-super-agent-20261021",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "chronicle-analytics",
+      "path": "/data/data/com.termux/files/home/chronicle-analytics",
+      "html_files": [],
+      "db_files": [
+        "production_perfection.db"
+      ],
+      "services": []
+    },
+    {
+      "folder": "core3d_hud",
+      "path": "/data/data/com.termux/files/home/core3d_hud",
+      "html_files": [
+        "index.html"
+      ],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "docker_spatial_3d",
+      "path": "/data/data/com.termux/files/home/docker_spatial_3d",
+      "html_files": [
+        "ALSTRA_SPATIAL_3D_ENGINE.html"
+      ],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "downloads",
+      "path": "/data/data/com.termux/files/home/downloads",
+      "html_files": [],
+      "db_files": [],
+      "services": [
+        {
+          "name": "eco-downloads-api-gateway",
+          "folder": "downloads",
+          "file": "api_gateway.py",
+          "script": "/data/data/com.termux/files/home/downloads/api_gateway.py",
+          "cwd": "/data/data/com.termux/files/home/downloads",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "freellmapi",
+      "path": "/data/data/com.termux/files/home/freellmapi",
+      "html_files": [],
+      "db_files": [],
+      "services": [
+        {
+          "name": "eco-freellmapi-server-bridge",
+          "folder": "freellmapi",
+          "file": "server_bridge.py",
+          "script": "/data/data/com.termux/files/home/freellmapi/server_bridge.py",
+          "cwd": "/data/data/com.termux/files/home/freellmapi",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "live-command-center",
+      "path": "/data/data/com.termux/files/home/live-command-center",
+      "html_files": [
+        "ALSTRA_API_CONSOLE.html",
+        "ALSTRA_SPATIAL_3D_ENGINE.html",
+        "astra_command_center.html",
+        "command_center_full.html",
+        "dashboard.html",
+        "dual_stream_module.html",
+        "index.html"
+      ],
+      "db_files": [
+        "alstra_flight_ledger.db",
+        "astra_flight_ledger.db",
+        "salathanie_agents.db",
+        "salathanie_astra_jet.db",
+        "salathanie_creative.db",
+        "salathanie_mesh_studio.db",
+        "salathanie_v3.db"
+      ],
+      "services": [
+        {
+          "name": "eco-live-comma-agentic-mesh-8119",
+          "folder": "live-command-center",
+          "file": "agentic_mesh_8119.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/agentic_mesh_8119.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-alstra-autopilot",
+          "folder": "live-command-center",
+          "file": "alstra_autopilot.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/alstra_autopilot.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-alstra-master-spine-",
+          "folder": "live-command-center",
+          "file": "alstra_master_spine_8095.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/alstra_master_spine_8095.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-3stream",
+          "folder": "live-command-center",
+          "file": "astra_3stream.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_3stream.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-alstra-dual-pe",
+          "folder": "live-command-center",
+          "file": "astra_alstra_dual_persona_8159.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_alstra_dual_persona_8159.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-cinema-mcp",
+          "folder": "live-command-center",
+          "file": "astra_cinema_mcp.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_cinema_mcp.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-context-teleme",
+          "folder": "live-command-center",
+          "file": "astra_context_telemetry_monitor.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_context_telemetry_monitor.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-edge-ml",
+          "folder": "live-command-center",
+          "file": "astra_edge_ml.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_edge_ml.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-github-watchdo",
+          "folder": "live-command-center",
+          "file": "astra_github_watchdog_daemon.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_github_watchdog_daemon.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-invoice-agent",
+          "folder": "live-command-center",
+          "file": "astra_invoice_agent.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_invoice_agent.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-master-sync",
+          "folder": "live-command-center",
+          "file": "astra_master_sync.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_master_sync.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-openai-tool-pr",
+          "folder": "live-command-center",
+          "file": "astra_openai_tool_proxy.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_openai_tool_proxy.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-quantum-lattic",
+          "folder": "live-command-center",
+          "file": "astra_quantum_lattice.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_quantum_lattice.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-saga-gov-nodes",
+          "folder": "live-command-center",
+          "file": "astra_saga_gov_nodes.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_saga_gov_nodes.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-spatial-assist",
+          "folder": "live-command-center",
+          "file": "astra_spatial_assistant.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_spatial_assistant.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-supercomputer-",
+          "folder": "live-command-center",
+          "file": "astra_supercomputer_mesh.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_supercomputer_mesh.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-svc-8182",
+          "folder": "live-command-center",
+          "file": "astra_svc_8182.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_svc_8182.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-telemetry-hud",
+          "folder": "live-command-center",
+          "file": "astra_telemetry_hud.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_telemetry_hud.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-trust-center-8",
+          "folder": "live-command-center",
+          "file": "astra_trust_center_8117.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_trust_center_8117.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-unified-brain",
+          "folder": "live-command-center",
+          "file": "astra_unified_brain.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_unified_brain.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-webhook-listen",
+          "folder": "live-command-center",
+          "file": "astra_webhook_listener.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/astra_webhook_listener.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-browser-agent",
+          "folder": "live-command-center",
+          "file": "browser_agent.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/browser_agent.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-codex-engineer",
+          "folder": "live-command-center",
+          "file": "codex_engineer.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/codex_engineer.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-core-engine",
+          "folder": "live-command-center",
+          "file": "core_engine.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/core_engine.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-dealership-module",
+          "folder": "live-command-center",
+          "file": "dealership_module.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/dealership_module.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-dual-stream-bridge",
+          "folder": "live-command-center",
+          "file": "dual_stream_bridge.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/dual_stream_bridge.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-invoice-agent-8111",
+          "folder": "live-command-center",
+          "file": "invoice_agent_8111.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/invoice_agent_8111.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-python-worker",
+          "folder": "live-command-center",
+          "file": "python_worker.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/python_worker.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-salathanie-agents",
+          "folder": "live-command-center",
+          "file": "salathanie_agents.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/salathanie_agents.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-solar-wattage-stream",
+          "folder": "live-command-center",
+          "file": "solar_wattage_streamer.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/solar_wattage_streamer.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-studio-auto-engine",
+          "folder": "live-command-center",
+          "file": "studio_auto_engine.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/studio_auto_engine.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-studio-cinema-mcp-81",
+          "folder": "live-command-center",
+          "file": "studio_cinema_mcp_8121.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/studio_cinema_mcp_8121.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-telemetry-sentinel",
+          "folder": "live-command-center",
+          "file": "telemetry_sentinel.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/telemetry_sentinel.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-trinity-core",
+          "folder": "live-command-center",
+          "file": "trinity_core.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/trinity_core.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-trust-center-8117",
+          "folder": "live-command-center",
+          "file": "trust_center_8117.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/trust_center_8117.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-webhook-listener-811",
+          "folder": "live-command-center",
+          "file": "webhook_listener_8115.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/webhook_listener_8115.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-websocket-telemetry-",
+          "folder": "live-command-center",
+          "file": "websocket_telemetry_streamer.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/websocket_telemetry_streamer.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-alstra-dual-pe",
+          "folder": "live-command-center",
+          "file": "astra_alstra_dual_persona_8159.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source/astra_alstra_dual_persona_8159.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-live-comma-astra-telemetry-hud",
+          "folder": "live-command-center",
+          "file": "astra_telemetry_hud.py",
+          "script": "/data/data/com.termux/files/home/live-command-center/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source/astra_telemetry_hud.py",
+          "cwd": "/data/data/com.termux/files/home/live-command-center/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "models",
+      "path": "/data/data/com.termux/files/home/models",
+      "html_files": [
+        "astra_dashboard.html"
+      ],
+      "db_files": [],
+      "services": [
+        {
+          "name": "eco-models-alstra-autopilot",
+          "folder": "models",
+          "file": "alstra_autopilot.py",
+          "script": "/data/data/com.termux/files/home/models/alstra_autopilot.py",
+          "cwd": "/data/data/com.termux/files/home/models",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-models-api-gateway",
+          "folder": "models",
+          "file": "api_gateway.py",
+          "script": "/data/data/com.termux/files/home/models/api_gateway.py",
+          "cwd": "/data/data/com.termux/files/home/models",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-models-astra-unified-matrix",
+          "folder": "models",
+          "file": "astra_unified_matrix.py",
+          "script": "/data/data/com.termux/files/home/models/astra_unified_matrix.py",
+          "cwd": "/data/data/com.termux/files/home/models",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-models-astra-websocket-tele",
+          "folder": "models",
+          "file": "astra_websocket_telemetry.py",
+          "script": "/data/data/com.termux/files/home/models/astra_websocket_telemetry.py",
+          "cwd": "/data/data/com.termux/files/home/models",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-models-listen-qasm",
+          "folder": "models",
+          "file": "listen_qasm.py",
+          "script": "/data/data/com.termux/files/home/models/listen_qasm.py",
+          "cwd": "/data/data/com.termux/files/home/models",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-models-run-server",
+          "folder": "models",
+          "file": "run_server.py",
+          "script": "/data/data/com.termux/files/home/models/run_server.py",
+          "cwd": "/data/data/com.termux/files/home/models",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-models-run-ws-client",
+          "folder": "models",
+          "file": "run_ws_client.py",
+          "script": "/data/data/com.termux/files/home/models/run_ws_client.py",
+          "cwd": "/data/data/com.termux/files/home/models",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-models-test-client",
+          "folder": "models",
+          "file": "test_client.py",
+          "script": "/data/data/com.termux/files/home/models/test_client.py",
+          "cwd": "/data/data/com.termux/files/home/models",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "portable_vserver",
+      "path": "/data/data/com.termux/files/home/portable_vserver",
+      "html_files": [],
+      "db_files": [
+        "agent_memory.db",
+        "vserver_state.db"
+      ],
+      "services": [
+        {
+          "name": "eco-portable-v-agent-bridge",
+          "folder": "portable_vserver",
+          "file": "agent_bridge.py",
+          "script": "/data/data/com.termux/files/home/portable_vserver/agent_bridge.py",
+          "cwd": "/data/data/com.termux/files/home/portable_vserver",
+          "max_memory_restart": "64M"
+        },
+        {
+          "name": "eco-portable-v-vserver",
+          "folder": "portable_vserver",
+          "file": "vserver.py",
+          "script": "/data/data/com.termux/files/home/portable_vserver/vserver.py",
+          "cwd": "/data/data/com.termux/files/home/portable_vserver",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "public",
+      "path": "/data/data/com.termux/files/home/public",
+      "html_files": [
+        "airspace.html",
+        "business.html",
+        "chat.html",
+        "deployment-center.html",
+        "index.html",
+        "nasa-imagery-test.html",
+        "official.html",
+        "request-deployment.html",
+        "tri-chat.html"
+      ],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "scripts",
+      "path": "/data/data/com.termux/files/home/scripts",
+      "html_files": [],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "telemetry-spine",
+      "path": "/data/data/com.termux/files/home/telemetry-spine",
+      "html_files": [],
+      "db_files": [],
+      "services": []
+    },
+    {
+      "folder": "telemetry_spine",
+      "path": "/data/data/com.termux/files/home/telemetry_spine",
+      "html_files": [],
+      "db_files": [],
+      "services": [
+        {
+          "name": "eco-telemetry--test-uplink-harness",
+          "folder": "telemetry_spine",
+          "file": "test_uplink_harness.py",
+          "script": "/data/data/com.termux/files/home/telemetry_spine/test_uplink_harness.py",
+          "cwd": "/data/data/com.termux/files/home/telemetry_spine",
+          "max_memory_restart": "64M"
+        }
+      ]
+    },
+    {
+      "folder": "vr",
+      "path": "/data/data/com.termux/files/home/vr",
+      "html_files": [],
+      "db_files": [],
+      "services": []
+    }
+  ],
+  "ondemand_services": [
+    {
+      "name": "eco---home---agentic-mesh-8119",
+      "folder": "__home__",
+      "file": "agentic_mesh_8119.py",
+      "script": "/data/data/com.termux/files/home/agentic_mesh_8119.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---alstra-autopilot",
+      "folder": "__home__",
+      "file": "alstra_autopilot.py",
+      "script": "/data/data/com.termux/files/home/alstra_autopilot.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---alstra-master-spine-",
+      "folder": "__home__",
+      "file": "alstra_master_spine_8095.py",
+      "script": "/data/data/com.termux/files/home/alstra_master_spine_8095.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-3stream",
+      "folder": "__home__",
+      "file": "astra_3stream.py",
+      "script": "/data/data/com.termux/files/home/astra_3stream.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-alstra-dual-pe",
+      "folder": "__home__",
+      "file": "astra_alstra_dual_persona_8159.py",
+      "script": "/data/data/com.termux/files/home/astra_alstra_dual_persona_8159.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-cinema-mcp",
+      "folder": "__home__",
+      "file": "astra_cinema_mcp.py",
+      "script": "/data/data/com.termux/files/home/astra_cinema_mcp.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-context-teleme",
+      "folder": "__home__",
+      "file": "astra_context_telemetry_monitor.py",
+      "script": "/data/data/com.termux/files/home/astra_context_telemetry_monitor.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-edge-ml",
+      "folder": "__home__",
+      "file": "astra_edge_ml.py",
+      "script": "/data/data/com.termux/files/home/astra_edge_ml.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-github-watchdo",
+      "folder": "__home__",
+      "file": "astra_github_watchdog_daemon.py",
+      "script": "/data/data/com.termux/files/home/astra_github_watchdog_daemon.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-ingress-8088",
+      "folder": "__home__",
+      "file": "astra_ingress_8088.py",
+      "script": "/data/data/com.termux/files/home/astra_ingress_8088.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-invoice-agent",
+      "folder": "__home__",
+      "file": "astra_invoice_agent.py",
+      "script": "/data/data/com.termux/files/home/astra_invoice_agent.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-omni-mux",
+      "folder": "__home__",
+      "file": "astra_omni_mux.py",
+      "script": "/data/data/com.termux/files/home/astra_omni_mux.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-openai-tool-pr",
+      "folder": "__home__",
+      "file": "astra_openai_tool_proxy.py",
+      "script": "/data/data/com.termux/files/home/astra_openai_tool_proxy.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-quantum-lattic",
+      "folder": "__home__",
+      "file": "astra_quantum_lattice.py",
+      "script": "/data/data/com.termux/files/home/astra_quantum_lattice.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-saga-gov-nodes",
+      "folder": "__home__",
+      "file": "astra_saga_gov_nodes.py",
+      "script": "/data/data/com.termux/files/home/astra_saga_gov_nodes.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-spatial-assist",
+      "folder": "__home__",
+      "file": "astra_spatial_assistant.py",
+      "script": "/data/data/com.termux/files/home/astra_spatial_assistant.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-supercomputer-",
+      "folder": "__home__",
+      "file": "astra_supercomputer_mesh.py",
+      "script": "/data/data/com.termux/files/home/astra_supercomputer_mesh.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-svc-8180",
+      "folder": "__home__",
+      "file": "astra_svc_8180.py",
+      "script": "/data/data/com.termux/files/home/astra_svc_8180.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-telemetry-hud",
+      "folder": "__home__",
+      "file": "astra_telemetry_hud.py",
+      "script": "/data/data/com.termux/files/home/astra_telemetry_hud.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-trust-center-8",
+      "folder": "__home__",
+      "file": "astra_trust_center_8117.py",
+      "script": "/data/data/com.termux/files/home/astra_trust_center_8117.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-unified-brain",
+      "folder": "__home__",
+      "file": "astra_unified_brain.py",
+      "script": "/data/data/com.termux/files/home/astra_unified_brain.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-webhook-listen",
+      "folder": "__home__",
+      "file": "astra_webhook_listener.py",
+      "script": "/data/data/com.termux/files/home/astra_webhook_listener.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---browser-agent",
+      "folder": "__home__",
+      "file": "browser_agent.py",
+      "script": "/data/data/com.termux/files/home/browser_agent.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---codex-engineer",
+      "folder": "__home__",
+      "file": "codex_engineer.py",
+      "script": "/data/data/com.termux/files/home/codex_engineer.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---core-engine",
+      "folder": "__home__",
+      "file": "core_engine.py",
+      "script": "/data/data/com.termux/files/home/core_engine.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---dealership-module",
+      "folder": "__home__",
+      "file": "dealership_module.py",
+      "script": "/data/data/com.termux/files/home/dealership_module.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---dual-stream-bridge",
+      "folder": "__home__",
+      "file": "dual_stream_bridge.py",
+      "script": "/data/data/com.termux/files/home/dual_stream_bridge.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---invoice-agent-8111",
+      "folder": "__home__",
+      "file": "invoice_agent_8111.py",
+      "script": "/data/data/com.termux/files/home/invoice_agent_8111.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---python-worker",
+      "folder": "__home__",
+      "file": "python_worker.py",
+      "script": "/data/data/com.termux/files/home/python_worker.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---salathanie-ai-node",
+      "folder": "__home__",
+      "file": "salathanie_ai_node.py",
+      "script": "/data/data/com.termux/files/home/salathanie_ai_node.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---studio-auto-engine",
+      "folder": "__home__",
+      "file": "studio_auto_engine.py",
+      "script": "/data/data/com.termux/files/home/studio_auto_engine.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---studio-cinema-mcp-81",
+      "folder": "__home__",
+      "file": "studio_cinema_mcp_8121.py",
+      "script": "/data/data/com.termux/files/home/studio_cinema_mcp_8121.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---telemetry-sentinel",
+      "folder": "__home__",
+      "file": "telemetry_sentinel.py",
+      "script": "/data/data/com.termux/files/home/telemetry_sentinel.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---trust-center-8117",
+      "folder": "__home__",
+      "file": "trust_center_8117.py",
+      "script": "/data/data/com.termux/files/home/trust_center_8117.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---webhook-listener-811",
+      "folder": "__home__",
+      "file": "webhook_listener_8115.py",
+      "script": "/data/data/com.termux/files/home/webhook_listener_8115.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---websocket-telemetry-",
+      "folder": "__home__",
+      "file": "websocket_telemetry_streamer.py",
+      "script": "/data/data/com.termux/files/home/websocket_telemetry_streamer.py",
+      "cwd": "/data/data/com.termux/files/home",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-alstra-dual-pe",
+      "folder": "__home__",
+      "file": "astra_alstra_dual_persona_8159.py",
+      "script": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source/astra_alstra_dual_persona_8159.py",
+      "cwd": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco---home---astra-telemetry-hud",
+      "folder": "__home__",
+      "file": "astra_telemetry_hud.py",
+      "script": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source/astra_telemetry_hud.py",
+      "cwd": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-ai-studio--dealership-core",
+      "folder": "ai-studio-dealership",
+      "file": "dealership_core.py",
+      "script": "/data/data/com.termux/files/home/ai-studio-dealership/dealership_core.py",
+      "cwd": "/data/data/com.termux/files/home/ai-studio-dealership",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-ai-studio--legal-brain",
+      "folder": "ai-studio-legal",
+      "file": "legal_brain.py",
+      "script": "/data/data/com.termux/files/home/ai-studio-legal/legal_brain.py",
+      "cwd": "/data/data/com.termux/files/home/ai-studio-legal",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-alstra-cor-alstra-dashboard-vie",
+      "folder": "alstra-core",
+      "file": "alstra_dashboard_view.py",
+      "script": "/data/data/com.termux/files/home/alstra-core/alstra_dashboard_view.py",
+      "cwd": "/data/data/com.termux/files/home/alstra-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-alstra-cor-alstra-master-orches",
+      "folder": "alstra-core",
+      "file": "alstra_master_orchestrator.py",
+      "script": "/data/data/com.termux/files/home/alstra-core/alstra_master_orchestrator.py",
+      "cwd": "/data/data/com.termux/files/home/alstra-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-alstra-cor-alstra-monitor-panel",
+      "folder": "alstra-core",
+      "file": "alstra_monitor_panel.py",
+      "script": "/data/data/com.termux/files/home/alstra-core/alstra_monitor_panel.py",
+      "cwd": "/data/data/com.termux/files/home/alstra-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-alstra-cor-alstra-secure-receiv",
+      "folder": "alstra-core",
+      "file": "alstra_secure_receiver.py",
+      "script": "/data/data/com.termux/files/home/alstra-core/alstra_secure_receiver.py",
+      "cwd": "/data/data/com.termux/files/home/alstra-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-alstra-cor-deepspace-spine",
+      "folder": "alstra-core",
+      "file": "deepspace_spine.py",
+      "script": "/data/data/com.termux/files/home/alstra-core/deepspace_spine.py",
+      "cwd": "/data/data/com.termux/files/home/alstra-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-alstra-cor-unified-server",
+      "folder": "alstra-core",
+      "file": "unified_server.py",
+      "script": "/data/data/com.termux/files/home/alstra-core/unified_server.py",
+      "cwd": "/data/data/com.termux/files/home/alstra-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-alstra-wor-websocket-telemetry-",
+      "folder": "alstra-workspace",
+      "file": "websocket_telemetry_server.py",
+      "script": "/data/data/com.termux/files/home/alstra-workspace/websocket_telemetry_server.py",
+      "cwd": "/data/data/com.termux/files/home/alstra-workspace",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-177b-astra-177b-nexus",
+      "folder": "astra-177b-nexus",
+      "file": "astra_177b_nexus.py",
+      "script": "/data/data/com.termux/files/home/astra-177b-nexus/astra_177b_nexus.py",
+      "cwd": "/data/data/com.termux/files/home/astra-177b-nexus",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-auto-auto-router",
+      "folder": "astra-auto-router",
+      "file": "auto_router.py",
+      "script": "/data/data/com.termux/files/home/astra-auto-router/auto_router.py",
+      "cwd": "/data/data/com.termux/files/home/astra-auto-router",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-bi-e-bi-superintelligence",
+      "folder": "astra-bi-engine",
+      "file": "bi_superintelligence.py",
+      "script": "/data/data/com.termux/files/home/astra-bi-engine/bi_superintelligence.py",
+      "cwd": "/data/data/com.termux/files/home/astra-bi-engine",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-agentic-mesh-8119",
+      "folder": "astra-enterprise-core",
+      "file": "agentic_mesh_8119.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/agentic_mesh_8119.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-alstra-autopilot",
+      "folder": "astra-enterprise-core",
+      "file": "alstra_autopilot.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/alstra_autopilot.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-4agent-sandbox",
+      "folder": "astra-enterprise-core",
+      "file": "astra_4agent_sandbox.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_4agent_sandbox.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-ai-memory-heal",
+      "folder": "astra-enterprise-core",
+      "file": "astra_ai_memory_healer.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_ai_memory_healer.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-cinema-mcp",
+      "folder": "astra-enterprise-core",
+      "file": "astra_cinema_mcp.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_cinema_mcp.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-e2e-validator",
+      "folder": "astra-enterprise-core",
+      "file": "astra_e2e_validator.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_e2e_validator.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-edge-ml",
+      "folder": "astra-enterprise-core",
+      "file": "astra_edge_ml.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_edge_ml.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-elite-cinema-a",
+      "folder": "astra-enterprise-core",
+      "file": "astra_elite_cinema_autopilot.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_elite_cinema_autopilot.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-generator-eval",
+      "folder": "astra-enterprise-core",
+      "file": "astra_generator_evaluator_loop.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_generator_evaluator_loop.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-invoice-agent",
+      "folder": "astra-enterprise-core",
+      "file": "astra_invoice_agent.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_invoice_agent.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-quantum-lattic",
+      "folder": "astra-enterprise-core",
+      "file": "astra_quantum_lattice.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_quantum_lattice.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-spatial-assist",
+      "folder": "astra-enterprise-core",
+      "file": "astra_spatial_assistant.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_spatial_assistant.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-supercomputer-",
+      "folder": "astra-enterprise-core",
+      "file": "astra_supercomputer_mesh.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_supercomputer_mesh.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-tdd-guardrails",
+      "folder": "astra-enterprise-core",
+      "file": "astra_tdd_guardrails.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_tdd_guardrails.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-telemetry-hud",
+      "folder": "astra-enterprise-core",
+      "file": "astra_telemetry_hud.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_telemetry_hud.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-trust-center",
+      "folder": "astra-enterprise-core",
+      "file": "astra_trust_center.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_trust_center.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-unified-brain",
+      "folder": "astra-enterprise-core",
+      "file": "astra_unified_brain.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_unified_brain.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-astra-webhook-listen",
+      "folder": "astra-enterprise-core",
+      "file": "astra_webhook_listener.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/astra_webhook_listener.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-browser-agent",
+      "folder": "astra-enterprise-core",
+      "file": "browser_agent.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/browser_agent.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-codex-engineer",
+      "folder": "astra-enterprise-core",
+      "file": "codex_engineer.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/codex_engineer.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-core-engine",
+      "folder": "astra-enterprise-core",
+      "file": "core_engine.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/core_engine.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-dashboard-server",
+      "folder": "astra-enterprise-core",
+      "file": "dashboard_server.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/dashboard_server.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-dealership-module",
+      "folder": "astra-enterprise-core",
+      "file": "dealership_module.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/dealership_module.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-dual-stream-bridge",
+      "folder": "astra-enterprise-core",
+      "file": "dual_stream_bridge.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/dual_stream_bridge.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-invoice-agent-8111",
+      "folder": "astra-enterprise-core",
+      "file": "invoice_agent_8111.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/invoice_agent_8111.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-python-worker",
+      "folder": "astra-enterprise-core",
+      "file": "python_worker.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/python_worker.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-studio-auto-engine",
+      "folder": "astra-enterprise-core",
+      "file": "studio_auto_engine.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/studio_auto_engine.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-studio-cinema-mcp-81",
+      "folder": "astra-enterprise-core",
+      "file": "studio_cinema_mcp_8121.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/studio_cinema_mcp_8121.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-telemetry-sentinel",
+      "folder": "astra-enterprise-core",
+      "file": "telemetry_sentinel.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/telemetry_sentinel.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-trust-center-8117",
+      "folder": "astra-enterprise-core",
+      "file": "trust_center_8117.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/trust_center_8117.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-webhook-listener-811",
+      "folder": "astra-enterprise-core",
+      "file": "webhook_listener_8115.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/webhook_listener_8115.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-websocket-telemetry-",
+      "folder": "astra-enterprise-core",
+      "file": "websocket_telemetry_streamer.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-core/websocket_telemetry_streamer.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ente-enterprise-gov",
+      "folder": "astra-enterprise-gov",
+      "file": "enterprise_gov.py",
+      "script": "/data/data/com.termux/files/home/astra-enterprise-gov/enterprise_gov.py",
+      "cwd": "/data/data/com.termux/files/home/astra-enterprise-gov",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-jev--jev-router",
+      "folder": "astra-jev-system1",
+      "file": "jev_router.py",
+      "script": "/data/data/com.termux/files/home/astra-jev-system1/jev_router.py",
+      "cwd": "/data/data/com.termux/files/home/astra-jev-system1",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-loca-location-intel-engin",
+      "folder": "astra-location-intel",
+      "file": "location_intel_engine.py",
+      "script": "/data/data/com.termux/files/home/astra-location-intel/location_intel_engine.py",
+      "cwd": "/data/data/com.termux/files/home/astra-location-intel",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-medi-media-engine",
+      "folder": "astra-media-studio",
+      "file": "media_engine.py",
+      "script": "/data/data/com.termux/files/home/astra-media-studio/media_engine.py",
+      "cwd": "/data/data/com.termux/files/home/astra-media-studio",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-medi-mediapipe-edge-ml",
+      "folder": "astra-mediapipe-tasks",
+      "file": "mediapipe_edge_ml.py",
+      "script": "/data/data/com.termux/files/home/astra-mediapipe-tasks/mediapipe_edge_ml.py",
+      "cwd": "/data/data/com.termux/files/home/astra-mediapipe-tasks",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-memo-astra-brain",
+      "folder": "astra-memory-brain",
+      "file": "astra_brain.py",
+      "script": "/data/data/com.termux/files/home/astra-memory-brain/astra_brain.py",
+      "cwd": "/data/data/com.termux/files/home/astra-memory-brain",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-mult-multimodal-agent",
+      "folder": "astra-multimodal",
+      "file": "multimodal_agent.py",
+      "script": "/data/data/com.termux/files/home/astra-multimodal/multimodal_agent.py",
+      "cwd": "/data/data/com.termux/files/home/astra-multimodal",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-ooda-ooda-os-core",
+      "folder": "astra-ooda-os",
+      "file": "ooda_os_core.py",
+      "script": "/data/data/com.termux/files/home/astra-ooda-os/ooda_os_core.py",
+      "cwd": "/data/data/com.termux/files/home/astra-ooda-os",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-osin-osint-harvester",
+      "folder": "astra-osint-harvester",
+      "file": "osint_harvester.py",
+      "script": "/data/data/com.termux/files/home/astra-osint-harvester/osint_harvester.py",
+      "cwd": "/data/data/com.termux/files/home/astra-osint-harvester",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-reve-re-anything-addon",
+      "folder": "astra-reverse-supercomputer",
+      "file": "re_anything_addon.py",
+      "script": "/data/data/com.termux/files/home/astra-reverse-supercomputer/re_anything_addon.py",
+      "cwd": "/data/data/com.termux/files/home/astra-reverse-supercomputer",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-reve-re-supercomputer",
+      "folder": "astra-reverse-supercomputer",
+      "file": "re_supercomputer.py",
+      "script": "/data/data/com.termux/files/home/astra-reverse-supercomputer/re_supercomputer.py",
+      "cwd": "/data/data/com.termux/files/home/astra-reverse-supercomputer",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-reve-telemetry-assistant",
+      "folder": "astra-reverse-supercomputer",
+      "file": "telemetry_assistant.py",
+      "script": "/data/data/com.termux/files/home/astra-reverse-supercomputer/telemetry_assistant.py",
+      "cwd": "/data/data/com.termux/files/home/astra-reverse-supercomputer",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-seo--seo-geo-franchise",
+      "folder": "astra-seo-franchise",
+      "file": "seo_geo_franchise.py",
+      "script": "/data/data/com.termux/files/home/astra-seo-franchise/seo_geo_franchise.py",
+      "cwd": "/data/data/com.termux/files/home/astra-seo-franchise",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-stud-studio-pro-engine",
+      "folder": "astra-studio-pro",
+      "file": "studio_pro_engine.py",
+      "script": "/data/data/com.termux/files/home/astra-studio-pro/studio_pro_engine.py",
+      "cwd": "/data/data/com.termux/files/home/astra-studio-pro",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-unif-compute-router-8108-",
+      "folder": "astra-unified-brain",
+      "file": "compute_router_8108_8109.py",
+      "script": "/data/data/com.termux/files/home/astra-unified-brain/compute_router_8108_8109.py",
+      "cwd": "/data/data/com.termux/files/home/astra-unified-brain",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-unif-unified-brain-os",
+      "folder": "astra-unified-brain",
+      "file": "unified_brain_os.py",
+      "script": "/data/data/com.termux/files/home/astra-unified-brain/unified_brain_os.py",
+      "cwd": "/data/data/com.termux/files/home/astra-unified-brain",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-astra-work-autonomous-workflows",
+      "folder": "astra-workflows",
+      "file": "autonomous_workflows_backup.py",
+      "script": "/data/data/com.termux/files/home/astra-workflows/autonomous_workflows_backup.py",
+      "cwd": "/data/data/com.termux/files/home/astra-workflows",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-ccb-super--secure-lab",
+      "folder": "ccb-super-agent-20261021",
+      "file": "secure_lab.py",
+      "script": "/data/data/com.termux/files/home/ccb-super-agent-20261021/secure_lab.py",
+      "cwd": "/data/data/com.termux/files/home/ccb-super-agent-20261021",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-ccb-super--super-agent",
+      "folder": "ccb-super-agent-20261021",
+      "file": "super_agent.py",
+      "script": "/data/data/com.termux/files/home/ccb-super-agent-20261021/super_agent.py",
+      "cwd": "/data/data/com.termux/files/home/ccb-super-agent-20261021",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-downloads-api-gateway",
+      "folder": "downloads",
+      "file": "api_gateway.py",
+      "script": "/data/data/com.termux/files/home/downloads/api_gateway.py",
+      "cwd": "/data/data/com.termux/files/home/downloads",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-freellmapi-server-bridge",
+      "folder": "freellmapi",
+      "file": "server_bridge.py",
+      "script": "/data/data/com.termux/files/home/freellmapi/server_bridge.py",
+      "cwd": "/data/data/com.termux/files/home/freellmapi",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-agentic-mesh-8119",
+      "folder": "live-command-center",
+      "file": "agentic_mesh_8119.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/agentic_mesh_8119.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-alstra-autopilot",
+      "folder": "live-command-center",
+      "file": "alstra_autopilot.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/alstra_autopilot.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-alstra-master-spine-",
+      "folder": "live-command-center",
+      "file": "alstra_master_spine_8095.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/alstra_master_spine_8095.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-3stream",
+      "folder": "live-command-center",
+      "file": "astra_3stream.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_3stream.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-alstra-dual-pe",
+      "folder": "live-command-center",
+      "file": "astra_alstra_dual_persona_8159.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_alstra_dual_persona_8159.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-cinema-mcp",
+      "folder": "live-command-center",
+      "file": "astra_cinema_mcp.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_cinema_mcp.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-context-teleme",
+      "folder": "live-command-center",
+      "file": "astra_context_telemetry_monitor.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_context_telemetry_monitor.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-edge-ml",
+      "folder": "live-command-center",
+      "file": "astra_edge_ml.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_edge_ml.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-github-watchdo",
+      "folder": "live-command-center",
+      "file": "astra_github_watchdog_daemon.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_github_watchdog_daemon.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-invoice-agent",
+      "folder": "live-command-center",
+      "file": "astra_invoice_agent.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_invoice_agent.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-master-sync",
+      "folder": "live-command-center",
+      "file": "astra_master_sync.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_master_sync.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-openai-tool-pr",
+      "folder": "live-command-center",
+      "file": "astra_openai_tool_proxy.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_openai_tool_proxy.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-quantum-lattic",
+      "folder": "live-command-center",
+      "file": "astra_quantum_lattice.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_quantum_lattice.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-saga-gov-nodes",
+      "folder": "live-command-center",
+      "file": "astra_saga_gov_nodes.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_saga_gov_nodes.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-spatial-assist",
+      "folder": "live-command-center",
+      "file": "astra_spatial_assistant.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_spatial_assistant.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-supercomputer-",
+      "folder": "live-command-center",
+      "file": "astra_supercomputer_mesh.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_supercomputer_mesh.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-svc-8182",
+      "folder": "live-command-center",
+      "file": "astra_svc_8182.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_svc_8182.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-telemetry-hud",
+      "folder": "live-command-center",
+      "file": "astra_telemetry_hud.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_telemetry_hud.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-trust-center-8",
+      "folder": "live-command-center",
+      "file": "astra_trust_center_8117.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_trust_center_8117.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-unified-brain",
+      "folder": "live-command-center",
+      "file": "astra_unified_brain.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_unified_brain.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-webhook-listen",
+      "folder": "live-command-center",
+      "file": "astra_webhook_listener.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/astra_webhook_listener.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-browser-agent",
+      "folder": "live-command-center",
+      "file": "browser_agent.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/browser_agent.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-codex-engineer",
+      "folder": "live-command-center",
+      "file": "codex_engineer.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/codex_engineer.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-core-engine",
+      "folder": "live-command-center",
+      "file": "core_engine.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/core_engine.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-dealership-module",
+      "folder": "live-command-center",
+      "file": "dealership_module.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/dealership_module.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-dual-stream-bridge",
+      "folder": "live-command-center",
+      "file": "dual_stream_bridge.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/dual_stream_bridge.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-invoice-agent-8111",
+      "folder": "live-command-center",
+      "file": "invoice_agent_8111.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/invoice_agent_8111.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-python-worker",
+      "folder": "live-command-center",
+      "file": "python_worker.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/python_worker.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-salathanie-agents",
+      "folder": "live-command-center",
+      "file": "salathanie_agents.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/salathanie_agents.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-solar-wattage-stream",
+      "folder": "live-command-center",
+      "file": "solar_wattage_streamer.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/solar_wattage_streamer.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-studio-auto-engine",
+      "folder": "live-command-center",
+      "file": "studio_auto_engine.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/studio_auto_engine.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-studio-cinema-mcp-81",
+      "folder": "live-command-center",
+      "file": "studio_cinema_mcp_8121.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/studio_cinema_mcp_8121.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-telemetry-sentinel",
+      "folder": "live-command-center",
+      "file": "telemetry_sentinel.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/telemetry_sentinel.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-trinity-core",
+      "folder": "live-command-center",
+      "file": "trinity_core.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/trinity_core.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-trust-center-8117",
+      "folder": "live-command-center",
+      "file": "trust_center_8117.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/trust_center_8117.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-webhook-listener-811",
+      "folder": "live-command-center",
+      "file": "webhook_listener_8115.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/webhook_listener_8115.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-websocket-telemetry-",
+      "folder": "live-command-center",
+      "file": "websocket_telemetry_streamer.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/websocket_telemetry_streamer.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-alstra-dual-pe",
+      "folder": "live-command-center",
+      "file": "astra_alstra_dual_persona_8159.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source/astra_alstra_dual_persona_8159.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-live-comma-astra-telemetry-hud",
+      "folder": "live-command-center",
+      "file": "astra_telemetry_hud.py",
+      "script": "/data/data/com.termux/files/home/live-command-center/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source/astra_telemetry_hud.py",
+      "cwd": "/data/data/com.termux/files/home/live-command-center/ALSTRA_VERIFIED_EVIDENCE_BUNDLE/verified_source",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-models-alstra-autopilot",
+      "folder": "models",
+      "file": "alstra_autopilot.py",
+      "script": "/data/data/com.termux/files/home/models/alstra_autopilot.py",
+      "cwd": "/data/data/com.termux/files/home/models",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-models-api-gateway",
+      "folder": "models",
+      "file": "api_gateway.py",
+      "script": "/data/data/com.termux/files/home/models/api_gateway.py",
+      "cwd": "/data/data/com.termux/files/home/models",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-models-astra-unified-matrix",
+      "folder": "models",
+      "file": "astra_unified_matrix.py",
+      "script": "/data/data/com.termux/files/home/models/astra_unified_matrix.py",
+      "cwd": "/data/data/com.termux/files/home/models",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-models-astra-websocket-tele",
+      "folder": "models",
+      "file": "astra_websocket_telemetry.py",
+      "script": "/data/data/com.termux/files/home/models/astra_websocket_telemetry.py",
+      "cwd": "/data/data/com.termux/files/home/models",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-models-listen-qasm",
+      "folder": "models",
+      "file": "listen_qasm.py",
+      "script": "/data/data/com.termux/files/home/models/listen_qasm.py",
+      "cwd": "/data/data/com.termux/files/home/models",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-models-run-server",
+      "folder": "models",
+      "file": "run_server.py",
+      "script": "/data/data/com.termux/files/home/models/run_server.py",
+      "cwd": "/data/data/com.termux/files/home/models",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-models-run-ws-client",
+      "folder": "models",
+      "file": "run_ws_client.py",
+      "script": "/data/data/com.termux/files/home/models/run_ws_client.py",
+      "cwd": "/data/data/com.termux/files/home/models",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-models-test-client",
+      "folder": "models",
+      "file": "test_client.py",
+      "script": "/data/data/com.termux/files/home/models/test_client.py",
+      "cwd": "/data/data/com.termux/files/home/models",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-portable-v-agent-bridge",
+      "folder": "portable_vserver",
+      "file": "agent_bridge.py",
+      "script": "/data/data/com.termux/files/home/portable_vserver/agent_bridge.py",
+      "cwd": "/data/data/com.termux/files/home/portable_vserver",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-portable-v-vserver",
+      "folder": "portable_vserver",
+      "file": "vserver.py",
+      "script": "/data/data/com.termux/files/home/portable_vserver/vserver.py",
+      "cwd": "/data/data/com.termux/files/home/portable_vserver",
+      "max_memory_restart": "64M"
+    },
+    {
+      "name": "eco-telemetry--test-uplink-harness",
+      "folder": "telemetry_spine",
+      "file": "test_uplink_harness.py",
+      "script": "/data/data/com.termux/files/home/telemetry_spine/test_uplink_harness.py",
+      "cwd": "/data/data/com.termux/files/home/telemetry_spine",
+      "max_memory_restart": "64M"
+    }
+  ]
+}
