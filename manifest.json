@@ -1,7 +1,7 @@
 {
   "name": "Astra + Alstra = SalathanieAI",
   "short_name": "SalathanieAI",
-  "version": "2026.11.23-r5",
+  "version": "2026.11.23-r6",
   "architecture": "SOVEREIGN_TRI_AVATAR_EV_OS",
   "ram_ceiling_pct": 83.0,
   "tri_avatar_council": [
@@ -26,9 +26,9 @@
   ],
   "telemetry_nodes": [
     {
-      "id": "unified-gateway",
+      "id": "polyglot-router",
       "port": 8090,
-      "health_path": "/api/flying-car/step",
+      "health_path": "/api/languages",
       "tier": "core"
     },
     {
@@ -104,7 +104,7 @@
       "tier": "core"
     }
   ],
-  "updated_at": "2026-11-23T23:27:52Z",
+  "updated_at": "2026-11-23T23:32:19Z",
   "upgrade_history": [
     {
       "version": "2026.11.23-r2",
@@ -160,6 +160,11 @@
       "version": "2026.11.23-r5",
       "title": "Add bounded-RAM SQLite WAL telemetry data spine (:8159) with 500-frame ring cap",
       "ts": 1795476472
+    },
+    {
+      "version": "2026.11.23-r6",
+      "title": "Enable universal polyglot all-languages support across models, avatars, and gateway :8090",
+      "ts": 1795476739
     }
   ]
 }

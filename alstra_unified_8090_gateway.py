@@ -1,3 +1,4 @@
+from polyglot_router import detect_language, enrich_payload, POLYGLOT_SYSTEM_DIRECTIVE
 import ecosystem_router as _eco_router
 #!/usr/bin/env python3
 """
@@ -196,6 +197,19 @@ class H(http.server.BaseHTTPRequestHandler):
         if _handle_8090_flying_car_step(self, 'GET'):
             return
         p = self.path.split("?")[0]
+        if p in ("/api/languages", "/api/polyglot"):
+            body = json.dumps({
+                "ok": True,
+                "all_languages": True,
+                "mode": "ISO-639-UNIVERSAL-AUTO",
+                "directive": POLYGLOT_SYSTEM_DIRECTIVE,
+            }).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if p in ("/api/manifest", "/api/telemetry/spine", "/api/evtol/spine"):
             c, ct, data = _proxy_try([f"http://127.0.0.1:8159{self.path}"])
             self.send_response(c)
@@ -240,6 +254,19 @@ class H(http.server.BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(min(length, 65536)) if length else b"{}"
         p = self.path.split("?")[0]
+        if p in ("/api/polyglot/route", "/api/languages/detect"):
+            try:
+                req = json.loads(raw.decode("utf-8") or "{}")
+            except Exception:
+                req = {}
+            enriched = enrich_payload(req, self.headers.get("Accept-Language"))
+            body = json.dumps({"ok": True, **enriched}, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if p in ("/api/telemetry/spine", "/api/telemetry/ingest", "/api/evtol/spine"):
             c, ct, data = _proxy_try([f"http://127.0.0.1:8159{self.path}"], "POST", raw)
             self.send_response(c)
