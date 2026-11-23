@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    {
+      "id": "elite-avatar-ev-brain-8156",
+      "role": "elite-cognitive-cortex",
+      "url": "http://127.0.0.1:8156",
+      "tier": "core"
+    }
+  ]
+}
