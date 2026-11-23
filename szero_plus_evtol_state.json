@@ -1,0 +1,132 @@
+{
+  "ok": true,
+  "ts": 1795403918,
+  "aircraft": "S-Zero Plus eVTOL",
+  "flight_phase": "GROUND-TO-AIR-TRANSITION",
+  "hv_dc_bus": {
+    "architecture": "400V-800V DC Bus",
+    "bus_v": 783.27,
+    "bus_a": 145.0,
+    "bus_kw": 113.57,
+    "soc_pct": 89.4,
+    "cell_max_temp_c": 37.2,
+    "temp_rise_c_per_min": 0.18,
+    "thermal_runaway_indicator": "NOMINAL"
+  },
+  "distributed_propulsion": [
+    {
+      "rotor_id": "M1",
+      "rpm": 4659,
+      "phase_currents_a": {
+        "a": 52.8,
+        "b": 52.3,
+        "c": 52.9
+      },
+      "inverter_temp_c": 59.3,
+      "thrust_vector_deg": 45.0,
+      "health": "NOMINAL"
+    },
+    {
+      "rotor_id": "M2",
+      "rpm": 4660,
+      "phase_currents_a": {
+        "a": 53.6,
+        "b": 53.0,
+        "c": 53.5
+      },
+      "inverter_temp_c": 60.2,
+      "thrust_vector_deg": 45.0,
+      "health": "NOMINAL"
+    },
+    {
+      "rotor_id": "M3",
+      "rpm": 4684,
+      "phase_currents_a": {
+        "a": 54.4,
+        "b": 53.7,
+        "c": 54.1
+      },
+      "inverter_temp_c": 61.1,
+      "thrust_vector_deg": 45.0,
+      "health": "NOMINAL"
+    },
+    {
+      "rotor_id": "M4",
+      "rpm": 4723,
+      "phase_currents_a": {
+        "a": 55.2,
+        "b": 54.4,
+        "c": 54.7
+      },
+      "inverter_temp_c": 62.0,
+      "thrust_vector_deg": 45.0,
+      "health": "NOMINAL"
+    },
+    {
+      "rotor_id": "M5",
+      "rpm": 4758,
+      "phase_currents_a": {
+        "a": 56.0,
+        "b": 55.1,
+        "c": 55.3
+      },
+      "inverter_temp_c": 62.9,
+      "thrust_vector_deg": 45.0,
+      "health": "NOMINAL"
+    },
+    {
+      "rotor_id": "M6",
+      "rpm": 4772,
+      "phase_currents_a": {
+        "a": 56.8,
+        "b": 55.8,
+        "c": 55.9
+      },
+      "inverter_temp_c": 63.8,
+      "thrust_vector_deg": 45.0,
+      "health": "NOMINAL"
+    }
+  ],
+  "flight_control_env": {
+    "airspeed_kts": 54.0,
+    "tat_c": 19.21,
+    "ins_gnss": {
+      "lat": 36.0726,
+      "lon": -79.792,
+      "alt_m": 14.5,
+      "roll_deg": -0.36,
+      "pitch_deg": -2.1,
+      "yaw_deg": 248.0,
+      "fix": "RTK-INS-LOCKED"
+    },
+    "control_surfaces_deg": {
+      "aileron": 0.7,
+      "elevator": -3.4,
+      "rudder": 0.18,
+      "flaperon": 12.0
+    }
+  },
+  "compliance": {
+    "us_faa": {
+      "framework": "FAA-Part-21.17b / RemoteID",
+      "remote_id_broadcast": true,
+      "airspace_class": "G/E-CORRIDOR",
+      "status": "COMPLIANT"
+    },
+    "china_caac": {
+      "framework": "CAAC-Low-Altitude-Economy / CCAR-92",
+      "uom_telemetry_link": "ACTIVE",
+      "geofence_integrity": "LOCKED",
+      "status": "COMPLIANT"
+    }
+  },
+  "modular_testing_24_7": {
+    "schedule": "24/7/365-ACTIVE",
+    "pilotless_autonomous_ops": true,
+    "automated_ground_to_air_transition": true,
+    "flight_envelope_expansion_pct": 84.5,
+    "structural_vibration_g_rms": 0.165,
+    "airframe_resonance_status": "NOMINAL"
+  },
+  "hmac_sig": "CD3D91F24DA2594E9EC9423D"
+}

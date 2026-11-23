@@ -1,0 +1,1041 @@
+{
+  "home_root": {
+    "py": [
+      "_gpu_daemon.py",
+      "agentic_mesh_8119.py",
+      "alstra_autopilot.py",
+      "alstra_genius_brain_8099.py",
+      "alstra_master_spine_8095.py",
+      "alstra_unified_8090_gateway.py",
+      "astra_3stream.py",
+      "astra_4agent_sandbox.py",
+      "astra_ai_brain.py",
+      "astra_ai_memory_healer.py",
+      "astra_alstra_dual_persona_8159.py",
+      "astra_atomic_shadow_forge.py",
+      "astra_autonomous_agent_8145.py",
+      "astra_chaos_bench.py",
+      "astra_cinema_mcp.py",
+      "astra_circuit_breaker_8134.py",
+      "astra_cognitive_rf_mitosis_8155.py",
+      "astra_context_telemetry_monitor.py",
+      "astra_contract_middleware.py",
+      "astra_cyber_cockpit.py",
+      "astra_dual_model_router_8173.py",
+      "astra_e2e_validator.py",
+      "astra_edge_ml.py",
+      "astra_edge_quad_daemon.py",
+      "astra_elite_cinema_autopilot.py",
+      "astra_forensic_showcase.py",
+      "astra_fountain_bbr_bridge_8136.py",
+      "astra_generator_evaluator_loop.py",
+      "astra_github_watchdog_daemon.py",
+      "astra_gnmi_openconfig_8138.py",
+      "astra_governance_engine.py",
+      "astra_grafana_v2_native_3000.py",
+      "astra_ingress_8088.py",
+      "astra_invoice_agent.py",
+      "astra_linux_edge_node.py",
+      "astra_mcp_stdio_bridge.py",
+      "astra_mesh_bridge_8147.py",
+      "astra_mps_control_8128.py",
+      "astra_neuromorphic_mps_spine_8157.py",
+      "astra_omni_mux.py",
+      "astra_openai_tool_proxy.py",
+      "astra_overnight_pilot.py",
+      "astra_peppers_ghost_svg.py",
+      "astra_photonic_acoustic_8153.py",
+      "astra_plugin_registry.py",
+      "astra_provisioner_8143.py",
+      "astra_quantum_lattice.py",
+      "astra_radial_hud_cicd_8131.py",
+      "astra_revenue_exec_8169.py",
+      "astra_saga_engine.py",
+      "astra_saga_gov_nodes.py",
+      "astra_self_correct_brain.py",
+      "astra_self_heal_loop.py",
+      "astra_self_patcher.py",
+      "astra_sentinel_8165.py",
+      "astra_shadow_sandbox.py",
+      "astra_shm_schema.py",
+      "astra_simli_agent.py",
+      "astra_skill_synthesizer.py",
+      "astra_sovereign_pr_engine.py",
+      "astra_spatial_3d_server_8151.py",
+      "astra_spatial_assistant.py",
+      "astra_spectral_phaselock_8135.py",
+      "astra_supercomputer_mesh.py",
+      "astra_svc_8180.py",
+      "astra_tdd_guardrails.py",
+      "astra_telemetry_addon.py",
+      "astra_telemetry_hud.py",
+      "astra_time_crystal_landauer_8129.py",
+      "astra_trust_center.py",
+      "astra_trust_center_8117.py",
+      "astra_ultrasonic_decoder_8130.py",
+      "astra_unified_brain.py",
+      "astra_visual_e2e.py",
+      "astra_webhook_listener.py",
+      "auto_fixer.py",
+      "browser_agent.py",
+      "chart.py",
+      "codex_engineer.py",
+      "core_engine.py",
+      "dashboard.py",
+      "dashboard_server.py",
+      "dealership_module.py",
+      "dual_stream_bridge.py",
+      "eagle-eyes.py",
+      "edge_tunnel_supervisor.py",
+      "elite_deployer.py",
+      "execute_telemetry.py",
+      "fix_8101_8108.py",
+      "fix_salathanie.py",
+      "fix_watchdog.py",
+      "generate_chat_handoff.py",
+      "git_ledger_sync.py",
+      "global-telemetry.py",
+      "invoice_agent_8111.py",
+      "main_prober.py",
+      "mopar_insurance_engine.py",
+      "ollama_router.py",
+      "orbital_crypto_spine.py",
+      "patch_hw.py",
+      "patch_stack.py",
+      "python_worker.py",
+      "salathanie_ai_core.py",
+      "salathanie_ai_node.py",
+      "server.py",
+      "start_tunnel_e2e.py",
+      "studio_auto_engine.py",
+      "studio_cinema_mcp_8121.py",
+      "telemetry_reporter.py",
+      "telemetry_sentinel.py",
+      "test_mesh.py",
+      "test_script.py",
+      "ticker.py",
+      "trust_center_8117.py",
+      "valid_edge_supervisor.py",
+      "vision_recovery.py",
+      "vortex_fabric_sidecar_8175.py",
+      "vserver.py",
+      "webhook_listener_8115.py",
+      "websocket_telemetry_streamer.py"
+    ],
+    "html": [
+      ".astra_locked_core_ui.html",
+      "ALSTRA_API_CONSOLE.html",
+      "ALSTRA_SPATIAL_3D_ENGINE.html",
+      "astra_command_center.html",
+      "astra_core3d_hud.html",
+      "command_center_full.html",
+      "dashboard.html",
+      "dual_stream_module.html",
+      "index.html"
+    ],
+    "db": [
+      ".astra_local_brain.db",
+      ".astra_multichain_assets.db",
+      ".astra_sentinel.db",
+      "alstra_enterprise_core.db",
+      "astra_agentic_mesh.db",
+      "astra_ai_memory.db",
+      "astra_brain_memory.db",
+      "astra_chronicles_vectors.db",
+      "astra_cinema_mcp.db",
+      "astra_dealership_ledger.db",
+      "astra_deepspace_ledger.db",
+      "astra_drone_telemetry.db",
+      "astra_future_tech.db",
+      "astra_governance_ledger.db",
+      "astra_invoice_ledger.db",
+      "astra_orbital_ledger.db",
+      "astra_planetary_ledger.db",
+      "astra_research_history.db",
+      "astra_saga_ledger.db",
+      "astra_sovereign_pr_wal.db",
+      "astra_space_memory.db",
+      "astra_spatial_ledger.db",
+      "astra_spine_health.db",
+      "astra_state.db",
+      "astra_telemetry.db",
+      "astra_trust_ledger.db",
+      "astra_vision_recovery_wal.db",
+      "astra_webhook_ledger.db",
+      "persistent_twin_state.db",
+      "salathanie_core.db"
+    ]
+  },
+  "golden_backup_dir": [
+    "command_center_full.html.golden",
+    "dashboard_server.py.golden",
+    "persistent_twin_state.db.golden",
+    "semantic_rl_router.pt.golden"
+  ],
+  "golden_tarballs_count": 0,
+  "latest_golden_tarball": null,
+  "project_folders": [
+    {
+      "folder": "/data/data/com.termux/files/home/ALSTRA_IMMUTABLE_VAULT",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/ALSTRA_VERIFIED_EVIDENCE_BUNDLE",
+      "py_count": 0,
+      "html_count": 1,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": [
+        "index.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/ASTRA_IMMUTABLE_VAULT",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/Build-Android-Release-AAB",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/aashoo-agent",
+      "py_count": 0,
+      "html_count": 2,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": [
+        "google17c261b6628668a1.html",
+        "index.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/ai-studio-dealership",
+      "py_count": 1,
+      "html_count": 1,
+      "db_count": 1,
+      "sample_py": [
+        "dealership_core.py"
+      ],
+      "sample_html": [
+        "index.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/ai-studio-legal",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "legal_brain.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/alstra-core",
+      "py_count": 28,
+      "html_count": 1,
+      "db_count": 3,
+      "sample_py": [
+        "alstra_master_orchestrator.py",
+        "deepspace_spine.py",
+        "alstra_jeti_omega.py",
+        "alstra_artifact_automation.py",
+        "alstra_apex_nexus.py",
+        "alstra_edge_daemon.py"
+      ],
+      "sample_html": [
+        "hud.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/alstra-langgraph",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/alstra-workspace",
+      "py_count": 4,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "telemetry_stream.py",
+        "astra_banking_core.py",
+        "server.py",
+        "websocket_telemetry_server.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/aria-termux",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/assets",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/assm",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-177b-nexus",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "astra_177b_nexus.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-auto-router",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "auto_router.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-backups",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-bi-engine",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "bi_superintelligence.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-enterprise-core",
+      "py_count": 65,
+      "html_count": 3,
+      "db_count": 2,
+      "sample_py": [
+        "main_prober.py",
+        "test_mesh.py",
+        "python_worker.py",
+        "astra_edge_ml.py",
+        "global-telemetry.py",
+        "_gpu_daemon.py"
+      ],
+      "sample_html": [
+        "dashboard.html",
+        "dual_stream_module.html",
+        "command_center_full.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-enterprise-gov",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "enterprise_gov.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-jev-system1",
+      "py_count": 2,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "jev_router.py",
+        "jev_feeds.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-location-intel",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "location_intel_engine.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-media-studio",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "media_engine.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-mediapipe-tasks",
+      "py_count": 3,
+      "html_count": 1,
+      "db_count": 1,
+      "sample_py": [
+        "mediapipe_edge_ml.py",
+        "overnight_daemon.py",
+        "scheduled_1030_test.py"
+      ],
+      "sample_html": [
+        "webgpu_runner.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-memory-brain",
+      "py_count": 3,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "astra_brain.py",
+        "llm_router.py",
+        "self_improve.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-multimodal",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "multimodal_agent.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-ooda-os",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "ooda_os_core.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-osint-harvester",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "osint_harvester.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-ownable-apps",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-reverse-supercomputer",
+      "py_count": 4,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "re_supercomputer.py",
+        "re_anything_addon.py",
+        "threejs_bundle_addon.py",
+        "telemetry_assistant.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-seo-franchise",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "seo_geo_franchise.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-simli-client",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-studio-pro",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "studio_pro_engine.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-termux-v1",
+      "py_count": 4,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "astra.py",
+        "make-demo-config.py",
+        "test_astra.py",
+        "astra_groq.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-unified-brain",
+      "py_count": 3,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "unified_brain_os.py",
+        "auto_correct_brain.py",
+        "compute_router_8108_8109.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra-workflows",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "autonomous_workflows_backup.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_backups",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 8,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_blueprints",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_compose_bridge",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_deploy_blueprint",
+      "py_count": 3,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "dashboard.py",
+        "vserver.py",
+        "orbital_crypto_spine.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_evolved_modules",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_fluentbit_v5",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_synthesized_telemetry",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_training_lab",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/astra_vision_uploads",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/bci_defense_project",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "setup.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/bin",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/bridges",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "px4-mavlink-bridge.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/ccb-recovery",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/ccb-super-agent-20261021",
+      "py_count": 5,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "super_tests.py",
+        "sync_astra.py",
+        "super_agent.py",
+        "secure_lab.py",
+        "tests.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/checkpoints",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/chronicle-analytics",
+      "py_count": 3,
+      "html_count": 0,
+      "db_count": 1,
+      "sample_py": [
+        "alstra_studio_master.py",
+        "telemetry_daemon.py",
+        "alstra_vector_master.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/clients",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/config",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/core3d_hud",
+      "py_count": 0,
+      "html_count": 1,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": [
+        "index.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/deploy",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/docker_spatial_3d",
+      "py_count": 2,
+      "html_count": 1,
+      "db_count": 0,
+      "sample_py": [
+        "astra_spatial_3d_server_8151.py",
+        "astra_peppers_ghost_svg.py"
+      ],
+      "sample_html": [
+        "ALSTRA_SPATIAL_3D_ENGINE.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/docs",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/downloads",
+      "py_count": 4,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "dashboard_server.py",
+        "api_gateway.py",
+        "astra-db-fix.py",
+        "astra-groq-setup.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/eagleyes",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/freellmapi",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "server_bridge.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/given-jackal-pipecat",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/gnmi_observability_stack",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/go-crypto",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/jeti_nexus_backups",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/keys",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/kiwix",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/kotlin_bridge",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/live-command-center",
+      "py_count": 135,
+      "html_count": 7,
+      "db_count": 7,
+      "sample_py": [
+        "_gpu_daemon.py",
+        "agentic_mesh_8119.py",
+        "alstra_autopilot.py",
+        "alstra_genius_brain_8099.py",
+        "alstra_master_spine_8095.py",
+        "alstra_unified_8090_gateway.py"
+      ],
+      "sample_html": [
+        "ALSTRA_API_CONSOLE.html",
+        "ALSTRA_SPATIAL_3D_ENGINE.html",
+        "astra_command_center.html",
+        "dual_stream_module.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/models",
+      "py_count": 21,
+      "html_count": 1,
+      "db_count": 0,
+      "sample_py": [
+        "dashboard_server.py",
+        "astra_matrix_runner.py",
+        "romtec_virtual_lab.py",
+        "setup_master_core.py",
+        "astra_runner.py",
+        "astra_master_node.py"
+      ],
+      "sample_html": [
+        "astra_dashboard.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/mosquitto",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/my-project-payload",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/new_game_system",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/nexus-brown",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/portable_vserver",
+      "py_count": 3,
+      "html_count": 0,
+      "db_count": 2,
+      "sample_py": [
+        "vserver_8101.py",
+        "vserver.py",
+        "agent_bridge.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/postgres",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/public",
+      "py_count": 0,
+      "html_count": 9,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": [
+        "airspace.html",
+        "business.html",
+        "chat.html",
+        "deployment-center.html"
+      ]
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/reality-engine",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/rf-flight-digital-twin",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/scripts",
+      "py_count": 3,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "send-mobile-heartbeat.py",
+        "update_contributors.py",
+        "verify-deployed-revision.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/src",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/telemetry-spine",
+      "py_count": 3,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "real-money.py",
+        "bridge.py",
+        "android_sensors.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/telemetry_spine",
+      "py_count": 8,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "eagle_eyes_telemetry_spine.py",
+        "gpu_telemetry.py",
+        "main.py",
+        "secure_main.py",
+        "signed_ingest.py",
+        "test_gpu_telemetry.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/test",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/vault",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/vr",
+      "py_count": 1,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [
+        "eagle_eyes_vr_baseline_v1.py"
+      ],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/workers",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    },
+    {
+      "folder": "/data/data/com.termux/files/home/workspace",
+      "py_count": 0,
+      "html_count": 0,
+      "db_count": 0,
+      "sample_py": [],
+      "sample_html": []
+    }
+  ]
+}
