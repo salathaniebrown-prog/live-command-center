@@ -328,3 +328,23 @@ class H(http.server.BaseHTTPRequestHandler):
 if __name__ == "__main__":
     with Server(("0.0.0.0", PORT), H) as srv:
         srv.serve_forever()
+
+def _boot_8088_ingress():
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    hcls = None
+    for obj in list(globals().values()):
+        if isinstance(obj, type) and issubclass(obj, BaseHTTPRequestHandler) and obj is not BaseHTTPRequestHandler:
+            hcls = obj
+            break
+    if hcls is None:
+        return
+    try:
+        srv88 = ThreadingHTTPServer(("0.0.0.0", 8088), hcls)
+        threading.Thread(target=srv88.serve_forever, daemon=True).start()
+        print(f"[OK] :8088 ingress bound using {hcls.__name__}", flush=True)
+    except Exception as e:
+        print(f"[WARN] :8088 ingress bind failed: {e}", flush=True)
+
+if __name__ == "__main__":
+    _boot_8088_ingress()
