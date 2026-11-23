@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from spine_client import push_spine_frame
 """
 Salathanie A.I — Universal Pilot + Trinity Control Plane + VR Data Circle
 Serves on 0.0.0.0:8125 (proxied by salathanie-tunnel) with RAM Safe-Mode Guard.
@@ -425,6 +426,11 @@ class PilotHandler(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
+        try:
+            push_spine_frame(craft_id="S-ZERO-PLUS-01", altitude_ft=float(globals().get("ALTITUDE_FT", 450.0)), airspeed_kts=float(globals().get("AIRSPEED_KTS", 72.0)), battery_pct=float(globals().get("BATTERY_PCT", 95.0)), rotor_rpm=int(globals().get("ROTOR_RPM", 3180)))
+        except Exception:
+            pass
+
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(min(length, 65536)).decode("utf-8", errors="ignore") if length else "{}"
         try:
