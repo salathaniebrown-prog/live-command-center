@@ -1,3 +1,4 @@
+import ecosystem_router as _eco_router
 #!/usr/bin/env python3
 """
 SalathanieAI — Unified Port 8090 Gateway Proxy
@@ -127,6 +128,30 @@ def _handle_8090_hub_routes(handler) -> bool:
         "/api/hub/state": ("http://127.0.0.1:8101/api/hub/state", "application/json; charset=utf-8"),
         "/api/flying-car/step": ("http://127.0.0.1:8132/api/flying-car/step", "application/json; charset=utf-8"),
     }
+    if p.startswith("/static/"):
+        targets[p] = (f"http://127.0.0.1:8102{p}", "image/jpeg")
+    if p == "/ecosystem":
+        mf = _P("/data/data/com.termux/files/home/live-command-center/master_ecosystem_map.json")
+        data = mf.read_text(encoding="utf-8") if mf.exists() else "{}"
+        page = (
+            "<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+            "<title>SalathanieAI Master Ecosystem Map</title>"
+            "<style>body{background:#060b14;color:#e2f1ff;font-family:system-ui;padding:14px}a{color:#34f5c5;margin-right:10px}pre{background:#0b1524;border:1px solid #1a3554;padding:12px;border-radius:8px;overflow:auto;font-size:12px}</style>"
+            "</head><body><h2>SALATHANIE AI // ALL REPOS, PORTS & GOLDEN VAULTS</h2>"
+            "<p><a href='http://127.0.0.1:8088/'>:8088 OMEGA Dashboard</a>"
+            "<a href='http://127.0.0.1:8090/flying-car'>:8090 Flying Car</a>"
+            "<a href='http://127.0.0.1:8090/avatars'>:8090 Avatars</a>"
+            "<a href='http://127.0.0.1:8090/jet'>:8090 3D Jet HUD</a>"
+            "<a href='http://127.0.0.1:8132/'>:8132 Car HUD</a>"
+            "<a href='http://127.0.0.1:8159/'>:8159 Dual-Persona</a></p>"
+            "<pre>" + data.replace("&","&amp;").replace("<","&lt;") + "</pre></body></html>"
+        ).encode("utf-8")
+        handler.send_response(200)
+        handler.send_header("Content-Type", "text/html; charset=utf-8")
+        handler.send_header("Content-Length", str(len(page)))
+        handler.end_headers()
+        handler.wfile.write(page)
+        return True
     if p not in targets:
         return False
     url, ctype = targets[p]
@@ -164,6 +189,8 @@ class H(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if _eco_router.handle_get(self):
+            return
         if _handle_8090_hub_routes(self):
             return
         if _handle_8090_flying_car_step(self, 'GET'):
@@ -199,6 +226,8 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         _ln = int(self.headers.get('Content-Length') or '0')
         _bd = self.rfile.read(_ln) if _ln > 0 else b'{}'
+        if _eco_router.handle_post(self, _bd):
+            return
         if _handle_8090_flying_car_step(self, 'POST', _bd):
             return
         length = int(self.headers.get("Content-Length", "0"))
