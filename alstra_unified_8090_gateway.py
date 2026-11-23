@@ -197,6 +197,27 @@ class H(http.server.BaseHTTPRequestHandler):
         if _handle_8090_flying_car_step(self, 'GET'):
             return
         p = self.path.split("?")[0]
+        if p in ("/api/cockpit/telemetry", "/api/hud/telemetry", "/api/predictive/drift"):
+            target_port = 8154 if p == "/api/predictive/drift" else 8132
+            try:
+                c = http.client.HTTPConnection("127.0.0.1", target_port, timeout=1.5)
+                c.request("GET", p)
+                resp = c.getresponse()
+                data = resp.read()
+                c.close()
+                self.send_response(resp.status)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+            except Exception as e:
+                err = json.dumps({"ok": False, "error": type(e).__name__, "port": target_port}).encode("utf-8")
+                self.send_response(502)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(err)))
+                self.end_headers()
+                self.wfile.write(err)
+            return
         if p in ("/api/languages", "/api/polyglot"):
             body = json.dumps({
                 "ok": True,
