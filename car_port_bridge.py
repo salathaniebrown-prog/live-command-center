@@ -21,9 +21,12 @@ from pathlib import Path
 
 try:
     import solar_supercomputer_telemetry as solar_sc
-import top25_pc_telemetry as top25_pc
+    import top25_pc_telemetry as top25_pc
+    import szero_plus_evtol_telemetry as szero_evtol
 except Exception:
     solar_sc = None
+    top25_pc = None
+    szero_evtol = None
 
 REPO = Path("/data/data/com.termux/files/home/live-command-center")
 WAL_DB = REPO / "alstra_flight_ledger.db"
@@ -379,6 +382,8 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
                 cooling_loop_flow_lpm=11.5,
                 target_dry_mass_kg=1140.0,
             ))
+        if path == "/api/evtol/szero-plus" and szero_evtol:
+            return self._send_json(200, szero_evtol.sample_szero_telemetry())
         if path == "/api/pc/top25":
             return self._send_json(200, top25_pc.get_top25_pc_telemetry(1.25))
         if path == "/api/bus/sensors":
@@ -411,10 +416,14 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
         return self._send_json(404, {"ok": False, "error": "not_found", "path": path})
 
 
+class ReusableHTTPServer(http.server.ThreadingHTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
 def serve(host: str = BRIDGE_HOST, port: int = BRIDGE_PORT):
-    sync_vehicle_bus(recover=True)
-    srv = http.server.ThreadingHTTPServer((host, port), BridgeHandler)
-    srv.daemon_threads = True
+    srv = ReusableHTTPServer((host, port), BridgeHandler)
+    threading.Thread(target=lambda: sync_vehicle_bus(recover=False), daemon=True).start()
     srv.serve_forever()
 
 

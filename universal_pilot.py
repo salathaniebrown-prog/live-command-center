@@ -13,6 +13,7 @@ import self_ram_controller as rctrl
 import compute_nodes_online as cnodes
 import solar_supercomputer_telemetry as solar_sc
 import top25_pc_telemetry as top25_pc
+import szero_plus_evtol_telemetry as szero_evtol
 import os
 import re
 import socket
@@ -308,6 +309,8 @@ class PilotHandler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(cisco_gis.collect_cisco_mdt()).encode("utf-8"))
         if parsed.path == "/tunnel-gis":
             return self._send(200, cisco_gis.TUNNEL_GIS_HTML.encode("utf-8"), "text/html; charset=utf-8")
+        if parsed.path == "/api/evtol/szero-plus":
+            return self._send(200, json.dumps(szero_evtol.sample_szero_telemetry()).encode("utf-8"))
         if parsed.path == "/api/pc/top25":
             return self._send(200, json.dumps(top25_pc.get_top25_pc_telemetry(1.25)).encode("utf-8"))
         if parsed.path == "/api/solar/supercomputer":
