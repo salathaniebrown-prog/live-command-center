@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"id": "omega-8088", "role": "dashboard", "url": "http://127.0.0.1:8088", "tier": "core"},
+    {"id": "gateway-8090", "role": "unified-gateway", "url": "http://127.0.0.1:8090", "tier": "core"},
+    {"id": "jet-hud-8095", "role": "3d-jet-hud", "url": "http://127.0.0.1:8095", "tier": "core"},
+    {"id": "flying-car-8101", "role": "ev-flying-car", "url": "http://127.0.0.1:8101", "tier": "core"},
+    {"id": "avatars-8102", "role": "tri-avatar-deck", "url": "http://127.0.0.1:8102", "tier": "core"},
+    {"id": "pilot-8125", "role": "universal-pilot", "url": "http://127.0.0.1:8125", "tier": "core"},
+    {"id": "bridge-8132", "role": "vehicle-port-bridge", "url": "http://127.0.0.1:8132", "tier": "core"}
+  ]
+}

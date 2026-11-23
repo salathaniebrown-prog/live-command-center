@@ -1,0 +1,8 @@
+name = "salathanie-rail-to-edge"
+main = "rail_to_edge_worker.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+RAIL_ORIGIN = "https://YOUR-APP.up.railway.app"
+EDGE_ORIGIN = "https://YOUR-CLOUDFLARE-TUNNEL.yourdomain.com"
+RAIL_TIMEOUT_MS = "3000"

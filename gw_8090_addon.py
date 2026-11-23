@@ -151,6 +151,7 @@ def attach_additive_routes(handler_cls, skip_paths: set[str] | None = None):
     orig_post = getattr(handler_cls, "do_POST", None)
 
     def wrapped_get(self):
+        pass
     if _serve_8090_step_direct(self):
         return
         p = self.path.split("?")[0]
