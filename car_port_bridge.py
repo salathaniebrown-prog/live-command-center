@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from spine_client import push_spine_frame
 """
 SalathanieAI — Unified Vehicle Telemetry Aggregator & Port Bridge (car_port_bridge.py)
 Sweeps local microservice sockets, checks PM2 worker health, binds custom sensor feeds
@@ -407,6 +408,11 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
         return self._send_json(404, {"ok": False, "error": "not_found", "path": path})
 
     def do_POST(self):
+        try:
+            push_spine_frame(craft_id="ASTRA-FLYING-CAR-01", altitude_ft=float(globals().get("ALTITUDE_FT", 450.0)), airspeed_kts=float(globals().get("AIRSPEED_KTS", 72.0)), battery_pct=float(globals().get("BATTERY_PCT", 95.0)), rotor_rpm=int(globals().get("ROTOR_RPM", 3180)))
+        except Exception:
+            pass
+
         path = self.path.split("?", 1)[0]
         length = int(self.headers.get("Content-Length") or "0")
         body = self.rfile.read(length) if length > 0 else b"{}"
