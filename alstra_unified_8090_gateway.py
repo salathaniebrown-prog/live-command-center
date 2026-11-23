@@ -83,13 +83,13 @@ poll(); setInterval(poll, 3000);
 def _handle_8090_flying_car_step(handler, method: str = "GET", body: bytes = b"") -> bool:
     raw_p = getattr(handler, "path", "") or ""
     p = raw_p.split("?", 1)[0]
-    if p != "/api/flying-car/step":
+    if p not in ("/api/flying-car/step", "/api/evtol/szero-plus", "/api/evtol/szero-plus/simulate-runaway"):
         return False
     out = None
     try:
         import urllib.request
         req = urllib.request.Request(
-            "http://127.0.0.1:8132/api/flying-car/step",
+            f"http://127.0.0.1:8132{p}",
             data=(body if method == "POST" else None),
             method=method,
             headers={"Content-Type": "application/json"} if method == "POST" else {},

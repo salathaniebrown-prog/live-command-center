@@ -308,6 +308,7 @@ HUD_HTML = """<!doctype html>
     <div class="card"><div class="title">EV Power &amp; Sensors</div><div id="bat" class="val">-- V</div><div id="gps" class="meta"></div><div id="wifi" class="meta"></div></div>
     <div class="card"><div class="title">Active Local Ports</div><div id="ports_cnt" class="val">--/--</div><div id="ports_list" class="meta"></div></div>
     <div class="card"><div class="title">Solar &amp; Supercomputer</div><div id="solar_val" class="val">-- W</div><div id="solar_meta" class="meta"></div></div>
+    <div class="card"><div class="title">S-Zero Plus eVTOL (HV/BTMS/Rotors)</div><div id="szero_val" class="val">-- V</div><div id="szero_meta" class="meta"></div></div>
     <div class="card"><div class="title">Host RAM &amp; Avatars</div><div id="ram" class="val">--%</div><div id="avatars" class="meta"></div><div id="rec" class="meta"></div></div>
   </div>
   <div class="foot"><span id="sig">HMAC: --</span><span>ENDPOINT: /api/flying-car/step</span></div>
@@ -336,7 +337,21 @@ async function refreshHud(){
     document.getElementById('sig').textContent = 'HMAC: ' + (d.hmac_sig || '--');
   }catch(e){}
 }
-refreshHud();
+async function refreshSZero(){
+  try{
+    const r = await fetch('/api/evtol/szero-plus');
+    const z = await r.json();
+    const hv = z.hv_dc_bus || {}; const bt = z.btms || {}; const al = z.autonomous_links || {};
+    const m1 = (z.distributed_propulsion || [{}])[0] || {};
+    const fe = z.flight_control_env || {};
+    const el = document.getElementById('szero_val');
+    el.textContent = (hv.bus_v ?? '--') + 'V | ' + (hv.thermal_runaway_indicator || 'NOMINAL');
+    el.style.color = (hv.thermal_runaway_indicator === 'CRITICAL-RUNAWAY-WARNING') ? '#f87171' : '#34d399';
+    document.getElementById('szero_meta').textContent =
+      (z.flight_phase || '') + ' | M1:' + (m1.rpm ?? '--') + 'rpm Inv:' + (m1.inverter_temp_c ?? '--') + 'C Tilt:' + (m1.thrust_vector_deg ?? '--') + '° | IAS:' + (fe.airspeed_kts ?? '--') + 'kt | BTMS:' + (bt.pump_flow_lpm ?? '--') + 'L/m | ' + (al.fail_safe_mode || '');
+  }catch(e){}
+}
+refreshHud(); refreshSZero(); setInterval(refreshSZero, 3000);
 setInterval(refreshHud, 3000);
 </script>
 </body>
@@ -400,6 +415,9 @@ class BridgeHandler(http.server.BaseHTTPRequestHandler):
         except Exception:
             payload = {}
 
+        if path == "/api/evtol/szero-plus/simulate-runaway" and szero_evtol:
+            act = bool((payload or {}).get("active", True)) if isinstance(payload, dict) else True
+            return self._send_json(200, szero_evtol.simulate_thermal_runaway(active=act))
         if path == "/api/solar/inverter" and solar_sc:
             p = payload if isinstance(payload, dict) else {}
             solar_sc.update_solar_feed(p)

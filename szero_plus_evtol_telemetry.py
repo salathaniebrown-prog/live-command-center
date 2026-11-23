@@ -51,7 +51,9 @@ def _db() -> sqlite3.Connection:
 
 
 def sample_szero_telemetry(overrides: dict | None = None) -> dict:
-    ov = overrides if isinstance(overrides, dict) else {}
+    ov = dict(_SIM_OVERRIDES)
+    if isinstance(overrides, dict):
+        ov.update(overrides)
     ts = int(time.time())
     phase_idx = (ts // 15) % 4
     phases = ["VTOL-TAKEOFF", "HOVER-TEST", "GROUND-TO-AIR-TRANSITION", "CRUISE-ENVELOPE"]
@@ -183,7 +185,79 @@ def sample_szero_telemetry(overrides: dict | None = None) -> dict:
     except Exception:
         pass
 
-    return snap
+    return enrich_szero_telemetry(snap)
+
+
+
+# _SZERO_BTMS_FAILSAFE_CERT_UPGRADE
+_SIM_OVERRIDES: dict = {}
+
+
+def set_sim_overrides(overrides: dict | None) -> dict:
+    global _SIM_OVERRIDES
+    _SIM_OVERRIDES = dict(overrides) if isinstance(overrides, dict) else {}
+    return dict(_SIM_OVERRIDES)
+
+
+def get_svtol_cert_comparison() -> dict:
+    return {
+        "faa_us": {
+            "basis": "14 CFR 21.17(b) Special Class + Powered-Lift SFAR",
+            "redundancy_target": "1e-9 catastrophic failure / DAL-A",
+            "thermal_runaway_rule": "Cell-to-cell propagation containment + safe landing margin",
+        },
+        "caac_china": {
+            "basis": "CAAC CCAR-21 / CCAR-92 Low-Altitude Economy + UOM",
+            "redundancy_target": "Triple-modular flight control + UOM live telemetry",
+            "thermal_runaway_rule": "Active BTMS isolation + automated geofence RTB",
+        },
+        "easa_eu": {
+            "basis": "EASA SC-VTOL Enhanced Category",
+            "redundancy_target": "Continued Safe Flight and Landing (CSFL)",
+            "thermal_runaway_rule": "No hazardous effect from single-cell thermal event",
+        },
+    }
+
+
+def enrich_szero_telemetry(base: dict) -> dict:
+    hv = base.get("hv_dc_bus") or {}
+    risk = hv.get("thermal_runaway_indicator", "NOMINAL")
+    cell_max = float(hv.get("cell_max_temp_c", 38.0))
+    is_crit = risk == "CRITICAL-RUNAWAY-WARNING"
+
+    base["btms"] = {
+        "coolant_inlet_c": round(24.5 if not is_crit else 19.2, 1),
+        "coolant_outlet_c": round(cell_max - 4.2, 1),
+        "pump_flow_lpm": 18.5 if is_crit else 9.8,
+        "cell_delta_t_c": round(11.4 if is_crit else 2.1, 1),
+        "containment_valve": "FLOOD-ISOLATE-ACTIVE" if is_crit else "NORMAL-LOOP",
+        "contactor_state": "PRE-TRIP-SAFE-LAND" if is_crit else "CLOSED-ENERGIZED",
+    }
+    base["autonomous_links"] = {
+        "primary_c2_link": "5G-SATCOM-ENCRYPTED",
+        "backup_c2_link": "900MHz-RF-LOS",
+        "c2_latency_ms": 14.2,
+        "fcc_redundancy": "TRIPLE-MODULAR-ACTIVE (FCC-A/B/C)",
+        "fail_safe_mode": "AUTONOMOUS-EMERGENCY-LANDING" if is_crit else "NOMINAL-MONITORING",
+        "link_loss_policy": "AUTO-HOVER-AND-RTB",
+    }
+    base["svtol_cert_comparison"] = get_svtol_cert_comparison()
+    return base
+
+
+def simulate_thermal_runaway(active: bool = True) -> dict:
+    if active:
+        set_sim_overrides({
+            "flight_phase": "VTOL-TAKEOFF",
+            "dc_bus_v": 748.0,
+            "dc_bus_a": 425.0,
+            "soc_pct": 84.2,
+            "cell_max_temp_c": 68.5,
+            "temp_rise_c_per_min": 3.85,
+        })
+    else:
+        set_sim_overrides({})
+    return sample_szero_telemetry(_SIM_OVERRIDES)
 
 
 def run_24_7_loop(interval_s: float = 5.0):
