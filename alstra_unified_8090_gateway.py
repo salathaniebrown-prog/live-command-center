@@ -256,7 +256,9 @@ class H(http.server.BaseHTTPRequestHandler):
         p = self.path.split("?")[0]
         if p in ("/api/polyglot/route", "/api/languages/detect"):
             try:
-                req = json.loads(raw.decode("utf-8") or "{}")
+                cl = int(self.headers.get("Content-Length", "0"))
+                raw_body = self.rfile.read(min(cl, 8192)) if cl > 0 else b"{}"
+                req = json.loads(raw_body.decode("utf-8") or "{}")
             except Exception:
                 req = {}
             enriched = enrich_payload(req, self.headers.get("Accept-Language"))
