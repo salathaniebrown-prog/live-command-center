@@ -1,7 +1,7 @@
 {
   "name": "Astra + Alstra = SalathanieAI",
   "short_name": "SalathanieAI",
-  "version": "2026.11.23-r6",
+  "version": "2026.11.23-r7",
   "architecture": "SOVEREIGN_TRI_AVATAR_EV_OS",
   "ram_ceiling_pct": 83.0,
   "tri_avatar_council": [
@@ -166,5 +166,11 @@
       "title": "Enable universal polyglot all-languages support across models, avatars, and gateway :8090",
       "ts": 1795476739
     }
-  ]
+  ],
+  "manifest_telemetry": {
+    "endpoint": "/api/manifest/telemetry",
+    "polyglot_all_languages": true,
+    "spine_ring_cap": 500,
+    "ram_ceiling_pct": 83.0
+  }
 }
