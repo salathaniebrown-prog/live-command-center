@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    {
+      "id": "memory-pressure-shield-8158",
+      "role": "oom-prevention-telemetry",
+      "url": "http://127.0.0.1:8158/api/memory/telemetry",
+      "tier": "core"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "name": "Astra + Alstra = SalathanieAI",
   "short_name": "SalathanieAI",
-  "version": "2026.11.23-r2",
+  "version": "2026.11.23-r3",
   "architecture": "SOVEREIGN_TRI_AVATAR_EV_OS",
   "ram_ceiling_pct": 83.0,
   "tri_avatar_council": [
@@ -90,9 +90,15 @@
       "port": 8156,
       "health_path": "/api/brain/manifest",
       "tier": "core"
+    },
+    {
+      "id": "memory-pressure-shield",
+      "port": 8158,
+      "health_path": "/api/memory/telemetry",
+      "tier": "core"
     }
   ],
-  "updated_at": "2026-11-23T13:44:41Z",
+  "updated_at": "2026-11-23T16:33:06Z",
   "upgrade_history": [
     {
       "version": "2026.11.23-r2",
@@ -123,6 +129,11 @@
       "version": "2026.11.23-r2",
       "title": "Automated manifest.json version & node telemetry stamper",
       "ts": 1795441481
+    },
+    {
+      "version": "2026.11.23-r3",
+      "title": "Add Predictive Memory Pressure & OOM Prevention Shield (:8158)",
+      "ts": 1795451586
     }
   ]
 }
