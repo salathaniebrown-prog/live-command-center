@@ -1,3 +1,11 @@
+import gc
+import signal
+
+def _handle_sigusr1_compact(signum, frame):
+    gc.collect()
+
+signal.signal(signal.SIGUSR1, _handle_sigusr1_compact)
+
 import hashlib, json, os, threading, time, uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
