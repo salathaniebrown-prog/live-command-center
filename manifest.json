@@ -98,7 +98,7 @@
       "tier": "core"
     }
   ],
-  "updated_at": "2026-11-23T16:33:06Z",
+  "updated_at": "2026-11-23T16:41:16Z",
   "upgrade_history": [
     {
       "version": "2026.11.23-r2",
@@ -134,6 +134,11 @@
       "version": "2026.11.23-r3",
       "title": "Add Predictive Memory Pressure & OOM Prevention Shield (:8158)",
       "ts": 1795451586
+    },
+    {
+      "version": "2026.11.23-r3",
+      "title": "Add Predictive Memory Pressure & OOM Prevention Shield (:8158)",
+      "ts": 1795452076
     }
   ]
 }
