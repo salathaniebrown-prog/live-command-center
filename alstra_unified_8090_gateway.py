@@ -196,6 +196,13 @@ class H(http.server.BaseHTTPRequestHandler):
         if _handle_8090_flying_car_step(self, 'GET'):
             return
         p = self.path.split("?")[0]
+        if p in ("/api/manifest", "/api/telemetry/spine", "/api/evtol/spine"):
+            c, ct, data = _proxy_try([f"http://127.0.0.1:8159{self.path}"])
+            self.send_response(c)
+            self.send_header("Content-Type", ct)
+            self.end_headers()
+            self.wfile.write(data)
+            return
         if p == "/":
             return self._send(200, "text/html; charset=utf-8", GW_HTML)
         if p == "/api/gw/status":
@@ -233,6 +240,13 @@ class H(http.server.BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(min(length, 65536)) if length else b"{}"
         p = self.path.split("?")[0]
+        if p in ("/api/telemetry/spine", "/api/telemetry/ingest", "/api/evtol/spine"):
+            c, ct, data = _proxy_try([f"http://127.0.0.1:8159{self.path}"], "POST", raw)
+            self.send_response(c)
+            self.send_header("Content-Type", ct)
+            self.end_headers()
+            self.wfile.write(data)
+            return
         if p == "/api/px4":
             body = json.loads(raw.decode("utf-8", errors="ignore") or "{}")
             return self._send(200, "application/json", json.dumps({"ok": True, "px4": ledger.record_px4(body, "px4_gw_8090")}).encode("utf-8"))
