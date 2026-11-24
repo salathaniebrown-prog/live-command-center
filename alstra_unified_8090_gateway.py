@@ -280,7 +280,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
-                self.wfile.write(data)
+                try:
+                    self.wfile.write(data)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
             except Exception as e:
                 err = json.dumps({"ok": False, "error": type(e).__name__, "port": target_port}).encode("utf-8")
                 self.send_response(502)
@@ -307,7 +310,10 @@ class H(http.server.BaseHTTPRequestHandler):
             self.send_response(c)
             self.send_header("Content-Type", ct)
             self.end_headers()
-            self.wfile.write(data)
+            try:
+                self.wfile.write(data)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
             return
         if p == "/":
             return self._send(200, "text/html; charset=utf-8", GW_HTML)
@@ -368,7 +374,10 @@ class H(http.server.BaseHTTPRequestHandler):
             self.send_response(c)
             self.send_header("Content-Type", ct)
             self.end_headers()
-            self.wfile.write(data)
+            try:
+                self.wfile.write(data)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
             return
         if p == "/api/px4":
             body = json.loads(raw.decode("utf-8", errors="ignore") or "{}")
@@ -386,7 +395,10 @@ class H(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-Type", ct)
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def log_message(self, *a):
         pass
