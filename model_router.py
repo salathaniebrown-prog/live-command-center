@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
 Local Pool + Failover + Diagnostics + Raw/Open-Weights Router.
-Supports Gemma 4 31B default, reusable system prefix caching, and JSON-schema outputs.
+Supports Gemma 4 31B default, reusable system prefix caching, JSON-schema outputs,
+vision/image content blocks, and live web search context.
 """
+import html
 import json
 import os
+import re
 import sys
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections import deque
 
@@ -20,6 +24,7 @@ DEFAULT_SYSTEM_PREFIX = sys.intern(
     )
 )
 POOL_TIMEOUT_SEC = float(os.environ.get("ASTRA_POOL_TIMEOUT", "25.0"))
+WEB_SEARCH_TIMEOUT_SEC = float(os.environ.get("ASTRA_WEB_SEARCH_TIMEOUT", "6.0"))
 _DEFAULT_URLS = os.environ.get(
     "ASTRA_MODEL_POOL",
     "http://192.168.1.68:12434,http://127.0.0.1:11434",
@@ -42,6 +47,109 @@ def _build_response_format(json_schema: dict | None, response_format: dict | Non
             },
         }
     return None
+
+
+def _normalize_image_url(item) -> str | None:
+    if isinstance(item, dict):
+        if isinstance(item.get("image_url"), dict):
+            u = item["image_url"].get("url")
+            return str(u).strip() if u else None
+        for k in ("url", "image_url", "data_url", "base64"):
+            if item.get(k):
+                val = str(item[k]).strip()
+                if k == "base64" and not val.startswith("data:"):
+                    return f"data:image/jpeg;base64,{val}"
+                return val
+        return None
+    if isinstance(item, str):
+        s = item.strip()
+        if not s:
+            return None
+        if s.startswith(("http://", "https://", "data:image/")):
+            return s
+        return f"data:image/jpeg;base64,{s}"
+    return None
+
+
+def _extract_images(payload: dict) -> list[str]:
+    out: list[str] = []
+    if payload.get("image_url"):
+        u = _normalize_image_url(payload["image_url"])
+        if u:
+            out.append(u)
+    raw_imgs = payload.get("images")
+    if isinstance(raw_imgs, list):
+        for entry in raw_imgs:
+            u = _normalize_image_url(entry)
+            if u:
+                out.append(u)
+    return out
+
+
+def web_search(query: str, max_results: int = 5) -> dict:
+    q = (query or "").strip()
+    if not q:
+        return {"ok": False, "query": q, "results": [], "error": "empty_query"}
+    url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(q)}"
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.9",
+        },
+        method="GET",
+    )
+    t0 = time.monotonic()
+    try:
+        with urllib.request.urlopen(req, timeout=WEB_SEARCH_TIMEOUT_SEC) as resp:
+            raw_html = resp.read().decode("utf-8", errors="ignore")
+    except Exception as exc:
+        return {
+            "ok": False,
+            "query": q,
+            "results": [],
+            "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
+            "error": str(exc),
+        }
+
+    link_matches = re.findall(
+        r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
+        raw_html,
+        flags=re.S | re.I,
+    )
+    snip_matches = re.findall(
+        r'<(?:a|div|td)[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</(?:a|div|td)>',
+        raw_html,
+        flags=re.S | re.I,
+    )
+    results = []
+    for idx, (href, title_html) in enumerate(link_matches[: max(1, min(max_results, 10))]):
+        clean_href = html.unescape(href).strip()
+        if "uddg=" in clean_href:
+            parsed_q = urllib.parse.parse_qs(urllib.parse.urlparse(clean_href).query)
+            if parsed_q.get("uddg"):
+                clean_href = parsed_q["uddg"][0]
+        clean_title = re.sub(r"<[^>]+>", "", html.unescape(title_html)).strip()
+        snippet = ""
+        if idx < len(snip_matches):
+            snippet = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", html.unescape(snip_matches[idx]))).strip()
+        results.append({"title": clean_title, "url": clean_href, "snippet": snippet})
+
+    return {
+        "ok": True,
+        "query": q,
+        "results": results,
+        "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
+    }
+
+
+def _format_search_context(search_res: dict) -> str:
+    if not search_res.get("ok") or not search_res.get("results"):
+        return ""
+    lines = [f"[LIVE WEB SEARCH :: {search_res.get('query', '')}]"]
+    for i, r in enumerate(search_res["results"], 1):
+        lines.append(f"{i}. {r.get('title','')} — {r.get('url','')}\n   {r.get('snippet','')}")
+    return "\n".join(lines)
 
 
 class LocalPoolOrchestrator:
@@ -96,6 +204,7 @@ class LocalPoolOrchestrator:
                 "developer_mode": self.developer_mode,
                 "raw_mode": self.raw_mode,
                 "system_prefix": self.system_prefix,
+                "capabilities": ["vision_images", "json_schema", "system_prefix", "web_search"],
                 "bind_host": self.bind_host,
                 "evidence_count": len(self.evidence),
                 "recent_evidence": list(self.evidence)[-8:] if self.developer_mode else [],
@@ -133,18 +242,32 @@ class LocalPoolOrchestrator:
         system_prefix: str | None = None,
         response_format: dict | None = None,
         use_system: bool = False,
+        images: list[str] | None = None,
+        search_context: str = "",
     ) -> tuple[bool, dict]:
         t0 = time.monotonic()
         chosen_model = model or DEFAULT_POOL_MODEL
+        img_list = images or []
 
         prefix_part = (system_prefix if system_prefix is not None else self.system_prefix) or ""
         extra_sys = system_prompt or ""
         combined_system = "\n\n".join(p for p in (prefix_part.strip(), extra_sys.strip()) if p)
 
+        effective_prompt = prompt
+        if search_context:
+            effective_prompt = f"{prompt}\n\n{search_context}".strip()
+
+        if img_list:
+            user_content = [{"type": "text", "text": effective_prompt}] + [
+                {"type": "image_url", "image_url": {"url": u}} for u in img_list
+            ]
+        else:
+            user_content = effective_prompt
+
         msgs = []
         if combined_system and (use_system or not self.raw_mode):
             msgs.append({"role": "system", "content": combined_system})
-        msgs.append({"role": "user", "content": prompt})
+        msgs.append({"role": "user", "content": user_content})
 
         oai_payload = {"model": chosen_model, "messages": msgs, "stream": False}
         if response_format:
@@ -168,6 +291,8 @@ class LocalPoolOrchestrator:
                         "api": "/v1/chat/completions",
                         "model": data.get("model") or chosen_model,
                         "schema_enforced": bool(response_format),
+                        "images_attached": len(img_list),
+                        "web_search_used": bool(search_context),
                         "response": choice.get("content", ""),
                         "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
                     }
@@ -193,7 +318,7 @@ class LocalPoolOrchestrator:
                 "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
             }
 
-        gen_payload = {"model": chosen_model, "prompt": prompt, "stream": False}
+        gen_payload = {"model": chosen_model, "prompt": effective_prompt, "stream": False}
         if combined_system and (use_system or not self.raw_mode):
             gen_payload["system"] = combined_system
         if response_format and isinstance(response_format.get("json_schema"), dict):
@@ -212,6 +337,8 @@ class LocalPoolOrchestrator:
                     "api": "/api/generate",
                     "model": data.get("model") or chosen_model,
                     "schema_enforced": bool(response_format),
+                    "images_attached": len(img_list),
+                    "web_search_used": bool(search_context),
                     "response": data.get("response", ""),
                     "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
                 }
@@ -232,9 +359,21 @@ class LocalPoolOrchestrator:
         json_schema: dict | None = None,
         response_format: dict | None = None,
         use_system: bool = False,
+        images: list[str] | None = None,
+        enable_web_search: bool = False,
+        search_query: str | None = None,
     ) -> dict:
         fmt = _build_response_format(json_schema, response_format)
         effective_use_system = bool(use_system or system_prefix is not None or system_prompt is not None)
+        img_list = images or []
+
+        search_meta = None
+        search_ctx = ""
+        if enable_web_search or (search_query and search_query.strip()):
+            q = (search_query or prompt).strip()
+            search_meta = web_search(q, max_results=5)
+            search_ctx = _format_search_context(search_meta)
+
         with self.lock:
             order = list(range(len(self.endpoints)))
             start = self.active_idx % len(self.endpoints)
@@ -252,6 +391,8 @@ class LocalPoolOrchestrator:
                 system_prefix=system_prefix,
                 response_format=fmt,
                 use_system=effective_use_system,
+                images=img_list,
+                search_context=search_ctx,
             )
             attempts.append(res)
             if ok:
@@ -263,12 +404,17 @@ class LocalPoolOrchestrator:
                         "api": res.get("api"),
                         "model": res.get("model"),
                         "schema_enforced": bool(fmt),
+                        "images_attached": len(img_list),
+                        "web_search_used": bool(search_ctx),
                         "latency_ms": res.get("latency_ms"),
                         "raw_mode": self.raw_mode,
                         "failover_used": idx > 0,
                     }
                     self.evidence.append(rec)
-                return {"ok": True, "routed": res, "attempts": attempts, "evidence": rec}
+                out = {"ok": True, "routed": res, "attempts": attempts, "evidence": rec}
+                if search_meta is not None:
+                    out["web_search"] = search_meta
+                return out
 
         with self.lock:
             rec = {
@@ -276,17 +422,22 @@ class LocalPoolOrchestrator:
                 "status": "NO_PROVIDER_REACHABLE",
                 "model": model or DEFAULT_POOL_MODEL,
                 "schema_enforced": bool(fmt),
+                "images_attached": len(img_list),
+                "web_search_used": bool(search_ctx),
                 "raw_mode": self.raw_mode,
                 "attempts": len(attempts),
             }
             self.evidence.append(rec)
-        return {
+        out = {
             "ok": False,
             "status": "OFFLINE_POOL",
             "message": "No local/LAN provider responded; start Ollama/SGLang/MLX or pass a reachable provider URL.",
             "attempts": attempts,
             "evidence": rec,
         }
+        if search_meta is not None:
+            out["web_search"] = search_meta
+        return out
 
 
 _POOL = LocalPoolOrchestrator()
@@ -309,6 +460,9 @@ def route_chat(payload: dict) -> dict:
     json_schema = p.get("json_schema")
     response_format = p.get("response_format")
     use_system = bool(p.get("use_system", False))
+    images = _extract_images(p)
+    enable_web_search = bool(p.get("web_search", False))
+    search_query = p.get("search_query")
     return _POOL.route_prompt(
         prompt=prompt,
         model=model,
@@ -317,6 +471,9 @@ def route_chat(payload: dict) -> dict:
         json_schema=json_schema,
         response_format=response_format,
         use_system=use_system,
+        images=images,
+        enable_web_search=enable_web_search,
+        search_query=search_query,
     )
 
 
@@ -336,13 +493,19 @@ def handle_pool_get(handler, req_path: str) -> bool:
 
 
 def handle_pool_post(handler, req_path: str, raw_body: bytes) -> bool:
-    if req_path not in ("/api/pool/config", "/api/pool/route"):
+    if req_path not in ("/api/pool/config", "/api/pool/route", "/api/pool/search"):
         return False
     try:
         data = json.loads((raw_body or b"{}").decode("utf-8", errors="ignore") or "{}")
     except Exception:
         data = {}
-    out = configure_pool(data) if req_path == "/api/pool/config" else route_chat(data)
+    if req_path == "/api/pool/config":
+        out = configure_pool(data)
+    elif req_path == "/api/pool/search":
+        q = str(data.get("query") or data.get("prompt") or "")
+        out = web_search(q, max_results=int(data.get("max_results") or 5))
+    else:
+        out = route_chat(data)
     body = json.dumps(out, separators=(",", ":")).encode("utf-8")
     try:
         handler.send_response(200)
