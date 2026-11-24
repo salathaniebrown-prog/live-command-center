@@ -131,3 +131,41 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+# === FRONTEND + BACKEND ROUTE LOCK (PREVENTS OVERWRITES ON PROMOTE) ===
+def _verify_frontend_backend_lock():
+    import urllib.request
+    required_routes = [
+        ("http://127.0.0.1:8090/", "text/html"),
+        ("http://127.0.0.1:8090/hud", "text/html"),
+        ("http://127.0.0.1:8090/car-3d", "text/html"),
+        ("http://127.0.0.1:8090/artifacts", "text/html"),
+        ("http://127.0.0.1:8090/metrics", "text/plain"),
+        ("http://127.0.0.1:8090/api/manifest/telemetry", "application/json"),
+        ("http://127.0.0.1:8090/api/cockpit/telemetry", "application/json"),
+        ("http://127.0.0.1:8090/api/shell-catcher/status", "application/json"),
+        ("http://127.0.0.1:8090/v1/neuro/merkle", "application/json"),
+        ("http://127.0.0.1:8090/api/languages", "application/json"),
+        ("http://127.0.0.1:8125/jet-3d", "text/html"),
+        ("http://127.0.0.1:8125/eagle-eyes", "text/html"),
+        ("http://127.0.0.1:8125/deck", "text/html"),
+        ("http://127.0.0.1:8159/telemetry", "application/json"),
+    ]
+    failures = []
+    for url, expected_ct in required_routes:
+        try:
+            with urllib.request.urlopen(url, timeout=2.0) as r:
+                ct = r.headers.get("Content-Type", "")
+                if r.status != 200 or expected_ct not in ct:
+                    failures.append(f"{url} -> status={r.status} ct={ct}")
+        except Exception as e:
+            failures.append(f"{url} -> {type(e).__name__}")
+    if failures:
+        print("[FAIL] Frontend/Backend Route Lock violations:")
+        for f in failures:
+            print("  -", f)
+        raise SystemExit(1)
+    print(f"[PASS] Frontend/Backend Route Lock verified ({len(required_routes)}/{len(required_routes)} routes locked)")
+
+if __name__ == "__main__":
+    _verify_frontend_backend_lock()
