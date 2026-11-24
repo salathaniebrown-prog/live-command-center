@@ -2620,6 +2620,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         super().end_headers()
 
     def do_GET(self):
+        import json as _js
         # === AVATAR_IMAGE_ROUTE_V1 ===
         import os as _os
         if self.path.startswith("/simli_avatar_component.js"):
@@ -3042,7 +3043,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
 class _ReusableDash8097(http.server.ThreadingHTTPServer):
     allow_reuse_address = True
     daemon_threads = True
-_ReusableDash8097(("0.0.0.0", int(os.environ.get("DASHBOARD_PORT", "8097"))), UnifiedHandler).serve_forever()
+_ReusableDash8097(("0.0.0.0", int(os.environ.get("DASHBOARD_PORT", "8177"))), UnifiedHandler).serve_forever()
 
 
 def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, custom_network=None):
