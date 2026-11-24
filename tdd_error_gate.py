@@ -163,6 +163,7 @@ def _verify_frontend_backend_lock():
         ("http://127.0.0.1:8090/api/pro/csv", "text/csv"),
         ("http://127.0.0.1:8090/api/evtol-satellite-spine", "application/json"),
         ("http://127.0.0.1:8090/api/crypto-intel", "application/json"),
+        ("http://127.0.0.1:8090/api/causal-dag", "application/json"),
         ("http://127.0.0.1:8090/api/kpi-summary", "application/json"),
         ("http://127.0.0.1:8090/api/avatar/image", ""),
         ("http://127.0.0.1:8090/api/simli/status", "application/json"),
