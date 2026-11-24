@@ -2,6 +2,10 @@ from virtual_car_3d import CAR_3D_HTML
 #!/usr/bin/env python3
 from spine_client import push_spine_frame
 
+if __name__ == "__main__":
+    from mux_4node_bridge import start_mux_nodes
+    start_mux_nodes()
+
 def _neuro_merkle_payload() -> dict:
     import hashlib, http.client, json, time
     hub_data = {}
