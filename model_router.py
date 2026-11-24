@@ -523,11 +523,83 @@ def configure_pool(cfg: dict) -> dict:
     return _POOL.configure(cfg or {})
 
 
+
+AGENT_ROLES = {
+    "coder": "You write clean, production-ready Python, Go, Node.js, and Bash scripts with explicit error handling.",
+    "reviewer": "You audit code for security flaws, resource/socket/memory leaks, and edge cases. Do not modify files.",
+    "architect": "You design resilient multi-node systems, telemetry pipelines, and SQLite/data schemas.",
+}
+
+
+def handle_agent_slash_command(prompt_text: str, state: dict | None = None) -> dict | None:
+    s = state if isinstance(state, dict) else {"active_agent": "coder"}
+    active = str(s.get("active_agent") or "coder").lower()
+    if active not in AGENT_ROLES:
+        active = "coder"
+    raw = (prompt_text or "").strip()
+
+    if raw == "/agents":
+        s["active_agent"] = active
+        return {
+            "ok": True,
+            "slash_command": "/agents",
+            "active_agent": active,
+            "available_agents": list(AGENT_ROLES.keys()),
+            "routed": {
+                "provider": "local_router",
+                "api": "slash:/agents",
+                "model": DEFAULT_POOL_MODEL,
+                "response": f"[System] Available agents: {', '.join(AGENT_ROLES.keys())} (Active: {active})",
+                "latency_ms": 0.1,
+            },
+        }
+
+    if raw.startswith("/switch "):
+        target = raw.split(" ", 1)[1].strip().lower()
+        if target not in AGENT_ROLES:
+            return {
+                "ok": False,
+                "slash_command": "/switch",
+                "active_agent": active,
+                "error": f"Unknown agent '{target}'. Available: {', '.join(AGENT_ROLES.keys())}",
+            }
+        s["active_agent"] = target
+        return {
+            "ok": True,
+            "slash_command": "/switch",
+            "active_agent": target,
+            "role_prompt": AGENT_ROLES[target],
+            "routed": {
+                "provider": "local_router",
+                "api": "slash:/switch",
+                "model": DEFAULT_POOL_MODEL,
+                "response": f"[System] Switched active agent to '{target}'.",
+                "latency_ms": 0.1,
+            },
+        }
+
+    return None
+
+
+_AGENT_STATE = {"active_agent": "coder"}
+
+
 def route_chat(payload: dict) -> dict:
     p = payload or {}
     prompt = str(p.get("prompt") or p.get("message") or "")
+    req_agent = str(p.get("agent") or "").strip().lower()
+    if req_agent in AGENT_ROLES:
+        _AGENT_STATE["active_agent"] = req_agent
+
+    slash_out = handle_agent_slash_command(prompt, _AGENT_STATE)
+    if slash_out is not None:
+        return slash_out
+
+    active_role = _AGENT_STATE.get("active_agent", "coder")
+    role_system = AGENT_ROLES.get(active_role, "")
     model = p.get("model")
-    system_prompt = p.get("system")
+    base_sys = str(p.get("system") or "").strip()
+    system_prompt = "\n\n".join(x for x in (role_system, base_sys) if x) or None
     system_prefix = p.get("system_prefix")
     json_schema = p.get("json_schema")
     response_format = p.get("response_format")
