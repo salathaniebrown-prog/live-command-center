@@ -426,6 +426,24 @@ class DualModel8173Handler(_BaseBoardHandler):
         })
 
 
+
+class HubStateHandler(_BaseBoardHandler):
+    hub_port = 8101
+    def do_GET(self):
+        p = (self.path or "/").split("?", 1)[0]
+        if p in ("/api/hub/state", "/health", "/"):
+            self._send_json(200, {
+                "ok": True,
+                "service": f"astra-hub-{self.hub_port}",
+                "port": self.hub_port,
+                "status": "ONLINE",
+                "wallet": _WALLET,
+                "ts": time.time(),
+            })
+            return
+        self._send_json(200, {"ok": True, "port": self.hub_port, "path": p})
+
+
 def start_board_mux():
     global _STARTED
     with _START_LOCK:
@@ -433,6 +451,8 @@ def start_board_mux():
             return
         _STARTED = True
     specs = [
+        (8101, "hub-state-8101", type("Hub8101", (HubStateHandler,), {"hub_port": 8101})),
+        (8102, "hub-state-8102", type("Hub8102", (HubStateHandler,), {"hub_port": 8102})),
         (8109, "auto-astra-router", AutoAstra8109Handler),
         (8110, "telemetry-mirror", Telemetry8110Handler),
         (8111, "jev-system-one", Jev8111Handler),
