@@ -166,6 +166,12 @@ def _verify_frontend_backend_lock():
         ("http://127.0.0.1:8090/api/kpi-summary", "application/json"),
         ("http://127.0.0.1:8090/api/avatar/image", ""),
         ("http://127.0.0.1:8090/api/simli/status", "application/json"),
+        ("http://127.0.0.1:8109/health", "application/json"),
+        ("http://127.0.0.1:8111/health", "application/json"),
+        ("http://127.0.0.1:8115/health", "application/json"),
+        ("http://127.0.0.1:8117/health", "application/json"),
+        ("http://127.0.0.1:8121/health", "application/json"),
+        ("http://127.0.0.1:8173/health", "application/json"),
     ]
     failures = []
     for url, expected_ct in required_routes:

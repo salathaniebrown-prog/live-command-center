@@ -1608,6 +1608,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        import json as _js
         # === BRAIN_V8_ALL_BOARD_PROGRAMMABLE ===
         import json as _js, time as _tm, hashlib as _hl, socket as _sk, sqlite3 as _sq, os as _os, subprocess as _sp, urllib.request as _ur
         _cl = int(self.headers.get("Content-Length", 0))
@@ -3043,6 +3044,8 @@ class UnifiedHandler(BaseHTTPRequestHandler):
 class _ReusableDash8097(http.server.ThreadingHTTPServer):
     allow_reuse_address = True
     daemon_threads = True
+from board_subsystems_mux import start_board_mux
+start_board_mux()
 _ReusableDash8097(("0.0.0.0", int(os.environ.get("DASHBOARD_PORT", "8177"))), UnifiedHandler).serve_forever()
 
 
