@@ -6,6 +6,31 @@ Binds :8109 (Auto-Astra Router), :8110 (Telemetry), :8111 (JEV + Invoice Agent),
 :8121 (Cinema MCP), and :8173 (Dual Model Dispatch) as daemon threads inside :8177.
 """
 import hashlib
+import sqlite3
+_WH_DB_PATH = os.path.expanduser('~/.astra_logs/webhooks_8115.db')
+def _persist_webhook_sqlite(event: dict):
+    try:
+        os.makedirs(os.path.dirname(_WH_DB_PATH), exist_ok=True)
+        with sqlite3.connect(_WH_DB_PATH, timeout=2.0) as conn:
+            conn.execute('''CREATE TABLE IF NOT EXISTS webhook_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tx_hash TEXT, network TEXT, asset TEXT, amount_usd REAL,
+                hmac_sha256 TEXT, jev_invoice_id TEXT, ts REAL
+            )''')
+            conn.execute(
+                'INSERT INTO webhook_events (tx_hash, network, asset, amount_usd, hmac_sha256, jev_invoice_id, ts) VALUES (?,?,?,?,?,?,?)',
+                (
+                    str(event.get('tx_hash', '')),
+                    str(event.get('network', 'BASE_USDC')),
+                    str(event.get('asset', '')),
+                    float(event.get('amount_usd') or 0),
+                    str(event.get('hmac_sha256', '')),
+                    str(event.get('jev_invoice_id', '')),
+                    float(event.get('ts') or 0),
+                ),
+            )
+    except Exception:
+        pass
 import hmac
 import http.client
 import json
@@ -299,6 +324,7 @@ class Webhook8115Handler(_BaseBoardHandler):
             "jev_invoice_id": jev_res.get("invoice_id", "PENDING"),
             "ts": now,
         }
+        _persist_webhook_sqlite(event)
         with _STATE_LOCK:
             _WEBHOOK_STATE["count"] += 1
             _WEBHOOK_STATE["events"].append(event)
