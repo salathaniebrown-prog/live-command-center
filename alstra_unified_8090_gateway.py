@@ -1,3 +1,4 @@
+from causal_dag_spine import handle_causal_dag_route
 from evtol_sat_crypto_spine import handle_evtol_sat_crypto
 import os
 from restored_legacy_routes import handle_restored_routes
@@ -221,6 +222,8 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         _boot_8088_ingress(self.__class__)
         _req_p = (self.path or "").split("?", 1)[0]
+        if handle_causal_dag_route(self, _req_p):
+            return
         if handle_evtol_sat_crypto(self, _req_p):
             return
         if handle_restored_routes(self, _req_p):
