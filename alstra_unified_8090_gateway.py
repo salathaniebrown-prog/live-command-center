@@ -222,14 +222,18 @@ class H(http.server.BaseHTTPRequestHandler):
         if handle_restored_routes(self, _req_p):
             return
         if _req_p == "/":
-            _c98, _ct98, _d98 = _proxy_try(["http://127.0.0.1:8098/"])
-            if _c98 == 200 and _d98:
-                self.send_response(200)
-                self.send_header("Content-Type", _ct98)
-                self.send_header("Content-Length", str(len(_d98)))
-                self.end_headers()
-                self.wfile.write(_d98)
-                return
+            try:
+                _c98, _ct98, _d98 = _proxy_try(["http://127.0.0.1:8098/"])
+                _ct98 = (_ct98 or "text/html; charset=utf-8").split("\r")[0].split("\n")[0]
+                if _c98 == 200 and _d98 and len(_d98) > 100:
+                    self.send_response(200)
+                    self.send_header("Content-Type", _ct98)
+                    self.send_header("Content-Length", str(len(_d98)))
+                    self.end_headers()
+                    self.wfile.write(_d98)
+                    return
+            except Exception:
+                pass
         if _req_p == "/" and os.path.exists("command_center_full.html"):
             with open("command_center_full.html", "rb") as _cf:
                 _cbody = _cf.read()
