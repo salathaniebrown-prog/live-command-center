@@ -1,3 +1,4 @@
+from shell_catcher_bridge import get_shell_catcher_status, audit_shell_command
 from manifest_sync import probe_manifest
 #!/usr/bin/env python3
 """
@@ -85,6 +86,14 @@ class SpineHandler(http.server.BaseHTTPRequestHandler):
             pass
 
     def do_GET(self):
+        if (self.path or "").split("?", 1)[0] == "/api/shell-catcher/status":
+            body = json.dumps(get_shell_catcher_status(), separators=(",", ":")).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if (self.path or "").split("?", 1)[0] in ("/telemetry", "/api/telemetry"):
             self.path = "/api/telemetry/spine"
         if (self.path or "").split("?", 1)[0] == "/api/manifest/telemetry":
@@ -122,6 +131,20 @@ class SpineHandler(http.server.BaseHTTPRequestHandler):
         return self._send(404, {"ok": False, "error": "not_found"})
 
     def do_POST(self):
+        if (self.path or "").split("?", 1)[0] == "/api/shell-catcher/audit":
+            cl = int(self.headers.get("Content-Length", "0"))
+            raw = self.rfile.read(min(cl, 4096)) if cl > 0 else b"{}"
+            try:
+                cmd = json.loads(raw.decode("utf-8", errors="ignore")).get("command", "")
+            except Exception:
+                cmd = ""
+            body = json.dumps(audit_shell_command(cmd), separators=(",", ":")).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         p = (self.path or "/").split("?", 1)[0]
         if p in ("/api/telemetry/spine", "/api/telemetry/ingest", "/api/evtol/spine"):
             length = int(self.headers.get("Content-Length", "0"))
