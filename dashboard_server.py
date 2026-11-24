@@ -3039,7 +3039,10 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                                         self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.end_headers()
                                         self.wfile.write(HTML.encode("utf-8"))
 
-http.server.ThreadingHTTPServer(("0.0.0.0", 8098), UnifiedHandler).serve_forever()
+class _ReusableDash8097(http.server.ThreadingHTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+_ReusableDash8097(("0.0.0.0", int(os.environ.get("DASHBOARD_PORT", "8097"))), UnifiedHandler).serve_forever()
 
 
 def trigger_1click_dealership_pipeline(custom_vin=None, custom_amount=None, custom_network=None):
