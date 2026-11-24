@@ -1,3 +1,4 @@
+from virtual_car_3d import CAR_3D_HTML
 #!/usr/bin/env python3
 from spine_client import push_spine_frame
 
@@ -351,6 +352,13 @@ class PilotHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if (self.path or "").split("?", 1)[0] in ("/car-3d", "/virtual-car"):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(CAR_3D_HTML)))
+            self.end_headers()
+            self.wfile.write(CAR_3D_HTML)
+            return
         if (self.path or "").split("?", 1)[0] in ("/v1/neuro/merkle", "/api/neuro/merkle", "/api/avatars"):
             b = json.dumps(_neuro_merkle_payload()).encode("utf-8")
             self.send_response(200)

@@ -1,7 +1,7 @@
 {
   "name": "Astra + Alstra = SalathanieAI",
   "short_name": "SalathanieAI",
-  "version": "2026.11.23-r7",
+  "version": "2026.11.23-r8",
   "architecture": "SOVEREIGN_TRI_AVATAR_EV_OS",
   "ram_ceiling_pct": 83.0,
   "tri_avatar_council": [
@@ -172,5 +172,15 @@
     "polyglot_all_languages": true,
     "spine_ring_cap": 500,
     "ram_ceiling_pct": 83.0
+  },
+  "shell_catcher": {
+    "endpoint": "/api/shell-catcher/status",
+    "audit": "/api/shell-catcher/audit",
+    "agent_mastery": true
+  },
+  "virtual_flying_car": {
+    "route": "/car-3d",
+    "solar_hybrid": true,
+    "telemetry_chronicles": true
   }
 }

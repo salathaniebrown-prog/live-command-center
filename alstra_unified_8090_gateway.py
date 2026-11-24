@@ -1,3 +1,4 @@
+from virtual_car_3d import CAR_3D_HTML
 from cockpit_hud_ui import HUD_HTML
 from polyglot_router import detect_language, enrich_payload, POLYGLOT_SYSTEM_DIRECTIVE
 import ecosystem_router as _eco_router
@@ -216,6 +217,13 @@ class H(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(_cbody)
             return
+        if _req_p in ("/car-3d", "/virtual-car"):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(CAR_3D_HTML)))
+            self.end_headers()
+            self.wfile.write(CAR_3D_HTML)
+            return
         if _req_p in ("/", "/hud", "/cockpit"):
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -264,7 +272,7 @@ class H(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
-        if p in ("/api/manifest", "/api/manifest/telemetry", "/api/telemetry/spine", "/api/evtol/spine"):
+        if p in ("/api/manifest", "/api/manifest/telemetry", "/api/telemetry/spine", "/api/evtol/spine", "/api/shell-catcher/status"):
             c, ct, data = _proxy_try([f"http://127.0.0.1:8159{self.path}"])
             self.send_response(c)
             self.send_header("Content-Type", ct)
