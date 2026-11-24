@@ -1,3 +1,4 @@
+from restored_legacy_routes import handle_restored_routes
 from virtual_car_3d import CAR_3D_HTML
 from cockpit_hud_ui import HUD_HTML
 from polyglot_router import detect_language, enrich_payload, POLYGLOT_SYSTEM_DIRECTIVE
@@ -218,6 +219,8 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         _boot_8088_ingress(self.__class__)
         _req_p = (self.path or "").split("?", 1)[0]
+        if handle_restored_routes(self, _req_p):
+            return
         if _req_p == "/":
             _c98, _ct98, _d98 = _proxy_try(["http://127.0.0.1:8098/"])
             if _c98 == 200 and _d98:
