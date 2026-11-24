@@ -161,7 +161,7 @@ def handle_restored_routes(handler, req_path: str) -> bool:
 
         sc = _local_json(8159, "/api/shell-catcher/status")
         ram = _local_json(8158, "/api/memory/telemetry")
-        man = _local_json(8159, "/api/manifest/telemetry")
+        man = _local_json(8159, "/api/manifest/telemetry", timeout=2.5)
         pred = _local_json(8154, "/")
         payload = {
             "ok": True,
@@ -176,8 +176,8 @@ def handle_restored_routes(handler, req_path: str) -> bool:
             },
             "manifest": {
                 "version": man.get("version", "2026.11.23-r8"),
-                "online": man.get("online", 0),
-                "total": man.get("total", 13),
+                "online": man.get("online") or man.get("summary", {}).get("online") or sum(1 for n in man.get("nodes", []) if n.get("online")),
+                "total": man.get("total") or man.get("summary", {}).get("total") or len(man.get("nodes", [])) or 13,
             },
             "ram_governor": ram,
             "predictive_kernel": pred,
@@ -192,7 +192,7 @@ def handle_restored_routes(handler, req_path: str) -> bool:
             _send(handler, 200, ct or "text/csv; charset=utf-8", body)
             return True
 
-        man = _local_json(8159, "/api/manifest/telemetry")
+        man = _local_json(8159, "/api/manifest/telemetry", timeout=2.5)
         spine = _local_json(8159, "/api/telemetry/spine")
         sc = _local_json(8159, "/api/shell-catcher/status")
         buf = io.StringIO()
