@@ -1,3 +1,4 @@
+from model_router import handle_pool_get, handle_pool_post
 from gateway_shm_hook import GatewayShmTelemetry
 _GW_SHM = GatewayShmTelemetry()
 from causal_dag_spine import handle_causal_dag_route
@@ -225,6 +226,8 @@ class H(http.server.BaseHTTPRequestHandler):
         _boot_8088_ingress(self.__class__)
         _req_p = (self.path or "").split("?", 1)[0]
         _GW_SHM.emit_tick(_req_p)
+        if handle_pool_get(self, _req_p):
+            return
         if handle_causal_dag_route(self, _req_p):
             return
         if handle_evtol_sat_crypto(self, _req_p):
@@ -373,6 +376,8 @@ class H(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+            return
+        if handle_pool_post(self, p, _bd):
             return
         if p in ("/api/telemetry/spine", "/api/telemetry/ingest", "/api/evtol/spine"):
             c, ct, data = _proxy_try([f"http://127.0.0.1:8159{self.path}"], "POST", raw)
