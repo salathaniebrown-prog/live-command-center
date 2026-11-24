@@ -1299,15 +1299,31 @@ async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json
     <strong>LOCAL POOL // FAILOVER &amp; EVIDENCE</strong>
     <span id="pool-active-badge" style="color:#6ee7b7;">CHECKING...</span>
   </div>
+  <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+    <input id="pool-prompt-input" type="text" value="reply with one word: online" style="flex:1;min-width:160px;background:#070b12;color:#e6edf7;border:1px solid #2b3548;padding:4px 6px;border-radius:4px;font-size:11px;" />
+    <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input id="pool-web-search" type="checkbox" /> WEB SEARCH</label>
+    <label style="font-size:11px;display:flex;align-items:center;gap:3px;"><input id="pool-use-schema" type="checkbox" /> JSON SCHEMA</label>
+    <input id="pool-img-file" type="file" accept="image/*" multiple style="max-width:165px;font-size:10px;" />
+  </div>
   <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
     <button type="button" onclick="astraPoolRefresh()">REFRESH POOL</button>
     <button type="button" onclick="astraPoolToggleFailover()">TOGGLE FAILOVER</button>
     <button type="button" onclick="astraPoolTestRoute()">TEST ROUTE</button>
   </div>
-  <pre id="pool-evidence-box" style="margin-top:8px;max-height:110px;overflow:auto;background:#070b12;padding:6px;border-radius:4px;font-size:11px;">Waiting for /api/pool/status...</pre>
+  <pre id="pool-evidence-box" style="margin-top:8px;max-height:130px;overflow:auto;background:#070b12;padding:6px;border-radius:4px;font-size:11px;">Waiting for /api/pool/status...</pre>
 </div>
 <script>
 let _astraPoolFailover = true;
+async function astraPoolReadFiles(inputEl) {
+  if (!inputEl || !inputEl.files || !inputEl.files.length) return [];
+  const readers = Array.from(inputEl.files).map(f => new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(f);
+  }));
+  return Promise.all(readers);
+}
 async function astraPoolRefresh() {
   try {
     const r = await fetch("/api/pool/status");
@@ -1332,10 +1348,31 @@ async function astraPoolToggleFailover() {
   astraPoolRefresh();
 }
 async function astraPoolTestRoute() {
+  const promptEl = document.getElementById("pool-prompt-input");
+  const wsEl = document.getElementById("pool-web-search");
+  const scEl = document.getElementById("pool-use-schema");
+  const fiEl = document.getElementById("pool-img-file");
+  const images = await astraPoolReadFiles(fiEl);
+  const payload = {
+    prompt: (promptEl && promptEl.value) ? promptEl.value : "status check",
+    web_search: !!(wsEl && wsEl.checked),
+    images
+  };
+  if (scEl && scEl.checked) {
+    payload.json_schema = {
+      name: "pool_response",
+      strict: true,
+      schema: {
+        type: "object",
+        properties: { status: { type: "string" }, summary: { type: "string" } },
+        required: ["status"]
+      }
+    };
+  }
   const r = await fetch("/api/pool/route", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({prompt: "status check"})
+    body: JSON.stringify(payload)
   });
   const d = await r.json();
   const box = document.getElementById("pool-evidence-box");
