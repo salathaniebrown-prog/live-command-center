@@ -1293,7 +1293,58 @@ function initiateVoiceDataLink() {
 <span id="sec-st" style="color:#aaddff;">LONGCAT-2.5 READY</span>
 </div><script>
 async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=d.mode+': '+(d.threat||d.grade||d.hardened.length+' OK');}
-</script><!-- ASTRA_VISION_8104_WIDGET --><div id='vis8104' style='position:fixed;bottom:12px;right:12px;z-index:99999;background:#061022;border:1px solid #a855f7;padding:8px;border-radius:6px;font-family:monospace;color:#00f0ff;font-size:11px;'><b>VISION 8104 // SEAL</b><br><input type='file' id='v8f' accept='image/*' style='font-size:10px;max-width:185px;'><pre id='v8o' style='max-height:95px;max-width:240px;overflow:auto;color:#34d399;margin:4px 0 0;'></pre><script>document.getElementById('v8f').onchange=function(e){var fl=e.target&&e.target.files;var f=fl&&fl[0];if(!f)return;var o=document.getElementById('v8o');o.textContent='Sealing...';var r=new FileReader();r.onload=function(){fetch('http://'+location.hostname+':8104/api/vision/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,image_base64:r.result})}).then(function(x){return x.json()}).then(function(j){o.textContent=JSON.stringify(j,null,2)}).catch(function(z){o.textContent='Err:'+z})};r.readAsDataURL(f)};</script></div><!-- /ASTRA_VISION_8104_WIDGET --></body>
+</script><!-- ASTRA_VISION_8104_WIDGET --><div id='vis8104' style='position:fixed;bottom:12px;right:12px;z-index:99999;background:#061022;border:1px solid #a855f7;padding:8px;border-radius:6px;font-family:monospace;color:#00f0ff;font-size:11px;'><b>VISION 8104 // SEAL</b><br><input type='file' id='v8f' accept='image/*' style='font-size:10px;max-width:185px;'><pre id='v8o' style='max-height:95px;max-width:240px;overflow:auto;color:#34d399;margin:4px 0 0;'></pre><script>document.getElementById('v8f').onchange=function(e){var fl=e.target&&e.target.files;var f=fl&&fl[0];if(!f)return;var o=document.getElementById('v8o');o.textContent='Sealing...';var r=new FileReader();r.onload=function(){fetch('http://'+location.hostname+':8104/api/vision/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,image_base64:r.result})}).then(function(x){return x.json()}).then(function(j){o.textContent=JSON.stringify(j,null,2)}).catch(function(z){o.textContent='Err:'+z})};r.readAsDataURL(f)};</script></div><!-- /ASTRA_VISION_8104_WIDGET -->
+<div id="astra-local-pool-card" style="border:1px solid #2b3548;background:#0d131f;color:#e6edf7;padding:10px 12px;margin:10px 0;border-radius:6px;font-family:monospace;font-size:12px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+    <strong>LOCAL POOL // FAILOVER &amp; EVIDENCE</strong>
+    <span id="pool-active-badge" style="color:#6ee7b7;">CHECKING...</span>
+  </div>
+  <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <button type="button" onclick="astraPoolRefresh()">REFRESH POOL</button>
+    <button type="button" onclick="astraPoolToggleFailover()">TOGGLE FAILOVER</button>
+    <button type="button" onclick="astraPoolTestRoute()">TEST ROUTE</button>
+  </div>
+  <pre id="pool-evidence-box" style="margin-top:8px;max-height:110px;overflow:auto;background:#070b12;padding:6px;border-radius:4px;font-size:11px;">Waiting for /api/pool/status...</pre>
+</div>
+<script>
+let _astraPoolFailover = true;
+async function astraPoolRefresh() {
+  try {
+    const r = await fetch("/api/pool/status");
+    const d = await r.json();
+    _astraPoolFailover = !!d.failover;
+    const b = document.getElementById("pool-active-badge");
+    if (b) b.textContent = (d.active_provider || "N/A") + " | failover=" + _astraPoolFailover;
+    const box = document.getElementById("pool-evidence-box");
+    if (box) box.textContent = JSON.stringify({providers: d.providers, recent_evidence: d.recent_evidence}, null, 2);
+  } catch (e) {
+    const box = document.getElementById("pool-evidence-box");
+    if (box) box.textContent = "Pool status error: " + e;
+  }
+}
+async function astraPoolToggleFailover() {
+  _astraPoolFailover = !_astraPoolFailover;
+  await fetch("/api/pool/config", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({failover: _astraPoolFailover})
+  });
+  astraPoolRefresh();
+}
+async function astraPoolTestRoute() {
+  const r = await fetch("/api/pool/route", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({prompt: "status check"})
+  });
+  const d = await r.json();
+  const box = document.getElementById("pool-evidence-box");
+  if (box) box.textContent = JSON.stringify(d, null, 2);
+}
+astraPoolRefresh();
+</script>
+
+</body>
 
 
 
