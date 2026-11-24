@@ -157,6 +157,7 @@ def _verify_frontend_backend_lock():
         ("http://127.0.0.1:8150/api/game/state", "application/json"),
         ("http://127.0.0.1:8152/api/twin-flight/state", "application/json"),
         ("http://127.0.0.1:8156/api/brain/manifest", "application/json"),
+        ("http://127.0.0.1:8098/", "text/html"),
     ]
     failures = []
     for url, expected_ct in required_routes:
