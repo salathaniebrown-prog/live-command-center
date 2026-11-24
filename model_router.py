@@ -12,6 +12,8 @@ import urllib.error
 import urllib.request
 from collections import deque
 
+DEFAULT_POOL_MODEL = sys.intern(os.environ.get("ASTRA_POOL_MODEL", "ollama-cluster-smart"))
+
 _DEFAULT_URLS = os.environ.get(
     "ASTRA_MODEL_POOL",
     "http://192.168.1.68:12434,http://127.0.0.1:11434",
@@ -98,9 +100,8 @@ class LocalPoolOrchestrator:
         if system_prompt and not self.raw_mode:
             msgs.append({"role": "system", "content": system_prompt})
         msgs.append({"role": "user", "content": prompt})
-        oai_payload = {"messages": msgs, "stream": False}
-        if model:
-            oai_payload["model"] = model
+        chosen_model = model or DEFAULT_POOL_MODEL
+        oai_payload = {"model": chosen_model, "messages": msgs, "stream": False}
 
         last_err = None
         for attempt in range(2):
