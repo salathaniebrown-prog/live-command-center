@@ -5,7 +5,7 @@ DB_PATH = os.path.join(HOME, "astra_ai_memory.db")
 VAULT_DIR = os.path.join(HOME, "astra-golden-vault")
 os.makedirs(VAULT_DIR, exist_ok=True)
 
-SKIP_DIRS = (".git", "astra-backups", "astra-golden-vault", "__pycache__", ".cache", "node_modules")
+SKIP_DIRS = (".git", "astra-backups", "astra-golden-vault", ".astra_snapshots", ".astra_atomic_checkpoints", "__pycache__", ".cache", "node_modules")
 
 def vacuum_and_recycle_codebase():
     conn = sqlite3.connect(DB_PATH, timeout=30.0)
@@ -37,7 +37,8 @@ def vacuum_and_recycle_codebase():
                 raw = open(fpath, "r", encoding="utf-8", errors="ignore").read()
                 digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()
                 dst = os.path.join(VAULT_DIR, rel.replace(os.sep, "__"))
-                shutil.copy2(fpath, dst)
+                if os.path.exists(dst): os.chmod(dst, 0o644); os.remove(dst)
+                shutil.copyfile(fpath, dst)
                 conn.execute("INSERT OR REPLACE INTO golden_code_vault VALUES (?, ?, ?, ?)", (rel, digest, "VACUUMED_VALID", now))
                 vacuumed_ok.append(rel)
                 continue
