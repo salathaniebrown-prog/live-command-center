@@ -1,3 +1,4 @@
+from evtol_sat_crypto_spine import handle_evtol_sat_crypto
 import os
 from restored_legacy_routes import handle_restored_routes
 from virtual_car_3d import CAR_3D_HTML
@@ -220,6 +221,8 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         _boot_8088_ingress(self.__class__)
         _req_p = (self.path or "").split("?", 1)[0]
+        if handle_evtol_sat_crypto(self, _req_p):
+            return
         if handle_restored_routes(self, _req_p):
             return
         if _req_p == "/":

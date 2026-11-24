@@ -161,6 +161,8 @@ def _verify_frontend_backend_lock():
         ("http://127.0.0.1:8090/forensic", "text/html"),
         ("http://127.0.0.1:8090/api/sentinel", "application/json"),
         ("http://127.0.0.1:8090/api/pro/csv", "text/csv"),
+        ("http://127.0.0.1:8090/api/evtol-satellite-spine", "application/json"),
+        ("http://127.0.0.1:8090/api/crypto-intel", "application/json"),
     ]
     failures = []
     for url, expected_ct in required_routes:
