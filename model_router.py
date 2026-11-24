@@ -86,59 +86,131 @@ def _extract_images(payload: dict) -> list[str]:
     return out
 
 
-def web_search(query: str, max_results: int = 5) -> dict:
-    q = (query or "").strip()
-    if not q:
-        return {"ok": False, "query": q, "results": [], "error": "empty_query"}
+def _ddg_html_search(q: str, limit: int) -> list[dict]:
     url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote_plus(q)}"
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml",
             "Accept-Language": "en-US,en;q=0.9",
         },
         method="GET",
     )
-    t0 = time.monotonic()
-    try:
-        with urllib.request.urlopen(req, timeout=WEB_SEARCH_TIMEOUT_SEC) as resp:
-            raw_html = resp.read().decode("utf-8", errors="ignore")
-    except Exception as exc:
-        return {
-            "ok": False,
-            "query": q,
-            "results": [],
-            "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
-            "error": str(exc),
-        }
+    with urllib.request.urlopen(req, timeout=WEB_SEARCH_TIMEOUT_SEC) as resp:
+        raw_html = resp.read().decode("utf-8", errors="ignore")
 
     link_matches = re.findall(
-        r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
+        r'<a[^>]*class="[^"]*result__(?:a|title-link)[^"]*"[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
         raw_html,
         flags=re.S | re.I,
     )
+    if not link_matches:
+        link_matches = re.findall(
+            r'<a[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>',
+            raw_html,
+            flags=re.S | re.I,
+        )
+        link_matches = [
+            (h, t) for (h, t) in link_matches
+            if "duckduckgo.com" not in urllib.parse.urlparse(h).netloc.lower()
+        ]
+
     snip_matches = re.findall(
-        r'<(?:a|div|td)[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</(?:a|div|td)>',
+        r'<(?:a|div|td|span)[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</(?:a|div|td|span)>',
         raw_html,
         flags=re.S | re.I,
     )
-    results = []
-    for idx, (href, title_html) in enumerate(link_matches[: max(1, min(max_results, 10))]):
+    out = []
+    seen = set()
+    for href, title_html in link_matches:
         clean_href = html.unescape(href).strip()
         if "uddg=" in clean_href:
             parsed_q = urllib.parse.parse_qs(urllib.parse.urlparse(clean_href).query)
             if parsed_q.get("uddg"):
                 clean_href = parsed_q["uddg"][0]
-        clean_title = re.sub(r"<[^>]+>", "", html.unescape(title_html)).strip()
+        if not clean_href.startswith(("http://", "https://")) or clean_href in seen:
+            continue
+        seen.add(clean_href)
+        clean_title = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", html.unescape(title_html))).strip()
+        if not clean_title:
+            continue
         snippet = ""
-        if idx < len(snip_matches):
-            snippet = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", html.unescape(snip_matches[idx]))).strip()
-        results.append({"title": clean_title, "url": clean_href, "snippet": snippet})
+        if len(out) < len(snip_matches):
+            snippet = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", html.unescape(snip_matches[len(out)]))).strip()
+        out.append({"title": clean_title, "url": clean_href, "snippet": snippet, "source": "ddg_html"})
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _ddg_instant_search(q: str, limit: int) -> list[dict]:
+    url = f"https://api.duckduckgo.com/?q={urllib.parse.quote_plus(q)}&format=json&no_html=1&skip_disambig=1"
+    req = urllib.request.Request(url, headers={"User-Agent": "AstraCommandCenter/1.0"}, method="GET")
+    with urllib.request.urlopen(req, timeout=WEB_SEARCH_TIMEOUT_SEC) as resp:
+        data = json.loads(resp.read().decode("utf-8", errors="ignore") or "{}")
+    out = []
+    if data.get("AbstractText") and data.get("AbstractURL"):
+        out.append({
+            "title": data.get("Heading") or q,
+            "url": data["AbstractURL"],
+            "snippet": data["AbstractText"],
+            "source": "ddg_instant",
+        })
+    for topic in (data.get("RelatedTopics") or []):
+        if isinstance(topic, dict) and topic.get("FirstURL") and topic.get("Text"):
+            out.append({
+                "title": topic.get("Text", "").split(" - ")[0][:90],
+                "url": topic["FirstURL"],
+                "snippet": topic["Text"],
+                "source": "ddg_instant",
+            })
+            if len(out) >= limit:
+                break
+    return out[:limit]
+
+
+def _wiki_opensearch(q: str, limit: int) -> list[dict]:
+    url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={urllib.parse.quote_plus(q)}&limit={limit}&namespace=0&format=json"
+    req = urllib.request.Request(url, headers={"User-Agent": "AstraCommandCenter/1.0"}, method="GET")
+    with urllib.request.urlopen(req, timeout=WEB_SEARCH_TIMEOUT_SEC) as resp:
+        arr = json.loads(resp.read().decode("utf-8", errors="ignore") or "[]")
+    out = []
+    if isinstance(arr, list) and len(arr) >= 4:
+        titles, descs, urls = arr[1], arr[2], arr[3]
+        for i in range(min(len(titles), len(urls), limit)):
+            out.append({
+                "title": str(titles[i]),
+                "url": str(urls[i]),
+                "snippet": str(descs[i] if i < len(descs) else ""),
+                "source": "wikipedia",
+            })
+    return out
+
+
+def web_search(query: str, max_results: int = 5) -> dict:
+    q = (query or "").strip()
+    limit = max(1, min(int(max_results or 5), 10))
+    if not q:
+        return {"ok": False, "query": q, "results": [], "error": "empty_query"}
+
+    t0 = time.monotonic()
+    results: list[dict] = []
+    errors: list[str] = []
+    for fn in (_ddg_html_search, _ddg_instant_search, _wiki_opensearch):
+        try:
+            hits = fn(q, limit)
+            if hits:
+                results = hits
+                break
+        except Exception as exc:
+            errors.append(f"{fn.__name__}:{exc}")
 
     return {
-        "ok": True,
+        "ok": len(results) > 0,
         "query": q,
         "results": results,
+        "errors": errors,
         "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
     }
 
