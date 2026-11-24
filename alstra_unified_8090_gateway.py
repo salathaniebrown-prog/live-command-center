@@ -223,6 +223,23 @@ class H(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        _static_p = self.path.split('?', 1)[0].rstrip('/')
+        _static_routes = {
+            '/docs': 'ALSTRA_API_CONSOLE.html',
+            '/spatial': 'ALSTRA_SPATIAL_3D_ENGINE.html',
+            '/core3d': 'core3d/index.html',
+        }
+        if _static_p in _static_routes:
+            _fp = os.path.join(os.path.dirname(os.path.abspath(__file__)), _static_routes[_static_p])
+            if os.path.isfile(_fp):
+                with open(_fp, 'rb') as _f:
+                    _body = _f.read()
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.send_header('Content-Length', str(len(_body)))
+                self.end_headers()
+                self.wfile.write(_body)
+                return
         _boot_8088_ingress(self.__class__)
         _req_p = (self.path or "").split("?", 1)[0]
         _GW_SHM.emit_tick(_req_p)
