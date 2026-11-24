@@ -12,6 +12,8 @@ import sqlite3
 import threading
 import time
 from collections import Counter, deque
+from gateway_shm_hook import GatewayShmTelemetry
+_SHM_BUS = GatewayShmTelemetry()
 
 DB_PATH = os.path.expanduser("~/astra_telemetry_wal.db")
 TARGET_PORTS = (8088, 8090, 8119)
@@ -162,6 +164,7 @@ class CausalDAGSpine:
                 "phase_velocity": {"port_mem": p_vel, "load": io_vel},
                 "causal_resonance": resonance,
                 "alert_state": alert_state,
+                "psi_shield": _shm_st,
                 "dag_edges": dag_edges,
             }
             raw_bytes = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -171,6 +174,9 @@ class CausalDAGSpine:
             merkle_root = hashlib.blake2b(chain_blob, digest_size=32).hexdigest()
             self.prev_hash = merkle_root
 
+            _shm_st = _SHM_BUS.emit_tick(merkle_root)
+            if _shm_st.get("shield_state") == "SHIELD_ACTIVE_WAL_TRUNCATED" and alert_state == "NOMINAL":
+                alert_state = "PSI_EVICTION_SHIELD"
             frame = {
                 "ok": True,
                 "service": "astra-causal-dag-spine",
