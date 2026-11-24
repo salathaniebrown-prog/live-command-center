@@ -227,7 +227,7 @@ class H(http.server.BaseHTTPRequestHandler):
             return
         if _req_p == "/":
             try:
-                _c98, _ct98, _d98 = _proxy_try(["http://127.0.0.1:8097/"])
+                _c98, _ct98, _d98 = _proxy_try(["http://127.0.0.1:8177/"])
                 _ct98 = (_ct98 or "text/html; charset=utf-8").split("\r")[0].split("\n")[0]
                 if _c98 == 200 and _d98 and len(_d98) > 100:
                     self.send_response(200)
@@ -334,7 +334,7 @@ class H(http.server.BaseHTTPRequestHandler):
             c, ct, data = _proxy_try(["http://127.0.0.1:8095/api/hud", "http://127.0.0.1:8125/api/hud"])
             return self._send(c, ct, data)
         _p8125 = self.path.startswith(("/jet-3d", "/eagle-eyes", "/deck", "/api/evtol", "/v1/neuro", "/api/pilot"))
-        _targets = [f"http://127.0.0.1:8125{self.path}", f"http://127.0.0.1:8097{self.path}"] if _p8125 else [f"http://127.0.0.1:8097{self.path}", f"http://127.0.0.1:8125{self.path}"]
+        _targets = [f"http://127.0.0.1:8125{self.path}", f"http://127.0.0.1:8177{self.path}"] if _p8125 else [f"http://127.0.0.1:8177{self.path}", f"http://127.0.0.1:8125{self.path}"]
         c, ct, data = _proxy_try_fallback(_targets)
         return self._send(c, ct, data)
 
@@ -377,7 +377,7 @@ class H(http.server.BaseHTTPRequestHandler):
             c, ct, data = _proxy_try([f"http://127.0.0.1:8095{p}", f"http://127.0.0.1:8125{p}"], "POST", raw)
             return self._send(c, ct, data)
         _p8125 = self.path.startswith(("/jet-3d", "/eagle-eyes", "/deck", "/api/evtol", "/v1/neuro", "/api/pilot"))
-        _targets = [f"http://127.0.0.1:8125{self.path}", f"http://127.0.0.1:8097{self.path}"] if _p8125 else [f"http://127.0.0.1:8097{self.path}", f"http://127.0.0.1:8125{self.path}"]
+        _targets = [f"http://127.0.0.1:8125{self.path}", f"http://127.0.0.1:8177{self.path}"] if _p8125 else [f"http://127.0.0.1:8177{self.path}", f"http://127.0.0.1:8125{self.path}"]
         c, ct, data = _proxy_try_fallback(_targets, "POST", raw, self.headers.get("Content-Type", "application/json"))
         return self._send(c, ct, data)
 

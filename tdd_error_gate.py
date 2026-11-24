@@ -157,12 +157,15 @@ def _verify_frontend_backend_lock():
         ("http://127.0.0.1:8150/api/game/state", "application/json"),
         ("http://127.0.0.1:8152/api/twin-flight/state", "application/json"),
         ("http://127.0.0.1:8156/api/brain/manifest", "application/json"),
-        ("http://127.0.0.1:8097/", "text/html"),
+        ("http://127.0.0.1:8177/", "text/html"),
         ("http://127.0.0.1:8090/forensic", "text/html"),
         ("http://127.0.0.1:8090/api/sentinel", "application/json"),
         ("http://127.0.0.1:8090/api/pro/csv", "text/csv"),
         ("http://127.0.0.1:8090/api/evtol-satellite-spine", "application/json"),
         ("http://127.0.0.1:8090/api/crypto-intel", "application/json"),
+        ("http://127.0.0.1:8090/api/kpi-summary", "application/json"),
+        ("http://127.0.0.1:8090/api/avatar/image", ""),
+        ("http://127.0.0.1:8090/api/simli/status", "application/json"),
     ]
     failures = []
     for url, expected_ct in required_routes:
