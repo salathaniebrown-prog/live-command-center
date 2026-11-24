@@ -180,6 +180,16 @@ def _handle_8090_hub_routes(handler) -> bool:
         pass
     return True
 
+def _proxy_try_fallback(targets: list[str], method: str = "GET", body: bytes = b"", ct: str = "application/json") -> tuple[int, str, bytes]:
+    last = (502, "application/json", b'{"ok":false,"error":"UPSTREAM_UNAVAILABLE"}')
+    for t in targets:
+        c, rct, data = _proxy_try([t], method, body, ct)
+        last = (c, rct, data)
+        if c not in (404, 501, 502, 503):
+            return last
+    return last
+
+
 def _boot_8088_ingress(handler_cls):
     import threading
     from http.server import ThreadingHTTPServer
@@ -208,6 +218,15 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         _boot_8088_ingress(self.__class__)
         _req_p = (self.path or "").split("?", 1)[0]
+        if _req_p == "/":
+            _c98, _ct98, _d98 = _proxy_try(["http://127.0.0.1:8098/"])
+            if _c98 == 200 and _d98:
+                self.send_response(200)
+                self.send_header("Content-Type", _ct98)
+                self.send_header("Content-Length", str(len(_d98)))
+                self.end_headers()
+                self.wfile.write(_d98)
+                return
         if _req_p == "/" and os.path.exists("command_center_full.html"):
             with open("command_center_full.html", "rb") as _cf:
                 _cbody = _cf.read()
@@ -303,7 +322,9 @@ class H(http.server.BaseHTTPRequestHandler):
         if p == "/api/hud":
             c, ct, data = _proxy_try(["http://127.0.0.1:8095/api/hud", "http://127.0.0.1:8125/api/hud"])
             return self._send(c, ct, data)
-        c, ct, data = _proxy_try([f"http://127.0.0.1:8125{self.path}"])
+        _p8125 = self.path.startswith(("/jet-3d", "/eagle-eyes", "/deck", "/api/evtol", "/v1/neuro", "/api/pilot"))
+        _targets = [f"http://127.0.0.1:8125{self.path}", f"http://127.0.0.1:8098{self.path}"] if _p8125 else [f"http://127.0.0.1:8098{self.path}", f"http://127.0.0.1:8125{self.path}"]
+        c, ct, data = _proxy_try_fallback(_targets)
         return self._send(c, ct, data)
 
     def do_POST(self):
@@ -344,7 +365,9 @@ class H(http.server.BaseHTTPRequestHandler):
         if p in ("/api/mode", "/api/pods", "/api/pilot"):
             c, ct, data = _proxy_try([f"http://127.0.0.1:8095{p}", f"http://127.0.0.1:8125{p}"], "POST", raw)
             return self._send(c, ct, data)
-        c, ct, data = _proxy_try([f"http://127.0.0.1:8125{self.path}"], "POST", raw)
+        _p8125 = self.path.startswith(("/jet-3d", "/eagle-eyes", "/deck", "/api/evtol", "/v1/neuro", "/api/pilot"))
+        _targets = [f"http://127.0.0.1:8125{self.path}", f"http://127.0.0.1:8098{self.path}"] if _p8125 else [f"http://127.0.0.1:8098{self.path}", f"http://127.0.0.1:8125{self.path}"]
+        c, ct, data = _proxy_try_fallback(_targets, "POST", raw, self.headers.get("Content-Type", "application/json"))
         return self._send(c, ct, data)
 
     def _send(self, code, ct, data):
