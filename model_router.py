@@ -94,7 +94,43 @@ class LocalPoolOrchestrator:
 
     def _call_provider(self, base_url: str, prompt: str, model: str | None, system_prompt: str | None) -> tuple[bool, dict]:
         t0 = time.monotonic()
-        # Try Ollama /api/generate first, then OpenAI-compatible /v1/chat/completions
+        msgs = []
+        if system_prompt and not self.raw_mode:
+            msgs.append({"role": "system", "content": system_prompt})
+        msgs.append({"role": "user", "content": prompt})
+        oai_payload = {"messages": msgs, "stream": False}
+        if model:
+            oai_payload["model"] = model
+
+        last_err = None
+        for attempt in range(2):
+            try:
+                req = urllib.request.Request(
+                    f"{base_url}/v1/chat/completions",
+                    data=json.dumps(oai_payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urllib.request.urlopen(req, timeout=8.0) as resp:
+                    data = json.loads(resp.read().decode("utf-8", errors="ignore") or "{}")
+                    choice = ((data.get("choices") or [{}])[0]).get("message") or {}
+                    return True, {
+                        "provider": base_url,
+                        "api": "/v1/chat/completions",
+                        "model": data.get("model") or model or "default",
+                        "response": choice.get("content", ""),
+                        "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
+                    }
+            except urllib.error.HTTPError as he:
+                last_err = f"oai_http_{he.code}"
+                if he.code in (429, 502, 503) and attempt == 0:
+                    time.sleep(0.35)
+                    continue
+                break
+            except Exception as e_oai:
+                last_err = f"oai={e_oai}"
+                break
+
         payload = {"prompt": prompt, "stream": False}
         if model:
             payload["model"] = model
@@ -117,36 +153,11 @@ class LocalPoolOrchestrator:
                     "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
                 }
         except Exception as e_ollama:
-            msgs = []
-            if system_prompt and not self.raw_mode:
-                msgs.append({"role": "system", "content": system_prompt})
-            msgs.append({"role": "user", "content": prompt})
-            oai_payload = {"messages": msgs, "stream": False}
-            if model:
-                oai_payload["model"] = model
-            try:
-                req = urllib.request.Request(
-                    f"{base_url}/v1/chat/completions",
-                    data=json.dumps(oai_payload).encode("utf-8"),
-                    headers={"Content-Type": "application/json"},
-                    method="POST",
-                )
-                with urllib.request.urlopen(req, timeout=8.0) as resp:
-                    data = json.loads(resp.read().decode("utf-8", errors="ignore") or "{}")
-                    choice = ((data.get("choices") or [{}])[0]).get("message") or {}
-                    return True, {
-                        "provider": base_url,
-                        "api": "/v1/chat/completions",
-                        "model": data.get("model") or model or "default",
-                        "response": choice.get("content", ""),
-                        "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
-                    }
-            except Exception as e_oai:
-                return False, {
-                    "provider": base_url,
-                    "error": f"ollama={e_ollama} | oai={e_oai}",
-                    "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
-                }
+            return False, {
+                "provider": base_url,
+                "error": f"{last_err} | ollama={e_ollama}",
+                "latency_ms": round((time.monotonic() - t0) * 1000.0, 1),
+            }
 
     def route_prompt(self, prompt: str, model: str | None = None, system_prompt: str | None = None) -> dict:
         with self.lock:
