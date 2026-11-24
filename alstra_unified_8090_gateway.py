@@ -179,6 +179,20 @@ def _handle_8090_hub_routes(handler) -> bool:
         pass
     return True
 
+def _boot_8088_ingress(handler_cls):
+    import threading
+    from http.server import ThreadingHTTPServer
+    if getattr(_boot_8088_ingress, "_bound", False):
+        return
+    _boot_8088_ingress._bound = True
+    try:
+        srv88 = ThreadingHTTPServer(("0.0.0.0", 8088), handler_cls)
+        threading.Thread(target=srv88.serve_forever, daemon=True).start()
+        print("[OK] :8088 ingress bound alongside :8090", flush=True)
+    except Exception as e:
+        print(f"[WARN] :8088 ingress skipped: {e}", flush=True)
+
+
 class Server(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
@@ -191,7 +205,18 @@ class H(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if (self.path or "").split("?", 1)[0] in ("/", "/hud", "/cockpit"):
+        _boot_8088_ingress(self.__class__)
+        _req_p = (self.path or "").split("?", 1)[0]
+        if _req_p == "/" and os.path.exists("command_center_full.html"):
+            with open("command_center_full.html", "rb") as _cf:
+                _cbody = _cf.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(_cbody)))
+            self.end_headers()
+            self.wfile.write(_cbody)
+            return
+        if _req_p in ("/", "/hud", "/cockpit"):
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(HUD_HTML)))
@@ -328,23 +353,3 @@ class H(http.server.BaseHTTPRequestHandler):
 if __name__ == "__main__":
     with Server(("0.0.0.0", PORT), H) as srv:
         srv.serve_forever()
-
-def _boot_8088_ingress():
-    import threading
-    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-    hcls = None
-    for obj in list(globals().values()):
-        if isinstance(obj, type) and issubclass(obj, BaseHTTPRequestHandler) and obj is not BaseHTTPRequestHandler:
-            hcls = obj
-            break
-    if hcls is None:
-        return
-    try:
-        srv88 = ThreadingHTTPServer(("0.0.0.0", 8088), hcls)
-        threading.Thread(target=srv88.serve_forever, daemon=True).start()
-        print(f"[OK] :8088 ingress bound using {hcls.__name__}", flush=True)
-    except Exception as e:
-        print(f"[WARN] :8088 ingress bind failed: {e}", flush=True)
-
-if __name__ == "__main__":
-    _boot_8088_ingress()
