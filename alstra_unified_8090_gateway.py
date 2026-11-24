@@ -351,8 +351,7 @@ class H(http.server.BaseHTTPRequestHandler):
             return
         if _handle_8090_flying_car_step(self, 'POST', _bd):
             return
-        length = int(self.headers.get("Content-Length", "0"))
-        raw = self.rfile.read(min(length, 65536)) if length else b"{}"
+        raw = _bd if _bd else b"{}"
         p = self.path.split("?")[0]
         if p in ("/api/polyglot/route", "/api/languages/detect"):
             try:
