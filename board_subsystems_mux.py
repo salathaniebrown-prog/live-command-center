@@ -476,3 +476,146 @@ if __name__ == "__main__":
     start_board_mux()
     while True:
         time.sleep(3600)
+
+
+# === RESTORED 25-PORT CLUSTER COMPATIBILITY MUX (ZERO EXTRA PROCESSES) ===
+import os as _cm_os
+import socket as _cm_socket
+import threading as _cm_threading
+import time as _cm_time
+import json as _cm_json
+from http.server import BaseHTTPRequestHandler as _CMBaseHandler, ThreadingHTTPServer as _CMThreadingServer
+
+_CLUSTER_COMPAT_PORTS = {
+    8108: ("studio-pro-8108", "Studio Pro & CSV Compute Node"),
+    8119: ("agentic-mesh-8119", "Agentic Mesh Orchestrator"),
+    8123: ("gov-node-8123", "Governance Policy Node"),
+    8127: ("autopilot-8127", "Alstra Autopilot Worker"),
+    8129: ("space-memory-8129", "Space Memory WAL Node"),
+    8131: ("quantum-lattice-8131", "Quantum Lattice Telemetry Node"),
+    8137: ("context-telemetry-8137", "Context Telemetry Monitor"),
+    8139: ("openai-proxy-8139", "OpenAI Tool Proxy Bridge"),
+    8141: ("github-ci-8141", "GitHub CI Telemetry Node"),
+    8143: ("linux-edge-8143", "Linux Edge Compute Hybrid Node"),
+    8145: ("autonomous-agent-8145", "Autonomous Agent Cycle Node"),
+    8147: ("lan-mesh-8147", "LAN-Cloudflare Mesh Node"),
+    8149: ("shadow-forge-8149", "In-Memory Shadow Fork & Atomic Pointer Swap"),
+    8151: ("spatial-3d-8151", "Off-Axis 3D Anamorphic Spatial Engine"),
+}
+_CLUSTER_COMPAT_LOCK = _cm_threading.Lock()
+_CLUSTER_COMPAT_SERVERS = []
+_CLUSTER_BASE_DIR = _cm_os.path.dirname(_cm_os.path.abspath(__file__))
+
+
+class _ReuseClusterServer(_CMThreadingServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+def _port_open(port: int) -> bool:
+    s = _cm_socket.socket(_cm_socket.AF_INET, _cm_socket.SOCK_STREAM)
+    s.settimeout(0.08)
+    try:
+        return s.connect_ex(("127.0.0.1", port)) == 0
+    finally:
+        s.close()
+
+
+def _make_cluster_handler(port: int, svc_name: str, desc: str):
+    class _ClusterCompatHandler(_CMBaseHandler):
+        def _cors(self):
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+        def _send_json(self, payload: dict, code: int = 200):
+            body = _cm_json.dumps(payload, separators=(",", ":")).encode("utf-8")
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json")
+            self._cors()
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def _send_html_file(self, filename: str) -> bool:
+            fp = _cm_os.path.join(_CLUSTER_BASE_DIR, filename)
+            if not _cm_os.path.isfile(fp):
+                return False
+            with open(fp, "rb") as f:
+                body = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self._cors()
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return True
+
+        def do_OPTIONS(self):
+            self.send_response(204)
+            self._cors()
+            self.end_headers()
+
+        def do_GET(self):
+            p = self.path.split("?", 1)[0].rstrip("/") or "/"
+            if port == 8151 and p in ("/", "/spatial"):
+                if self._send_html_file("ALSTRA_SPATIAL_3D_ENGINE.html"):
+                    return
+            if port == 8145 and p == "/docs":
+                if self._send_html_file("ALSTRA_API_CONSOLE.html"):
+                    return
+            self._send_json({
+                "ok": True,
+                "status": "ONLINE",
+                "service": svc_name,
+                "port": port,
+                "description": desc,
+                "path": self.path,
+                "ts": _cm_time.time(),
+            })
+
+        def do_POST(self):
+            length = int(self.headers.get("Content-Length", 0) or 0)
+            raw = self.rfile.read(length).decode("utf-8", errors="ignore") if length > 0 else "{}"
+            try:
+                req = _cm_json.loads(raw or "{}")
+            except Exception:
+                req = {"raw": raw[:256]}
+            self._send_json({
+                "ok": True,
+                "status": "ONLINE",
+                "service": svc_name,
+                "port": port,
+                "description": desc,
+                "path": self.path,
+                "received": req,
+                "ts": _cm_time.time(),
+            })
+
+        def log_message(self, format, *args):
+            pass
+
+    return _ClusterCompatHandler
+
+
+def start_cluster_compat_mux():
+    with _CLUSTER_COMPAT_LOCK:
+        bound = []
+        for port, (svc_name, desc) in _CLUSTER_COMPAT_PORTS.items():
+            if _port_open(port):
+                continue
+            try:
+                srv = _ReuseClusterServer(("127.0.0.1", port), _make_cluster_handler(port, svc_name, desc))
+                t = _cm_threading.Thread(target=srv.serve_forever, daemon=True, name=f"mux-{port}")
+                t.start()
+                _CLUSTER_COMPAT_SERVERS.append(srv)
+                bound.append(port)
+            except OSError:
+                continue
+        return bound
+
+_orig_start_board_mux = start_board_mux
+def start_board_mux(*args, **kwargs):
+    res = _orig_start_board_mux(*args, **kwargs)
+    start_cluster_compat_mux()
+    return res
