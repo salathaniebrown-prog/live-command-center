@@ -1,3 +1,4 @@
+import os
 from restored_legacy_routes import handle_restored_routes
 from virtual_car_3d import CAR_3D_HTML
 from cockpit_hud_ui import HUD_HTML
