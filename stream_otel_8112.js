@@ -65,69 +65,98 @@ async function refreshProbes() {
   return state.last_probe;
 }
 
-function buildTacticalPlan(prompt, probes) {
-  const up = probes.filter((x) => x.up).map((x) => ":" + x.port).join(", ") || "none";
-  return [
-    `[${GOD_QWEN_MODEL} tactical-plan | online: ${up}]`,
-    "1. Node Roles & 520.0 MiB RAM Floor: :8088/:8090 UI/API gateway, :8095 master spine, :8099 WAL brain, :8110 telemetry assistant, :8112 HUD/stream/OTel bridge, :8125 IoT process, :8170 SHM monitor; gate launches on MemAvailable >= 520.0 MiB.",
-    "2. :8110 Route Alignment: Probe :8110 on /api/telemetry/status so active telemetry health reports HTTP 200 instead of root / 404.",
-    "3. Zero-Drop Failover: Enforce SQLite WAL mode, short <=1.5s probe/upstream timeouts, and immediate local/cached fallback under peak load or memory pressure."
-  ].join(" ");
+const OLLAMA_BASE = (process.env.OLLAMA_HOST || "http://127.0.0.1:11434").replace(/\/+$/, "");
+const OLLAMA_MODEL = process.env.GOD_QWEN_MODEL || "god-qwen:latest";
+
+function httpJsonPost(baseUrl, pathName, payload, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(baseUrl);
+    const body = JSON.stringify(payload);
+    const req = http.request(
+      {
+        hostname: u.hostname,
+        port: Number(u.port || 11434),
+        path: pathName,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(body),
+        },
+        timeout: timeoutMs,
+      },
+      (res) => {
+        let buf = "";
+        res.on("data", (c) => { buf += c; });
+        res.on("end", () => {
+          if ((res.statusCode || 500) >= 400) {
+            return reject(new Error(`HTTP ${res.statusCode}: ${buf.slice(0, 180)}`));
+          }
+          try {
+            resolve(JSON.parse(buf));
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+    );
+    req.on("timeout", () => { req.destroy(); reject(new Error("timeout")); });
+    req.on("error", (err) => reject(err));
+    req.write(body);
+    req.end();
+  });
 }
 
-function askGodQwen(prompt, probes) {
-  const low = String(prompt || "").toLowerCase();
-  if (low.includes("3-phase") || low.includes("architect") || low.includes("8110") || low.includes("failover") || low.includes("role")) {
-    return Promise.resolve({ reply: buildTacticalPlan(prompt, probes), engine: `${GOD_QWEN_MODEL}:tactical` });
-  }
-  return new Promise((resolve) => {
-    const upList = probes.filter((x) => x.up).map((x) => ":" + x.port).join(", ") || "none";
-    const postData = JSON.stringify({ model: GOD_QWEN_MODEL, prompt, stream: false });
-    let done = false;
-    const finish = (reply, engine) => {
-      if (done) return;
-      done = true;
-      resolve({ reply, engine });
-    };
-    const timer = setTimeout(() => {
-      finish(`[${GOD_QWEN_MODEL} local-tactical] Active nodes: ${upList}. Command logged: "${prompt}".`, "local_fallback");
-    }, 1400);
+async function askGodQwen(prompt, probes) {
+  const up = probes.filter((x) => x.up).map((x) => ":" + x.port).join(", ") || "none";
+  const sysCtx = `Live nodes online: ${up}. Respond concisely and directly.`;
 
-    try {
-      const u = new URL(GOD_QWEN_URL);
-      const req = http.request(
-        {
-          hostname: u.hostname,
-          port: Number(u.port || 11434),
-          path: u.pathname,
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(postData) },
-          timeout: 1200,
-        },
-        (res) => {
-          let buf = "";
-          res.on("data", (c) => { buf += c; });
-          res.on("end", () => {
-            clearTimeout(timer);
-            try {
-              const j = JSON.parse(buf);
-              if (j.response) return finish(String(j.response).trim(), GOD_QWEN_MODEL);
-            } catch (_) {}
-            finish(`[${GOD_QWEN_MODEL}] Online nodes: ${upList} | Echo: "${prompt}".`, "local_fallback");
-          });
-        }
-      );
-      req.on("error", () => {
-        clearTimeout(timer);
-        finish(`[${GOD_QWEN_MODEL} local-tactical] Active nodes: ${upList}. Ready for "${prompt}".`, "local_fallback");
-      });
-      req.write(postData);
-      req.end();
-    } catch (_) {
-      clearTimeout(timer);
-      finish(`[${GOD_QWEN_MODEL} local-tactical] Active nodes: ${upList}.`, "local_fallback");
+  try {
+    const chatRes = await httpJsonPost(
+      OLLAMA_BASE,
+      "/api/chat",
+      {
+        model: OLLAMA_MODEL,
+        stream: false,
+        messages: [
+          { role: "system", content: sysCtx },
+          { role: "user", content: prompt },
+        ],
+      },
+      30000
+    );
+    const txt = (chatRes && chatRes.message && chatRes.message.content) || "";
+    if (txt.trim()) {
+      return { reply: txt.trim(), engine: `ollama:${OLLAMA_MODEL}` };
     }
-  });
+  } catch (_) {}
+
+  try {
+    const genRes = await httpJsonPost(
+      OLLAMA_BASE,
+      "/api/generate",
+      {
+        model: OLLAMA_MODEL,
+        system: sysCtx,
+        prompt,
+        stream: false,
+      },
+      30000
+    );
+    const txt = (genRes && genRes.response) || "";
+    if (txt.trim()) {
+      return { reply: txt.trim(), engine: `ollama:${OLLAMA_MODEL}` };
+    }
+  } catch (err) {
+    return {
+      reply: `Ollama unreachable at ${OLLAMA_BASE} for model "${OLLAMA_MODEL}" (${err.message}). Start Ollama when MemAvailable >= 520.0 MiB to run live inference.`,
+      engine: "ollama_offline",
+    };
+  }
+
+  return {
+    reply: `Empty response from ${OLLAMA_MODEL} at ${OLLAMA_BASE}.`,
+    engine: "ollama_empty",
+  };
 }
 
 function jsonOut(res, code, obj) {
