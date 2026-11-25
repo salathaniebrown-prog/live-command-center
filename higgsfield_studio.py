@@ -132,9 +132,11 @@ STUDIO_HTML = """<!doctype html>
         <select id="aperture"><option>f/1.4 Wide Open</option><option>f/4 Moderate</option><option>f/11 Deep Focus</option></select>
       </div>
     </div>
-    <div class="grid2">
-      <div><label>Aspect Ratio</label><select id="aspect"><option>16:9</option><option>2.39:1 Anamorphic</option><option>9:16 Vertical</option><option>1:1 Square</option></select></div>
-      <div><label>Duration (sec)</label><input id="duration" type="number" min="2" max="30" value="6"/></div>
+    <div class="grid3">
+      <div><label>Model Engine</label><select id="engine"><option value="Higgsfield Cinema">Higgsfield Cinema</option><option value="MiniMax H3">MiniMax H3 (2K + Stereo Audio)</option></select></div>
+      <div><label>Aspect Ratio</label><select id="aspect"><option>16:9</option><option>21:9 Ultrawide</option><option>2.39:1 Anamorphic</option><option>4:3</option><option>1:1 Square</option><option>3:4</option><option>9:16 Vertical</option></select></div>
+      <div><label>Duration (5–15s)</label><input id="duration" type="number" min="5" max="15" value="10"/></div>
+      <div><label>H3 Audio / Ref / Edit Note</label><input id="h3note" placeholder="Stereo foley, voice ref, or edit..."/></div>
     </div>
     <div class="row">
       <button onclick="generateShot()">Generate &amp; Preview</button>
@@ -221,6 +223,8 @@ async function generateShot(){
     camera: document.getElementById('camera').value,
     lens: document.getElementById('lens').value,
     aperture: document.getElementById('aperture').value,
+    engine: document.getElementById('engine').value,
+    h3_note: document.getElementById('h3note').value.trim(),
     aspect: document.getElementById('aspect').value,
     duration: Number(document.getElementById('duration').value || 6)
   };
@@ -294,6 +298,8 @@ def handle_get(handler):
             "status": "ONLINE",
             "studio": "Higgsfield Cinema Studio Local (No Login)",
             "cloud_bridge_configured": bool(os.environ.get("HIGGSFIELD_API_KEY")),
+            "minimax_h3_configured": bool(os.environ.get("MINIMAX_API_KEY")),
+            "models_supported": ["Higgsfield Cinema", "MiniMax H3"],
             "shots_saved": cnt,
             "chat_ports": sorted(PORT_ROUTES.keys()),
         })
@@ -327,9 +333,12 @@ def handle_post(handler):
         lighting = str(d.get("lighting") or "Soft Cross")
         aspect = str(d.get("aspect") or "16:9")
         duration = int(d.get("duration") or 6)
+        engine = str(d.get("engine") or "Higgsfield Cinema").strip()
+        h3_note = str(d.get("h3_note") or "").strip()
+        h3_tag = f" | H3-Audio/Ref: {h3_note}" if (engine == "MiniMax H3" and h3_note) else (" | Native-Stereo-2K-24fps" if engine == "MiniMax H3" else "")
         compiled = (
-            f"[{genre} | #{move} | {camera} · {lens} · {aperture} | "
-            f"{lighting} lighting | {aspect} · {duration}s] {prompt}"
+            f"[{engine} | {genre} | #{move} | {camera} · {lens} · {aperture} | "
+            f"{lighting} lighting | {aspect} · {duration}s{h3_tag}] {prompt}"
         )
         mode = "cloud_ready" if os.environ.get("HIGGSFIELD_API_KEY") else "local_preview"
         with sqlite3.connect(DB_PATH, timeout=3) as conn:
@@ -348,8 +357,8 @@ def handle_post(handler):
         targets = sorted(PORT_ROUTES.keys()) if port == "all" else [port]
         results = [_probe_port(p, msg) for p in targets]
         note = None
-        if any(k in msg.lower() for k in ("shot", "camera", "scene", "lens", "higgs", "video")):
-            note = f"Suggested setup for '{msg}': #Dolly In + 35mm Film + Anamorphic f/1.4 + Contre-jour lighting."
+        if any(k in msg.lower() for k in ("shot", "camera", "scene", "lens", "higgs", "video", "minimax", "h3", "hailuo")):
+            note = f"Suggested setup for '{msg}': MiniMax H3 / #Dolly In + 35mm Film + Anamorphic f/1.4 + Contre-jour lighting + native stereo audio."
         _send_json(handler, 200, {"ok": True, "target": port, "director_note": note, "results": results})
         return True
     return False
