@@ -67,6 +67,8 @@ jobs:
     name: Seal Global Edge Routing Manifest
     needs: global-datacenter-fanout
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
