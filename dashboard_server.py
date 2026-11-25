@@ -1554,7 +1554,11 @@ function initiateVoiceDataLink() {
 <span id="sec-st" style="color:#aaddff;">LONGCAT-2.5 READY</span>
 </div><script>
 async function secRun(m){const r=await fetch('/api/sec/'+m);const d=await r.json();document.getElementById('sec-st').innerText=d.mode+': '+(d.threat||d.grade||d.hardened.length+' OK');}
-</script></body>
+</script><div class="card"><h3>3. RE-ANYTHING ENGINE • AUTOMATED PROMPT PACK • BUILD FROM NOTES (PORT 8105)</h3>
+<div class="row"><input id="re-name" placeholder="Target / App Name (e.g. fleet_api_clone)"><button class="g" onclick="runRE('/api/re/anything')">REVERSE ENGINEER</button><button class="a" onclick="runRE('/api/re/prompt-pack')">RE PROMPT PACK</button><button class="g" onclick="runRE('/api/re/build-notes')">BUILD FROM NOTES</button></div>
+<div class="row"><textarea id="re-in" rows="3" style="width:100%;background:#02060b;color:#e6f9ff;border:1px solid #00f0ff66;font-family:monospace;padding:6px;" placeholder="Paste code, binary strings, API dumps, or rough build notes..."></textarea></div>
+<pre id="re-out">[RE-ANYTHING READY] Paste artifact or notes above to disassemble, generate LLM prompt packs, or synthesize runnable microservices.</pre></div>
+<script>async function runRE(ep){const v=document.getElementById('re-in').value;const n=document.getElementById('re-name').value||'astra_note_build';const d=await api(ep,{target:v,notes:v,app_name:n});document.getElementById('re-out').innerText=JSON.stringify(d,null,2);}</script></body>
 
 
 
@@ -2084,6 +2088,17 @@ class UnifiedHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+
+        if self.path in ("/api/re/anything", "/api/re/prompt-pack", "/api/re/build-notes"):
+            import urllib.request
+            ln = int(self.headers.get("Content-Length", 0))
+            raw = self.rfile.read(ln)
+            req = urllib.request.Request("http://127.0.0.1:8105" + self.path, data=raw, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                out = r.read()
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.end_headers()
+            self.wfile.write(out); return
+
         if self.path == "/api/trace-vacuum":
             import json
             b = json.dumps(call_satellite_vacuum_8158(True)).encode("utf-8")
@@ -3174,7 +3189,87 @@ class UnifiedHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
 
-        if self.path == "/api/telemetry/chronicle": # ASTRA_CHRONICLE_TELEMETRY_V1
+        if self.path.split("?", 1)[0] in ("/api/telemetry/chronicle", "/api/telemetry/iot-process"): # ASTRA_IOT_PROCESS_TELEMETRY_V1
+            import json, os, socket, sqlite3, subprocess, time, urllib.request
+            home_dir = os.path.expanduser("~")
+            req_path = self.path.split("?", 1)[0]
+            avail_mib = 0.0
+            total_mib = 0.0
+            meminfo = os.path.join(os.sep, "proc", "meminfo")
+            if os.path.exists(meminfo):
+                with open(meminfo, "r", encoding="utf-8", errors="replace") as mf:
+                    for ln in mf:
+                        if ln.startswith("MemTotal:"):
+                            toks = ln.split()
+                            if len(toks) > 1 and toks.pop(1).isdigit():
+                                total_mib = round(int(ln.split().pop(1)) / 1024.0, 1)
+                        elif ln.startswith("MemAvailable:"):
+                            toks = ln.split()
+                            if len(toks) > 1 and toks.pop(1).isdigit():
+                                avail_mib = round(int(ln.split().pop(1)) / 1024.0, 1)
+            load1 = 0.0
+            loadavg_p = os.path.join(os.sep, "proc", "loadavg")
+            if os.path.exists(loadavg_p):
+                raw_la = open(loadavg_p, "r", encoding="utf-8", errors="replace").read().split()
+                if raw_la:
+                    try:
+                        load1 = float(raw_la.pop(0))
+                    except ValueError:
+                        load1 = 0.0
+            proc_count = 0
+            top_procs = []
+            try:
+                ps_lines = subprocess.check_output(["ps", "-eo", "pid,rss,comm"], text=True, errors="replace").splitlines()[1:]
+                proc_count = len(ps_lines)
+                parsed = []
+                for pl in ps_lines:
+                    parts = pl.strip().split()
+                    if len(parts) >= 3 and parts[1].isdigit():
+                        parsed.append((int(parts[1]), int(parts[0]), parts[-1]))
+                parsed.sort(reverse=True)
+                top_procs = [{"pid": item[1], "rss_mib": round(item[0] / 1024.0, 1), "comm": item[2]} for item in parsed[:6]]
+            except Exception:
+                pass
+            ports = (8088, 8090, 8095, 8096, 8097, 8098, 8099, 8100, 8101, 8102, 8108, 8109, 8110, 8111, 8115, 8117, 8119, 8121)
+            online = []
+            for p in ports:
+                try:
+                    with socket.create_connection(("127.0.0.1", p), timeout=0.2):
+                        online.append(p)
+                except OSError:
+                    pass
+            ta_status = {"status": "UNREACHABLE"}
+            try:
+                with urllib.request.urlopen("http://127.0.0.1:8110/api/telemetry/status", timeout=1.5) as r:
+                    ta_status = json.loads(r.read().decode("utf-8", errors="replace"))
+            except Exception as exc:
+                ta_status = {"status": "ADVISORY_STANDBY", "detail": str(exc)}
+            sat_opinion = {"source": "satellite_telemetry", "mode": "advisory_opinion", "authoritative": False, "note": "Treat satellite pass/telemetry data as directional opinion rather than ground truth."}
+            iot_edge = {"edge_node": "termux-android", "ram_floor_mib": 520.0, "ram_floor_ok": avail_mib >= 520.0, "total_ram_mib": total_mib, "free_ram_mib": avail_mib, "load_1m": load1, "process_count": proc_count, "top_processes": top_procs}
+            db_fp = os.path.join(home_dir, "astra_telemetry.db")
+            recent_events = []
+            try:
+                conn = sqlite3.connect(db_fp)
+                conn.execute("PRAGMA journal_mode=WAL;")
+                conn.execute("CREATE TABLE IF NOT EXISTS telemetry_chronicles (id INTEGER PRIMARY KEY AUTOINCREMENT, ts REAL, free_ram_mib REAL, online_count INTEGER, payload TEXT)")
+                snap = {"free_ram_mib": avail_mib, "online_ports": online, "assistant": ta_status, "satellite_telemetry": sat_opinion, "iot_edge": iot_edge}
+                conn.execute("INSERT INTO telemetry_chronicles (ts, free_ram_mib, online_count, payload) VALUES (?, ?, ?, ?)", (time.time(), avail_mib, len(online), json.dumps(snap)))
+                conn.commit()
+                cur = conn.execute("SELECT id, ts, free_ram_mib, online_count FROM telemetry_chronicles ORDER BY id DESC LIMIT 5")
+                recent_events = [{"id": row[0], "ts": row[1], "free_ram_mib": row[2], "online_count": row[3]} for row in cur.fetchall()]
+                conn.close()
+            except Exception as db_exc:
+                recent_events = [{"db_error": str(db_exc)}]
+            out_payload = {"status": "CHRONICLE_OK", "route": req_path, "free_ram_mib": avail_mib, "online_ports": online, "online_count": len(online), "assistant": ta_status, "satellite_telemetry": sat_opinion, "iot_edge": iot_edge, "recent_chronicles": recent_events}
+            raw_out = json.dumps(out_payload, indent=2).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw_out)))
+            self.end_headers()
+            self.wfile.write(raw_out)
+            return
+
+        if self.path.split("?", 1)[0] == "/api/telemetry/chronicle": # ASTRA_CHRONICLE_ADVISORY_V3
             import json, os, socket, sqlite3, time, urllib.request
             home_dir = os.path.expanduser("~")
             avail_mib = 0.0
@@ -3200,14 +3295,15 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                 with urllib.request.urlopen("http://127.0.0.1:8110/api/telemetry/status", timeout=1.5) as r:
                     ta_status = json.loads(r.read().decode("utf-8", errors="replace"))
             except Exception as exc:
-                ta_status = {"status": "ERROR", "detail": str(exc)}
+                ta_status = {"status": "ADVISORY_STANDBY", "detail": str(exc)}
+            sat_opinion = {"source": "satellite_telemetry", "mode": "advisory_opinion", "authoritative": False, "note": "Treat satellite pass/telemetry data as directional opinion rather than ground truth."}
             db_fp = os.path.join(home_dir, "astra_telemetry.db")
             recent_events = []
             try:
                 conn = sqlite3.connect(db_fp)
                 conn.execute("PRAGMA journal_mode=WAL;")
                 conn.execute("CREATE TABLE IF NOT EXISTS telemetry_chronicles (id INTEGER PRIMARY KEY AUTOINCREMENT, ts REAL, free_ram_mib REAL, online_count INTEGER, payload TEXT)")
-                snap = {"free_ram_mib": avail_mib, "online_ports": online, "assistant": ta_status}
+                snap = {"free_ram_mib": avail_mib, "online_ports": online, "assistant": ta_status, "satellite_telemetry": sat_opinion}
                 conn.execute("INSERT INTO telemetry_chronicles (ts, free_ram_mib, online_count, payload) VALUES (?, ?, ?, ?)", (time.time(), avail_mib, len(online), json.dumps(snap)))
                 conn.commit()
                 cur = conn.execute("SELECT id, ts, free_ram_mib, online_count FROM telemetry_chronicles ORDER BY id DESC LIMIT 5")
@@ -3215,7 +3311,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                 conn.close()
             except Exception as db_exc:
                 recent_events = [{"db_error": str(db_exc)}]
-            out_payload = {"status": "CHRONICLE_OK", "free_ram_mib": avail_mib, "online_ports": online, "online_count": len(online), "assistant": ta_status, "recent_chronicles": recent_events}
+            out_payload = {"status": "CHRONICLE_OK", "free_ram_mib": avail_mib, "online_ports": online, "online_count": len(online), "assistant": ta_status, "satellite_telemetry": sat_opinion, "recent_chronicles": recent_events}
             raw_out = json.dumps(out_payload, indent=2).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -3223,6 +3319,7 @@ class UnifiedHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(raw_out)
             return
+
 
         if self.path == "/api/alpha-vector":
             import json
@@ -4360,6 +4457,106 @@ def _astra_boot_12_port_mesh():
         def do_OPTIONS(self):
             self._json({"ok": True})
         def do_GET(self):
+            if self.path.split("?", 1)[0] == "/api/telemetry/chronicle": # ASTRA_MAIN_DO_GET_CHRONICLE_V6
+                import json, os, socket, sqlite3, time, urllib.request
+                home_dir = os.path.expanduser("~")
+                avail_mib = 0.0
+                meminfo = os.path.join(os.sep, "proc", "meminfo")
+                if os.path.exists(meminfo):
+                    with open(meminfo, "r", encoding="utf-8", errors="replace") as mf:
+                        for ln in mf:
+                            if ln.startswith("MemAvailable:"):
+                                toks = ln.split()
+                                if len(toks) > 1 and toks.pop(1).isdigit():
+                                    avail_mib = round(int(ln.split().pop(1)) / 1024.0, 1)
+                                break
+                ports = (8088, 8090, 8095, 8096, 8097, 8098, 8099, 8100, 8101, 8102, 8108, 8109, 8110, 8111, 8115, 8117, 8119, 8121)
+                online = []
+                for p in ports:
+                    try:
+                        with socket.create_connection(("127.0.0.1", p), timeout=0.2):
+                            online.append(p)
+                    except OSError:
+                        pass
+                ta_status = {"status": "UNREACHABLE"}
+                try:
+                    with urllib.request.urlopen("http://127.0.0.1:8110/api/telemetry/status", timeout=1.5) as r:
+                        ta_status = json.loads(r.read().decode("utf-8", errors="replace"))
+                except Exception as exc:
+                    ta_status = {"status": "ADVISORY_STANDBY", "detail": str(exc)}
+                sat_opinion = {"source": "satellite_telemetry", "mode": "advisory_opinion", "authoritative": False, "note": "Treat satellite pass/telemetry data as directional opinion rather than ground truth."}
+                db_fp = os.path.join(home_dir, "astra_telemetry.db")
+                recent_events = []
+                try:
+                    conn = sqlite3.connect(db_fp)
+                    conn.execute("PRAGMA journal_mode=WAL;")
+                    conn.execute("CREATE TABLE IF NOT EXISTS telemetry_chronicles (id INTEGER PRIMARY KEY AUTOINCREMENT, ts REAL, free_ram_mib REAL, online_count INTEGER, payload TEXT)")
+                    snap = {"free_ram_mib": avail_mib, "online_ports": online, "assistant": ta_status, "satellite_telemetry": sat_opinion}
+                    conn.execute("INSERT INTO telemetry_chronicles (ts, free_ram_mib, online_count, payload) VALUES (?, ?, ?, ?)", (time.time(), avail_mib, len(online), json.dumps(snap)))
+                    conn.commit()
+                    cur = conn.execute("SELECT id, ts, free_ram_mib, online_count FROM telemetry_chronicles ORDER BY id DESC LIMIT 5")
+                    recent_events = [{"id": row[0], "ts": row[1], "free_ram_mib": row[2], "online_count": row[3]} for row in cur.fetchall()]
+                    conn.close()
+                except Exception as db_exc:
+                    recent_events = [{"db_error": str(db_exc)}]
+                out_payload = {"status": "CHRONICLE_OK", "free_ram_mib": avail_mib, "online_ports": online, "online_count": len(online), "assistant": ta_status, "satellite_telemetry": sat_opinion, "recent_chronicles": recent_events}
+                raw_out = json.dumps(out_payload, indent=2).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(raw_out)))
+                self.end_headers()
+                self.wfile.write(raw_out)
+                return
+            if self.path.split("?", 1)[0] == "/api/telemetry/chronicle": # ASTRA_MAIN_DO_GET_CHRONICLE_V6
+                import json, os, socket, sqlite3, time, urllib.request
+                home_dir = os.path.expanduser("~")
+                avail_mib = 0.0
+                meminfo = os.path.join(os.sep, "proc", "meminfo")
+                if os.path.exists(meminfo):
+                    with open(meminfo, "r", encoding="utf-8", errors="replace") as mf:
+                        for ln in mf:
+                            if ln.startswith("MemAvailable:"):
+                                toks = ln.split()
+                                if len(toks) > 1 and toks.pop(1).isdigit():
+                                    avail_mib = round(int(ln.split().pop(1)) / 1024.0, 1)
+                                break
+                ports = (8088, 8090, 8095, 8096, 8097, 8098, 8099, 8100, 8101, 8102, 8108, 8109, 8110, 8111, 8115, 8117, 8119, 8121)
+                online = []
+                for p in ports:
+                    try:
+                        with socket.create_connection(("127.0.0.1", p), timeout=0.2):
+                            online.append(p)
+                    except OSError:
+                        pass
+                ta_status = {"status": "UNREACHABLE"}
+                try:
+                    with urllib.request.urlopen("http://127.0.0.1:8110/api/telemetry/status", timeout=1.5) as r:
+                        ta_status = json.loads(r.read().decode("utf-8", errors="replace"))
+                except Exception as exc:
+                    ta_status = {"status": "ADVISORY_STANDBY", "detail": str(exc)}
+                sat_opinion = {"source": "satellite_telemetry", "mode": "advisory_opinion", "authoritative": False, "note": "Treat satellite pass/telemetry data as directional opinion rather than ground truth."}
+                db_fp = os.path.join(home_dir, "astra_telemetry.db")
+                recent_events = []
+                try:
+                    conn = sqlite3.connect(db_fp)
+                    conn.execute("PRAGMA journal_mode=WAL;")
+                    conn.execute("CREATE TABLE IF NOT EXISTS telemetry_chronicles (id INTEGER PRIMARY KEY AUTOINCREMENT, ts REAL, free_ram_mib REAL, online_count INTEGER, payload TEXT)")
+                    snap = {"free_ram_mib": avail_mib, "online_ports": online, "assistant": ta_status, "satellite_telemetry": sat_opinion}
+                    conn.execute("INSERT INTO telemetry_chronicles (ts, free_ram_mib, online_count, payload) VALUES (?, ?, ?, ?)", (time.time(), avail_mib, len(online), json.dumps(snap)))
+                    conn.commit()
+                    cur = conn.execute("SELECT id, ts, free_ram_mib, online_count FROM telemetry_chronicles ORDER BY id DESC LIMIT 5")
+                    recent_events = [{"id": row[0], "ts": row[1], "free_ram_mib": row[2], "online_count": row[3]} for row in cur.fetchall()]
+                    conn.close()
+                except Exception as db_exc:
+                    recent_events = [{"db_error": str(db_exc)}]
+                out_payload = {"status": "CHRONICLE_OK", "free_ram_mib": avail_mib, "online_ports": online, "online_count": len(online), "assistant": ta_status, "satellite_telemetry": sat_opinion, "recent_chronicles": recent_events}
+                raw_out = json.dumps(out_payload, indent=2).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(raw_out)))
+                self.end_headers()
+                self.wfile.write(raw_out)
+                return
             pt = self.server.server_address[1]
             manifest_p = os.path.expanduser("~/astra-enterprise-core/astra_plugins_manifest.json")
             plugins = []
