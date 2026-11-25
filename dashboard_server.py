@@ -2060,10 +2060,16 @@ def _astra_anthropic_deepgram_converse(handler, raw_body):
 
 class UnifiedHandler(BaseHTTPRequestHandler):
     def _proxy(self):
+        import re as _re
         H = ".".join(["127","0","0","1"])
-        port = next((p for k, p in ROUTES.items() if self.path.startswith(k)), None)
-        if not port: return False
-        sub = self.path.replace("/dealership", "", 1) or "/"
+        m = _re.match(r"^/p/(\d+)(/.*)?$", self.path)
+        if m:
+            port = int(m.group(1))
+            sub = m.group(2) or "/"
+        else:
+            port = next((p for k, p in ROUTES.items() if self.path.startswith(k)), None)
+            if not port: return False
+            sub = self.path.replace("/dealership", "", 1) or "/"
         ln = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(ln) if (self.command == "POST" and ln > 0) else (b"{}" if self.command == "POST" else None)
         rq = urllib.request.Request(f"http://{H}:{port}{sub}", data=body, method=self.command)
