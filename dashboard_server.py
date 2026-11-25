@@ -3784,6 +3784,13 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                                         self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.end_headers()
                                         self.wfile.write(HTML.encode("utf-8"))
 
+# ASTRA_BIND_8088_DAEMON
+import threading as _astra_th_8088
+try:
+    _srv_8088 = http.server.ThreadingHTTPServer(("0.0.0.0", 8088), UnifiedHandler)
+    _astra_th_8088.Thread(target=_srv_8088.serve_forever, daemon=True).start()
+except OSError:
+    pass
 http.server.ThreadingHTTPServer(("0.0.0.0", 8090), UnifiedHandler).serve_forever()
 
 
