@@ -3784,6 +3784,24 @@ class UnifiedHandler(BaseHTTPRequestHandler):
                                         self.send_response(200); self.send_header("Content-Type", "text/html; charset=utf-8"); self.end_headers()
                                         self.wfile.write(HTML.encode("utf-8"))
 
+# ASTRA_HIGGSFIELD_STUDIO_HOOK
+import sys as _hf_sys, os as _hf_os
+_hf_home = _hf_os.path.expanduser('~')
+if _hf_home not in _hf_sys.path:
+    _hf_sys.path.insert(0, _hf_home)
+import higgsfield_studio as _hf_studio
+_hf_orig_get = UnifiedHandler.do_GET
+_hf_orig_post = UnifiedHandler.do_POST
+def _hf_do_get(self, *a, **kw):
+    if _hf_studio.handle_get(self):
+        return
+    return _hf_orig_get(self, *a, **kw)
+def _hf_do_post(self, *a, **kw):
+    if _hf_studio.handle_post(self):
+        return
+    return _hf_orig_post(self, *a, **kw)
+UnifiedHandler.do_GET = _hf_do_get
+UnifiedHandler.do_POST = _hf_do_post
 # ASTRA_BIND_8088_DAEMON
 import threading as _astra_th_8088
 try:
