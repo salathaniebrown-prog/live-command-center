@@ -1,0 +1,111 @@
+{
+  "manifest_schema": "causal-merkle-telemetry-v1",
+  "sequence": 1,
+  "prev_merkle_root": "0000000000000000000000000000000000000000000000000000000000000000",
+  "clock": {
+    "wall_epoch_ns": 1795561169764412342,
+    "cpu_process_ns": 226289977,
+    "scheduler_jitter": {
+      "min_ns": 86458,
+      "median_ns": 90729,
+      "max_ns": 168073
+    }
+  },
+  "live_planes": {
+    "eagle_eyes_8080_health": {
+      "reachable": false,
+      "latency_us": 165190,
+      "error": "URLError"
+    },
+    "eagle_eyes_8080_sources": {
+      "reachable": false,
+      "latency_us": 15741,
+      "error": "URLError"
+    },
+    "core3d_ingress_8088": {
+      "listening": true,
+      "connect_us": 3152
+    }
+  },
+  "verified_artifacts": [
+    {
+      "rel_path": "live-command-center/core3d/astra_chaos_bench.py",
+      "bytes": 3798,
+      "entropy_bpb": 4.916106,
+      "blake2b_16": "7bb46ff2479e43b3ca2bb7603c684d11"
+    },
+    {
+      "rel_path": "live-command-center/core3d/astra_ingress_8088.py",
+      "bytes": 3429,
+      "entropy_bpb": 4.907354,
+      "blake2b_16": "41ba285d28b2d3a175138bda3318e2fb"
+    },
+    {
+      "rel_path": "live-command-center/core3d/astra_shm_schema.py",
+      "bytes": 3403,
+      "entropy_bpb": 4.952237,
+      "blake2b_16": "2677a179360f4692274642e72ef3276e"
+    },
+    {
+      "rel_path": "live-command-center/.github/workflows/alstra_immutable_release.yml",
+      "bytes": 648,
+      "entropy_bpb": 4.635307,
+      "blake2b_16": "df570ba1f2d3758f0e58b3770e34e9f6"
+    },
+    {
+      "rel_path": "live-command-center/.github/workflows/astra-ci.yml",
+      "bytes": 819,
+      "entropy_bpb": 4.822459,
+      "blake2b_16": "d27a2da72f210f3a1ea1b2c5712f5a39"
+    },
+    {
+      "rel_path": "live-command-center/.github/workflows/astra-core3d-ci.yml",
+      "bytes": 1307,
+      "entropy_bpb": 4.692253,
+      "blake2b_16": "38946ae199617a90b19a503f3a2fe6c1"
+    },
+    {
+      "rel_path": "live-command-center/.github/workflows/backup-ledgers.yml",
+      "bytes": 806,
+      "entropy_bpb": 4.385718,
+      "blake2b_16": "0b2f6518fdeac812ac2306c2d5a33a25"
+    },
+    {
+      "rel_path": "live-command-center/.github/workflows/ci-verify.yml",
+      "bytes": 1766,
+      "entropy_bpb": 4.242742,
+      "blake2b_16": "a3083a329d321aaa96eebe59c65f7449"
+    },
+    {
+      "rel_path": "live-command-center/.github/workflows/deploy.yml",
+      "bytes": 589,
+      "entropy_bpb": 4.833133,
+      "blake2b_16": "3a87fd080e5942009d23526e9d160f57"
+    },
+    {
+      "rel_path": "live-command-center/.github/workflows/global_edge_datacenter_mesh.yml",
+      "bytes": 3881,
+      "entropy_bpb": 4.838316,
+      "blake2b_16": "aacd2970aad060eb9691ab6f61bc8ee4"
+    },
+    {
+      "rel_path": "live-command-center/.github/workflows/weekly_security_audit.yml",
+      "bytes": 3194,
+      "entropy_bpb": 4.716473,
+      "blake2b_16": "7f73388bea1457114ba0517d87303216"
+    },
+    {
+      "rel_path": "eagle-eyes/server.js",
+      "bytes": 3662,
+      "entropy_bpb": 5.271799,
+      "blake2b_16": "35f541139cbdf3f9f4c60795a94836a3"
+    },
+    {
+      "rel_path": "eagle-eyes/package.json",
+      "bytes": 135,
+      "entropy_bpb": 4.349243,
+      "blake2b_16": "aa4072582498bc353be707ee207a578d"
+    }
+  ],
+  "merkle_root": "faa8561a02b4ec563ba42c97de106f6549eeadb46e8336ec772f409c97e452e0"
+}
