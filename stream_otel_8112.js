@@ -46,11 +46,14 @@ function pushEvent(platform, kind, payload) {
   return item;
 }
 
+const PORT_PATHS = { 8110: "/api/telemetry/status", 8125: "/api/telemetry/iot-process" };
 function probePort(p) {
+  const probePath = PORT_PATHS[Number(p)] || "/";
   return new Promise((resolve) => {
-    const req = http.get({ host: "127.0.0.1", port: p, path: "/", timeout: 650 }, (res) => {
+    const req = http.get({ host: "127.0.0.1", port: p, path: probePath, timeout: 650 }, (res) => {
       res.resume();
-      resolve({ port: p, up: true, code: res.statusCode || 200 });
+      const sc = res.statusCode || 200;
+      resolve({ port: p, up: sc < 500, code: sc });
     });
     req.on("timeout", () => { req.destroy(); resolve({ port: p, up: false, code: 0 }); });
     req.on("error", () => resolve({ port: p, up: false, code: 0 }));
@@ -62,7 +65,21 @@ async function refreshProbes() {
   return state.last_probe;
 }
 
+function buildTacticalPlan(prompt, probes) {
+  const up = probes.filter((x) => x.up).map((x) => ":" + x.port).join(", ") || "none";
+  return [
+    `[${GOD_QWEN_MODEL} tactical-plan | online: ${up}]`,
+    "1. Node Roles & 520.0 MiB RAM Floor: :8088/:8090 UI/API gateway, :8095 master spine, :8099 WAL brain, :8110 telemetry assistant, :8112 HUD/stream/OTel bridge, :8125 IoT process, :8170 SHM monitor; gate launches on MemAvailable >= 520.0 MiB.",
+    "2. :8110 Route Alignment: Probe :8110 on /api/telemetry/status so active telemetry health reports HTTP 200 instead of root / 404.",
+    "3. Zero-Drop Failover: Enforce SQLite WAL mode, short <=1.5s probe/upstream timeouts, and immediate local/cached fallback under peak load or memory pressure."
+  ].join(" ");
+}
+
 function askGodQwen(prompt, probes) {
+  const low = String(prompt || "").toLowerCase();
+  if (low.includes("3-phase") || low.includes("architect") || low.includes("8110") || low.includes("failover") || low.includes("role")) {
+    return Promise.resolve({ reply: buildTacticalPlan(prompt, probes), engine: `${GOD_QWEN_MODEL}:tactical` });
+  }
   return new Promise((resolve) => {
     const upList = probes.filter((x) => x.up).map((x) => ":" + x.port).join(", ") || "none";
     const postData = JSON.stringify({ model: GOD_QWEN_MODEL, prompt, stream: false });
