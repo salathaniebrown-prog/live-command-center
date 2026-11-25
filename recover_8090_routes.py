@@ -72,4 +72,4 @@ class S0(ThreadingHTTPServer):
     allow_reuse_address = True
 
 if __name__ == "__main__":
-    S0((HOST, PORT), G)).serve_forever()
+    S0((HOST, PORT), G).serve_forever()
