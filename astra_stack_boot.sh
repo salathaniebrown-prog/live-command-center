@@ -33,6 +33,7 @@ start_svc 8095 ~/alstra_master_spine_8095.py ~ ~/tmp/spine_8095.log
 start_svc 8099 ~/alstra_genius_brain_8099.py ~ ~/tmp/brain_8099.log
 start_svc 8110 "$assist" "$(dirname "$assist")" ~/telemetry_assistant.log
 start_svc 8125 ~/tmp/astra_live_backend.py ~ ~/astra_live_backend.log
+start_svc 8112 ~/stream_otel_8112.js ~ ~/tmp/stream_8112.log
 start_svc 8170 ~/local_shm_monitor/shm_port_monitor.py ~/local_shm_monitor ~/local_shm_monitor/shm_8170.log
 
 echo "=== 7-PORT HEALTH CHECK (free=$(avail_mib) MiB) ==="
@@ -47,3 +48,5 @@ for u in \
   code=$(curl -sS --max-time 2 -o /dev/null -w '%{http_code}' "$u" 2>/dev/null || true)
   printf "  %-46s -> HTTP %s\n" "$u" "${code:-000}"
 done
+
+[ -f "$HOME/.astra_env" ] && { set -a; . "$HOME/.astra_env"; set +a; }
