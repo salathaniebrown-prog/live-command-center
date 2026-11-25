@@ -109,7 +109,7 @@ STUDIO_HTML = """<!doctype html>
     <div class="grid3">
       <div><label>Camera Movement</label>
         <select id="move">
-          <option>Dolly In</option><option>Orbit 360</option><option>Crash Zoom</option>
+          <option value="Dolly In">Dolly In (Preset: Command Center Night)</option><option>Dolly In</option><option>Orbit 360</option><option>Crash Zoom</option>
           <option>Bullet Time</option><option>Crane Up</option><option>FPV Drone</option>
           <option>Robot Arm</option><option>Pan Left</option><option>Static Locked</option>
         </select>
@@ -139,6 +139,7 @@ STUDIO_HTML = """<!doctype html>
       <div><label>H3 Audio / Ref / Edit Note</label><input id="h3note" placeholder="Stereo foley, voice ref, or edit..."/></div>
     </div>
     <div class="row">
+      <button class="sec" onclick="applyCommandCenterPreset()">Preset: Command Center Night</button>
       <button onclick="generateShot()">Generate &amp; Preview</button>
       <button class="sec" onclick="recordClip()">Record .webm Clip</button>
       <button class="sec" onclick="copyPrompt()">Copy Compiled Prompt</button>
@@ -248,6 +249,16 @@ function recordClip(){
   rec.start(); setTimeout(() => rec.stop(), 3000);
 }
 
+function applyCommandCenterPreset(){
+  document.getElementById('prompt').value = 'COMMAND_CENTER_NIGHT: dual telemetry monitors, glass reflections, calm tactical precision';
+  document.getElementById('move').value = 'Dolly In';
+  document.getElementById('genre').value = 'Noir';
+  document.getElementById('lighting').value = 'Practicals';
+  document.getElementById('camera').value = '35mm Film';
+  document.getElementById('lens').value = 'Anamorphic';
+  document.getElementById('aperture').value = 'f/1.4 Wide Open';
+  generateShot();
+}
 function copyPrompt(){
   const txt = document.getElementById('compiledOut').textContent || document.getElementById('prompt').value;
   navigator.clipboard && navigator.clipboard.writeText(txt);
@@ -360,5 +371,42 @@ def handle_post(handler):
         if any(k in msg.lower() for k in ("shot", "camera", "scene", "lens", "higgs", "video", "minimax", "h3", "hailuo")):
             note = f"Suggested setup for '{msg}': MiniMax H3 / #Dolly In + 35mm Film + Anamorphic f/1.4 + Contre-jour lighting + native stereo audio."
         _send_json(handler, 200, {"ok": True, "target": port, "director_note": note, "results": results})
+        return True
+
+    if path == "/api/higgsfield/dispatch_cloud":
+        d = _read_json(handler)
+        provider = str(d.get("provider") or "minimax").lower()
+        prompt = str(d.get("prompt") or "").strip()
+        if not prompt:
+            _send_json(handler, 400, {"ok": False, "error": "prompt is required"})
+            return True
+        if provider == "minimax":
+            key = os.environ.get("MINIMAX_API_KEY", "").strip()
+            if not key:
+                _send_json(handler, 200, {"ok": False, "configured": False, "provider": "minimax", "error": "Set MINIMAX_API_KEY in Termux env before live dispatch"})
+                return True
+            req_obj = urllib.request.Request(
+                "https://api.minimax.io/v1/video_generation",
+                data=json.dumps({"model": "MiniMax-H3", "prompt": prompt[:2000], "duration": int(d.get("duration") or 10)}).encode("utf-8"),
+                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                method="POST",
+            )
+        else:
+            key = os.environ.get("HIGGSFIELD_API_KEY", "").strip()
+            if not key:
+                _send_json(handler, 200, {"ok": False, "configured": False, "provider": "higgsfield", "error": "Set HIGGSFIELD_API_KEY in Termux env before live dispatch"})
+                return True
+            req_obj = urllib.request.Request(
+                "https://api.higgsfield.ai/v1/video/generations",
+                data=json.dumps({"prompt": prompt[:2000]}).encode("utf-8"),
+                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                method="POST",
+            )
+        try:
+            with urllib.request.urlopen(req_obj, timeout=15) as resp:
+                body = resp.read(2048).decode("utf-8", errors="replace")
+            _send_json(handler, 200, {"ok": True, "provider": provider, "response": body})
+        except Exception as e:
+            _send_json(handler, 502, {"ok": False, "provider": provider, "error": str(e)})
         return True
     return False
