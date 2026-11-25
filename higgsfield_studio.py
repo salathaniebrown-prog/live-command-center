@@ -64,6 +64,124 @@ def _probe_port(port, message):
         ms = round((time.time() - t0) * 1000, 1)
         return {"port": str(port), "ok": False, "http": 0, "ms": ms, "reply": str(e)}
 
+GIANT_HTML = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Astra Giant Dashboard — :8112 Bridge + OTel/FluentBit/Prometheus</title>
+<style>
+  :root{--bg:#06090f;--panel:#0e1420;--line:#1f2b3d;--txt:#edf2f7;--muted:#8899b3;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--acc:#38bdf8}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.4 system-ui,sans-serif}
+  header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#0a0f18;border-bottom:1px solid var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px}
+  .span2{grid-column:span 2} .span4{grid-column:span 4}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}.span2,.span4{grid-column:span 1}}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .kpi{font-size:22px;font-weight:700;margin-top:4px}
+  .ports{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px}
+  .pchip{padding:8px;border-radius:8px;border:1px solid var(--line);background:#090d14;font-family:monospace;font-size:12px}
+  .up{border-color:#10b98166;color:var(--ok)} .dn{border-color:#ef444466;color:var(--bad)}
+  .feed{height:170px;overflow:auto;background:#070a10;border:1px solid var(--line);border-radius:8px;padding:8px;font-family:monospace;font-size:11.5px}
+  input,select,button{background:#090e17;color:var(--txt);border:1px solid var(--line);border-radius:7px;padding:7px 10px;font:inherit}
+  button{background:var(--acc);color:#041018;font-weight:700;border:0;cursor:pointer}
+  .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header>
+  <div><strong>ASTRA GIANT COMMAND WALL</strong> · Kick/Twitch :8112 · OTel · Fluent Bit · Prometheus</div>
+  <div id="clock">--:--:--</div>
+</header>
+<div class="grid">
+  <div class="box"><div style="color:var(--muted)">FREE RAM (FLOOR 520 MiB)</div><div class="kpi" id="kRam">--</div></div>
+  <div class="box"><div style="color:var(--muted)">:8112 BRIDGE / WS</div><div class="kpi" id="kBridge">--</div></div>
+  <div class="box"><div style="color:var(--muted)">OTEL + FLUENT BIT</div><div class="kpi" id="kPipe">--</div></div>
+  <div class="box"><div style="color:var(--muted)">PROMETHEUS SCRAPES</div><div class="kpi" id="kProm">--</div></div>
+
+  <div class="box span4">
+    <strong>7-PORT CONTROL + INTELLIGENCE MESH</strong>
+    <div class="ports" id="portGrid"></div>
+  </div>
+
+  <div class="box span2">
+    <strong>KICK + TWITCH LIVE STREAM FEED (:8112)</strong>
+    <div class="feed" id="streamFeed"></div>
+    <div class="row">
+      <select id="plat"><option value="kick">Kick</option><option value="twitch">Twitch</option></select>
+      <input id="evText" style="flex:1" placeholder="Push live stream chat/alert test event..."/>
+      <button onclick="sendStreamEvent()">Emit Event</button>
+    </div>
+  </div>
+
+  <div class="box span2">
+    <strong>TELEMETRY PIPELINE INGEST TEST (OTEL / FLUENT BIT)</strong>
+    <div class="feed" id="pipeLog"></div>
+    <div class="row">
+      <button onclick="sendPipe('otel')">Send OTel Batch</button>
+      <button onclick="sendPipe('fluentbit')">Send Fluent Bit Record</button>
+      <button onclick="refreshAll()">Refresh Now</button>
+    </div>
+  </div>
+</div>
+<script>
+function logPipe(msg){
+  const el = document.getElementById('pipeLog');
+  el.textContent += msg + "\n"; el.scrollTop = el.scrollHeight;
+}
+async function refreshAll(){
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+  try {
+    const st = await (await fetch('/api/higgsfield/status')).json();
+    const ch = await (await fetch('/api/telemetry/chronicle')).json();
+    const ram = Number(ch.free_ram_mib || 0);
+    const rEl = document.getElementById('kRam');
+    rEl.textContent = ram.toFixed(1) + ' MiB';
+    rEl.style.color = ram >= 520 ? 'var(--ok)' : 'var(--warn)';
+  } catch(e){}
+  try {
+    const b = await (await fetch('http://127.0.0.1:8112/')).json();
+    document.getElementById('kBridge').textContent = (b.ok ? 'ONLINE' : 'DOWN') + ' · WS:' + b.ws_clients;
+    document.getElementById('kPipe').textContent = 'OTel:' + (b.otel.metrics_batches + b.otel.logs_batches) + ' · FB:' + b.fluentbit_records;
+    document.getElementById('kProm').textContent = String(b.prom_scrapes);
+    document.getElementById('portGrid').innerHTML = (b.watched_ports || []).map(p =>
+      `<div class="pchip ${p.up ? 'up' : 'dn'}">:${p.port} ${p.up ? 'UP ('+p.status+')' : 'DOWN'}</div>`
+    ).join('');
+  } catch(e){
+    document.getElementById('kBridge').textContent = 'OFFLINE';
+  }
+  try {
+    const ev = await (await fetch('http://127.0.0.1:8112/api/stream/events')).json();
+    document.getElementById('streamFeed').innerHTML = (ev.events || []).slice(-20).map(x =>
+      `[${x.ts.slice(11,19)}] <strong>${x.platform.toUpperCase()}</strong> (${x.kind}): ${JSON.stringify(x.payload)}`
+    ).join('<br/>') || 'No stream events yet.';
+  } catch(e){}
+}
+async function sendStreamEvent(){
+  const plat = document.getElementById('plat').value;
+  const text = document.getElementById('evText').value.trim() || 'Live test ping';
+  document.getElementById('evText').value = '';
+  await fetch('http://127.0.0.1:8112/api/stream/event', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({platform: plat, kind: 'chat', payload: {text}})
+  });
+  refreshAll();
+}
+async function sendPipe(kind){
+  if(kind === 'otel'){
+    const r = await (await fetch('http://127.0.0.1:8112/v1/metrics', {method:'POST', body:'{"metric":"ram_mib"}'})).json();
+    logPipe('OTel batch accepted -> total=' + r.accepted_batches);
+  } else {
+    const r = await (await fetch('http://127.0.0.1:8112/api/fluentbit/ingest', {method:'POST', body:'[{"tag":"astra.log","msg":"ok"}]'})).json();
+    logPipe('Fluent Bit ingested -> total=' + r.total_records);
+  }
+  refreshAll();
+}
+refreshAll(); setInterval(refreshAll, 4000);
+</script>
+</body>
+</html>
+"""
+
 STUDIO_HTML = """<!doctype html>
 <html lang="en">
 <head>
@@ -298,6 +416,9 @@ loadShots();
 
 def handle_get(handler):
     path = urlparse(handler.path).path.rstrip("/") or "/"
+    if path == "/giant":
+        _send(handler, 200, "text/html; charset=utf-8", GIANT_HTML.encode("utf-8"))
+        return True
     if path in ("/higgsfield", "/higginsfield", "/chat"):
         _send(handler, 200, "text/html; charset=utf-8", STUDIO_HTML.encode("utf-8"))
         return True
