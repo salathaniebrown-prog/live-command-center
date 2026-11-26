@@ -246,7 +246,7 @@ const HUD_LIGHTNING_HTML = `<!doctype html>
   .brand{color:var(--bolt);font-weight:700;letter-spacing:.08em;text-shadow:0 0 10px #38bdf866}
   .pill{padding:2px 7px;border-radius:999px;border:1px solid #38bdf855;background:#091830;color:var(--cyan);font-size:10px}
   .grid{display:grid;grid-template-columns:270px 1fr 330px;gap:7px;padding:7px;min-height:0;height:100%}
-  @media(max-width:980px){.grid{grid-template-columns:1fr;grid-template-rows:auto 175px 1fr}}
+  @media(max-width:980px){.grid{grid-template-columns:1fr;grid-template-rows:195px 125px 1fr}.ports{grid-template-columns:repeat(5,1fr);gap:3px}.feed{max-height:54px}}
   .box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
   .hdr{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
   .ports{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px}
@@ -491,8 +491,8 @@ async function refreshState(){
   } catch(_){}
 }
 
-refreshState();
-setInterval(refreshState, 3000);
+fetch('/api/control/workflow',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow:'refresh_all'})}).catch(()=>{}).finally(refreshState);
+setInterval(refreshState, 2500);
 </script>
 </body>
 </html>
