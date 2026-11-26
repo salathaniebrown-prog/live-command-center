@@ -11,6 +11,7 @@ const PORT_PATHS = { 8110: "/api/telemetry/status", 8125: "/api/telemetry/iot-pr
 const OLLAMA_BASE = (process.env.OLLAMA_HOST || "http://127.0.0.1:11434").replace(/\/+$/, "");
 const OLLAMA_MODEL = process.env.GOD_QWEN_MODEL || "god-qwen:latest";
 const HOME_DIR = process.env.HOME || "/data/data/com.termux/files/home";
+const TARGET_8112 = path.join(HOME_DIR, "stream_otel_8112.js");
 const REPO_DIR = path.join(HOME_DIR, "live-command-center");
 
 const PORT_CMDS = {
